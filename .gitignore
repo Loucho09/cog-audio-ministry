@@ -1,0 +1,36 @@
+# Secrets
+.env
+.env.backup
+.env.production
+auth.json
+
+# Dependencies and build output
+/vendor
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+
+# Tooling caches
+.phpunit.result.cache
+/.phpunit.cache
+/.fleet
+/.idea
+/.nova
+/.zed
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+
+# Claude Code local-only settings
+.claude/settings.local.json
+
+# Obsidian: keep notes and shared config, skip per-device workspace state
+brain/.obsidian/workspace.json
+brain/.obsidian/workspace-mobile.json
+
+# Separate personal Obsidian vault (not part of the project)
+/COG_AUDIO/
