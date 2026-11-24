@@ -20,6 +20,8 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 - Added 2026-11-24 (owner request): dark mode for public pages. See [[dark-mode]].
 - Moved 2026-11-24: Filament resources (Service, GalleryImage, Faq, TeamMember) go to Phase 2; Phase 1 closes without them. See [[filament-resources-phase-2]].
 - [x] Done 2026-11-24 (owner request): homepage hooks (impact strip, "One sound, many churches", stay updated, FAQ hidden from homepage). Browser check pending. See [[homepage-hooks]], tasks in [[homepage-hooks-tasks]]. Phase 1 stays open until the browser check and MySQL are done.
+- [x] Done 2026-11-24 (owner request): homepage theme polish (stage lighting, section rhythm, card consistency). Browser check at 360px and dark mode pending. See [[homepage-theme-polish]], [[card-style-and-section-rhythm]].
+- TODO (2026-11-24): Marilag Facebook link; confirm whether COG Dasmariñas has its own Facebook page (currently the Audio Ministry page); owner browser check at 360px and dark mode.
 
 ### Tasks
 1. [x] Scaffold Laravel (latest stable) + Tailwind, Alpine, Filament, Spatie Permission, Breeze Blade, Pest; commit

@@ -21,6 +21,16 @@ Changes (built):
 3. "One sound, many churches" section after what we do: COG Dasmariñas (main) plus Marilag, Trece, Silang, Jabez. Church logo `public/images/cog-church-logo.png`. Short "behind the sound" story (sound and mixing so every sermon and song is heard clearly). Names only; addresses TODO. List from `config/ministry.php` (see [[churches-list-in-config]]).
 4. "Stay updated" section before contact: Follow on Facebook (`ministry.facebook_url`). Messenger (`ministry.messenger_url`) shows only when set.
 
+v1.1 (2026-11-24, branch `feature/homepage-hooks`):
+- Churches section uses the church logo `public/images/cog-church-logo.png` as a full-bleed dark photo background, like the hero. White text allowed on the photo.
+- Per-church Facebook link: `facebook_url` on each item in the `churches` list in `config/ministry.php`.
+  - COG Dasmariñas: https://www.facebook.com/COGAudioDasma (owner said use this; it is the Audio Ministry page, see TODO)
+  - Trece: https://www.facebook.com/COGTreceMartires
+  - Silang: https://www.facebook.com/cogsilang
+  - Jabez: https://www.facebook.com/churchofgodjabez
+  - Marilag: none yet (TODO)
+- `public/images/cog-church-logo-256.png` is no longer used. Kept; owner to decide whether to delete.
+
 Wording:
 - Visitor-facing copy says "our churches", never "satellite" (owner decision 2026-11-24, see [[owner-wording-our-churches]]). Earlier "satellite" wording in this spec is superseded.
 
@@ -42,6 +52,9 @@ Remaining TODOs:
 - Church addresses
 - Owner review of "behind the sound" copy
 - Owner browser check at 360px and dark mode
+- Marilag Facebook link (`facebook_url` in `config/ministry.php`)
+- Dasma church Facebook page: does COG Dasmariñas have its own page? Currently uses the Audio Ministry page.
+- Decide on `cog-church-logo-256.png` (unused)
 
 Out of scope:
 - Public updates or news feed (parked in [[Backlog]] for Phase 5).
