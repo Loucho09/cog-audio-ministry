@@ -32,8 +32,7 @@
             </p>
 
             <div class="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
-                {{-- TODO: point back to route('home').'#join' when the Join Us section exists (later Phase 1 slice). --}}
-                <x-site.button :href="route('home').'#about'" size="lg" class="w-full sm:w-auto">Join Us</x-site.button>
+                <x-site.button :href="route('home').'#join'" size="lg" class="w-full sm:w-auto">Join Us</x-site.button>
                 <x-site.button :href="route('home').'#services'" variant="secondary" size="lg" class="w-full sm:w-auto">See Service Times</x-site.button>
             </div>
         </div>

@@ -7,10 +7,9 @@
         config('ministry.show_team') ? ['label' => 'Meet the Team', 'href' => route('home').'#team'] : null,
         ['label' => 'Services', 'href' => route('home').'#services'],
         ['label' => 'Gallery', 'href' => route('home').'#gallery'],
-        // TODO: re-enable these three when the #join, #faq and #contact sections are built (set 'ready' => true).
-        ['label' => 'Join Us', 'href' => route('home').'#join', 'ready' => false],
-        ['label' => 'FAQ', 'href' => route('home').'#faq', 'ready' => false],
-        ['label' => 'Contact', 'href' => route('home').'#contact', 'ready' => false],
+        ['label' => 'Join Us', 'href' => route('home').'#join', 'ready' => true],
+        ['label' => 'FAQ', 'href' => route('home').'#faq', 'ready' => true],
+        ['label' => 'Contact', 'href' => route('home').'#contact', 'ready' => true],
     ])->filter(fn ($link) => $link && ($link['ready'] ?? true))->values();
 
     $authUrl = auth()->check() ? route('dashboard') : route('login');

@@ -38,14 +38,13 @@ it('renders exactly one h1 with the ministry name in the hero', function () {
         ->and(homepageText($xpath, '//section[@aria-labelledby="hero-title"]'))->toContain(config('ministry.tagline'));
 });
 
-it('links the hero buttons to #about and #services', function () {
+it('links the hero buttons to #join and #services', function () {
     $xpath = homepageXPath($this->get('/')->assertOk()->getContent());
 
     $hero = '//section[@aria-labelledby="hero-title"]';
 
-    // Join Us points to #about until the #join section exists.
     expect($xpath->evaluate("string($hero//a[normalize-space()='Join Us']/@href)"))
-        ->toBe(route('home').'#about')
+        ->toBe(route('home').'#join')
         ->and($xpath->evaluate("string($hero//a[normalize-space()='See Service Times']/@href)"))
         ->toBe(route('home').'#services');
 });

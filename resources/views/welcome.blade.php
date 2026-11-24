@@ -5,9 +5,10 @@
     <x-home.hero />
     <x-home.about />
     <x-home.what-we-do />
-    {{-- TODO: meet the team (behind config show_team) goes here --}}
+    <x-home.team :members="$teamMembers" />
     <x-home.services :branch="$branch" :schedule="$schedule" />
     <x-home.gallery :images="$galleryImages" />
-
-    {{-- TODO (later slices): join us (#join), FAQ (#faq), contact (#contact), footer is already in the layout --}}
+    <x-home.join />
+    <x-home.faq :faqs="$faqs" />
+    <x-home.contact />
 </x-public-layout>

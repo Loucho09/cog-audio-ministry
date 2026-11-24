@@ -87,7 +87,7 @@ it('links nav items to homepage anchors so they work from any page', function ()
         ->assertOk()
         ->assertSee('href="'.route('home').'#about"', false)
         ->assertSee('href="'.route('home').'#gallery"', false)
-        ->assertDontSee('href="'.route('home').'#contact"', false);
+        ->assertSee('href="'.route('home').'#contact"', false);
 });
 
 it('renders a skip link to the main landmark', function () {

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Actions\UpcomingServices;
 use App\Models\Branch;
+use App\Models\Faq;
 use App\Models\GalleryImage;
+use App\Models\TeamMember;
 use App\Support\ServiceSchedule;
 use Illuminate\Contracts\View\View;
 
@@ -32,10 +34,14 @@ class HomeController extends Controller
             ])
             ->values();
 
+        $teamMembers = config('ministry.show_team') ? TeamMember::query()->featured()->get() : collect();
+
         return view('welcome', [
             'branch' => $branch,
             'schedule' => $schedule,
             'galleryImages' => $galleryImages,
+            'faqs' => Faq::query()->published()->get(),
+            'teamMembers' => $teamMembers,
         ]);
     }
 }
