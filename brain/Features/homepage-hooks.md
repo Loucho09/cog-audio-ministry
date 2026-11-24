@@ -15,10 +15,10 @@ Screens / routes:
 Changes (built):
 1. Hide FAQ from the homepage: `<x-home.faq>` removed from the welcome view and the FAQ query removed from `HomeController`. `Faq` model, table, seeder, factory and component kept (may return later).
 2. Impact strip right after the hero:
-   - Churches served: 5 (COG Dasmariñas main + 4 of our churches), from config.
+   - Churches served: 4 (COG Dasmariñas main + Trece, Silang, Jabez), counted from the `branches` table. See [[marilag-is-dasma-subdivision]].
    - Services per week: counted from the `services` table (active rows).
    - Years serving: shown only when `MINISTRY_YEARS_SERVING` is set. TODO owner number. No invented numbers.
-3. "One sound, many churches" section after what we do: COG Dasmariñas (main) plus Marilag, Trece, Silang, Jabez. Church logo `public/images/cog-church-logo.png`. Short "behind the sound" story (sound and mixing so every sermon and song is heard clearly). Names only; addresses TODO. List from `config/ministry.php` (see [[churches-list-in-config]]).
+3. "One sound, many churches" section after what we do: COG Dasmariñas (main) plus Trece, Silang, Jabez. (Marilag removed 2026-11-25: it is the subdivision where COG Dasmariñas is, not a branch. See [[marilag-is-dasma-subdivision]].) Church logo `public/images/cog-church-logo.png`. Short "behind the sound" story (sound and mixing so every sermon and song is heard clearly). Names only; addresses TODO. List from `config/ministry.php` (see [[churches-list-in-config]]).
 4. "Stay updated" section before contact: Follow on Facebook (`ministry.facebook_url`). Messenger (`ministry.messenger_url`) shows only when set.
 
 v1.1 (2026-11-24, branch `feature/homepage-hooks`):
@@ -28,7 +28,7 @@ v1.1 (2026-11-24, branch `feature/homepage-hooks`):
   - Trece: https://www.facebook.com/COGTreceMartires
   - Silang: https://www.facebook.com/cogsilang
   - Jabez: https://www.facebook.com/churchofgodjabez
-  - Marilag: none yet (TODO)
+  - ~~Marilag: none yet (TODO)~~ OBSOLETE 2026-11-25: not a church, see [[marilag-is-dasma-subdivision]]
 - `public/images/cog-church-logo-256.png` is no longer used. Kept; owner to decide whether to delete.
 
 Wording:
@@ -52,7 +52,7 @@ Remaining TODOs:
 - Church addresses
 - Owner review of "behind the sound" copy
 - Owner browser check at 360px and dark mode
-- Marilag Facebook link (`facebook_url` in `config/ministry.php`)
+- ~~Marilag Facebook link (`facebook_url` in `config/ministry.php`)~~ OBSOLETE 2026-11-25: Marilag is not a branch, see [[marilag-is-dasma-subdivision]]
 - Dasma church Facebook page: does COG Dasmariñas have its own page? Currently uses the Audio Ministry page.
 - Decide on `cog-church-logo-256.png` (unused)
 

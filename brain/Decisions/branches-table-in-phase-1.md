@@ -12,7 +12,7 @@ Scope:
 - No roles or auth changes. Spatie roles, Breeze, and branch scoping stay in Phase 2.
 - Branch names keep the "COG" prefix:
   - COG Dasmariñas (slug `dasma`, is_main = true)
-  - COG Marilag
+  - ~~COG Marilag~~ OBSOLETE 2026-11-25: Marilag is not a branch, it is the subdivision where COG Dasmariñas is. See [[marilag-is-dasma-subdivision]].
   - COG Trece
   - COG Silang
   - COG Jabez

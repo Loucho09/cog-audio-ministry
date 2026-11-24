@@ -28,7 +28,7 @@ it('runs the seeders', function () {
 
     $this->seed(DatabaseSeeder::class);
 
-    expect(Branch::count())->toBe(5)
+    expect(Branch::count())->toBe(4)
         ->and(Branch::main()->count())->toBe(1)
         ->and(Branch::mainBranch()->slug)->toBe('dasma')
         ->and(Service::count())->toBe(11)

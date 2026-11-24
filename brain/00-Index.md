@@ -22,6 +22,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[menu-breakpoint-lg]]: full desktop menu from 1024px, hamburger below (2026-11-24)
 - [[footer-tagline]]: approved footer tagline, stored in config (2026-11-24)
 - [[branches-table-in-phase-1]]: branches table created in Phase 1 because services need `branch_id` (2026-11-24)
+- [[marilag-is-dasma-subdivision]]: Marilag is COG Dasma's subdivision, not a branch; 4 branches (2026-11-25)
 - [[timezone-asia-manila]]: `APP_TIMEZONE=Asia/Manila`, no DST (2026-11-24)
 - [[image-path-convention]]: `images/` paths are bundled files; other paths are on the public disk (2026-11-24)
 - [[logo-and-cover-assets]]: owner-supplied logo and cover; navbar crop approved (2026-11-24)
