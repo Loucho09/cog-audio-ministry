@@ -3,6 +3,7 @@
     $next = collect($day['items'])->first();
     $later = collect($day['items'])->slice(1)->values();
     $dateLabel = $day['date']->format('l, M j');
+    $directionsUrl = \App\Support\Directions::url();
 @endphp
 
 <article class="relative overflow-hidden rounded-3xl border border-text/10 bg-background p-6 shadow-sm dark:shadow-[0_0_48px_-12px] dark:shadow-primary/20 sm:p-8">
@@ -28,7 +29,18 @@
             <time datetime="{{ $next['starts_at']->format('c') }}">{{ $next['starts_at']->format('g:i A') }}</time>
         </p>
         <p class="mt-1 text-base font-semibold text-text">{{ $next['service']->name }}</p>
-        <a href="{{ route('services.calendar', $next['service']) }}" class="mt-3 inline-block text-sm font-semibold text-primary-dark underline underline-offset-4 hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">Add to calendar<span class="sr-only">: {{ $next['service']->name }} {{ $next['starts_at']->format('g:i A') }}</span></a>
+        <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+            <a href="{{ route('services.calendar', $next['service']) }}" class="inline-block text-sm font-semibold text-primary-dark underline underline-offset-4 hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">Add to calendar<span class="sr-only">: {{ $next['service']->name }} {{ $next['starts_at']->format('g:i A') }}</span></a>
+            @if ($directionsUrl)
+                <a href="{{ $directionsUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary-dark underline underline-offset-4 hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                    </svg>
+                    Get directions<span class="sr-only"> (opens Google Maps)</span>
+                </a>
+            @endif
+        </div>
     </div>
 
     @if ($later->isNotEmpty())
