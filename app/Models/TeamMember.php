@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToBranch;
 use App\Support\ImageUrl;
 use Database\Factories\TeamMemberFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[UseFactory(TeamMemberFactory::class)]
 class TeamMember extends Model
 {
-    use HasFactory;
+    use BelongsToBranch, HasFactory;
 
     protected $fillable = [
         'branch_id', 'name', 'role_title', 'photo_path',

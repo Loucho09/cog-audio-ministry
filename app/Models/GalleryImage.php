@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToBranch;
 use App\Support\ImageUrl;
 use Database\Factories\GalleryImageFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[UseFactory(GalleryImageFactory::class)]
 class GalleryImage extends Model
 {
-    use HasFactory;
+    use BelongsToBranch, HasFactory;
 
     protected $fillable = ['branch_id', 'title', 'path', 'alt_text', 'sort_order', 'is_published'];
 

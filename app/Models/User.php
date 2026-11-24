@@ -28,8 +28,12 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        // TODO Phase 2: allow super-admin, branch-head, branch-admin
-        return false;
+        if ($this->hasRole('super-admin')) {
+            return true;
+        }
+
+        // Branch admins need a branch; an admin without one gets nothing.
+        return $this->branch_id !== null && $this->hasAnyRole(['branch-head', 'branch-admin']);
     }
 
     /**

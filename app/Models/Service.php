@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToBranch;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\ServiceFactory;
@@ -15,7 +16,7 @@ use InvalidArgumentException;
 #[UseFactory(ServiceFactory::class)]
 class Service extends Model
 {
-    use HasFactory;
+    use BelongsToBranch, HasFactory;
 
     protected $fillable = ['branch_id', 'name', 'day_of_week', 'start_time', 'is_active', 'starts_on', 'ends_on', 'sort_order'];
 
