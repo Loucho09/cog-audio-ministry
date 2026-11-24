@@ -332,3 +332,19 @@ it('rejects branch-head and branch-admin calling CreateUser directly', function 
         Livewire::test(CreateUser::class)->assertForbidden();
     }
 });
+
+it('renders every list tab with the right rows', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    $head = User::factory()->create(['branch_id' => $this->branchA->id]);
+    $head->assignRole('branch-head');
+    $member = User::factory()->create(['branch_id' => $this->branchA->id]);
+    $member->assignRole('member');
+    $pending = User::factory()->create(['branch_id' => $this->branchA->id, 'must_change_password' => true]);
+    $pending->assignRole('member');
+
+    Livewire::test(ListUsers::class)
+        ->set('activeTab', 'all')->assertCanSeeTableRecords([$head, $member, $pending])
+        ->set('activeTab', 'admins')->assertCanSeeTableRecords([$head])->assertCanNotSeeTableRecords([$member])
+        ->set('activeTab', 'members')->assertCanSeeTableRecords([$member, $pending])->assertCanNotSeeTableRecords([$head])
+        ->set('activeTab', 'attention')->assertCanSeeTableRecords([$pending])->assertCanNotSeeTableRecords([$member]);
+});

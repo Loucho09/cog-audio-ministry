@@ -11,17 +11,27 @@ use App\Models\User;
 use App\Notifications\WelcomeSetPassword;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -205,63 +215,241 @@ class UserResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema
+            ->columns(3)
             ->components([
-                TextInput::make('name')->required()->maxLength(255),
-                TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true)
-                    ->disabled(fn () => ! self::isSuperAdmin()),
-                Select::make('branch_id')
-                    ->label('Branch')
-                    ->options(fn () => Branch::query()->orderBy('name')->pluck('name', 'id'))
-                    ->searchable()
-                    ->rules(['nullable', 'exists:branches,id'])
-                    ->visible(fn () => self::isSuperAdmin()),
-                Radio::make('password_mode')
-                    ->label('Password')
-                    ->options([
-                        'email' => 'Send set-password email',
-                        'temporary' => 'Set a temporary password',
-                    ])
-                    ->default('email')
-                    ->live()
-                    ->visible(fn (string $operation) => $operation === 'create' && self::isSuperAdmin()),
-                TextInput::make('password')
-                    ->label('Temporary password')
-                    ->password()
-                    ->revealable()
-                    ->autocomplete('new-password')
-                    ->required(fn (Get $get) => $get('password_mode') === 'temporary')
-                    ->rule(PasswordRule::defaults())
-                    ->visible(fn (Get $get, string $operation) => $operation === 'create'
-                        && self::isSuperAdmin()
-                        && $get('password_mode') === 'temporary'),
-                Select::make('role')
-                    ->options(array_combine(AssignRole::ROLES, AssignRole::ROLES))
-                    ->required()
-                    ->default('member')
-                    ->afterStateHydrated(function (Select $component, ?User $record): void {
-                        if ($record) {
-                            $component->state($record->getRoleNames()->first() ?? 'member');
-                        }
-                    })
-                    ->visible(fn () => self::isSuperAdmin()),
+                Group::make([
+                    Section::make('Profile')
+                        ->description('Their name and the email they sign in with.')
+                        ->icon(Heroicon::OutlinedIdentification)
+                        ->columns(2)
+                        ->schema([
+                            TextInput::make('name')
+                                ->required()
+                                ->maxLength(255)
+                                ->prefixIcon(Heroicon::OutlinedUser),
+                            TextInput::make('email')
+                                ->email()
+                                ->required()
+                                ->maxLength(255)
+                                ->unique(ignoreRecord: true)
+                                ->prefixIcon(Heroicon::OutlinedEnvelope)
+                                ->helperText(fn () => self::isSuperAdmin() ? null : 'Only the super-admin can change an email.')
+                                ->disabled(fn () => ! self::isSuperAdmin()),
+                        ]),
+                    Section::make('Access')
+                        ->description('The branch and role decide what this person can see and manage.')
+                        ->icon(Heroicon::OutlinedShieldCheck)
+                        ->columns(2)
+                        ->visible(fn () => self::isSuperAdmin())
+                        ->schema([
+                            Select::make('branch_id')
+                                ->label('Branch')
+                                ->options(fn () => Branch::query()->orderBy('name')->pluck('name', 'id'))
+                                ->searchable()
+                                ->placeholder('No branch')
+                                ->prefixIcon(Heroicon::OutlinedBuildingLibrary)
+                                ->helperText('Required for branch-head and branch-admin.')
+                                ->rules(['nullable', 'exists:branches,id'])
+                                ->visible(fn () => self::isSuperAdmin()),
+                            Select::make('role')
+                                ->options(array_combine(AssignRole::ROLES, AssignRole::ROLES))
+                                ->required()
+                                ->default('member')
+                                ->prefixIcon(Heroicon::OutlinedKey)
+                                ->afterStateHydrated(function (Select $component, ?User $record): void {
+                                    if ($record) {
+                                        $component->state($record->getRoleNames()->first() ?? 'member');
+                                    }
+                                })
+                                ->visible(fn () => self::isSuperAdmin()),
+                        ]),
+                    Section::make('Password')
+                        ->description('How this person gets their first password.')
+                        ->icon(Heroicon::OutlinedLockClosed)
+                        ->visible(fn (string $operation) => $operation === 'create' && self::isSuperAdmin())
+                        ->schema([
+                            Radio::make('password_mode')
+                                ->hiddenLabel()
+                                ->options([
+                                    'email' => 'Send set-password email',
+                                    'temporary' => 'Set a temporary password',
+                                ])
+                                ->descriptions([
+                                    'email' => 'They get a link to choose their own password (valid 3 days).',
+                                    'temporary' => 'You share it with them; they must change it at first login.',
+                                ])
+                                ->default('email')
+                                ->live()
+                                ->visible(fn (string $operation) => $operation === 'create' && self::isSuperAdmin()),
+                            TextInput::make('password')
+                                ->label('Temporary password')
+                                ->password()
+                                ->revealable()
+                                ->autocomplete('new-password')
+                                ->required(fn (Get $get) => $get('password_mode') === 'temporary')
+                                ->rule(PasswordRule::defaults())
+                                ->visible(fn (Get $get, string $operation) => $operation === 'create'
+                                    && self::isSuperAdmin()
+                                    && $get('password_mode') === 'temporary'),
+                        ]),
+                ])->columnSpan(fn (string $operation) => $operation === 'edit' ? ['default' => 3, 'lg' => 2] : 'full'),
+                self::accountSummary(),
             ]);
+    }
+
+    /** Read-only side card on the edit page: who this is at a glance. */
+    protected static function accountSummary(): Section
+    {
+        return Section::make('Account')
+            ->icon(Heroicon::OutlinedUserCircle)
+            ->visible(fn (string $operation) => $operation === 'edit')
+            ->columnSpan(['default' => 3, 'lg' => 1])
+            ->columns(2)
+            ->schema([
+                ImageEntry::make('avatar')
+                    ->columnSpanFull()
+                    ->hiddenLabel()
+                    ->circular()
+                    ->imageSize(64)
+                    ->state(fn (User $record) => filament()->getUserAvatarUrl($record)),
+                TextEntry::make('summary_name')
+                    ->columnSpanFull()
+                    ->hiddenLabel()
+                    ->weight(FontWeight::Bold)
+                    ->size(TextSize::Large)
+                    ->state(fn (User $record) => $record->name),
+                TextEntry::make('summary_email')
+                    ->columnSpanFull()
+                    ->hiddenLabel()
+                    ->color('gray')
+                    ->icon(Heroicon::OutlinedEnvelope)
+                    ->copyable()
+                    ->state(fn (User $record) => $record->email),
+                TextEntry::make('summary_role')
+                    ->label('Role')
+                    ->badge()
+                    ->state(fn (User $record) => $record->getRoleNames()->first() ?? 'no role')
+                    ->color(fn (string $state) => self::ROLE_COLORS[$state] ?? 'gray'),
+                TextEntry::make('summary_branch')
+                    ->label('Branch')
+                    ->icon(Heroicon::OutlinedBuildingLibrary)
+                    ->state(fn (User $record) => $record->branch?->name ?? 'No branch'),
+                TextEntry::make('summary_status')
+                    ->label('Status')
+                    ->badge()
+                    ->state(fn (User $record) => self::statusOf($record))
+                    ->color(fn (string $state) => match ($state) {
+                        'Active' => 'success',
+                        'Must change password' => 'warning',
+                        default => 'gray',
+                    })
+                    ->icon(fn (string $state) => match ($state) {
+                        'Active' => Heroicon::OutlinedCheckCircle,
+                        'Must change password' => Heroicon::OutlinedExclamationTriangle,
+                        default => Heroicon::OutlinedClock,
+                    }),
+                TextEntry::make('summary_joined')
+                    ->label('Member since')
+                    ->state(fn (User $record) => $record->created_at)
+                    ->date('M j, Y')
+                    ->tooltip(fn (User $record) => $record->created_at?->diffForHumans()),
+                TextEntry::make('summary_updated')
+                    ->label('Last updated')
+                    ->state(fn (User $record) => $record->updated_at)
+                    ->since(),
+            ]);
+    }
+
+    public const ROLE_COLORS = [
+        'super-admin' => 'danger',
+        'branch-head' => 'primary',
+        'branch-admin' => 'info',
+        'member' => 'gray',
+    ];
+
+    public static function statusOf(User $record): string
+    {
+        return match (true) {
+            $record->must_change_password => 'Must change password',
+            $record->email_verified_at === null => 'Not activated yet',
+            default => 'Active',
+        };
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('email')->searchable()->sortable(),
-                TextColumn::make('branch.name')->label('Branch')->placeholder('-'),
-                TextColumn::make('roles.name')->label('Role')->badge()->placeholder('-'),
-                TextColumn::make('created_at')->dateTime()->sortable(),
+                // Split/Stack reflow each row to the screen width, so the table never scrolls sideways.
+                Split::make([
+                    ImageColumn::make('avatar')
+                        ->label('')
+                        ->circular()
+                        ->imageSize(40)
+                        ->grow(false)
+                        ->state(fn (User $record) => filament()->getUserAvatarUrl($record)),
+                    Stack::make([
+                        TextColumn::make('name')
+                            ->label('Name')
+                            ->weight(FontWeight::SemiBold)
+                            ->searchable(['name', 'email'])
+                            ->sortable(),
+                        TextColumn::make('email')
+                            ->label('Email')
+                            ->color('gray')
+                            ->size(TextSize::Small)
+                            ->copyable()
+                            ->copyMessage('Email copied')
+                            ->wrap(),
+                    ]),
+                    Stack::make([
+                        TextColumn::make('roles.name')
+                            ->label('Role')
+                            ->badge()
+                            ->formatStateUsing(fn (string $state) => Str::headline($state))
+                            ->color(fn (string $state) => self::ROLE_COLORS[$state] ?? 'gray')
+                            ->placeholder('No role'),
+                        TextColumn::make('branch.name')
+                            ->label('Branch')
+                            ->icon(Heroicon::OutlinedBuildingLibrary)
+                            ->iconColor('gray')
+                            ->size(TextSize::Small)
+                            ->placeholder('No branch'),
+                    ])->space(1),
+                    Stack::make([
+                        TextColumn::make('status')
+                            ->label('Status')
+                            ->badge()
+                            ->state(fn (User $record) => self::statusOf($record))
+                            ->color(fn (string $state) => match ($state) {
+                                'Active' => 'success',
+                                'Must change password' => 'warning',
+                                default => 'gray',
+                            })
+                            ->icon(fn (string $state) => match ($state) {
+                                'Active' => Heroicon::OutlinedCheckCircle,
+                                'Must change password' => Heroicon::OutlinedExclamationTriangle,
+                                default => Heroicon::OutlinedClock,
+                            }),
+                        TextColumn::make('created_at')
+                            ->label('Joined')
+                            ->since()
+                            ->prefix('Joined ')
+                            ->dateTimeTooltip('M j, Y g:i A')
+                            ->color('gray')
+                            ->size(TextSize::Small)
+                            ->sortable(),
+                    ])->space(1)->visibleFrom('lg'),
+                ])->from('md'),
             ])
             ->defaultSort('name')
+            ->striped()
+            ->searchPlaceholder('Search name or email')
+            ->paginated([10, 25, 50, 100])
+            ->defaultPaginationPageOption(25)
+            ->emptyStateIcon(Heroicon::OutlinedUsers)
+            ->emptyStateHeading('No users here yet')
+            ->emptyStateDescription('Approved members and admins will show up in this list.')
             ->filters([
                 SelectFilter::make('branch_id')
                     ->label('Branch')
@@ -273,10 +461,13 @@ class UserResource extends Resource
                         ? $query->whereHas('roles', fn (Builder $q) => $q->where('name', $data['value']))
                         : $query),
             ])
+            ->filtersTriggerAction(fn (Action $action) => $action->button()->label('Filters'))
             ->recordActions([
-                EditAction::make(),
-                self::temporaryPasswordAction(),
-                self::resendAction(),
+                EditAction::make()->iconButton()->tooltip('Edit'),
+                ActionGroup::make([
+                    self::temporaryPasswordAction(),
+                    self::resendAction(),
+                ])->tooltip('More actions'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
