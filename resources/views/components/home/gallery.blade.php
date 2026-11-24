@@ -106,13 +106,15 @@
                         @php
                             $isFeatured = $featured && $loop->first;
                             $isOrphan = $mobileOrphan && $loop->last && ! $isFeatured;
-                            $cell = match (true) {
-                                $isFeatured => 'col-span-2 aspect-[4/3] md:row-span-2 md:aspect-auto',
-                                $loop->last && $wideRemainder === 1 => 'col-span-2 aspect-[16/9] md:col-span-3 md:aspect-[21/9]',
-                                $loop->last && $wideRemainder === 2 => 'col-span-2 aspect-[16/9] md:aspect-auto',
-                                $isOrphan => 'col-span-2 aspect-[16/9] md:col-span-1 md:aspect-[4/3]',
-                                default => 'aspect-[4/3]',
+                            // Mobile (2 columns) and md+ (3 columns) are decided separately so each grid stays gap-free.
+                            $mobileCell = $isOrphan ? 'col-span-2 aspect-[16/9]' : 'aspect-[4/3]';
+                            $mdCell = match (true) {
+                                $loop->last && $wideRemainder === 1 => 'md:col-span-3 md:aspect-[21/9]',
+                                $loop->last && $wideRemainder === 2 => 'md:col-span-2 md:aspect-auto',
+                                $isOrphan => 'md:col-span-1 md:aspect-[4/3]',
+                                default => '',
                             };
+                            $cell = $isFeatured ? 'col-span-2 aspect-[4/3] md:row-span-2 md:aspect-auto' : trim($mobileCell.' '.$mdCell);
                         @endphp
                         <li class="{{ $cell }}">
                             @if ($image['placeholder'])
@@ -136,7 +138,7 @@
                                             'line-clamp-2 font-medium text-white',
                                             'text-base sm:text-lg' => $isFeatured,
                                             'text-sm' => ! $isFeatured,
-                                        ])>{{ $image['title'] ?? $image['alt'] }}</span>
+                                        ])>{{ $image['title'] ?: $image['alt'] }}</span>
                                     </span>
                                 </button>
                             @endif

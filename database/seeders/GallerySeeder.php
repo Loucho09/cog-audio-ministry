@@ -35,18 +35,24 @@ class GallerySeeder extends Seeder
             : [];
 
         if ($files) {
+            $created = false;
+
             foreach ($files as $i => $file) {
                 $name = basename($file);
                 [$title, $alt] = self::CAPTIONS[$name] ?? [null, 'Photo from COG Audio Ministry'];
 
-                GalleryImage::firstOrCreate(
+                $image = GalleryImage::firstOrCreate(
                     ['path' => 'images/gallery/'.$name],
                     ['title' => $title, 'alt_text' => $alt, 'sort_order' => $i + 1, 'is_published' => true],
                 );
+                $created = $created || $image->wasRecentlyCreated;
             }
 
-            // Real photos exist: hide (never delete) old placeholder rows.
-            GalleryImage::query()->where('path', 'like', 'images/placeholders/%')->update(['is_published' => false]);
+            // New real photos were added: hide (never delete) old placeholder rows.
+            // Skipped on re-runs so a placeholder re-published in Filament stays published.
+            if ($created) {
+                GalleryImage::query()->where('path', 'like', 'images/placeholders/%')->update(['is_published' => false]);
+            }
 
             return;
         }
