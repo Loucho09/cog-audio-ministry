@@ -12,12 +12,16 @@
 
 <section id="contact" aria-labelledby="contact-title" class="relative isolate overflow-hidden bg-surface py-20 sm:py-24 lg:py-32">
     <x-site.section-backdrop variant="floor" fade-from="background" />
-    <div class="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
-        <x-site.section-header id="contact-title" eyebrow="Contact" title="Contact Us" lead="We would love to hear from you." />
+    <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+        <div class="lg:grid lg:grid-cols-12 lg:items-start lg:gap-16">
+            {{-- Desktop: heading in the left column, contact cards and map on the right. --}}
+            <div class="lg:col-span-4">
+                <x-site.section-header id="contact-title" eyebrow="Contact" title="Contact Us" lead="We would love to hear from you." align="split" />
+            </div>
 
-        <div class="mt-12 grid gap-8 sm:mt-16 {{ $address ? 'lg:grid-cols-2 lg:items-stretch lg:gap-10' : '' }}">
+        <div class="mt-12 grid gap-8 sm:mt-16 lg:col-span-8 lg:mt-0 {{ $address ? 'lg:grid-cols-2 lg:items-stretch lg:gap-10' : '' }}">
             @if ($hasContact)
-            <ul class="grid w-full gap-4 {{ $address ? '' : 'mx-auto max-w-2xl sm:grid-cols-2' }}">
+            <ul class="grid w-full gap-4 {{ $address ? '' : 'mx-auto max-w-2xl sm:grid-cols-2 lg:mx-0 lg:max-w-none' }}">
                 @if ($email)
                     <li>
                         <a href="mailto:{{ $email }}" class="{{ $cardClasses }}">
@@ -103,6 +107,7 @@
                     class="h-72 w-full rounded-3xl border border-text/15 shadow-sm lg:h-auto lg:min-h-80"
                 ></iframe>
             @endif
+        </div>
         </div>
     </div>
 </section>

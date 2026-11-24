@@ -1,6 +1,6 @@
 <section id="what-we-do" aria-labelledby="what-we-do-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
     <x-site.section-backdrop variant="rings" fade-from="surface" />
-    <div class="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <x-site.section-header
             id="what-we-do-title"
             eyebrow="How we serve"
@@ -52,10 +52,20 @@
         @endphp
 
         <div
-            class="mx-auto mt-12 max-w-4xl sm:mt-16"
+            class="mx-auto mt-12 sm:mt-16 lg:grid lg:grid-cols-12 lg:items-start lg:gap-8"
             x-data="{
                 active: 0,
                 count: {{ $count }},
+                // Desktop (lg+) tabs are a vertical list, so Up/Down move between them instead of Left/Right.
+                vertical: window.matchMedia('(min-width: 1024px)').matches,
+                init() {
+                    this._mq = window.matchMedia('(min-width: 1024px)');
+                    this._onMq = (e) => { this.vertical = e.matches; };
+                    this._mq.addEventListener('change', this._onMq);
+                },
+                destroy() {
+                    this._mq?.removeEventListener('change', this._onMq);
+                },
                 select(i, focus = false) {
                     this.active = (i + this.count) % this.count;
                     if (focus) this.$nextTick(() => this.$refs['roleTab' + this.active].focus());
@@ -63,18 +73,21 @@
                 onKey(e) {
                     {{-- Leave Alt/Ctrl/Meta combos (e.g. Alt+Left = browser Back) alone. --}}
                     if (e.altKey || e.ctrlKey || e.metaKey) return;
-                    const target = { ArrowRight: this.active + 1, ArrowLeft: this.active - 1, Home: 0, End: this.count - 1 }[e.key];
+                    const next = this.vertical ? 'ArrowDown' : 'ArrowRight';
+                    const prev = this.vertical ? 'ArrowUp' : 'ArrowLeft';
+                    const target = { [next]: this.active + 1, [prev]: this.active - 1, Home: 0, End: this.count - 1 }[e.key];
                     if (target === undefined) return;
                     e.preventDefault();
                     this.select(target, true);
                 },
             }"
         >
-            {{-- Role picker: WAI-ARIA tabs pattern (arrow keys, Home/End). --}}
+            {{-- Role picker: WAI-ARIA tabs pattern (arrow keys, Home/End). Horizontal on mobile/tablet, vertical on lg+. --}}
             <div
                 role="tablist"
                 aria-label="Audio ministry roles"
-                class="grid grid-cols-2 gap-3 sm:grid-cols-4"
+                :aria-orientation="vertical ? 'vertical' : 'horizontal'"
+                class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:col-span-4 lg:grid-cols-1 lg:gap-3"
                 @keydown="onKey($event)"
             >
                 @foreach ($roles as $index => $role)
@@ -90,7 +103,7 @@
                         :tabindex="active === {{ $index }} ? 0 : -1"
                         @click="select({{ $index }})"
                         @class([
-                            'group relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border px-2 py-4 text-center text-sm font-semibold transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none sm:px-4 sm:py-5',
+                            'group relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border px-2 py-4 text-center text-sm font-semibold transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none sm:px-4 sm:py-5 lg:flex-row lg:justify-start lg:gap-4 lg:px-5 lg:py-4 lg:text-left',
                             'border-primary/40 bg-surface text-text shadow-md dark:shadow-[0_0_30px_-10px] dark:shadow-primary/40' => $index === 0,
                             'border-text/15 bg-surface/60 text-text/80 hover:border-primary/30 hover:bg-surface hover:text-text' => $index !== 0,
                         ])
@@ -110,7 +123,7 @@
                         {{-- Active indicator: stage-light bar along the bottom edge. --}}
                         <span aria-hidden="true"
                             @class([
-                                'absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary to-accent transition-opacity duration-300 motion-reduce:transition-none',
+                                'absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary to-accent transition-opacity duration-300 motion-reduce:transition-none lg:inset-x-auto lg:inset-y-0 lg:left-0 lg:h-auto lg:w-1 lg:bg-gradient-to-b',
                                 'opacity-0' => $index !== 0,
                             ])
                             :class="{ 'opacity-100': active === {{ $index }}, 'opacity-0': active !== {{ $index }} }"></span>
@@ -119,7 +132,7 @@
             </div>
 
             {{-- Panels share one grid cell so the height never jumps between roles. --}}
-            <div class="mt-5 grid sm:mt-6">
+            <div class="mt-5 grid sm:mt-6 lg:col-span-8 lg:mt-0">
                 @foreach ($roles as $index => $role)
                     <div
                         role="tabpanel"

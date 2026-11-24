@@ -23,7 +23,7 @@
     <div aria-hidden="true" class="absolute inset-0 -z-10 hidden bg-gradient-to-r from-black/90 via-black/75 to-black/60 dark:block"></div>
     <div aria-hidden="true" class="absolute inset-0 -z-10 hidden bg-gradient-to-t from-black/70 via-transparent to-black/40 dark:block"></div>
 
-    <div class="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div class="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
             <div>
                 <p class="inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent-text dark:text-white/90"><span aria-hidden="true" class="h-0.5 w-8 rounded-full bg-accent"></span>Our Churches</p>

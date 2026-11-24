@@ -8,16 +8,19 @@
     <section id="updates" aria-labelledby="updates-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
         <x-site.section-backdrop variant="vignette" />
 
-        <div class="relative mx-auto max-w-3xl px-5 text-center sm:px-6 lg:px-8">
-            <div class="rounded-3xl border border-text/15 bg-surface p-8 shadow-sm sm:p-10">
-                <x-site.section-header
-                    id="updates-title"
-                    eyebrow="Stay Updated"
-                    title="Don't miss a Sunday"
-                    lead="Follow us for service updates, behind-the-scenes moments, and ministry news."
-                />
+        <div class="relative mx-auto max-w-7xl px-5 text-center sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-4xl rounded-3xl border border-text/15 bg-surface p-8 shadow-sm sm:p-10 lg:flex lg:items-center lg:justify-between lg:gap-12 lg:p-12">
+                <div class="lg:min-w-0 lg:flex-1">
+                    <x-site.section-header
+                        id="updates-title"
+                        eyebrow="Stay Updated"
+                        title="Don't miss a Sunday"
+                        lead="Follow us for service updates, behind-the-scenes moments, and ministry news."
+                        align="split"
+                    />
+                </div>
 
-                <div class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+                <div class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center lg:mt-0 lg:shrink-0 lg:justify-end">
                     @if (filled($facebookUrl))
                         <x-site.button :href="$facebookUrl" size="lg" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Facebook (opens in a new tab)">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H7.9v3h2.6V21h3z"/></svg>

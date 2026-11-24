@@ -11,7 +11,7 @@
 
 <section id="services" aria-labelledby="services-title" class="relative isolate overflow-hidden bg-surface py-16 sm:py-20 lg:py-24">
     <x-site.section-backdrop variant="cone" fade-from="background" />
-    <div class="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <x-site.section-header
             id="services-title"
             eyebrow="Services"
@@ -22,24 +22,26 @@
         @if ($soon->isEmpty() && $weekly->isEmpty())
             <p class="mt-10 text-center text-base text-text/80 sm:mt-12">Service times will be posted soon.</p>
         @else
-            @if ($spotlight)
-                <div class="mx-auto mt-10 max-w-3xl sm:mt-12">
-                    @include('components.home.partials.service-spotlight', ['day' => $spotlight, 'badge' => $spotlight['badge']])
-                </div>
-            @endif
+            <div class="mt-10 sm:mt-12 lg:grid lg:grid-cols-12 lg:items-start lg:gap-8">
+                @if ($spotlight)
+                    <div class="mx-auto max-w-3xl {{ $upcoming->isNotEmpty() ? 'lg:col-span-7' : 'lg:col-span-12' }} lg:mx-0 lg:max-w-none">
+                        @include('components.home.partials.service-spotlight', ['day' => $spotlight, 'badge' => $spotlight['badge']])
+                    </div>
+                @endif
 
-            @if ($upcoming->isNotEmpty())
-                {{-- Flex + centred, so one or two day cards sit in the middle instead of hanging left. Three per row on large screens. --}}
-                <ul class="mt-6 flex flex-wrap justify-center gap-4 sm:mt-8 [&>li]:w-full lg:[&>li]:w-[calc((100%-2rem)/3)]">
-                    @foreach ($upcoming as $day)
-                        @include('components.home.partials.service-day', ['day' => $day, 'badge' => $day['badge']])
-                    @endforeach
-                </ul>
-            @endif
+                @if ($upcoming->isNotEmpty())
+                    {{-- Flex + centred on mobile. On lg, a stacked list in the right column beside the featured service. --}}
+                    <ul class="mt-6 flex flex-wrap justify-center gap-4 sm:mt-8 [&>li]:w-full {{ $spotlight ? 'lg:col-span-5' : 'lg:col-span-12' }} lg:mt-0 lg:flex-col lg:flex-nowrap lg:justify-start">
+                        @foreach ($upcoming as $day)
+                            @include('components.home.partials.service-day', ['day' => $day, 'badge' => $day['badge']])
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
 
             @if ($weekly->isNotEmpty())
                 <div x-data="{ openWeekly: false }" class="mt-10 sm:mt-12">
-                    <div class="text-center">
+                    <div class="text-center lg:text-left">
                         <x-site.button
                             variant="secondary"
                             x-on:click="openWeekly = !openWeekly"
@@ -51,7 +53,7 @@
                         </x-site.button>
                     </div>
 
-                    <div id="weekly-schedule" x-show="openWeekly" x-cloak class="mx-auto mt-6 max-w-3xl rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm sm:p-6">
+                    <div id="weekly-schedule" x-show="openWeekly" x-cloak class="mx-auto mt-6 max-w-3xl lg:mx-0 rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm sm:p-6">
                         <h3 class="text-lg font-bold text-text">Weekly schedule</h3>
                         <p class="mt-1 text-sm text-text/80">Tap a time to add it to your calendar.</p>
                         <ul class="mt-4 space-y-1">

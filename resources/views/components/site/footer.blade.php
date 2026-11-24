@@ -19,7 +19,7 @@
 <footer class="relative isolate overflow-hidden border-t border-text/15 bg-surface">
     <x-site.glow tone="accent" class="-bottom-32 -right-24 hidden h-72 w-72 opacity-60 dark:block" />
 
-    <div class="mx-auto grid max-w-6xl gap-12 px-5 py-14 sm:px-6 sm:py-16 md:grid-cols-[1.4fr_1fr_1fr] lg:gap-16 lg:px-8">
+    <div class="mx-auto grid max-w-7xl gap-12 px-5 py-14 sm:px-6 sm:py-16 md:grid-cols-[1.4fr_1fr_1fr] lg:gap-16 lg:px-8">
 
         {{-- Brand --}}
         <div class="min-w-0">
@@ -99,7 +99,7 @@
     </div>
 
     <div class="border-t border-text/15">
-        <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-text/70 sm:flex-row sm:px-6 lg:px-8">
+        <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-text/70 sm:flex-row sm:px-6 lg:px-8">
             <p>&copy; {{ now()->year }} {{ config('ministry.name') }}. All rights reserved.</p>
             <a
                 href="#main"

@@ -1,4 +1,4 @@
-<section aria-labelledby="hero-title" class="relative isolate flex min-h-[100svh] items-center overflow-hidden bg-black sm:min-h-[44rem]">
+<section aria-labelledby="hero-title" class="relative isolate flex min-h-[100svh] items-center overflow-hidden bg-black sm:min-h-[44rem] lg:min-h-[clamp(44rem,85svh,52rem)]">
     {{-- Cover photo as a full-bleed background. Decorative (the h1 carries the name), so alt is empty.
          Above the fold, so no lazy loading. --}}
     <picture>
@@ -14,8 +14,10 @@
             height="609"
             fetchpriority="high"
             decoding="async"
-            class="absolute inset-0 -z-10 h-full w-full object-cover object-center"
+            class="absolute inset-0 -z-10 h-full w-full object-cover object-center lg:bottom-auto lg:h-auto lg:max-h-full lg:[mask-image:linear-gradient(to_bottom,black_65%,transparent)]"
         >
+        {{-- Desktop: fit the photo to the width (not cover) so the wide photo is not cropped on the left,
+             which pushed its wordmark behind the hero text at ~1440px. The bottom fades into the black section. --}}
     </picture>
 
     {{-- Readability overlay. Darker on the left where the text sits; the photo's wordmark stays visible on the right.
@@ -33,7 +35,7 @@
     <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-0 hidden h-32 bg-gradient-to-t from-background to-transparent dark:block"></div>
     <span aria-hidden="true" class="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-primary via-primary to-accent dark:hidden"></span>
 
-    <div class="relative mx-auto w-full max-w-6xl px-5 pb-24 pt-28 sm:px-6 sm:pt-32 lg:px-8">
+    <div class="relative mx-auto w-full max-w-7xl px-5 pb-24 pt-28 sm:px-6 sm:pt-32 lg:px-8">
         <div class="motion-safe:animate-fade-up flex flex-col items-center text-center lg:items-start lg:text-left">
 
             {{-- Small pill above the title: EQ bars and the location line. --}}
@@ -43,9 +45,9 @@
             </p>
 
             {{-- "Audio" is set in the script font to echo the logo. The name is escaped first, so the replace is safe. --}}
-            <h1 id="hero-title" class="mt-6 max-w-full break-words text-5xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">{!! str_replace('Audio', '<span class="inline-block bg-gradient-to-r from-white to-accent bg-clip-text pb-1 font-script text-[1.9em] font-normal leading-none tracking-normal text-transparent forced-colors:bg-none forced-colors:text-[CanvasText]">Audio</span>', e(config('ministry.name'))) !!}</h1>
+            <h1 id="hero-title" class="mt-6 max-w-full break-words text-5xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl 2xl:text-8xl">{!!str_replace('Audio', '<span class="inline-block bg-gradient-to-r from-white to-accent bg-clip-text pb-1 font-script text-[1.9em] font-normal leading-none tracking-normal text-transparent forced-colors:bg-none forced-colors:text-[CanvasText]">Audio</span>', e(config('ministry.name'))) !!}</h1>
 
-            <p class="mt-5 text-lg font-semibold text-white sm:text-xl">{{ config('ministry.tagline') }}</p>
+            <p class="mt-5 text-lg font-semibold text-white sm:text-xl 2xl:text-2xl">{{ config('ministry.tagline') }}</p>
 
             {{-- Theme verse (from config, as on the Facebook page). Red bar echoes the section eyebrows. --}}
             @if (filled(config('ministry.verse.text')))
