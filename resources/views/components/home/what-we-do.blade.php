@@ -3,7 +3,7 @@
     <div class="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
         <x-site.section-header
             id="what-we-do-title"
-            eyebrow="What we do"
+            eyebrow="How we serve"
             title="What We Do"
             lead="Every service needs a team. These are the main roles we serve in."
         />
@@ -48,11 +48,11 @@
                                 {!! $role['icon'] !!}
                             </svg>
                         </span>
-                        <span aria-hidden="true" class="font-mono text-xs font-semibold tracking-wider text-text/50">{{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                        <span aria-hidden="true" class="font-mono text-xs font-semibold tracking-wider text-text/70">{{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}</span>
                     </div>
 
                     <h3 class="mt-6 text-lg font-bold text-text">{{ $role['title'] }}</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-text/70">
+                    <p class="mt-3 text-sm leading-relaxed text-text/75">
                         {{ $role['description'] }}
                     </p>
                 </li>

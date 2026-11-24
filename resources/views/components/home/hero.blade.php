@@ -27,6 +27,9 @@
     <x-site.glow tone="primary" class="-left-40 top-10 h-[28rem] w-[28rem] opacity-70 sm:-left-24" />
     <x-site.glow tone="accent" class="-bottom-24 right-0 h-80 w-80 opacity-70 sm:right-10" />
 
+    {{-- Bottom fade into the next section (background token), so the photo does not end in a hard edge. Decorative only. --}}
+    <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent"></div>
+
     <div class="relative mx-auto w-full max-w-6xl px-5 pb-24 pt-28 sm:px-6 sm:pt-32 lg:px-8">
         <div class="motion-safe:animate-fade-up flex flex-col items-center text-center lg:items-start lg:text-left">
 
@@ -64,11 +67,11 @@
         </div>
     </div>
 
-    {{-- Scroll cue: a real link to the next section. The bounce is motion-safe only. --}}
+    {{-- Scroll cue: a real link to the next section. It sits over the bottom fade, so it uses theme text colours. The bounce is motion-safe only. --}}
     <a
         href="#about"
         aria-label="Scroll to About"
-        class="absolute inset-x-0 bottom-4 mx-auto flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition-colors duration-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black motion-safe:animate-nudge"
+        class="absolute inset-x-0 bottom-4 mx-auto flex h-11 w-11 items-center justify-center rounded-full text-text transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-safe:animate-nudge"
     >
         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />

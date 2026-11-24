@@ -16,11 +16,17 @@
 @endphp
 
 @if (count($stats) > 0)
-    <section id="impact" aria-labelledby="impact-title" class="relative isolate overflow-hidden bg-surface py-14 sm:py-16">
-        <div class="mx-auto max-w-6xl px-5 text-center sm:px-6 lg:px-8">
-            <h2 id="impact-title" class="text-xl font-extrabold leading-snug tracking-tight text-text [text-wrap:balance] sm:text-2xl">
-                Every sermon, every song, heard clearly.
-            </h2>
+    <section id="impact" aria-labelledby="impact-title" class="relative isolate overflow-hidden bg-background py-14 sm:py-16">
+        {{-- Thin primary-to-accent light bar on the top edge, and a subtle backdrop. Decorative. --}}
+        <span aria-hidden="true" class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary to-accent"></span>
+        <x-site.section-backdrop variant="vignette" />
+
+        <div class="relative mx-auto max-w-6xl px-5 text-center sm:px-6 lg:px-8">
+            <x-site.section-header
+                id="impact-title"
+                eyebrow="Our impact"
+                title="Every sermon, every song, heard clearly."
+            />
 
             <dl class="mx-auto mt-10 grid max-w-3xl gap-8 {{ $gridCols }}">
                 @foreach ($stats as $stat)

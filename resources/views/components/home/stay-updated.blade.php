@@ -5,8 +5,10 @@
 @endphp
 
 @if (filled($facebookUrl) || filled($messengerUrl))
-    <section id="updates" aria-labelledby="updates-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24">
-        <div class="mx-auto max-w-3xl px-5 text-center sm:px-6 lg:px-8">
+    <section id="updates" aria-labelledby="updates-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
+        <x-site.section-backdrop variant="vignette" />
+
+        <div class="relative mx-auto max-w-3xl px-5 text-center sm:px-6 lg:px-8">
             <div class="rounded-3xl border border-text/10 bg-surface p-8 shadow-sm sm:p-10">
                 <x-site.section-header
                     id="updates-title"
