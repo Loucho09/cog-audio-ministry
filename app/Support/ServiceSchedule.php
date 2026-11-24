@@ -55,7 +55,7 @@ class ServiceSchedule
     /**
      * One line per weekday + service name, e.g. "Sunday: Sunday Service, 5:30 AM, 7:30 AM".
      * Built from the branch's active services, so paused services still appear.
-     * Services whose ends_on is before today are left out.
+     * Services with no remaining service date on or after today are left out.
      *
      * Optional keys: 'note' (one note for the whole line) or, when services on a
      * line differ, 'notes' (list of ['time' => label, 'note' => text]).
@@ -68,10 +68,13 @@ class ServiceSchedule
             return collect();
         }
 
-        $todayDate = $today->format('Y-m-d');
+        // Service dates are Manila dates; convert once so the filter and the notes agree on "today".
+        $today = $today->setTimezone('Asia/Manila')->startOfDay();
 
         return $branch->services()->active()->ordered()->get()
-            ->filter(fn (Service $s) => $s->ends_on === null || $s->ends_on->format('Y-m-d') >= $todayDate)
+            // Same rule as the calendar link: keep a service only while it still has a date on or after today
+            // (so its "add to calendar" link never 404s).
+            ->filter(fn (Service $s) => ServiceIcs::available($s, $today))
             ->sortBy(fn (Service $s) => $s->start_time)
             ->groupBy(fn (Service $s) => $s->day_of_week.'|'.$s->name)
             ->map(function (Collection $items) use ($today) {
@@ -114,10 +117,15 @@ class ServiceSchedule
             return 'Resumes '.$service->starts_on->format('M j, Y');
         }
 
-        if ($service->ends_on !== null
-            && $service->ends_on->format('Y-m-d') >= $today->format('Y-m-d')
-            && $service->ends_on->format('Y-m-d') <= $today->addWeeks(8)->format('Y-m-d')) {
-            return 'Last service '.$service->ends_on->format('M j');
+        if ($service->ends_on !== null) {
+            // The last service is the final matching weekday on or before ends_on.
+            $endsOn = CarbonImmutable::parse($service->ends_on->format('Y-m-d'));
+            $last = $endsOn->subDays(($endsOn->dayOfWeek - (int) $service->day_of_week + 7) % 7);
+
+            if ($last->format('Y-m-d') >= $today->format('Y-m-d')
+                && $last->format('Y-m-d') <= $today->addWeeks(8)->format('Y-m-d')) {
+                return 'Last service '.$last->format('M j');
+            }
         }
 
         return null;

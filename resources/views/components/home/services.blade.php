@@ -63,15 +63,16 @@
                                     $isToday = $line['day'] === $todayName;
                                 @endphp
                                 <li class="rounded-2xl px-3 py-3 {{ $isToday ? 'bg-primary/10 ring-1 ring-inset ring-primary/30' : '' }}">
-                                    <div class="flex flex-col gap-2 sm:grid sm:grid-cols-[7rem_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
+                                    <div class="flex flex-col gap-2 sm:grid sm:grid-cols-[7rem_minmax(9rem,1fr)_minmax(0,auto)] sm:items-center sm:gap-4">
+                                        {{-- The name column keeps at least 9rem; the times column takes what is left and wraps, so many times never cover the name. --}}
                                         <p class="text-sm font-bold text-text">{{ $line['day'] }}@if ($isToday)<span class="sr-only"> (today)</span>@endif</p>
                                         <div class="flex min-w-0 flex-wrap items-center gap-2">
-                                            <span class="text-sm text-text">{{ $line['name'] }}</span>
+                                            <span class="min-w-0 text-sm text-text">{{ $line['name'] }}</span>
                                             @if (isset($line['note']))
                                                 <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary-dark ring-1 ring-inset ring-primary/25">{{ $line['note'] }}</span>
                                             @endif
                                         </div>
-                                        <ul class="flex flex-wrap items-center gap-2">
+                                        <ul class="flex min-w-0 flex-wrap items-center gap-2 sm:justify-end">
                                             @foreach ($line['times'] as $time)
                                                 @php
                                                     $timeNote = collect($line['notes'] ?? [])->firstWhere('time', $time);
