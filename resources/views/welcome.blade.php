@@ -11,5 +11,6 @@
     <x-home.services :branch="$branch" :schedule="$schedule" />
     <x-home.gallery :images="$galleryImages" />
     <x-home.join />
+    <x-home.stay-updated />
     <x-home.contact />
 </x-public-layout>
