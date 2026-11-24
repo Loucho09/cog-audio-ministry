@@ -54,6 +54,12 @@ Slices:
 6. Homepage hooks (done 2026-11-24, see [[homepage-hooks]]; browser check pending).
    - FAQ section hidden from the homepage. `Faq` model, table, seeder and component kept.
    - Section order: hero, impact, about, what-we-do, churches, team (flag), services, gallery, join, stay-updated, contact.
+7. Gallery with real photos (done 2026-11-24, branch `feature/gallery-photos`, commit 4cc3e4d; browser check pending).
+   - 6 real photos in `public/images/gallery/01-team-on-stage.webp` to `06-behind-the-scenes.webp`. WebP, 1600px long edge, q80, about 800KB total. Converted with PHP GD.
+   - `GallerySeeder` has a `CAPTIONS` map (filename to title and alt text). When real photos exist, placeholder rows get `is_published = false`. Rows are never deleted.
+   - Bento layout: with 5+ photos the first is featured (2x2 on md and up, full width on mobile). Desktop grid stays 3 columns. Last tile stretches to avoid orphans.
+   - Featured caption always visible. Other captions show on hover or focus.
+   - Owner must confirm everyone pictured is OK on the public site (photos include children).
 
 Owner-confirm copy (placeholders until the owner confirms):
 - Hero sentence
@@ -64,7 +70,7 @@ Owner-confirm copy (placeholders until the owner confirms):
 Out of scope:
 - Filament resources for services, gallery, FAQs, team members, branches (moved to Phase 2, see [[filament-resources-phase-2]] and [[Roadmap]])
 - The join application form itself (Phase 3)
-- Real gallery photos, team list, address, Messenger link (pending from the owner)
+- Team list, address, Messenger link (pending from the owner). Gallery photos are done (slice 7).
 - SEO meta, Open Graph, sitemap (Phase 7)
 
 Tasks: [[homepage-sections-tasks]]

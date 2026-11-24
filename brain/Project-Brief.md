@@ -99,7 +99,7 @@ Meet the Team is OFF by default. Do not invent team members.
 ## Pending from the head
 - [ ] Vision and mission statement
 - [ ] "Meet the Team" list (full-time members first): name, role, photo
-- [ ] Gallery photos (sound booth, serving, services/events, group photo) (still pending as of 2026-11-24)
+- [x] Gallery photos: 6 real photos added 2026-11-24 (commit 4cc3e4d). Owner to confirm everyone pictured is OK on the public site (photos include children)
 - [ ] Messenger link and official church address
 - [ ] FAQ content
 - [ ] Confirm homepage copy (hero sentence, about intro, role descriptions)
