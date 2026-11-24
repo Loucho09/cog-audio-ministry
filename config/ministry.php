@@ -54,11 +54,11 @@ return [
 
     // Churches the ministry serves. Display-only until the Phase 2 branches table.
     'churches' => [
-        ['name' => 'COG Dasma', 'is_main' => true],
-        ['name' => 'COG Marilag', 'is_main' => false],
-        ['name' => 'COG Trece', 'is_main' => false],
-        ['name' => 'COG Silang', 'is_main' => false],
-        ['name' => 'COG Jabez', 'is_main' => false],
+        ['name' => 'COG Dasma', 'is_main' => true, 'facebook_url' => $httpsUrl('https://www.facebook.com/COGAudioDasma')],
+        ['name' => 'COG Marilag', 'is_main' => false, 'facebook_url' => null],
+        ['name' => 'COG Trece', 'is_main' => false, 'facebook_url' => $httpsUrl('https://www.facebook.com/COGTreceMartires')],
+        ['name' => 'COG Silang', 'is_main' => false, 'facebook_url' => $httpsUrl('https://www.facebook.com/cogsilang')],
+        ['name' => 'COG Jabez', 'is_main' => false, 'facebook_url' => $httpsUrl('https://www.facebook.com/churchofgodjabez')],
     ],
 
     // TODO: owner to provide the number of years serving. Null hides the stat.
