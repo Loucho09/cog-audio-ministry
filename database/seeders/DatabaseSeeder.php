@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,17 +14,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $seeders = [BranchSeeder::class, RoleSeeder::class];
+
+        // Demo accounts use a known password: never outside local/testing.
+        if (app()->environment(['local', 'testing'])) {
+            $seeders[] = DemoUserSeeder::class;
+        }
+
         $this->call([
-            BranchSeeder::class,
+            ...$seeders,
             ServiceSeeder::class,
             GallerySeeder::class,
             FaqSeeder::class,
             TeamMemberSeeder::class,
         ]);
-
-        User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            ['name' => 'Test User', 'password' => Hash::make('password'), 'email_verified_at' => now()],
-        );
     }
 }

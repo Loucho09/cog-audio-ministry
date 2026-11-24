@@ -40,3 +40,4 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Cosmetic re-indent in `resources/views/components/home/contact.blade.php` (added 2026-11-24; see [[desktop-container-and-splits]])
 - Refactor: shared ServiceIcs helper for "last service date" so `ServiceSchedule::note()` and `ServiceIcs::firstStart` do not drift (reviewer suggestion, 2026-11-24; see [[services-section-v2]])
 - Windows dev: "rename(): Access is denied" and 30s timeouts come from compiled view cache locking (first load after `view:clear` takes about 21s). Consider excluding `storage/framework/views` from Windows Defender (added 2026-11-24; see [[services-section-v2]])
+- Tap targets under 24px (church Facebook links 92x20, Add to calendar 115x20). Fix in Phase 7 accessibility pass. Found 2026-11-24 Playwright check (see [[Roadmap]]).

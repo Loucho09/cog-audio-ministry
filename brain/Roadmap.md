@@ -6,8 +6,8 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 
 | # | Phase | Status |
 |---|-------|--------|
-| 1 | Setup and homepage | in progress |
-| 2 | Member accounts and roles | planned |
+| 1 | Setup and homepage | done (2026-11-24) |
+| 2 | Member accounts and roles | in progress (2a done 2026-11-25, pending merge; 2b next) |
 | 3 | Join applications | planned |
 | 4 | Duty roster | planned |
 | 5 | Notifications and reminders | planned |
@@ -25,18 +25,18 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 - [x] Done 2026-11-24 (owner request): gallery with real photos, captions and bento layout (merged to main, b3415eb). Still open: owner consent for everyone pictured before going live; re-run `GallerySeeder` on MySQL. See [[homepage-sections]]. Phase 1 stays open.
 - [x] Done 2026-11-24 (branch `feature/what-we-do-cards`, commits 8d2e5e5, 81ab9a8, 287a5c9): What We Do is now an interactive role picker (4 tabs: FOH, Monitors, Livestream, Stage Tech; one panel with summary and detail; WAI-ARIA tabs, keyboard support). Replaces the earlier 2x2 card grid (8d2e5e5, now superseded). Checked with Playwright at 1280px light, 360px dark, and keyboard; reviewer clean; 146 tests (145 pass, 1 skipped). Owner to check the wording. See [[homepage-theme-polish]] slice E.
 - [x] Done 2026-11-24 (owner request): light-mode polish (softer background #EEF2F7, darker muted text and borders, Our Churches and Join Us now light in light mode; hero ends on a crisp edge in light mode instead of a dark-to-light fade; cards white in light mode; light-mode glows, beams and vignettes cut to about a third; footer glow dark-only; Impact stats in white cards with gradient numbers; Join Us is a deep-blue band (light) with crisp white sound-wave rings and a white button; service day cards centred; dark mode otherwise unchanged). Branch `feature/light-mode-polish`. See [[stage-palette]].
-- TODO (2026-11-24): Marilag Facebook link; confirm whether COG Dasmariñas has its own Facebook page (currently the Audio Ministry page); owner browser check at 360px and dark mode.
+- Done 2026-11-24: Playwright check at 360px, light + dark: no horizontal overflow, no console errors, all 10 sections render, theme follows device and toggle persists, gallery images load, mobile menu works. Owner-pending (non-blocking): What We Do wording, gallery photo consent before live, Marilag FB link, COG Dasma own FB page?
 
 ### Tasks
 1. [x] Scaffold Laravel (latest stable) + Tailwind, Alpine, Filament, Spatie Permission, Breeze Blade, Pest; commit
    - Done 2026-11-24. Laravel 13.43, PHP 8.6, Breeze 2.4 Blade, Pest 5.3, Filament 5.12 (`/admin`; `canAccessPanel` returns false until Phase 2), Spatie Permission 8.5 (teams off, `HasRoles` on `User`, no roles yet), Pint, Tailwind 3.4 ([[tailwind-v3-with-breeze]]), Alpine 3, Vite.
 2. [x] Base layout: header, navigation, footer; theme tokens (background, surface, text, primary, accent); Inter font
    - Done 2026-11-24. See [[public-layout]]. Tests: 41 total (40 pass, 1 skipped until `public/images/logo.png` exists). Checked at 360px, 1024px and 1280px. Reviewer run, issues fixed.
-3. **In progress:** Homepage sections as Blade components (in order): hero, about us, what we do, meet the team (config flag, OFF by default), upcoming services, gallery, join us, FAQ, contact, footer; commit per section group. Spec: [[homepage-sections]]. All four slices are built (slice 4 in commit 1c8d658). Browser check at 360px and dark mode is pending; needs MySQL. Phase 1 stays open until that check passes.
+3. [x] Done 2026-11-24: Homepage sections as Blade components (in order): hero, about us, what we do, meet the team (config flag, OFF by default), upcoming services, gallery, join us, FAQ, contact, footer; commit per section group. Spec: [[homepage-sections]]. Browser check at 360px and dark mode passed (see the Done line above).
 4. [x] Services model, migration, seeder (main ministry schedule). Done via slice 1 of [[homepage-sections]]. Services seeded for COG Dasmariñas only.
 5. [x] `gallery_images`, `faqs`, `team_members` tables + seeders with placeholder data (team: `is_featured` flag, full-time first). Done via slice 1 of [[homepage-sections]].
 6. Semantic HTML and alt text now. SEO basics (meta, Open Graph, sitemap) can wait for the Phase 7 pass
-7. Mobile check at 360px; ensure responsive design
+7. [x] Done 2026-11-24: Mobile check at 360px; ensure responsive design
    - ~~Mobile check at 375px~~ (superseded 2026-11-24 by [[second-brief-merged]])
 
 ### Carry-over (already done)
@@ -58,22 +58,27 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 ## Phase 2: Member Accounts and Roles
 **Goal:** set up authentication, roles, and branch scoping so members can log in and admins can manage the organization.
 
+Status: in progress. Split into two parts (owner decision, 2026-11-24). Spec: [[member-accounts-roles]]. Tasks: [[member-accounts-roles-tasks]].
+- **2a Security core:** `branch_id` on users, Spatie roles, demo seed, `ministry:create-super-admin` command, register route removed, route throttles, `canAccessPanel`, `Gate::before`, `BelongsToBranch` scope, `AssignRole` action, Service and User policies, tests, themed auth screens. Decision: [[super-admin-via-artisan-command]].
+- **2b Filament screens:** Service, GalleryImage, TeamMember, Faq, Branch, and User resources. The "Our churches" list moves from config to the `branches` table (nullable `facebook_url`).
+
 ### Tasks
 - Breeze Blade login/register; accounts created by approval only (no open signup)
-- [ ] Open (added 2026-11-24): disable the Breeze `/register` route (approval-only accounts)
-- [ ] Open (added 2026-11-24): implement `canAccessPanel` on `User` for Filament (currently returns false)
+- [x] Done 2026-11-25 (2a): disable the Breeze `/register` route (approval-only accounts)
+- [x] Done 2026-11-25 (2a): implement `canAccessPanel` on `User` for Filament (`/admin` by role)
 - [ ] Filament resources: Service, GalleryImage, Faq, TeamMember (moved from Phase 1 on 2026-11-24, see [[filament-resources-phase-2]]). Service resource needs a friendly error for the unique branch/day/time slot (from [[Backlog]]). Service resource: include starts_on/ends_on fields, branch-scoped for branch-head (see [[services-section-v2]], [[service-date-window]]).
-- `branches` table with seeder (main + 4 satellites)
-- Spatie Permission: roles `super-admin` (project owner only), `branch-head` (admin of one branch), `branch-admin` (applications and roster for one branch; cannot assign roles), `member`
-- Super-admin and branch-head seeders with fake data
+- [x] Done 2026-11-25 (2a): `branches` table with seeder (main + 4 satellites)
+- [x] Done 2026-11-25 (2a): Spatie Permission: roles `super-admin` (project owner only), `branch-head` (admin of one branch), `branch-admin` (applications and roster for one branch; cannot assign roles), `member`
+- [x] Done 2026-11-25 (2a): Super-admin and branch-head seeders with fake data (`DemoUserSeeder`, local and testing only)
 - Member profile page (view own info)
-- `/admin` reachable only by users with a role
-- Rate limit login and password reset
+  - [x] Done 2026-11-25 (2a): profile shows read-only branch and role
+- [x] Done 2026-11-25 (2a): `/admin` reachable only by users with a role
+- [x] Done 2026-11-25 (2a): Rate limit login and password reset
 - Tests:
-  - role checks, branch-scoped queries
-  - members cannot escalate roles; super-admin is the only one who assigns roles
-  - a branch-head cannot assign roles
-  - unauthorized access, role escalation, cross-branch access, mass assignment
+  - [x] Done 2026-11-25 (2a): role checks, branch-scoped queries
+  - [x] Done 2026-11-25 (2a): members cannot escalate roles; super-admin is the only one who assigns roles
+  - [x] Done 2026-11-25 (2a): a branch-head cannot assign roles
+  - [x] Done 2026-11-25 (2a): unauthorized access, role escalation, cross-branch access, mass assignment
 
 ### Notes
 - Phased before Join Applications (Phase 3) because applications need branch-head login and Filament access.

@@ -1,11 +1,13 @@
-@props(['active'])
+@props(['active' => false])
 
 @php
-$classes = ($active ?? false)
-            ? 'inline-flex items-center px-1 pt-1 border-b-2 border-indigo-400 text-sm font-medium leading-5 text-gray-900 focus:outline-none focus:border-indigo-700 transition duration-150 ease-in-out'
-            : 'inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out';
+// Active = primary-dark text with an accent underline. Inactive = muted text, primary on hover.
+$base = 'relative inline-flex min-h-11 items-center whitespace-nowrap rounded-md px-3 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark after:absolute after:inset-x-3 after:bottom-1.5 after:h-0.5 after:rounded-full after:bg-accent after:transition-transform after:duration-200';
+$classes = $active
+    ? $base.' text-primary-dark after:scale-x-100'
+    : $base.' text-text/80 hover:text-primary-dark after:origin-left after:scale-x-0 hover:after:scale-x-100';
 @endphp
 
-<a {{ $attributes->merge(['class' => $classes]) }}>
+<a {{ $attributes->class($classes) }} @if ($active) aria-current="page" @endif>
     {{ $slot }}
 </a>

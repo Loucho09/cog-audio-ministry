@@ -22,6 +22,11 @@ class Branch extends Model
         return ['is_main' => 'boolean'];
     }
 
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+
     public function services(): HasMany
     {
         return $this->hasMany(Service::class);

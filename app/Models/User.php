@@ -9,6 +9,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -20,10 +21,19 @@ class User extends Authenticatable implements FilamentUser
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
 
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
-        // TODO Phase 2: allow super-admin, branch-head, branch-admin
-        return false;
+        if ($this->hasRole('super-admin')) {
+            return true;
+        }
+
+        // Branch admins need a branch; an admin without one gets nothing.
+        return $this->branch_id !== null && $this->hasAnyRole(['branch-head', 'branch-admin']);
     }
 
     /**
