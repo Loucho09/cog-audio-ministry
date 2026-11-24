@@ -33,3 +33,4 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Maybe merge same-weekday rows (two Wednesday rows) in the weekly list; ask owner first (added 2026-11-24; see [[services-section-v2]])
 - Windows dev note: "rename(): Access is denied" on compiled views; run `php artisan view:clear` (added 2026-11-24)
 - Consider gitignoring `.playwright-mcp/` (added 2026-11-24)
+- TODO: confirm service duration for calendar (90 min default) (added 2026-11-24; see [[services-section-v2]])
