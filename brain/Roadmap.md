@@ -18,6 +18,8 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 **Goal:** scaffold Laravel with required packages, build a mobile-first homepage.
 
 - Added 2026-11-24 (owner request): dark mode for public pages. See [[dark-mode]].
+- Moved 2026-11-24: Filament resources (Service, GalleryImage, Faq, TeamMember) go to Phase 2; Phase 1 closes without them. See [[filament-resources-phase-2]].
+- Planned 2026-11-24 (owner request, awaiting go-ahead): homepage hooks (impact strip, "One sound, many churches", stay updated, FAQ hidden from homepage). See [[homepage-hooks]], tasks in [[homepage-hooks-tasks]].
 
 ### Tasks
 1. [x] Scaffold Laravel (latest stable) + Tailwind, Alpine, Filament, Spatie Permission, Breeze Blade, Pest; commit
@@ -54,6 +56,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 - Breeze Blade login/register; accounts created by approval only (no open signup)
 - [ ] Open (added 2026-11-24): disable the Breeze `/register` route (approval-only accounts)
 - [ ] Open (added 2026-11-24): implement `canAccessPanel` on `User` for Filament (currently returns false)
+- [ ] Filament resources: Service, GalleryImage, Faq, TeamMember (moved from Phase 1 on 2026-11-24, see [[filament-resources-phase-2]]). Service resource needs a friendly error for the unique branch/day/time slot (from [[Backlog]]).
 - `branches` table with seeder (main + 4 satellites)
 - Spatie Permission: roles `super-admin` (project owner only), `branch-head` (admin of one branch), `branch-admin` (applications and roster for one branch; cannot assign roles), `member`
 - Super-admin and branch-head seeders with fake data

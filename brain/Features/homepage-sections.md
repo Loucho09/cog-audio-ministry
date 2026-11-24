@@ -2,7 +2,7 @@
 Status: in progress
 Phase: 1
 
-Related: [[00-Index]], [[Roadmap]], [[Project-Brief]], [[public-layout]]
+Related: [[00-Index]], [[Roadmap]], [[Project-Brief]], [[public-layout]], [[homepage-hooks]] (new planned slices: impact strip, satellites story, stay updated, FAQ hidden)
 
 Goal: build the homepage from Blade components, in the order set in [[Project-Brief]]: hero, about us, what we do, meet the team (behind a config flag, OFF by default), upcoming services, gallery (Alpine lightbox), join us CTA, FAQ (Alpine accordion), contact (map only when the address is set), footer.
 
@@ -58,7 +58,7 @@ Owner-confirm copy (placeholders until the owner confirms):
 - Placeholder FAQ answers
 
 Out of scope:
-- Filament resources for services, gallery, FAQs, team members, branches (later phase, see [[Roadmap]])
+- Filament resources for services, gallery, FAQs, team members, branches (moved to Phase 2, see [[filament-resources-phase-2]] and [[Roadmap]])
 - The join application form itself (Phase 3)
 - Real gallery photos, team list, address, Messenger link (pending from the owner)
 - SEO meta, Open Graph, sitemap (Phase 7)

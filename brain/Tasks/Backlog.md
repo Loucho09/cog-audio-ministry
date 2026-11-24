@@ -21,3 +21,7 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Owner browser check of homepage at 360px and desktop, light and dark, once MySQL runs: lightbox above navbar (open, close, Esc, arrows, Tab), backdrop strength, verse readability on mobile over the photo (added 2026-11-24; see [[homepage-sections]], [[hero-theme-verse]], [[section-backdrops]])
 - Vignette ellipse stretches on tall mobile sections; consider `farthest-corner` if it looks odd (added 2026-11-24; see [[section-backdrops]])
 - Backdrop fade seam colours assume default section order; check if team or FAQ is hidden (added 2026-11-24; see [[section-backdrops]])
+- Public updates or news feed on the homepage (Phase 5; owner idea 2026-11-24; see [[homepage-hooks]], [[Roadmap]])
+- Testimonies section (owner idea 2026-11-24; see [[homepage-hooks]])
+- Sticky join CTA on mobile (owner idea 2026-11-24; see [[homepage-hooks]])
+- "No experience needed" steps on the join section (owner declined for now, 2026-11-24; see [[homepage-hooks]])
