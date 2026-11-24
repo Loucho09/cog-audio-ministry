@@ -80,7 +80,7 @@ it('renders the four team roles as h3 headings in what-we-do', function () {
         $titles[] = trim($heading->textContent);
     }
 
-    expect($titles)->toBe(['FOH (Front of House)', 'Monitors', 'Livestream', 'Stage Tech']);
+    expect($titles)->toBe(['Front of House', 'Monitors', 'Livestream', 'Stage Tech']);
 });
 
 it('renders the hero background as a responsive, decorative picture with a jpg fallback', function () {
