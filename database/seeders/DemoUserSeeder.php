@@ -11,6 +11,12 @@ class DemoUserSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! app()->environment(['local', 'testing'])) {
+            $this->command?->warn('DemoUserSeeder skipped: only runs in local/testing.');
+
+            return;
+        }
+
         $this->make('Demo Super Admin', 'superadmin@example.test', null, 'super-admin');
 
         foreach (Branch::all() as $branch) {

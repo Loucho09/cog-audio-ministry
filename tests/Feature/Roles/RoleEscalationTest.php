@@ -4,6 +4,7 @@ use App\Actions\AssignRole;
 use App\Models\Branch;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Validation\ValidationException;
 
 beforeEach(fn () => $this->seed(RoleSeeder::class));
 
@@ -67,3 +68,23 @@ it('blocks the last super-admin from demoting themselves', function () {
 
     expect($actor->fresh()->hasRole('super-admin'))->toBeFalse();
 });
+
+it('demotes one of two super-admins then blocks demoting the last', function () {
+    $a = User::factory()->superAdmin()->create();
+    $b = User::factory()->superAdmin()->create();
+
+    app(AssignRole::class)->handle($a, $b, 'member');
+    expect($b->fresh()->hasRole('super-admin'))->toBeFalse();
+
+    expect(fn () => app(AssignRole::class)->handle($a, $a, 'member'))
+        ->toThrow(AuthorizationException::class);
+    expect($a->fresh()->hasRole('super-admin'))->toBeTrue();
+});
+
+it('rejects branch roles for users without a branch', function (string $role) {
+    $actor = User::factory()->superAdmin()->create();
+    $target = User::factory()->create(['branch_id' => null]);
+
+    expect(fn () => app(AssignRole::class)->handle($actor, $target, $role))
+        ->toThrow(ValidationException::class);
+})->with(['branch-head', 'branch-admin']);

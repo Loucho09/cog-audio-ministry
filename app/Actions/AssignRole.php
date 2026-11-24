@@ -4,6 +4,8 @@ namespace App\Actions;
 
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * The only place roles are changed. Only a super-admin may assign roles.
@@ -25,15 +27,25 @@ class AssignRole
             throw new AuthorizationException('Unknown role.');
         }
 
-        if (
-            $role !== 'super-admin'
-            && $target->hasRole('super-admin')
-            && User::role('super-admin')->count() <= 1
-        ) {
-            throw new AuthorizationException('Cannot remove the last super-admin.');
+        if (in_array($role, ['branch-head', 'branch-admin'], true) && $target->branch_id === null) {
+            throw ValidationException::withMessages([
+                'role' => 'Assign the user to a branch before giving this role.',
+            ]);
         }
 
-        $target->syncRoles([$role]);
+        DB::transaction(function () use ($target, $role) {
+            $superAdmins = User::role('super-admin')->lockForUpdate()->get();
+
+            if (
+                $role !== 'super-admin'
+                && $superAdmins->contains('id', $target->id)
+                && $superAdmins->count() <= 1
+            ) {
+                throw new AuthorizationException('Cannot remove the last super-admin.');
+            }
+
+            $target->syncRoles([$role]);
+        });
 
         return $target;
     }

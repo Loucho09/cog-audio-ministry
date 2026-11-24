@@ -1,8 +1,13 @@
 @php
     $user = auth()->user();
     // Panel access rules live in App\Models\User::canAccessPanel(); the link only appears when they allow it.
-    $panel = \Filament\Facades\Filament::getPanel('admin');
-    $canSeePanel = $user->canAccessPanel($panel);
+    try {
+        $panel = \Filament\Facades\Filament::getPanel('admin');
+        $canSeePanel = $user->canAccessPanel($panel);
+    } catch (\Throwable) {
+        $panel = null;
+        $canSeePanel = false;
+    }
 @endphp
 
 <header x-data="{ open: false }" @keydown.escape.window="if (open) { open = false; $refs.menuButton.focus() }" class="sticky top-0 z-50 w-full border-b border-text/15 bg-surface/90 backdrop-blur-md">

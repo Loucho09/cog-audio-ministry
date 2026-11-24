@@ -14,10 +14,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $seeders = [BranchSeeder::class, RoleSeeder::class];
+
+        // Demo accounts use a known password: never outside local/testing.
+        if (app()->environment(['local', 'testing'])) {
+            $seeders[] = DemoUserSeeder::class;
+        }
+
         $this->call([
-            BranchSeeder::class,
-            RoleSeeder::class,
-            DemoUserSeeder::class,
+            ...$seeders,
             ServiceSeeder::class,
             GallerySeeder::class,
             FaqSeeder::class,
