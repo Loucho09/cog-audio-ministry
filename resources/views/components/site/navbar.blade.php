@@ -43,7 +43,7 @@
                 {{-- Placeholder until public/images/logo.png is added --}}
                 <span
                     aria-hidden="true"
-                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold tracking-wide text-surface"
+                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-dark text-xs font-semibold tracking-wide text-surface"
                 >COG</span>
             @endif
 
