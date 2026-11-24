@@ -1,100 +1,119 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
-                </div>
+@php
+    $user = auth()->user();
+    // Panel access rules live in App\Models\User::canAccessPanel(); the link only appears when they allow it.
+    $panel = \Filament\Facades\Filament::getPanel('admin');
+    $canSeePanel = $user->canAccessPanel($panel);
+@endphp
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                </div>
-            </div>
+<header x-data="{ open: false }" @keydown.escape.window="if (open) { open = false; $refs.menuButton.focus() }" class="sticky top-0 z-50 w-full border-b border-text/15 bg-surface/90 backdrop-blur-md">
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-5 sm:px-6 lg:px-8">
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+        {{-- Brand: links to the public homepage --}}
+        <a
+            href="{{ route('home') }}"
+            class="flex min-h-11 min-w-0 items-center gap-3 rounded-md transition-opacity duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
+        >
+            <x-site.logo />
+            <span class="min-w-0 leading-tight">
+                <span class="block truncate text-[0.8125rem] font-bold tracking-tight text-text sm:text-base">{{ config('ministry.name') }}</span>
+                <span class="block truncate text-xs text-text/70">{{ config('ministry.subheader') }}</span>
+            </span>
+        </a>
 
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
+        <div class="flex shrink-0 items-center gap-1 sm:gap-2">
 
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
+            {{-- Desktop links --}}
+            <nav aria-label="Member" class="hidden sm:block">
+                <ul class="flex items-center gap-1">
+                    <li>
+                        <x-nav-link :href="route('home')">Homepage</x-nav-link>
+                    </li>
+                    <li>
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
+                    </li>
+                    <li>
+                        <x-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.*')">Profile</x-nav-link>
+                    </li>
+                    @if ($canSeePanel)
+                        <li>
+                            <x-nav-link :href="$panel->getUrl()">Admin panel</x-nav-link>
+                        </li>
+                    @endif
+                    <li>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
+                            <button
+                                type="submit"
+                                class="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-text/80 transition-colors duration-200 hover:text-accent-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
+                            >Log out</button>
                         </form>
-                    </x-slot>
-                </x-dropdown>
-            </div>
+                    </li>
+                </ul>
+            </nav>
 
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
+            <x-site.theme-toggle />
+
+            {{-- Mobile menu toggle --}}
+            <button
+                type="button"
+                x-ref="menuButton"
+                @click="open = !open"
+                :aria-expanded="open.toString()"
+                aria-controls="member-menu"
+                aria-label="Toggle navigation menu"
+                class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-text transition-colors duration-200 hover:bg-text/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark sm:hidden"
+            >
+                <svg x-show="!open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+                </svg>
+                <svg x-show="open" x-cloak class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         </div>
     </div>
 
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+    {{-- Mobile menu: solid surface panel below the header --}}
+    <div
+        id="member-menu"
+        x-show="open"
+        x-cloak
+        x-transition:enter="transition ease-out duration-150"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        class="border-t border-text/15 bg-surface sm:hidden"
+    >
+        <nav aria-label="Member mobile" class="mx-auto max-w-7xl px-5 py-4">
+            <div class="mb-3 px-4">
+                <p class="font-semibold text-text">{{ $user->name }}</p>
+                <p class="truncate text-sm text-text/70">{{ $user->email }}</p>
             </div>
 
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </form>
-            </div>
-        </div>
+            <ul class="flex flex-col gap-1">
+                <li>
+                    <a href="{{ route('home') }}" @click="open = false" class="block rounded-2xl px-4 py-3.5 text-base font-medium text-text transition-colors duration-200 hover:bg-background hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark">Homepage</a>
+                </li>
+                <li>
+                    <a href="{{ route('dashboard') }}" @click="open = false" @if (request()->routeIs('dashboard')) aria-current="page" @endif class="block rounded-2xl px-4 py-3.5 text-base font-medium text-text transition-colors duration-200 hover:bg-background hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark">Dashboard</a>
+                </li>
+                <li>
+                    <a href="{{ route('profile.edit') }}" @click="open = false" @if (request()->routeIs('profile.*')) aria-current="page" @endif class="block rounded-2xl px-4 py-3.5 text-base font-medium text-text transition-colors duration-200 hover:bg-background hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark">Profile</a>
+                </li>
+                @if ($canSeePanel)
+                    <li>
+                        <a href="{{ $panel->getUrl() }}" @click="open = false" class="block rounded-2xl px-4 py-3.5 text-base font-medium text-text transition-colors duration-200 hover:bg-background hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark">Admin panel</a>
+                    </li>
+                @endif
+                <li>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button
+                            type="submit"
+                            class="block w-full rounded-2xl px-4 py-3.5 text-left text-base font-medium text-text transition-colors duration-200 hover:bg-background hover:text-accent-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
+                        >Log out</button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
     </div>
-</nav>
+</header>

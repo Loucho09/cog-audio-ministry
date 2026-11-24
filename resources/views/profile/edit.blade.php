@@ -1,35 +1,38 @@
-<x-app-layout>
+<x-app-layout :title="__('Profile')">
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Profile') }}
-        </h2>
+        <h1 class="text-2xl font-bold tracking-tight text-text sm:text-3xl">{{ __('Profile') }}</h1>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <dl class="max-w-xl text-sm text-gray-600 space-y-1">
-                    <div><dt class="inline font-medium text-gray-900">{{ __('Branch') }}:</dt> <dd class="inline">{{ $user->branch?->name ?? '—' }}</dd></div>
-                    <div><dt class="inline font-medium text-gray-900">{{ __('Role') }}:</dt> <dd class="inline">{{ $user->getRoleNames()->join(', ') ?: '—' }}</dd></div>
-                </dl>
-            </div>
-
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
+    <div class="space-y-6">
+        <section aria-labelledby="account-summary-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+            <h2 id="account-summary-heading" class="sr-only">{{ __('Account summary') }}</h2>
+            <dl class="max-w-xl space-y-2 text-sm">
+                <div class="flex flex-wrap gap-x-2">
+                    <dt class="font-medium text-text">{{ __('Branch') }}:</dt>
+                    <dd class="text-text/70">{{ $user->branch?->name ?? '—' }}</dd>
                 </div>
-            </div>
-
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-password-form')
+                <div class="flex flex-wrap gap-x-2">
+                    <dt class="font-medium text-text">{{ __('Role') }}:</dt>
+                    <dd class="text-text/70">{{ $user->getRoleNames()->join(', ') ?: '—' }}</dd>
                 </div>
-            </div>
+            </dl>
+        </section>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
-                </div>
+        <div class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+            <div class="max-w-xl">
+                @include('profile.partials.update-profile-information-form')
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+            <div class="max-w-xl">
+                @include('profile.partials.update-password-form')
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+            <div class="max-w-xl">
+                @include('profile.partials.delete-user-form')
             </div>
         </div>
     </div>
