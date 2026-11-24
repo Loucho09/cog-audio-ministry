@@ -83,3 +83,26 @@ test('correct password must be provided to delete account', function () {
 
     $this->assertNotNull($user->fresh());
 });
+
+test('last super-admin cannot delete their own account', function () {
+    $user = User::factory()->superAdmin()->create();
+
+    $this
+        ->actingAs($user)
+        ->delete('/profile', ['password' => 'password'])
+        ->assertSessionHasErrorsIn('userDeletion', 'password');
+
+    expect($user->fresh())->not->toBeNull();
+});
+
+test('a super-admin can delete their account when another exists', function () {
+    $user = User::factory()->superAdmin()->create();
+    User::factory()->superAdmin()->create();
+
+    $this
+        ->actingAs($user)
+        ->delete('/profile', ['password' => 'password'])
+        ->assertRedirect('/');
+
+    expect($user->fresh())->toBeNull();
+});
