@@ -39,3 +39,32 @@ test('users can logout', function () {
     $this->assertGuest();
     $response->assertRedirect('/');
 });
+
+test('two users sharing one IP do not lock each other out', function () {
+    $a = User::factory()->create();
+    $b = User::factory()->create();
+
+    foreach ([$a, $b] as $u) {
+        for ($i = 0; $i < 3; $i++) {
+            $this->post('/login', ['email' => $u->email, 'password' => 'wrong-password']);
+        }
+    }
+
+    $this->post('/login', ['email' => $a->email, 'password' => 'password']);
+    $this->assertAuthenticatedAs($a);
+    $this->post('/logout');
+
+    $this->post('/login', ['email' => $b->email, 'password' => 'password']);
+    $this->assertAuthenticatedAs($b);
+});
+
+test('the per-email login limit still triggers', function () {
+    $user = User::factory()->create();
+
+    for ($i = 0; $i < 5; $i++) {
+        $this->post('/login', ['email' => $user->email, 'password' => 'wrong-password']);
+    }
+
+    $this->post('/login', ['email' => $user->email, 'password' => 'password'])->assertStatus(429);
+    $this->assertGuest();
+});

@@ -26,6 +26,14 @@ class User extends Authenticatable implements FilamentUser
         return $this->belongsTo(Branch::class);
     }
 
+    /**
+     * Only plain members (or accounts with no role) may delete their own account.
+     */
+    public function canSelfDelete(): bool
+    {
+        return $this->getRoleNames()->diff(['member'])->isEmpty();
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         if ($this->hasRole('super-admin')) {

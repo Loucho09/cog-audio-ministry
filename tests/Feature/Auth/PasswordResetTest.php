@@ -58,3 +58,38 @@ test('password can be reset with valid token', function () {
         return true;
     });
 });
+
+test('forgot password answers the same for known and unknown emails', function () {
+    Notification::fake();
+    $user = User::factory()->create();
+
+    $known = $this->from('/forgot-password')->post('/forgot-password', ['email' => $user->email]);
+    $unknown = $this->from('/forgot-password')->post('/forgot-password', ['email' => 'nobody@example.com']);
+
+    $known->assertSessionHasNoErrors()->assertSessionHas('status');
+    $unknown->assertSessionHasNoErrors()->assertSessionHas('status');
+    expect($unknown->baseResponse->getSession()->get('status'))->toBe($known->baseResponse->getSession()->get('status'));
+    Notification::assertSentTo($user, ResetPassword::class);
+    Notification::assertCount(1);
+});
+
+test('a successful reset clears the must-change-password flag', function () {
+    Notification::fake();
+    $user = User::factory()->create();
+    $user->forceFill(['must_change_password' => true])->save();
+
+    $this->post('/forgot-password', ['email' => $user->email]);
+
+    Notification::assertSentTo($user, ResetPassword::class, function ($n) use ($user) {
+        $this->post('/reset-password', [
+            'token' => $n->token,
+            'email' => $user->email,
+            'password' => 'new-Password-123',
+            'password_confirmation' => 'new-Password-123',
+        ])->assertSessionHasNoErrors();
+
+        return true;
+    });
+
+    expect($user->fresh()->must_change_password)->toBeFalse();
+});
