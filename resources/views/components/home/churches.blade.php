@@ -30,9 +30,9 @@
                 <h2 id="churches-title" class="mt-3 text-3xl font-extrabold tracking-tight text-text sm:text-4xl">One sound, all our churches</h2>
                 <p class="mt-4 max-w-xl text-base leading-relaxed text-text/80 sm:text-lg">The same heart for worship, shared across every church we serve.</p>
 
-                <ul class="mt-8 grid gap-3 sm:grid-cols-2">
+                <ul class="mt-8 grid grid-cols-2 gap-3 [&>li:last-child:nth-child(odd)]:col-span-2">
                     @foreach ($churches as $church)
-                        <li class="flex flex-col gap-2 rounded-2xl border border-text/15 bg-surface px-4 py-3 shadow-sm dark:border-white/15 dark:bg-black/55 dark:shadow-none dark:backdrop-blur-sm">
+                        <li class="flex flex-col gap-2 rounded-2xl border border-text/15 bg-surface px-3 py-3 shadow-sm sm:px-4 dark:border-white/15 dark:bg-black/55 dark:shadow-none dark:backdrop-blur-sm">
                             <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                                 <span class="min-w-0 break-words font-semibold text-text">{{ $church['name'] }}</span>
                                 @if ($church['is_main'] ?? false)
