@@ -4,7 +4,7 @@
      and below the content).
 
      Props:
-     - variant: 'spotlight-left' | 'rings' | 'cone'. Each maps to a `.backdrop-*` class in
+     - variant: 'spotlight-left' | 'rings' | 'cone' | 'vignette' | 'grid' | 'floor'. Each maps to a `.backdrop-*` class in
        resources/css/app.css (gradients and masks live there because they are too long for
        readable Tailwind class strings). Alpha values are CSS variables with a `.dark` override.
      - fadeFrom: 'surface' | 'background' | null. Adds a short soft edge at the top that fades from
@@ -34,6 +34,9 @@
         'backdrop-spotlight-left' => $variant === 'spotlight-left',
         'backdrop-rings' => $variant === 'rings',
         'backdrop-cone' => $variant === 'cone',
+        'backdrop-vignette' => $variant === 'vignette',
+        'backdrop-grid' => $variant === 'grid',
+        'backdrop-floor' => $variant === 'floor',
         'scale-x-[-1]' => $mirror,
     ])></div>
 

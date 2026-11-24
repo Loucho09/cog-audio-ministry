@@ -2,6 +2,7 @@
 
 @if (collect($faqs)->isNotEmpty())
     <section id="faq" aria-labelledby="faq-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
+        <x-site.section-backdrop variant="grid" />
         <div class="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
             <div class="grid gap-12 lg:grid-cols-[1fr_1.4fr] lg:items-start lg:gap-16">
                 <x-site.section-header id="faq-title" eyebrow="FAQ" title="Frequently Asked Questions" align="left" />

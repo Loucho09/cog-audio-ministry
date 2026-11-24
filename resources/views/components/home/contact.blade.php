@@ -11,6 +11,7 @@
 @endphp
 
 <section id="contact" aria-labelledby="contact-title" class="relative isolate overflow-hidden bg-surface py-20 sm:py-24 lg:py-32">
+    <x-site.section-backdrop variant="floor" fade-from="background" />
     <div class="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
         <x-site.section-header id="contact-title" eyebrow="Contact" title="Contact Us" lead="We would love to hear from you." />
 

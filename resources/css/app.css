@@ -117,4 +117,56 @@
         --beam-alpha: 0.2;
         --edge-alpha: 0.08;
     }
+
+    /* Gallery: a gentle edge vignette (transparent centre, text colour at low alpha toward the edges)
+       so the photos stand out a little more against the section. */
+    .backdrop-vignette {
+        --vignette-alpha: 0.05;
+        background-image: radial-gradient(ellipse at center, transparent 55%, rgb(var(--color-text) / var(--vignette-alpha)) 100%);
+    }
+
+    .dark .backdrop-vignette {
+        --vignette-alpha: 0.08;
+    }
+
+    /* FAQ: a very light line grid (about 44px cells) that fades out from the centre-top, plus a soft
+       accent glow in the bottom-right corner. The glow sits on the element itself; the grid lines are on
+       ::before so their mask does not hide the glow. */
+    .backdrop-grid {
+        --grid-alpha: 0.045;
+        --accent-alpha: 0.08;
+        background-image: radial-gradient(circle 320px at 100% 100%, rgb(var(--color-accent) / var(--accent-alpha)), transparent 100%);
+    }
+
+    .backdrop-grid::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(to right, rgb(var(--color-text) / var(--grid-alpha)) 1px, transparent 1px),
+            linear-gradient(to bottom, rgb(var(--color-text) / var(--grid-alpha)) 1px, transparent 1px);
+        background-size: 44px 44px;
+        -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, rgb(0 0 0) 0%, transparent 100%);
+        mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, rgb(0 0 0) 0%, transparent 100%);
+    }
+
+    .dark .backdrop-grid {
+        --grid-alpha: 0.06;
+        --accent-alpha: 0.12;
+    }
+
+    /* Contact: a soft primary glow rising from the bottom edge, with a faint accent tint, so the
+       page ends smoothly into the footer. */
+    .backdrop-floor {
+        --glow-alpha: 0.1;
+        --accent-alpha: 0.04;
+        background-image:
+            radial-gradient(ellipse 60% 45% at 50% 100%, rgb(var(--color-accent) / var(--accent-alpha)), transparent 70%),
+            radial-gradient(ellipse 80% 60% at 50% 100%, rgb(var(--color-primary) / var(--glow-alpha)), transparent 70%);
+    }
+
+    .dark .backdrop-floor {
+        --glow-alpha: 0.16;
+        --accent-alpha: 0.06;
+    }
 }
