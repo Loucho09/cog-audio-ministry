@@ -33,7 +33,7 @@
                             <span class="min-w-0 flex-1">
                                 <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-text/80">Email us</span>
                                 {{-- <wbr> after "@" lets a long address wrap at a clean point on small phones. The email is escaped first. --}}
-                                <span class="mt-1 block break-words text-[15px] font-semibold text-text sm:text-base">{!! str_replace('@', '@<wbr>', e($email)) !!}</span>
+                                <span class="mt-1 block break-words text-sm font-semibold text-text sm:text-base">{!! str_replace('@', '@<wbr>', e($email)) !!}</span>
                             </span>
                             <svg class="h-5 w-5 shrink-0 text-text/40 transition duration-300 motion-safe:group-hover:translate-x-0.5 group-hover:text-primary-dark" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
