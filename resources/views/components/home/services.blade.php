@@ -2,7 +2,8 @@
 
 @php
     $tz = config('app.timezone');
-    $today = now($tz)->startOfDay();
+    // Immutable on purpose: addDays()/addDay() below must not move "today".
+    $today = now($tz)->toImmutable()->startOfDay();
     $cutoff = $today->addDays(7);
 
     // One entry per calendar day: ['date' => CarbonImmutable, 'items' => occurrences that day].

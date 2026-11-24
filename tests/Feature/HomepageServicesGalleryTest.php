@@ -32,6 +32,17 @@ it('shows today and upcoming services in chronological order', function () {
         ->assertSeeInOrder(['Saturday, Nov 28', '5:30 PM', 'Empowered Night', 'Sunday, Nov 29', '5:30 AM', 'Sunday Service', '7:30 AM']);
 });
 
+it('puts the Today and Tomorrow badges on the correct dates only', function () {
+    seedServices();
+
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect(substr_count($html, '>Today</span>'))->toBe(1)
+        ->and(substr_count($html, '>Tomorrow</span>'))->toBe(1)
+        ->and($html)->toMatch('/Saturday, Nov 28<\/h3>\s*<span[^>]*>Today<\/span>/')
+        ->and($html)->toMatch('/Sunday, Nov 29<\/h3>\s*<span[^>]*>Tomorrow<\/span>/');
+});
+
 it('shows the branch name and weekly schedule', function () {
     seedServices();
 
