@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToBranch;
+use App\Models\Concerns\DeletesOldUploads;
 use App\Support\ImageUrl;
 use Database\Factories\GalleryImageFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -15,7 +16,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[UseFactory(GalleryImageFactory::class)]
 class GalleryImage extends Model
 {
-    use BelongsToBranch, HasFactory;
+    use BelongsToBranch, DeletesOldUploads, HasFactory;
+
+    protected string $uploadColumn = 'path';
 
     protected $fillable = ['branch_id', 'title', 'path', 'alt_text', 'sort_order', 'is_published'];
 

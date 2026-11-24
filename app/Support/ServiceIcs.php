@@ -10,8 +10,6 @@ use Carbon\CarbonImmutable;
  */
 class ServiceIcs
 {
-    private const TZ = 'Asia/Manila';
-
     /** Services have no stored length, so every calendar event is 90 minutes. */
     private const DURATION_MINUTES = 90;
 
@@ -19,10 +17,16 @@ class ServiceIcs
 
     private const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
+    /** The app timezone (Asia/Manila). The VTIMEZONE offsets below are still Manila's +08:00. */
+    private static function tz(): string
+    {
+        return config('app.timezone');
+    }
+
     /** Whether the service can still be added (active and not ended). */
     public static function available(Service $service, ?CarbonImmutable $now = null): bool
     {
-        $today = ($now ?? CarbonImmutable::now(self::TZ))->setTimezone(self::TZ)->format('Y-m-d');
+        $today = ($now ?? CarbonImmutable::now(self::tz()))->setTimezone(self::tz())->format('Y-m-d');
 
         return $service->is_active
             && ($service->ends_on === null || $service->ends_on->format('Y-m-d') >= $today)
@@ -38,14 +42,14 @@ class ServiceIcs
 
     public static function build(Service $service, ?CarbonImmutable $now = null): string
     {
-        $now = $now ?? CarbonImmutable::now(self::TZ);
+        $now = $now ?? CarbonImmutable::now(self::tz());
         $start = self::firstStart($service, $now) ?? $now;
         $end = $start->addMinutes(self::DURATION_MINUTES);
         $branch = $service->branch;
 
         $rrule = 'FREQ=WEEKLY;BYDAY='.self::BYDAY[$service->day_of_week];
         if ($service->ends_on !== null) {
-            $until = CarbonImmutable::parse($service->ends_on->format('Y-m-d').' 23:59:59', self::TZ)->utc();
+            $until = CarbonImmutable::parse($service->ends_on->format('Y-m-d').' 23:59:59', self::tz())->utc();
             $rrule .= ';UNTIL='.$until->format('Ymd\THis\Z');
         }
 
@@ -59,7 +63,7 @@ class ServiceIcs
             'CALSCALE:GREGORIAN',
             'METHOD:PUBLISH',
             'BEGIN:VTIMEZONE',
-            'TZID:'.self::TZ,
+            'TZID:'.self::tz(),
             'BEGIN:STANDARD',
             'DTSTART:19700101T000000',
             'TZOFFSETFROM:+0800',
@@ -70,8 +74,8 @@ class ServiceIcs
             'BEGIN:VEVENT',
             'UID:service-'.$service->id.'@'.$host,
             'DTSTAMP:'.$now->utc()->format('Ymd\THis\Z'),
-            'DTSTART;TZID='.self::TZ.':'.$start->format('Ymd\THis'),
-            'DTEND;TZID='.self::TZ.':'.$end->format('Ymd\THis'),
+            'DTSTART;TZID='.self::tz().':'.$start->format('Ymd\THis'),
+            'DTEND;TZID='.self::tz().':'.$end->format('Ymd\THis'),
             'RRULE:'.$rrule,
             'SUMMARY:'.self::escape($service->name),
         ];
@@ -90,12 +94,12 @@ class ServiceIcs
     /** First occurrence on/after max(today, starts_on), in Manila time; null if past ends_on. */
     private static function firstStart(Service $service, ?CarbonImmutable $now = null): ?CarbonImmutable
     {
-        $now = ($now ?? CarbonImmutable::now(self::TZ))->setTimezone(self::TZ);
+        $now = ($now ?? CarbonImmutable::now(self::tz()))->setTimezone(self::tz());
         [$hour, $minute] = $service->startTimeParts();
 
         $from = $now->startOfDay();
         if ($service->starts_on !== null) {
-            $startsOn = CarbonImmutable::parse($service->starts_on->format('Y-m-d'), self::TZ)->startOfDay();
+            $startsOn = CarbonImmutable::parse($service->starts_on->format('Y-m-d'), self::tz())->startOfDay();
             if ($startsOn->greaterThan($from)) {
                 $from = $startsOn;
             }

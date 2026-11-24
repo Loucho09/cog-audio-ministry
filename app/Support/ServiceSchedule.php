@@ -68,8 +68,8 @@ class ServiceSchedule
             return collect();
         }
 
-        // Service dates are Manila dates; convert once so the filter and the notes agree on "today".
-        $today = $today->setTimezone('Asia/Manila')->startOfDay();
+        // Service dates are in the app timezone (Manila); convert once so the filter and the notes agree on "today".
+        $today = $today->setTimezone(config('app.timezone'))->startOfDay();
 
         return $branch->services()->active()->ordered()->get()
             // Same rule as the calendar link: keep a service only while it still has a date on or after today
