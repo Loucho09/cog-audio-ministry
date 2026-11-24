@@ -7,7 +7,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 | # | Phase | Status |
 |---|-------|--------|
 | 1 | Setup and homepage | done (2026-11-24) |
-| 2 | Member accounts and roles | in progress (2a done 2026-11-25, pending merge; 2b next) |
+| 2 | Member accounts and roles | in progress (2a done and merged 2026-11-25; 2b in progress) |
 | 3 | Join applications | planned |
 | 4 | Duty roster | planned |
 | 5 | Notifications and reminders | planned |
@@ -58,7 +58,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 ## Phase 2: Member Accounts and Roles
 **Goal:** set up authentication, roles, and branch scoping so members can log in and admins can manage the organization.
 
-Status: in progress. Split into two parts (owner decision, 2026-11-24). Spec: [[member-accounts-roles]]. Tasks: [[member-accounts-roles-tasks]].
+Status: in progress. 2a merged to main 2026-11-25. 2b in progress (started 2026-11-25). Split into two parts (owner decision, 2026-11-24). Spec: [[member-accounts-roles]]. Tasks: [[member-accounts-roles-tasks]].
 - **2a Security core:** `branch_id` on users, Spatie roles, demo seed, `ministry:create-super-admin` command, register route removed, route throttles, `canAccessPanel`, `Gate::before`, `BelongsToBranch` scope, `AssignRole` action, Service and User policies, tests, themed auth screens. Decision: [[super-admin-via-artisan-command]].
 - **2b Filament screens:** Service, GalleryImage, TeamMember, Faq, Branch, and User resources. The "Our churches" list moves from config to the `branches` table (nullable `facebook_url`).
 
