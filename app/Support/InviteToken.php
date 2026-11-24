@@ -29,8 +29,17 @@ class InviteToken
         return hash_equals(self::signature($parts[0]), $parts[1]) ? $parts[0] : null;
     }
 
+    /** Derived key (domain separation): the raw app key is never used directly for invite links. */
+    private static function key(): string
+    {
+        $appKey = (string) config('app.key');
+        $bytes = str_starts_with($appKey, 'base64:') ? (base64_decode(substr($appKey, 7), true) ?: $appKey) : $appKey;
+
+        return hash_hmac('sha256', 'invite-v1', $bytes);
+    }
+
     private static function signature(string $token): string
     {
-        return substr(hash_hmac('sha256', 'invite|'.$token, (string) config('app.key')), 0, 32);
+        return substr(hash_hmac('sha256', 'invite|'.$token, self::key()), 0, 32);
     }
 }

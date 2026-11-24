@@ -131,3 +131,31 @@ it('shows the pending approval filter only to a super-admin', function () {
     $this->actingAs($this->head);
     Livewire::test(ListTeamMembers::class)->assertTableFilterHidden('pending_approval');
 });
+
+it('keeps items unpublished when a branch-head fills is_published through the create and edit forms', function () {
+    $this->actingAs($this->head);
+
+    Livewire::test(CreateTeamMember::class)
+        ->fillForm(['name' => 'Filled Person', 'is_published' => true])
+        ->call('create')
+        ->assertHasNoFormErrors();
+    expect(TeamMember::where('name', 'Filled Person')->firstOrFail()->is_published)->toBeFalse();
+
+    Livewire::test(CreateGalleryImage::class)
+        ->fillForm(['path' => UploadedFile::fake()->image('f.jpg'), 'alt_text' => 'Filled photo', 'is_published' => true])
+        ->call('create')
+        ->assertHasNoFormErrors();
+    expect(GalleryImage::where('alt_text', 'Filled photo')->firstOrFail()->is_published)->toBeFalse();
+
+    $member = TeamMember::factory()->create(['branch_id' => $this->branch->id, 'is_published' => false]);
+    Livewire::test(EditTeamMember::class, ['record' => $member->id])
+        ->fillForm(['is_published' => true])
+        ->call('save');
+    expect($member->fresh()->is_published)->toBeFalse();
+
+    $image = GalleryImage::factory()->create(['branch_id' => $this->branch->id, 'is_published' => false]);
+    Livewire::test(EditGalleryImage::class, ['record' => $image->id])
+        ->fillForm(['is_published' => true])
+        ->call('save');
+    expect($image->fresh()->is_published)->toBeFalse();
+});

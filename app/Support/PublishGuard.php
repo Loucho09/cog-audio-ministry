@@ -45,11 +45,21 @@ class PublishGuard
     private static function contentChanged(array $data, Model $record, array $contentFields): bool
     {
         foreach ($contentFields as $field) {
-            if (array_key_exists($field, $data) && (string) ($data[$field] ?? '') !== (string) ($record->getAttribute($field) ?? '')) {
+            if (array_key_exists($field, $data) && self::normalize($data[$field]) !== self::normalize($record->getAttribute($field))) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /** Compare values as strings; arrays and other non-scalars go through json_encode (no array-to-string cast). */
+    private static function normalize(mixed $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        return is_scalar($value) ? (string) $value : (string) json_encode($value);
     }
 }

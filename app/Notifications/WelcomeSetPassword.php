@@ -4,15 +4,20 @@ namespace App\Notifications;
 
 use App\Support\InviteToken;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class WelcomeSetPassword extends Notification implements ShouldQueue
+class WelcomeSetPassword extends Notification implements ShouldBeEncrypted, ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public string $token) {}
+    public function __construct(public string $token)
+    {
+        // Do not send before the surrounding transaction (e.g. approval) has committed.
+        $this->afterCommit();
+    }
 
     /** @return array<int, string> */
     public function via(object $notifiable): array

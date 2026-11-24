@@ -20,6 +20,8 @@ class GalleryImage extends Model
 
     protected string $uploadColumn = 'path';
 
+    protected string $uploadDirectory = 'gallery';
+
     protected $fillable = ['branch_id', 'title', 'path', 'alt_text', 'sort_order', 'is_published'];
 
     protected function casts(): array

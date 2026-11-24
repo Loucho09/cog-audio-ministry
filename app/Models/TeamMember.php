@@ -20,6 +20,8 @@ class TeamMember extends Model
 
     protected string $uploadColumn = 'photo_path';
 
+    protected string $uploadDirectory = 'team';
+
     protected $fillable = [
         'branch_id', 'name', 'role_title', 'photo_path',
         'is_full_time', 'is_featured', 'is_published', 'sort_order',

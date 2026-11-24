@@ -25,6 +25,7 @@ class HomeController extends Controller
         // Gallery is intentionally not branch-filtered in Phase 1 (see brain Backlog).
         $galleryImages = GalleryImage::query()
             ->published()
+            ->whereNotNull('path')
             ->limit(12)
             ->get()
             ->filter(fn (GalleryImage $image) => $image->url !== null)

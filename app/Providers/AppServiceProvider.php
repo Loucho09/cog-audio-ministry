@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
         // Per email+IP so people sharing one church IP do not lock each other out,
         // plus a looser IP-only ceiling against floods.
         RateLimiter::for('auth-attempts', fn (Request $request) => [
-            Limit::perMinute(5)->by('email:'.Str::lower((string) $request->input('email')).'|'.$request->ip()),
+            Limit::perMinute(5)->by('email:'.Str::transliterate(Str::lower($request->string('email')->toString())).'|'.$request->ip()),
             Limit::perMinute(30)->by('ip:'.$request->ip()),
         ]);
 

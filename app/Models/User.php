@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use SensitiveParameter;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -22,6 +23,31 @@ class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
+
+    /**
+     * Stale-token hygiene: a pending reset/invite link must not outlive a password
+     * change, an email change, or the account itself (a re-created account with the
+     * same email must not inherit an old link).
+     */
+    protected static function booted(): void
+    {
+        static::updated(function (User $user) {
+            if ($user->wasChanged('password')) {
+                self::forgetResetTokens($user->email);
+            }
+
+            if ($user->wasChanged('email')) {
+                self::forgetResetTokens((string) $user->getOriginal('email'));
+            }
+        });
+
+        static::deleted(fn (User $user) => self::forgetResetTokens($user->email));
+    }
+
+    private static function forgetResetTokens(string $email): void
+    {
+        DB::table(config('auth.passwords.users.table'))->where('email', $email)->delete();
+    }
 
     public function branch(): BelongsTo
     {
