@@ -40,6 +40,19 @@
             <h1 id="hero-title" class="mt-6 max-w-full break-words text-5xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">{!! str_replace('Audio', '<span class="inline-block bg-gradient-to-r from-white to-accent bg-clip-text pb-1 font-script text-[1.9em] font-normal leading-none tracking-normal text-transparent forced-colors:bg-none forced-colors:text-[CanvasText]">Audio</span>', e(config('ministry.name'))) !!}</h1>
 
             <p class="mt-5 text-lg font-semibold text-white sm:text-xl">{{ config('ministry.tagline') }}</p>
+
+            {{-- Theme verse (from config, as on the Facebook page). Red bar echoes the section eyebrows. --}}
+            @if (filled(config('ministry.verse.text')))
+                <figure class="mt-6 max-w-xl">
+                    <span aria-hidden="true" class="mx-auto mb-4 block h-0.5 w-10 rounded-full bg-accent lg:mx-0"></span>
+                    <blockquote class="text-base italic leading-relaxed text-white sm:text-lg">
+                        <p>&ldquo;{{ config('ministry.verse.text') }}&rdquo;</p>
+                    </blockquote>
+                    @if (filled(config('ministry.verse.reference')))
+                        <figcaption class="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/75">{{ config('ministry.verse.reference') }}</figcaption>
+                    @endif
+                </figure>
+            @endif
             <p class="mt-4 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
                 We serve our church through sound. Whether you mix, stream, or set up the stage, there is a place for you to serve with us.
             </p>

@@ -123,3 +123,20 @@ it('renders the hero decorative shapes without blur-3xl', function () {
 
     expect($html)->not->toContain('blur-3xl');
 });
+
+it('shows the theme verse and its reference in the hero', function () {
+    $xpath = homepageXPath($this->get('/')->assertOk()->getContent());
+
+    $figure = '//section[@aria-labelledby="hero-title"]//figure';
+
+    expect(homepageText($xpath, $figure.'//blockquote'))->toContain(config('ministry.verse.text'))
+        ->and(homepageText($xpath, $figure.'//figcaption'))->toBe(config('ministry.verse.reference'));
+});
+
+it('hides the theme verse when no verse text is set', function () {
+    config(['ministry.verse.text' => null]);
+
+    $xpath = homepageXPath($this->get('/')->assertOk()->getContent());
+
+    expect($xpath->query('//section[@aria-labelledby="hero-title"]//figure')->length)->toBe(0);
+});

@@ -33,6 +33,12 @@ return [
 
     'tagline' => env('MINISTRY_TAGLINE', 'Serving together with heart and harmony.'),
 
+    // Theme verse, as used on the ministry's Facebook page. Shown in the hero; hidden if the text is empty.
+    'verse' => [
+        'text' => env('MINISTRY_VERSE_TEXT', 'Praise our God, all peoples, let the sound of his praise be heard.'),
+        'reference' => env('MINISTRY_VERSE_REFERENCE', 'Psalm 66:8 (NIV)'),
+    ],
+
     'facebook_url' => $httpsUrl(env('MINISTRY_FACEBOOK_URL', 'https://www.facebook.com/COGAudioDasma')),
 
     'email' => $validEmail(env('MINISTRY_EMAIL', 'cogdasmaaudio@gmail.com')),
