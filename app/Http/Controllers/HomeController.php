@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\UpcomingServices;
 use App\Models\Branch;
 use App\Models\GalleryImage;
+use App\Models\Service;
 use App\Models\TeamMember;
 use App\Support\ServiceSchedule;
 use Illuminate\Contracts\View\View;
@@ -35,7 +36,11 @@ class HomeController extends Controller
 
         $teamMembers = config('ministry.show_team') ? TeamMember::query()->featured()->get() : collect();
 
+        // Weekly services of the main branch (one count query; occurrences above are capped at 4).
+        $servicesPerWeek = $branch ? Service::query()->active()->where('branch_id', $branch->id)->count() : 0;
+
         return view('welcome', [
+            'servicesPerWeek' => $servicesPerWeek,
             'branch' => $branch,
             'schedule' => $schedule,
             'galleryImages' => $galleryImages,
