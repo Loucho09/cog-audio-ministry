@@ -7,7 +7,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 | # | Phase | Status |
 |---|-------|--------|
 | 1 | Setup and homepage | done (2026-11-24) |
-| 2 | Member accounts and roles | in progress (2a, then 2b) |
+| 2 | Member accounts and roles | in progress (2a done 2026-11-25, pending merge; 2b next) |
 | 3 | Join applications | planned |
 | 4 | Duty roster | planned |
 | 5 | Notifications and reminders | planned |
@@ -64,20 +64,21 @@ Status: in progress. Split into two parts (owner decision, 2026-11-24). Spec: [[
 
 ### Tasks
 - Breeze Blade login/register; accounts created by approval only (no open signup)
-- [ ] Open (added 2026-11-24): disable the Breeze `/register` route (approval-only accounts)
-- [ ] Open (added 2026-11-24): implement `canAccessPanel` on `User` for Filament (currently returns false)
+- [x] Done 2026-11-25 (2a): disable the Breeze `/register` route (approval-only accounts)
+- [x] Done 2026-11-25 (2a): implement `canAccessPanel` on `User` for Filament (`/admin` by role)
 - [ ] Filament resources: Service, GalleryImage, Faq, TeamMember (moved from Phase 1 on 2026-11-24, see [[filament-resources-phase-2]]). Service resource needs a friendly error for the unique branch/day/time slot (from [[Backlog]]). Service resource: include starts_on/ends_on fields, branch-scoped for branch-head (see [[services-section-v2]], [[service-date-window]]).
-- `branches` table with seeder (main + 4 satellites)
-- Spatie Permission: roles `super-admin` (project owner only), `branch-head` (admin of one branch), `branch-admin` (applications and roster for one branch; cannot assign roles), `member`
-- Super-admin and branch-head seeders with fake data
+- [x] Done 2026-11-25 (2a): `branches` table with seeder (main + 4 satellites)
+- [x] Done 2026-11-25 (2a): Spatie Permission: roles `super-admin` (project owner only), `branch-head` (admin of one branch), `branch-admin` (applications and roster for one branch; cannot assign roles), `member`
+- [x] Done 2026-11-25 (2a): Super-admin and branch-head seeders with fake data (`DemoUserSeeder`, local and testing only)
 - Member profile page (view own info)
-- `/admin` reachable only by users with a role
-- Rate limit login and password reset
+  - [x] Done 2026-11-25 (2a): profile shows read-only branch and role
+- [x] Done 2026-11-25 (2a): `/admin` reachable only by users with a role
+- [x] Done 2026-11-25 (2a): Rate limit login and password reset
 - Tests:
-  - role checks, branch-scoped queries
-  - members cannot escalate roles; super-admin is the only one who assigns roles
-  - a branch-head cannot assign roles
-  - unauthorized access, role escalation, cross-branch access, mass assignment
+  - [x] Done 2026-11-25 (2a): role checks, branch-scoped queries
+  - [x] Done 2026-11-25 (2a): members cannot escalate roles; super-admin is the only one who assigns roles
+  - [x] Done 2026-11-25 (2a): a branch-head cannot assign roles
+  - [x] Done 2026-11-25 (2a): unauthorized access, role escalation, cross-branch access, mass assignment
 
 ### Notes
 - Phased before Join Applications (Phase 3) because applications need branch-head login and Filament access.

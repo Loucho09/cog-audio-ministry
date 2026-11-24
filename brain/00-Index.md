@@ -47,7 +47,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[homepage-hooks]]: impact strip, "One sound, many churches", stay updated, FAQ hidden from homepage (Phase 1, done, owner browser check pending; tasks in [[homepage-hooks-tasks]])
 - [[homepage-theme-polish]]: stage lighting, section rhythm, card consistency on `/` (Phase 1, done, owner browser check pending; 2026-11-24)
 - [[services-section-v2]]: shorter Services section, spotlight, date window, calendar and directions (Phase 1 polish, in progress; tasks in [[services-section-v2-tasks]])
-- [[member-accounts-roles]]: branches on users, roles, route throttles, policies, branch scoping, themed auth (Phase 2, in progress: 2a then 2b; tasks in [[member-accounts-roles-tasks]])
+- [[member-accounts-roles]]: branches on users, roles, route throttles, policies, branch scoping, themed auth (Phase 2, in progress: 2a done 2026-11-25, pending merge; 2b next; tasks in [[member-accounts-roles-tasks]])
 
 ## Folders
 - `Features/`: one spec per feature (template in `CLAUDE.md`)
