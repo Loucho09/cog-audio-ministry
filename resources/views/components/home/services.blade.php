@@ -1,42 +1,9 @@
-@props(['branch' => null, 'occurrences' => collect()])
+@props(['branch' => null, 'schedule' => ['soon' => collect(), 'later' => collect(), 'weekly' => collect()]])
 
 @php
-    $tz = config('app.timezone');
-    // Immutable on purpose: addDays()/addDay() below must not move "today".
-    $today = now($tz)->toImmutable()->startOfDay();
-    $cutoff = $today->addDays(7);
-
-    // One entry per calendar day: ['date' => CarbonImmutable, 'items' => occurrences that day].
-    $days = collect($occurrences)
-        ->groupBy(fn ($o) => $o['starts_at']->format('Y-m-d'))
-        ->map(fn ($items) => ['date' => $items->first()['starts_at']->startOfDay(), 'items' => $items])
-        ->values();
-
-    $soon = $days->filter(fn ($d) => $d['date']->lessThan($cutoff))->values();
-    $later = $days->filter(fn ($d) => $d['date']->greaterThanOrEqualTo($cutoff))->values();
-
-    // Weekly summary derived from the data: one line per weekday + service name.
-    $weekly = collect($occurrences)
-        ->unique(fn ($o) => $o['service']->id)
-        ->groupBy(fn ($o) => $o['service']->day_of_week.'|'.$o['service']->name)
-        ->map(fn ($items) => [
-            'day' => $items->first()['service']->day_of_week,
-            'name' => $items->first()['service']->name,
-            'times' => $items->sortBy(fn ($o) => $o['service']->start_time)
-                ->map(fn ($o) => $o['starts_at']->format('g:i A'))->all(),
-        ])
-        ->sortBy('day')
-        ->values();
-
-    $dayName = fn (int $n) => \Carbon\CarbonImmutable::now($tz)->startOfWeek(\Carbon\CarbonInterface::SUNDAY)->addDays($n)->format('l');
-
-    $badge = function ($date) use ($today) {
-        if ($date->isSameDay($today)) {
-            return 'Today';
-        }
-
-        return $date->isSameDay($today->addDay()) ? 'Tomorrow' : null;
-    };
+    $soon = $schedule['soon'];
+    $later = $schedule['later'];
+    $weekly = $schedule['weekly'];
 @endphp
 
 <section id="services" aria-labelledby="services-title" class="bg-background py-16 sm:py-20">
@@ -48,20 +15,20 @@
             @endif
         </div>
 
-        @if ($days->isEmpty())
+        @if ($soon->isEmpty() && $later->isEmpty())
             <p class="mt-12 text-center text-base text-text/70">Service times will be posted soon.</p>
         @else
             <div x-data="{ showMore: false }" class="mt-12">
                 <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($soon as $day)
-                        @include('components.home.partials.service-day', ['day' => $day, 'badge' => $badge($day['date'])])
+                        @include('components.home.partials.service-day', ['day' => $day, 'badge' => $day['badge']])
                     @endforeach
                 </ul>
 
                 @if ($later->isNotEmpty())
                     <ul id="more-service-dates" x-show="showMore" x-cloak class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         @foreach ($later as $day)
-                            @include('components.home.partials.service-day', ['day' => $day, 'badge' => $badge($day['date'])])
+                            @include('components.home.partials.service-day', ['day' => $day, 'badge' => $day['badge']])
                         @endforeach
                     </ul>
 
@@ -77,13 +44,7 @@
                 <h3 class="text-lg font-semibold text-text">Weekly schedule</h3>
                 <ul class="mt-4 space-y-2 text-base text-text/70">
                     @foreach ($weekly as $line)
-                        <li>
-                            @if (count($line['times']) > 1)
-                                <span class="font-medium text-text">{{ $line['name'] }}:</span> {{ implode(', ', $line['times']) }}
-                            @else
-                                <span class="font-medium text-text">{{ $dayName($line['day']) }}:</span> {{ $line['name'] }}, {{ $line['times'][0] }}
-                            @endif
-                        </li>
+                        <li><span class="font-medium text-text">{{ $line['day'] }}:</span> {{ $line['name'] }}, {{ implode(', ', $line['times']) }}</li>
                     @endforeach
                 </ul>
             </div>

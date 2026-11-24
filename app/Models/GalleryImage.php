@@ -28,6 +28,11 @@ class GalleryImage extends Model
         return Attribute::get(fn () => ImageUrl::for($this->path));
     }
 
+    public function isPlaceholder(): bool
+    {
+        return str_starts_with((string) $this->path, 'images/placeholders/');
+    }
+
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);

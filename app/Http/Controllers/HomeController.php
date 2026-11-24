@@ -5,31 +5,36 @@ namespace App\Http\Controllers;
 use App\Actions\UpcomingServices;
 use App\Models\Branch;
 use App\Models\GalleryImage;
+use App\Support\ServiceSchedule;
 use Illuminate\Contracts\View\View;
 
 class HomeController extends Controller
 {
     public function __invoke(): View
     {
+        $now = now()->toImmutable()->setTimezone(config('app.timezone'));
         $branch = Branch::mainBranch();
 
-        $occurrences = $branch ? UpcomingServices::forBranch($branch, 4) : collect();
+        $occurrences = $branch ? UpcomingServices::forBranch($branch, 4, $now) : collect();
+        $schedule = ServiceSchedule::build($occurrences, $now);
 
+        // Gallery is intentionally not branch-filtered in Phase 1 (see brain Backlog).
         $galleryImages = GalleryImage::query()
             ->published()
             ->limit(12)
             ->get()
+            ->filter(fn (GalleryImage $image) => $image->url !== null)
             ->map(fn (GalleryImage $image) => [
                 'url' => $image->url,
                 'alt' => $image->alt_text,
                 'title' => $image->title,
-                'placeholder' => str_starts_with($image->path, 'images/placeholders/'),
+                'placeholder' => $image->isPlaceholder(),
             ])
             ->values();
 
         return view('welcome', [
             'branch' => $branch,
-            'occurrences' => $occurrences,
+            'schedule' => $schedule,
             'galleryImages' => $galleryImages,
         ]);
     }

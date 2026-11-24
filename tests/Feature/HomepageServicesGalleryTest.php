@@ -14,6 +14,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->withoutVite();
+    config(['app.timezone' => 'Asia/Manila']);
     // Saturday 2026-11-28 10:00 Manila.
     $this->travelTo(CarbonImmutable::parse('2026-11-28 10:00', 'Asia/Manila'));
 });
@@ -28,7 +29,6 @@ it('shows today and upcoming services in chronological order', function () {
 
     $this->get('/')
         ->assertOk()
-        ->assertSee('Today')
         ->assertSeeInOrder(['Saturday, Nov 28', '5:30 PM', 'Empowered Night', 'Sunday, Nov 29', '5:30 AM', 'Sunday Service', '7:30 AM']);
 });
 
@@ -97,12 +97,74 @@ it('shows the gallery empty state', function () {
 
 it('keeps the homepage query count small', function () {
     seedServices();
-    GalleryImage::factory()->count(5)->create();
+    foreach (range(1, 5) as $n) {
+        GalleryImage::factory()->create(['path' => "images/gallery/real-{$n}.jpg"]);
+    }
 
     DB::enableQueryLog();
     $this->get('/')->assertOk();
 
-    expect(count(DB::getQueryLog()))->toBeLessThanOrEqual(6);
+    expect(count(DB::getQueryLog()))->toBeLessThanOrEqual(4);
+});
+
+it('puts later dates only in the collapsible list', function () {
+    seedServices();
+
+    $html = $this->get('/')->assertOk()->getContent();
+    $doc = new DOMDocument;
+    @$doc->loadHTML('<?xml encoding="utf-8"?>'.$html);
+    $xp = new DOMXPath($doc);
+
+    // Dec 5 is exactly 7 days after Nov 28, so it belongs in "later".
+    $more = $xp->query('//*[@id="more-service-dates"]')->item(0);
+    expect($more)->not->toBeNull()
+        ->and($more->textContent)->toContain('Saturday, Dec 5')
+        ->and($more->textContent)->not->toContain('Saturday, Nov 28');
+
+    $main = $xp->query('//*[@id="more-service-dates"]/preceding-sibling::ul[1]')->item(0);
+    expect($main->textContent)->toContain('Saturday, Nov 28')->not->toContain('Saturday, Dec 5');
+});
+
+it('shows real weekly summary lines with the weekday', function () {
+    seedServices();
+
+    $this->get('/')
+        ->assertSee('Tuesday:', false)
+        ->assertSee('Revival Night, 7:00 PM')
+        ->assertSee('Sunday:', false)
+        ->assertSeeInOrder(['Sunday:', 'Sunday Service, 5:30 AM, 7:30 AM, 11:30 AM']);
+});
+
+it('puts a single real photo in the lightbox without prev and next', function () {
+    $q = chr(92).'u0022';
+    GalleryImage::factory()->create(['path' => 'images/gallery/only.jpg', 'alt_text' => 'Only photo']);
+
+    $this->get('/')
+        ->assertSee('role="dialog"', false)
+        ->assertSee('only.jpg', false)
+        ->assertSee('placeholder'.$q.':false', false)
+        ->assertDontSee('aria-label="Previous photo"', false)
+        ->assertDontSee('aria-label="Next photo"', false)
+        ->assertSee('trapTab', false);
+});
+
+it('shows prev and next with several real photos and keeps placeholders out of the lightbox', function () {
+    $q = chr(92).'u0022';
+    GalleryImage::factory()->create(['path' => 'images/placeholders/gallery-1.svg', 'alt_text' => 'Placeholder shot']);
+    GalleryImage::factory()->create(['path' => 'images/gallery/one.jpg', 'alt_text' => 'Real one']);
+    GalleryImage::factory()->create(['path' => 'images/gallery/two.jpg', 'alt_text' => 'Real two']);
+
+    $html = $this->get('/')
+        ->assertSee('aria-label="Previous photo"', false)
+        ->assertSee('aria-label="Next photo"', false)
+        ->assertSee('show(0, $el)', false)
+        ->assertSee('show(1, $el)', false)
+        ->assertDontSee('show(2, $el)', false)
+        ->getContent();
+
+    // The @js payload holds only the two real photos.
+    expect(substr_count($html, 'placeholder'.$q.':false'))->toBe(2)
+        ->and($html)->not->toContain('placeholder'.$q.':true');
 });
 
 it('serves the home route through HomeController', function () {
