@@ -28,9 +28,10 @@ class UpcomingServices
         foreach ($branch->services()->active()->ordered()->get() as $service) {
             $startsAt = $service->nextOccurrence($from);
 
-            while ($startsAt->lessThan($until)) {
+            while ($startsAt !== null && $startsAt->lessThan($until)) {
                 $items->push(['service' => $service, 'starts_at' => $startsAt]);
-                $startsAt = $startsAt->addWeek();
+                $next = $startsAt->addWeek();
+                $startsAt = $service->runsOn($next) ? $next : null;
             }
         }
 

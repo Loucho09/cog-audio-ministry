@@ -104,7 +104,7 @@ it('keeps the homepage query count small', function () {
     DB::enableQueryLog();
     $this->get('/')->assertOk();
 
-    expect(count(DB::getQueryLog()))->toBeLessThanOrEqual(4);
+    expect(count(DB::getQueryLog()))->toBeLessThanOrEqual(5); // + weekly services list
 });
 
 it('puts later dates only in the collapsible list', function () {
@@ -129,7 +129,8 @@ it('shows real weekly summary lines with the weekday', function () {
     seedServices();
 
     $this->get('/')
-        ->assertSee('Tuesday:', false)
+        ->assertSee('Saturday:', false)
+        ->assertSeeInOrder(['Saturday:', 'Empowered Night', '5:30 PM'])
         ->assertSeeInOrder(['Tuesday:', 'Revival Night', '7:00 PM'])
         ->assertSee('Sunday:', false)
         ->assertSeeInOrder(['Sunday:', 'Sunday Service', '5:30 AM', '7:30 AM', '11:30 AM']);

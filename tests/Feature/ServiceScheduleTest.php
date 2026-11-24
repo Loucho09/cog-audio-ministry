@@ -16,7 +16,7 @@ beforeEach(function () {
 
 function scheduleFor(Branch $branch, CarbonImmutable $now, int $weeks = 4): array
 {
-    return ServiceSchedule::build(UpcomingServices::forBranch($branch, $weeks, $now), $now);
+    return ServiceSchedule::build(UpcomingServices::forBranch($branch, $weeks, $now), $now, $branch);
 }
 
 function makeService(Branch $branch, int $day, string $time, string $name, bool $active = true): Service
@@ -86,4 +86,99 @@ it('excludes inactive services', function () {
 
     expect($schedule['weekly']->pluck('name')->all())->toBe(['Sunday Service'])
         ->and($schedule['soon']->pluck('items')->flatten(1)->pluck('service.name')->all())->not->toContain('Hidden Night');
+});
+
+it('checks the date window boundaries in runsOn', function () {
+    $service = makeService($this->branch, 2, '19:00:00', 'Revival Night');
+    $service->starts_on = '2026-12-01';
+    $service->ends_on = '2026-12-15';
+
+    expect($service->runsOn(CarbonImmutable::parse('2026-11-30 23:59')))->toBeFalse()
+        ->and($service->runsOn(CarbonImmutable::parse('2026-12-01 00:00')))->toBeTrue()
+        ->and($service->runsOn(CarbonImmutable::parse('2026-12-15 23:59')))->toBeTrue()
+        ->and($service->runsOn(CarbonImmutable::parse('2026-12-16 00:00')))->toBeFalse();
+
+    $open = makeService($this->branch, 3, '19:00:00', 'Open');
+    expect($open->runsOn(CarbonImmutable::parse('2030-01-01')))->toBeTrue();
+});
+
+it('respects starts_on and ends_on in nextOccurrence', function () {
+    $service = makeService($this->branch, 2, '19:00:00', 'Revival Night');
+    $service->starts_on = '2027-01-05'; // a Tuesday
+    $service->ends_on = '2027-01-12';
+
+    expect($service->nextOccurrence($this->now)->format('Y-m-d H:i'))->toBe('2027-01-05 19:00')
+        ->and($service->nextOccurrence(CarbonImmutable::parse('2027-01-06 10:00', 'Asia/Manila'))->format('Y-m-d'))->toBe('2027-01-12')
+        ->and($service->nextOccurrence(CarbonImmutable::parse('2027-01-12 20:00', 'Asia/Manila')))->toBeNull();
+});
+
+it('excludes services past ends_on and includes ones after starts_on', function () {
+    $ended = makeService($this->branch, 2, '19:00:00', 'Revival Night');
+    $ended->update(['ends_on' => '2026-11-24']);
+    $later = makeService($this->branch, 3, '19:00:00', 'Salvation Night');
+    $later->update(['starts_on' => '2026-12-09']); // a Wednesday
+
+    $schedule = scheduleFor($this->branch, $this->now);
+    $dates = $schedule['soon']->concat($schedule['later'])
+        ->flatMap(fn ($d) => $d['items']->map(fn ($i) => $i['service']->name.' '.$i['starts_at']->format('Y-m-d')))->all();
+
+    expect($dates)->toBe(['Salvation Night 2026-12-09', 'Salvation Night 2026-12-16', 'Salvation Night 2026-12-23'])
+        ->and($schedule['weekly']->pluck('name')->all())->toBe(['Salvation Night']);
+});
+
+it('adds weekly notes for resuming and last-service windows', function () {
+    $later = makeService($this->branch, 3, '19:00:00', 'Salvation Night');
+    $later->update(['starts_on' => '2026-12-09']);
+    $ending = makeService($this->branch, 2, '19:00:00', 'Revival Night');
+    $ending->update(['ends_on' => '2026-12-08']);
+    makeService($this->branch, 0, '09:00:00', 'Sunday Service');
+
+    $weekly = scheduleFor($this->branch, $this->now)['weekly']->keyBy('name');
+
+    expect($weekly['Salvation Night']['note'])->toBe('Resumes Dec 9, 2026')
+        ->and($weekly['Revival Night']['note'])->toBe('Last service Dec 8')
+        ->and($weekly['Sunday Service'])->not->toHaveKey('note');
+});
+
+it('lists a paused service in weekly with a Resumes note', function () {
+    makeService($this->branch, 2, '19:00:00', 'Revival Night')->update(['starts_on' => '2027-02-23']); // 3 months out
+
+    $schedule = scheduleFor($this->branch, $this->now);
+
+    expect($schedule['soon'])->toBeEmpty()
+        ->and($schedule['weekly']->first()['name'])->toBe('Revival Night')
+        ->and($schedule['weekly']->first()['note'])->toBe('Resumes Feb 23, 2027');
+});
+
+it('shows the last-service note only within 8 weeks', function () {
+    makeService($this->branch, 2, '19:00:00', 'Revival Night')->update(['ends_on' => '2027-02-02']); // > 8 weeks
+    makeService($this->branch, 3, '19:00:00', 'Salvation Night')->update(['ends_on' => '2026-12-23']); // within
+
+    $weekly = scheduleFor($this->branch, $this->now)['weekly']->keyBy('name');
+
+    expect($weekly['Revival Night'])->not->toHaveKey('note')
+        ->and($weekly['Salvation Night']['note'])->toBe('Last service Dec 23');
+});
+
+it('keeps a service ending today in weekly after its start time has passed', function () {
+    makeService($this->branch, 6, '08:00:00', 'Empowered Night')->update(['ends_on' => '2026-11-28']); // now is 10:00
+
+    $schedule = scheduleFor($this->branch, $this->now);
+
+    expect($schedule['soon'])->toBeEmpty()
+        ->and($schedule['weekly']->first()['note'])->toBe('Last service Nov 28');
+});
+
+it('lists per-time notes when services on one line differ', function () {
+    makeService($this->branch, 0, '05:30:00', 'Sunday Service');
+    makeService($this->branch, 0, '07:30:00', 'Sunday Service')->update(['ends_on' => '2026-12-13']);
+    makeService($this->branch, 0, '09:30:00', 'Sunday Service')->update(['ends_on' => '2026-12-13']);
+
+    $row = scheduleFor($this->branch, $this->now)['weekly']->first();
+
+    expect($row)->not->toHaveKey('note')
+        ->and($row['notes'])->toBe([
+            ['time' => '7:30 AM', 'note' => 'Last service Dec 13'],
+            ['time' => '9:30 AM', 'note' => 'Last service Dec 13'],
+        ]);
 });
