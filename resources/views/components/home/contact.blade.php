@@ -21,7 +21,7 @@
 
         <div class="mt-12 grid gap-8 sm:mt-16 lg:col-span-8 lg:mt-0 {{ $address ? 'lg:grid-cols-2 lg:items-stretch lg:gap-10' : '' }}">
             @if ($hasContact)
-            <ul class="grid w-full gap-4 {{ $address ? '' : 'mx-auto max-w-2xl sm:grid-cols-2 lg:mx-0 lg:max-w-none' }}">
+            <ul class="grid w-full gap-4 {{ $address ? '' : 'mx-auto max-w-xl lg:mx-0 lg:max-w-none xl:grid-cols-2' }}">
                 @if ($email)
                     <li>
                         <a href="mailto:{{ $email }}" class="{{ $cardClasses }}">

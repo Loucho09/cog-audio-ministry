@@ -14,10 +14,11 @@
             height="609"
             fetchpriority="high"
             decoding="async"
-            class="absolute inset-0 -z-10 h-full w-full object-cover object-center lg:bottom-auto lg:h-auto lg:max-h-full lg:[mask-image:linear-gradient(to_bottom,black_65%,transparent)]"
+            class="absolute inset-0 -z-10 h-full w-full object-cover object-left lg:top-auto lg:h-auto lg:max-h-full lg:[mask-image:linear-gradient(to_top,black_65%,transparent)]"
         >
-        {{-- Desktop: fit the photo to the width (not cover) so the wide photo is not cropped on the left,
-             which pushed its wordmark behind the hero text at ~1440px. The bottom fades into the black section. --}}
+        {{-- Desktop: fit the photo to the width (not cover) and pin it to the bottom, so the photo's own
+             "COG Audio" wordmark sits low-right, below the h1 and right of the text column at 1024px and up.
+             The top edge fades into the black section. --}}
     </picture>
 
     {{-- Readability overlay. Darker on the left where the text sits; the photo's wordmark stays visible on the right.

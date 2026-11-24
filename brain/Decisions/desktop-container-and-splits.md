@@ -33,3 +33,10 @@ Related: [[00-Index]], [[homepage-theme-polish]], [[public-layout]], [[homepage-
 
 ## Open items
 - See [[Backlog]] (larger cover photo, services column heights, contact map width, contact indent).
+
+## Update 2026-11-24 (polish pass)
+- Hero photo: on `lg` it is width-fit and pinned to the bottom (`lg:top-auto lg:h-auto lg:max-h-full`), with a mask fading its top edge. Reason: at 1024-1280px a top-pinned photo put its own "COG Audio" wordmark behind the h1. Below `lg` the photo uses `object-left`, so the wordmark is cropped off and the mixing console shows behind the centred text.
+- What We Do panel and services spotlight/upcoming cards stretch to equal height on `lg` (`items-stretch`). Weekly schedule toggle is centred to match the centred section header.
+- Contact cards (no-address branch) are one column until `xl`, `max-w-xl` below `lg`, so the email never breaks mid-word. Footer `md` grid is `minmax(0,1.3fr) minmax(0,1fr) auto` so the email fits.
+- Church card name wraps with the Main church badge (`flex-wrap`, `break-words`). Navbar brand name is 13px `tracking-tight` on mobile so it fits at 360px.
+- Checks: Playwright at 360, 768, 1024, 1280, 1440 and 1920px in light and dark; no horizontal scroll; tests pass; reviewer found nothing blocking.

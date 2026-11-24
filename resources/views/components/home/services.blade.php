@@ -22,16 +22,16 @@
         @if ($soon->isEmpty() && $weekly->isEmpty())
             <p class="mt-10 text-center text-base text-text/80 sm:mt-12">Service times will be posted soon.</p>
         @else
-            <div class="mt-10 sm:mt-12 lg:grid lg:grid-cols-12 lg:items-start lg:gap-8">
+            <div class="mt-10 sm:mt-12 lg:grid lg:grid-cols-12 lg:items-stretch lg:gap-8">
                 @if ($spotlight)
-                    <div class="mx-auto max-w-3xl {{ $upcoming->isNotEmpty() ? 'lg:col-span-7' : 'lg:col-span-12' }} lg:mx-0 lg:max-w-none">
+                    <div class="mx-auto max-w-3xl {{ $upcoming->isNotEmpty() ? 'lg:col-span-7' : 'lg:col-span-12' }} lg:mx-0 lg:flex lg:max-w-none lg:flex-col lg:[&>*]:flex-1">
                         @include('components.home.partials.service-spotlight', ['day' => $spotlight, 'badge' => $spotlight['badge']])
                     </div>
                 @endif
 
                 @if ($upcoming->isNotEmpty())
                     {{-- Flex + centred on mobile. On lg, a stacked list in the right column beside the featured service. --}}
-                    <ul class="mt-6 flex flex-wrap justify-center gap-4 sm:mt-8 [&>li]:w-full {{ $spotlight ? 'lg:col-span-5' : 'lg:col-span-12' }} lg:mt-0 lg:flex-col lg:flex-nowrap lg:justify-start">
+                    <ul class="mt-6 flex flex-wrap justify-center gap-4 sm:mt-8 [&>li]:w-full {{ $spotlight ? 'lg:col-span-5' : 'lg:col-span-12' }} lg:mt-0 lg:flex-col lg:flex-nowrap lg:justify-start lg:[&>li]:flex-1">
                         @foreach ($upcoming as $day)
                             @include('components.home.partials.service-day', ['day' => $day, 'badge' => $day['badge']])
                         @endforeach
@@ -41,7 +41,7 @@
 
             @if ($weekly->isNotEmpty())
                 <div x-data="{ openWeekly: false }" class="mt-10 sm:mt-12">
-                    <div class="text-center lg:text-left">
+                    <div class="text-center">
                         <x-site.button
                             variant="secondary"
                             x-on:click="openWeekly = !openWeekly"
@@ -53,7 +53,7 @@
                         </x-site.button>
                     </div>
 
-                    <div id="weekly-schedule" x-show="openWeekly" x-cloak class="mx-auto mt-6 max-w-3xl lg:mx-0 rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm sm:p-6">
+                    <div id="weekly-schedule" x-show="openWeekly" x-cloak class="mx-auto mt-6 max-w-3xl rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm sm:p-6">
                         <h3 class="text-lg font-bold text-text">Weekly schedule</h3>
                         <p class="mt-1 text-sm text-text/80">Tap a time to add it to your calendar.</p>
                         <ul class="mt-4 space-y-1">

@@ -19,7 +19,7 @@
 <footer class="relative isolate overflow-hidden border-t border-text/15 bg-surface">
     <x-site.glow tone="accent" class="-bottom-32 -right-24 hidden h-72 w-72 opacity-60 dark:block" />
 
-    <div class="mx-auto grid max-w-7xl gap-12 px-5 py-14 sm:px-6 sm:py-16 md:grid-cols-[1.4fr_1fr_1fr] lg:gap-16 lg:px-8">
+    <div class="mx-auto grid max-w-7xl gap-12 px-5 py-14 sm:px-6 sm:py-16 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_auto] md:gap-10 lg:gap-16 lg:px-8">
 
         {{-- Brand --}}
         <div class="min-w-0">

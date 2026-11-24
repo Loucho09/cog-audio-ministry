@@ -60,7 +60,7 @@
             @endif
 
             <span class="min-w-0 leading-tight">
-                <span class="block truncate text-sm font-bold text-text group-data-[solid=false]:text-white sm:text-base">{{ config('ministry.name') }}</span>
+                <span class="block truncate text-[0.8125rem] font-bold tracking-tight text-text group-data-[solid=false]:text-white sm:text-base">{{ config('ministry.name') }}</span>
                 <span class="block truncate text-xs text-text/70 group-data-[solid=false]:text-white/75">{{ config('ministry.subheader') }}</span>
             </span>
         </a>
