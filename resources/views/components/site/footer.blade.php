@@ -4,8 +4,7 @@
         <div class="max-w-sm">
             <p class="text-base font-semibold text-text">{{ config('ministry.name') }}</p>
             <p class="text-sm text-text/60">{{ config('ministry.subheader') }}</p>
-            {{-- TODO: owner to confirm this short line --}}
-            <p class="mt-3 text-sm leading-relaxed text-text/80">Serving together with heart and harmony.</p>
+            <p class="mt-3 text-sm leading-relaxed text-text/80">{{ config('ministry.tagline') }}</p>
         </div>
 
         <nav aria-label="Footer" class="min-w-0">
@@ -16,7 +15,7 @@
                             href="{{ config('ministry.facebook_url') }}"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="rounded-sm text-text/80 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                            class="rounded-sm text-text/80 transition-colors hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                         >Facebook<span class="sr-only"> (opens in a new tab)</span></a>
                     </li>
                 @endif
@@ -27,7 +26,7 @@
                             href="{{ config('ministry.messenger_url') }}"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="rounded-sm text-text/80 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                            class="rounded-sm text-text/80 transition-colors hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                         >Messenger<span class="sr-only"> (opens in a new tab)</span></a>
                     </li>
                 @endif
@@ -36,7 +35,7 @@
                     <li>
                         <a
                             href="mailto:{{ config('ministry.email') }}"
-                            class="break-words rounded-sm text-text/80 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                            class="break-words rounded-sm text-text/80 transition-colors hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                         >{{ config('ministry.email') }}</a>
                     </li>
                 @endif

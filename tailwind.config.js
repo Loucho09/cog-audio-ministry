@@ -16,6 +16,7 @@ export default {
                 surface: '#FFFFFF',
                 text: '#0F172A',
                 primary: '#0284C7',
+                'primary-dark': '#0369A1',
                 accent: '#0EA5E9',
             },
             fontFamily: {

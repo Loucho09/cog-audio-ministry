@@ -2,21 +2,21 @@
     $hasLogo = file_exists(public_path('images/logo.png'));
 
     $links = collect([
-        ['label' => 'About', 'href' => '#about'],
-        ['label' => 'What We Do', 'href' => '#what-we-do'],
-        config('ministry.show_team') ? ['label' => 'Meet the Team', 'href' => '#team'] : null,
-        ['label' => 'Services', 'href' => '#services'],
-        ['label' => 'Gallery', 'href' => '#gallery'],
-        ['label' => 'Join Us', 'href' => '#join'],
-        ['label' => 'FAQ', 'href' => '#faq'],
-        ['label' => 'Contact', 'href' => '#contact'],
+        ['label' => 'About', 'href' => route('home').'#about'],
+        ['label' => 'What We Do', 'href' => route('home').'#what-we-do'],
+        config('ministry.show_team') ? ['label' => 'Meet the Team', 'href' => route('home').'#team'] : null,
+        ['label' => 'Services', 'href' => route('home').'#services'],
+        ['label' => 'Gallery', 'href' => route('home').'#gallery'],
+        ['label' => 'Join Us', 'href' => route('home').'#join'],
+        ['label' => 'FAQ', 'href' => route('home').'#faq'],
+        ['label' => 'Contact', 'href' => route('home').'#contact'],
     ])->filter()->values();
 
     $authUrl = auth()->check() ? route('dashboard') : route('login');
     $authLabel = auth()->check() ? 'Dashboard' : 'Member Login';
 
-    $linkClasses = 'rounded-sm text-text/80 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent';
-    $buttonClasses = 'inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-surface transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2';
+    $linkClasses = 'whitespace-nowrap rounded-sm text-text/80 transition-colors hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent';
+    $buttonClasses = 'inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md bg-primary-dark px-4 py-2 text-sm font-medium text-surface transition-colors hover:bg-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2';
 @endphp
 
 <header
@@ -29,12 +29,12 @@
         {{-- Brand --}}
         <a
             href="{{ route('home') }}"
-            class="flex min-w-0 items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            class="flex min-w-0 flex-1 items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
             @if ($hasLogo)
                 <img
                     src="{{ asset('images/logo.png') }}"
-                    alt="COG Audio Ministry logo"
+                    alt=""
                     width="40"
                     height="40"
                     class="h-10 w-10 shrink-0 object-contain"
@@ -53,11 +53,11 @@
             </span>
         </a>
 
-        <div class="flex items-center gap-6">
+        <div class="flex shrink-0 items-center gap-4 xl:gap-6">
 
             {{-- Desktop links --}}
-            <nav aria-label="Main" class="hidden xl:block">
-                <ul class="flex items-center gap-6 text-sm font-medium">
+            <nav aria-label="Main" class="hidden shrink-0 lg:block">
+                <ul class="flex items-center gap-4 text-sm font-medium xl:gap-6">
                     @foreach ($links as $link)
                         <li>
                             <a href="{{ $link['href'] }}" class="{{ $linkClasses }}">{{ $link['label'] }}</a>
@@ -67,7 +67,7 @@
             </nav>
 
             {{-- Desktop auth button --}}
-            <a href="{{ $authUrl }}" class="hidden xl:inline-flex {{ $buttonClasses }}">{{ $authLabel }}</a>
+            <a href="{{ $authUrl }}" class="hidden lg:inline-flex {{ $buttonClasses }}">{{ $authLabel }}</a>
 
             {{-- Mobile menu toggle --}}
             <button
@@ -77,7 +77,7 @@
                 :aria-expanded="open.toString()"
                 aria-controls="mobile-menu"
                 aria-label="Toggle navigation menu"
-                class="inline-flex h-10 w-10 items-center justify-center rounded-md text-text transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent xl:hidden"
+                class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-text transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent lg:hidden"
             >
                 <svg x-show="!open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
@@ -89,7 +89,7 @@
         </div>
     </div>
 
-    {{-- Mobile menu --}}
+    {{-- Mobile menu (sized to the viewport below the 4rem header) --}}
     <div
         id="mobile-menu"
         x-show="open"
@@ -97,7 +97,7 @@
         x-transition:enter="transition ease-out duration-150"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
-        class="border-t border-text/10 bg-surface xl:hidden"
+        class="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-text/10 bg-surface lg:hidden"
     >
         <nav aria-label="Mobile" class="mx-auto max-w-6xl px-4 py-4 sm:px-6">
             <ul class="flex flex-col">
@@ -106,7 +106,7 @@
                         <a
                             href="{{ $link['href'] }}"
                             @click="open = false"
-                            class="block rounded-md px-3 py-3 text-base text-text transition-colors hover:bg-background hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                            class="block rounded-md px-3 py-3 text-base text-text transition-colors hover:bg-background hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                         >{{ $link['label'] }}</a>
                     </li>
                 @endforeach

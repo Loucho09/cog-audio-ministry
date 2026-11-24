@@ -6,7 +6,7 @@
 @php
     $siteName = config('ministry.name');
     $pageTitle = $title ? $title.' | '.$siteName : $siteName;
-    $metaDescription = $description ?? $siteName.', '.config('ministry.subheader').'.';
+    $metaDescription = filled($description) ? $description : $siteName.', '.config('ministry.subheader').'.';
 @endphp
 
 <!DOCTYPE html>
@@ -18,8 +18,13 @@
         <title>{{ $pageTitle }}</title>
         <meta name="description" content="{{ $metaDescription }}">
 
+        <!-- Open Graph -->
+        <meta property="og:title" content="{{ $pageTitle }}">
+        <meta property="og:description" content="{{ $metaDescription }}">
+        <meta property="og:type" content="website">
+
         <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
         <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
 
         <!-- Scripts / Styles -->
@@ -32,7 +37,7 @@
 
         <a
             href="#main"
-            class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-surface focus:outline-none focus:ring-2 focus:ring-accent"
+            class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-primary-dark focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-surface focus:outline-none focus:ring-2 focus:ring-accent"
         >
             Skip to content
         </a>

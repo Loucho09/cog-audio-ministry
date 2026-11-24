@@ -11,18 +11,34 @@
 |
 */
 
+// Keep only https:// URLs. Anything else (javascript:, http:, typos) becomes null.
+$httpsUrl = static function (?string $url): ?string {
+    $url = trim((string) $url);
+
+    return str_starts_with($url, 'https://') ? $url : null;
+};
+
+// Keep only a valid email address. Anything else becomes null.
+$validEmail = static function (?string $email): ?string {
+    $email = trim((string) $email);
+
+    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false ? $email : null;
+};
+
 return [
 
     'name' => env('MINISTRY_NAME', 'COG Audio Ministry'),
 
     'subheader' => env('MINISTRY_SUBHEADER', 'Dasmariñas'),
 
-    'facebook_url' => env('MINISTRY_FACEBOOK_URL', 'https://www.facebook.com/COGAudioDasma'),
+    'tagline' => env('MINISTRY_TAGLINE', 'Serving together with heart and harmony.'),
 
-    'email' => env('MINISTRY_EMAIL', 'cogdasmaaudio@gmail.com'),
+    'facebook_url' => $httpsUrl(env('MINISTRY_FACEBOOK_URL', 'https://www.facebook.com/COGAudioDasma')),
+
+    'email' => $validEmail(env('MINISTRY_EMAIL', 'cogdasmaaudio@gmail.com')),
 
     // TODO: owner to provide the Messenger link.
-    'messenger_url' => env('MINISTRY_MESSENGER_URL') ?: null,
+    'messenger_url' => $httpsUrl(env('MINISTRY_MESSENGER_URL')),
 
     // TODO: owner to provide the church address (the map shows only when filled in).
     'address' => env('MINISTRY_ADDRESS') ?: null,
