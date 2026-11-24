@@ -1,0 +1,120 @@
+@php
+    $hasLogo = file_exists(public_path('images/logo.png'));
+
+    $links = collect([
+        ['label' => 'About', 'href' => '#about'],
+        ['label' => 'What We Do', 'href' => '#what-we-do'],
+        config('ministry.show_team') ? ['label' => 'Meet the Team', 'href' => '#team'] : null,
+        ['label' => 'Services', 'href' => '#services'],
+        ['label' => 'Gallery', 'href' => '#gallery'],
+        ['label' => 'Join Us', 'href' => '#join'],
+        ['label' => 'FAQ', 'href' => '#faq'],
+        ['label' => 'Contact', 'href' => '#contact'],
+    ])->filter()->values();
+
+    $authUrl = auth()->check() ? route('dashboard') : route('login');
+    $authLabel = auth()->check() ? 'Dashboard' : 'Member Login';
+
+    $linkClasses = 'rounded-sm text-text/80 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent';
+    $buttonClasses = 'inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-surface transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2';
+@endphp
+
+<header
+    class="sticky top-0 z-50 border-b border-text/10 bg-surface/95 backdrop-blur"
+    x-data="{ open: false }"
+    @keydown.escape.window="if (open) { open = false; $refs.menuButton.focus() }"
+>
+    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+
+        {{-- Brand --}}
+        <a
+            href="{{ route('home') }}"
+            class="flex min-w-0 items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+            @if ($hasLogo)
+                <img
+                    src="{{ asset('images/logo.png') }}"
+                    alt="COG Audio Ministry logo"
+                    width="40"
+                    height="40"
+                    class="h-10 w-10 shrink-0 object-contain"
+                >
+            @else
+                {{-- Placeholder until public/images/logo.png is added --}}
+                <span
+                    aria-hidden="true"
+                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold tracking-wide text-surface"
+                >COG</span>
+            @endif
+
+            <span class="min-w-0 leading-tight">
+                <span class="block truncate text-sm font-semibold text-text sm:text-base">{{ config('ministry.name') }}</span>
+                <span class="block truncate text-xs text-text/60">{{ config('ministry.subheader') }}</span>
+            </span>
+        </a>
+
+        <div class="flex items-center gap-6">
+
+            {{-- Desktop links --}}
+            <nav aria-label="Main" class="hidden xl:block">
+                <ul class="flex items-center gap-6 text-sm font-medium">
+                    @foreach ($links as $link)
+                        <li>
+                            <a href="{{ $link['href'] }}" class="{{ $linkClasses }}">{{ $link['label'] }}</a>
+                        </li>
+                    @endforeach
+                </ul>
+            </nav>
+
+            {{-- Desktop auth button --}}
+            <a href="{{ $authUrl }}" class="hidden xl:inline-flex {{ $buttonClasses }}">{{ $authLabel }}</a>
+
+            {{-- Mobile menu toggle --}}
+            <button
+                type="button"
+                x-ref="menuButton"
+                @click="open = !open"
+                :aria-expanded="open.toString()"
+                aria-controls="mobile-menu"
+                aria-label="Toggle navigation menu"
+                class="inline-flex h-10 w-10 items-center justify-center rounded-md text-text transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent xl:hidden"
+            >
+                <svg x-show="!open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+                </svg>
+                <svg x-show="open" x-cloak class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    {{-- Mobile menu --}}
+    <div
+        id="mobile-menu"
+        x-show="open"
+        x-cloak
+        x-transition:enter="transition ease-out duration-150"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        class="border-t border-text/10 bg-surface xl:hidden"
+    >
+        <nav aria-label="Mobile" class="mx-auto max-w-6xl px-4 py-4 sm:px-6">
+            <ul class="flex flex-col">
+                @foreach ($links as $link)
+                    <li>
+                        <a
+                            href="{{ $link['href'] }}"
+                            @click="open = false"
+                            class="block rounded-md px-3 py-3 text-base text-text transition-colors hover:bg-background hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                        >{{ $link['label'] }}</a>
+                    </li>
+                @endforeach
+            </ul>
+
+            <div class="mt-4 border-t border-text/10 pt-4">
+                <a href="{{ $authUrl }}" class="{{ $buttonClasses }} w-full">{{ $authLabel }}</a>
+            </div>
+        </nav>
+    </div>
+</header>
