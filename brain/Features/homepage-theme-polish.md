@@ -32,6 +32,14 @@ Slices:
   - Gallery `rounded-3xl`.
   - Services list 360px overflow fix.
 
+- D. What We Do cards (branch `feature/what-we-do-cards`, commit 8d2e5e5), 2026-11-24:
+  - 2x2 grid at md+ (`max-w-5xl`), icon beside text from sm+, stacked on mobile.
+  - Titles shortened: "FOH (Front of House)" to "Front of House".
+  - Tag pills (FOH, On stage, Online, Setup) use primary tokens. Labels are UI wording chosen by Claude, not church facts; owner may reword.
+  - Top gradient bar, faint watermark numbers (aria-hidden), hover lift removed (cards are not links).
+  - Test `tests/Feature/HomepageSectionsTest.php` expects "Front of House".
+  - Checked: 1280px light, 360px dark, no horizontal scroll. Tag contrast about 5.2:1 light, 8:1 dark.
+
 Skipped: audit item to re-add FAQ. Owner removed FAQ (see [[homepage-hooks]]).
 
 Data changes: none.
