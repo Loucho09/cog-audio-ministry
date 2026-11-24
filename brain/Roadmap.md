@@ -1,8 +1,8 @@
 # Roadmap
 
-Related: [[00-Index]], [[Project-Brief]], [[new-project-brief-adopted]]
+Related: [[00-Index]], [[Project-Brief]], [[new-project-brief-adopted]], [[second-brief-merged]]
 
-Work one phase at a time. A phase starts only after the previous one is marked done.
+Work one phase at a time. A phase starts only after the previous one is marked done. Owner go-ahead before each phase.
 
 | # | Phase | Status |
 |---|-------|--------|
@@ -19,10 +19,13 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 
 ### Tasks
 1. Scaffold Laravel (latest stable) + Tailwind, Alpine, Filament, Spatie Permission, Breeze Blade, Pest; commit
-2. Base layout: header, navigation, footer; theme tokens (background, surface, text, primary, accent)
-3. Homepage sections (in order): hero, about us, what we do, meet the team (config flag, OFF by default), upcoming services, gallery, join us, FAQ, contact, footer; commit per section group
+2. Base layout: header, navigation, footer; theme tokens (background, surface, text, primary, accent); Inter font
+3. Homepage sections as Blade components (in order): hero, about us, what we do, meet the team (config flag, OFF by default), upcoming services, gallery, join us, FAQ, contact, footer; commit per section group
 4. `services` model, migration, seeder (main ministry schedule)
-5. Mobile check at 375px; ensure responsive design
+5. `gallery_images`, `faqs`, `team_members` tables + seeders with placeholder data (team: `is_featured` flag, full-time first)
+6. Semantic HTML and alt text now. SEO basics (meta, Open Graph, sitemap) can wait for the Phase 7 pass
+7. Mobile check at 360px; ensure responsive design
+   - ~~Mobile check at 375px~~ (superseded 2026-11-24 by [[second-brief-merged]])
 
 ### Carry-over (already done)
 - [x] Brain (Obsidian vault) set up
@@ -39,24 +42,39 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 ### Tasks
 - Breeze Blade login/register; accounts created by approval only (no open signup)
 - `branches` table with seeder (main + 4 satellites)
-- Spatie Permission: roles `super-admin` (project owner only), `branch-head` (admin of one branch), `member`
+- Spatie Permission: roles `super-admin` (project owner only), `branch-head` (admin of one branch), `branch-admin` (applications and roster for one branch; cannot assign roles), `member`
 - Super-admin and branch-head seeders with fake data
 - Member profile page (view own info)
-- Tests: role checks, branch-scoped queries, members cannot escalate roles, super-admin is the only one who assigns roles
+- `/admin` reachable only by users with a role
+- Rate limit login and password reset
+- Tests:
+  - role checks, branch-scoped queries
+  - members cannot escalate roles; super-admin is the only one who assigns roles
+  - a branch-head cannot assign roles
+  - unauthorized access, role escalation, cross-branch access, mass assignment
 
 ### Notes
 - Phased before Join Applications (Phase 3) because applications need branch-head login and Filament access.
+- Spatie teams feature: not used (keep `branch_id` + Policies + query scopes). Revisit before this phase starts if owner wants it (see [[Backlog]]).
 
 ## Phase 3: Join Applications
-**Goal:** public application form, branch-head approval, email notifications.
+**Goal:** public application form, branch approval, email notifications.
 
 ### Tasks
-- Public application form: name, contact, age range, audio/tech experience, branch choice, availability, message
+- Public application form fields:
+  - full name, age, contact number, email
+  - Facebook profile link (optional)
+  - branch dropdown
+  - interest areas checkboxes: FOH, Monitors, Livestream, Stage Tech, Other
+  - experience, availability
+  - consent checkbox
 - `join_applications` table: status pending/approved/rejected
-- Validation and spam protection (rate limiting)
-- Queued email to that branch's branch-head when new application arrives
-- Filament list for branch-head: view, approve, reject
-- Tests: saved, email queued, branch-head cannot see another branch's applications
+- Honeypot field + rate limiting
+- Queued email to that branch's branch-head, branch-admin, and super-admin when a new application arrives
+- Filament: list with filters by branch and status; view, approve, reject
+- Approve creates a user account (member role) and sends a set-password email
+- Tests: saved, email queued, branch-head cannot see another branch's applications, approval creates account
+- ~~Old field list: age range, audio/tech experience, message~~ (superseded 2026-11-24 by [[second-brief-merged]])
 
 ## Phase 4: Duty Roster
 **Goal:** event and duty management with swaps, availability, and member acceptance workflow.
@@ -64,10 +82,21 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 ### Tasks
 - `events` model, migration: date, time, branch, type (Sunday Service, Revival Night, etc.)
 - `duty_assignments` with statuses: assigned/accepted/declined/swap-requested/swapped
-- Service classes with business logic: no double-booking, swap rules (needs other member's accept + branch-head approval)
+- Service classes with business logic
+- Filament roster builder for branch-head and branch-admin (assign duties)
 - Members accept/decline/swap via dashboard
-- Filament roster builder for branch-head (assign duties)
-- Tests: double-booking rules, swap workflow, permission checks
+- Dashboard: next duties, upcoming services, announcements, member's branch
+
+### Roster rules (write Pest tests BEFORE the enforcing code)
+- No double-assign at the same event time
+- Cannot assign a duty the member declined
+- A swap cannot leave an event without its required duties
+- Swaps stay within the branch unless super-admin approves
+- Availability is respected
+- A swap completes only when another eligible member accepts AND branch-head or branch-admin approves
+
+### Tests
+- Rules above, swap workflow, permission checks
 
 ## Phase 5: Notifications and Reminders
 **Goal:** in-app + email notifications for assignments, swaps, announcements; scheduled reminders.
@@ -76,14 +105,25 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 - In-app notifications (Laravel's `Notification` and `Notifiable`)
 - Email notifications per trigger (new assignment, swap approved, announcement)
 - Queued job for email (Laravel `Queue`)
-- Scheduled reminders (Laravel `Schedule`): assignment reminders before service, member availability requests
+- Scheduled reminders (Laravel `Schedule`): day before and 2 hours before each assigned duty
+- Announcements posted by branch-heads, shown on dashboard, optional email blast
 - Tests per trigger
 
 ## Phase 6: Equipment, Training, Reports
 **Goal:** plan only when reached; do not build earlier.
 
+### Notes from second brief (not planned yet)
+- Equipment per branch: name, status, location, last checked
+- Training records: member, skill, date, trainer
+- Reports: duty attendance, accepted vs declined, members per duty type, CSV export
+
 ## Phase 7: Production Launch
 **Goal:** harden security, performance, and deployment readiness.
+
+### Tasks
+- Accessibility, SEO (meta per page, Open Graph, sitemap), and performance pass. Target Lighthouse 90+
+- Write `DEPLOY.md`: server reqs PHP 8.2+, MySQL 8, Composer, Node, extensions; `composer install --no-dev --optimize-autoloader`; `npm ci && npm run build`; production `.env` values; `key:generate`; `migrate --force`; seed only branches and roles; `storage:link`; config/route/view/event cache; HTTPS; queue worker; scheduler cron; backups of DB and uploads; first-login checklist (create super-admin, assign branch-heads, set logo, check schedule, check team flag)
+- Write `PRODUCTION-CHECKLIST.md`: pages load on phone and desktop; join form sends email; admin login works; non-admin cannot reach /admin; schedule correct; images load
 
 ### Checklist (11 items)
 - [ ] APP_ENV=production, APP_DEBUG=false, strong APP_KEY generated
@@ -95,16 +135,19 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 - [ ] Fake seeded data removed; only manually created super-admin remains
 - [ ] `php artisan optimize` run; storage/cache permissions correct
 - [ ] Security review by owner: roles, branch scoping, file uploads, login rate limiting
-- [ ] Phone smoke test: homepage, apply form, login, member dashboard on 375px
+- [ ] Phone smoke test: homepage, apply form, login, member dashboard on 360px
+  - ~~on 375px~~ (superseded 2026-11-24 by [[second-brief-merged]])
 - [ ] Runbook: how to deploy, back up, add a new branch
 
 ### Working Rules for phases 1–7
 - **One phase at a time.** Do not start until the previous phase is marked done.
 - **Small commits:** one per task; clear messages (e.g., "Phase 2: add Spatie roles").
 - **Plan first:** state the plan in 3–5 bullets and wait for confirmation before large builds.
+- **Run before every commit:** `php artisan test` and `./vendor/bin/pint`.
 - **Seeders use fake data:** TODO placeholders for real facts (contact, address, photos).
 - **Tests for anything touching members, roles, or duties.**
 - **Never commit `.env`.** Keep `.env.example` updated.
+- **Ask before:** adding packages, changing auth/roles, or deleting anything.
 - **New Laravel concepts:** explain briefly the first time (e.g., "this uses Laravel's built-in notification queue").
 
 ---

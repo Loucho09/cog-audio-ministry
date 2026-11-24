@@ -11,6 +11,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 
 ## Decisions
 - [[new-project-brief-adopted]]: new brief replaces old 9-phase plan; branches/roles/Filament/packages approved
+- [[second-brief-merged]]: second brief merged 2026-11-24 (branch-admin role, DB-managed content, 360px, Inter); "chapters" naming not adopted
 - [[phase-order-roles-before-applications]]: why Phase 2 (roles) comes before Phase 3 (applications)
 - [[package-filament]]: admin panel framework, approved 2026-11-23
 - [[package-spatie-permission]]: roles and permissions, approved 2026-11-23

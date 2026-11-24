@@ -3,28 +3,35 @@
 Web app for the Audio department of Church Of God Audio Ministry.
 Goal: take this project from first commit to a live, maintained production site.
 
-**Stack:** Laravel (latest stable), MySQL, Blade, Tailwind CSS, Alpine.js, Filament (admin panel), Spatie Laravel Permission (roles), Laravel Breeze Blade (auth), Pest (tests), Laravel Mail + queue (notifications).
+**Current phase:** 1 (Setup and homepage), in progress
+
+**Stack:** PHP 8.2+, Laravel (latest stable), MySQL 8, Blade, Tailwind CSS, Alpine.js, Filament (admin panel), Spatie Laravel Permission (roles), Laravel Breeze Blade (auth), Pest (tests), Pint, Laravel Mail + queue (notifications), scheduler (reminders). No Livewire/Inertia/React/Vue (outside Filament's internals), no Postgres/Supabase or extra services.
 **Dev environment:** VS Code + Claude Code. Notes live in `brain/` (Obsidian vault).
 
 ## Who it serves
 - **Visitors:** public pages only: homepage, learn about the ministry, submit a join application.
 - **Members:** every Audio Ministry member has an account; they see their own duties, schedules, events, and announcements.
-- **Branch heads:** manage their own branch's services, team, duties, announcements, and approve join applications.
+- **Branch heads:** manage their own branch's members, services, team, duties, announcements, and approve join applications.
+- **Branch admins:** help one branch with join applications and the duty roster; cannot assign roles.
 - **Super-admin:** the project owner; creates branches and assigns branch heads.
 
 ## Branches and roles (multi-branch from the start)
-- Main branch: COG Dasma (Dasmariñas). Other branches: Marilag, Trece, Silang, Jabez. Store them in a `branches` table so more can be added without code changes.
-- Roles (Spatie): `super-admin` (all branches; only role that can assign roles), `branch-head` (admin for ONE branch), `member`. Not logged in = visitor.
+- Main branch: COG Dasma (Dasmariñas, `is_main = true`). Other branches: Marilag, Trece, Silang, Jabez. Store them in a `branches` table (name, slug, address and contact fields nullable, is_main) so more can be added without code changes.
+- Roles (Spatie): `super-admin` (all branches; only role that can assign roles), `branch-head` (admin for ONE branch), `branch-admin` (applications + roster for ONE branch, no role assignment), `member` (default for approved accounts). Not logged in = visitor.
 - Roles are assigned to accounts, never hardcoded to a person. Members can never change their own role.
-- Every branch-scoped record has a `branch_id`. Enforce scoping in Policies and query scopes (and Filament resources), never only in the UI. Write tests for it.
-- Join applications: the applicant picks a branch; that branch's branch-head gets a queued email.
-- Member accounts are created by approval only (no open signup).
+- Every branch-scoped record (members, events, services, join applications, duty assignments) has a `branch_id`. Enforce scoping in Policies and query scopes (and Filament resources), never only in the UI. Write tests for it. (Spatie "teams" is not used for now; see `brain/Decisions/`.)
+- Join applications: the applicant picks a branch; that branch's branch-head and branch-admins, plus the super-admin, get a queued email.
+- Member accounts are created by approval only (no open signup). Approving an application creates the account and sends a set-password email.
+- `/admin` (Filament) is only for users with an admin role.
 
 ## Brand and content
-- Name: "COG Audio Ministry", subheader "Dasmariñas". Logo: official Facebook logo in `public/images/logo` (do not redraw).
-- Colors are Tailwind theme tokens, not hardcoded hex: `background` #F8FAFC, `surface` #FFFFFF, `text` #0F172A, `primary` #0284C7, `accent` #0EA5E9.
-- Contacts live in `config/ministry.php`, never hardcoded in views. Service schedule is seeded into the `services` table and managed in Filament.
-- "Meet the Team" is behind a config flag, default OFF.
+- Name: "COG Audio Ministry", subheader "Dasmariñas". Logo: official Facebook logo at `public/images/logo.png` (do not redraw; show a text placeholder until the file exists).
+- Colors are Tailwind theme tokens, not hardcoded hex: `background` #F8FAFC, `surface` #FFFFFF, `text` #0F172A, `primary` #0284C7, `accent` #0EA5E9. Font: Inter. Style: clean minimalist light, spacious, mobile-first.
+- Copy: English, warm, simple, respectful, Tagalog-friendly tone.
+- Contacts and flags live in `config/ministry.php`, never hardcoded in views. Service schedule is seeded into the `services` table and managed in Filament.
+- Gallery images, FAQs, and team members are stored in the database and managed in Filament. Placeholder images until real photos are added.
+- "Meet the Team" is behind a config flag, default OFF. When on, it shows team members marked `is_featured` (full-time first).
+- Homepage sections are Blade components. Contact section shows a map only when the address is filled in.
 - Full details in `brain/Project-Brief.md`. Use TODO placeholders for pending content (vision/mission, team list, Messenger link, address, photos). Never invent names, phone numbers, or church facts.
 
 ## Second brain (read this first)
@@ -36,13 +43,13 @@ Goal: take this project from first commit to a live, maintained production site.
 ## Roadmap: from start to production
 Work one phase at a time. Do not start a phase until the previous one is marked done in `brain/Roadmap.md`.
 
-1. **Setup and homepage:** scaffold Laravel + packages, layout and theme tokens, homepage sections (hero, about, what we do, meet the team behind flag, upcoming services, gallery, join us, FAQ, contact, footer), services model + seeder, mobile check at 375px.
-2. **Member accounts and roles:** Breeze login, approval-only accounts, Spatie roles, branches, seeders, role and branch-scoping tests.
-3. **Join applications:** public form, pending/approved/rejected status, queued email to the branch-head, Filament approve/reject, tests.
-4. **Duty roster:** events, duty assignments and swaps with rules in service classes, Filament roster, member accept/decline/swap view, tests.
-5. **Notifications and reminders:** in-app + email for assignments, swaps, announcements; scheduled queued reminders; tests.
+1. **Setup and homepage:** scaffold Laravel + packages, layout and theme tokens, homepage sections (hero, about, what we do, meet the team behind flag, upcoming services, gallery, join us, FAQ, contact, footer), services, gallery, FAQ and team models + seeders, mobile check at 360px.
+2. **Member accounts and roles:** Breeze login, approval-only accounts, Spatie roles (incl. `branch-admin`), branches, seeders, rate-limited login and password reset, tests for role escalation, cross-branch access, mass assignment, and "branch-head cannot assign roles".
+3. **Join applications:** public form with honeypot and rate limiting, pending/approved/rejected status, queued email to branch-head + branch-admins + super-admin, Filament approve/reject with branch and status filters, approval creates account + set-password email, tests.
+4. **Duty roster:** events, duty assignments and swaps with rules in service classes (rule tests written first), Filament roster, member dashboard with accept/decline/swap, tests.
+5. **Notifications and reminders:** in-app + email for assignments, swaps, announcements; reminders the day before and 2 hours before each duty; tests.
 6. **Equipment, training, reports:** plan in detail only when reached. Do not build earlier.
-7. **Production launch:** checklist below.
+7. **Production launch:** accessibility/SEO/sitemap/performance pass (Lighthouse 90+), `DEPLOY.md`, `PRODUCTION-CHECKLIST.md`, checklist below.
 
 (Phases 2 and 3 were swapped from the original brief so roles exist before the application approval screens. See `brain/Decisions/`.)
 
@@ -64,7 +71,10 @@ Standard loop for every feature: **build → review → fix → record in brain*
 - Mass assignment: always define `$fillable`.
 - Keep controllers thin; move logic to Actions/Services when it grows.
 - Write at least one feature test per feature (happy path + authorization failure).
-- Small, focused commits with clear messages. One feature per branch (`feature/<name>`).
+- Small, focused commits with clear messages. One feature per branch (`feature/<name>`). Run `php artisan test` and `./vendor/bin/pint` before every commit; fix failures first.
+- Semantic HTML, alt text on images, meta title/description per page.
+- Uploaded images go in `storage/app/public` (with `php artisan storage:link`). No secrets in the repo; `.env.example` has empty values.
+- Seeders must give a working demo with `php artisan migrate:fresh --seed` (fake members, events, duties, applications).
 - No new Composer/NPM packages without asking and noting the reason in `brain/Decisions/`.
 
 ## Definition of done (every feature)
@@ -85,7 +95,7 @@ Standard loop for every feature: **build → review → fix → record in brain*
 7. Remove seeded fake data; keep only the super-admin account, created manually.
 8. Run `php artisan optimize`; check storage and cache permissions.
 9. Security review by the owner: roles, branch scoping, file uploads, login rate limiting.
-10. Smoke test on a phone: homepage, apply form, login, member dashboard.
+10. Smoke test on a phone: homepage, apply form, login, member dashboard; confirm a non-admin cannot reach `/admin`.
 11. Short runbook: how to deploy, back up, and add a branch.
 
 ## Adding a new feature (anti-overwhelm protocol)
@@ -133,4 +143,5 @@ Notes / decisions: [[link]]
 - Explain steps simply, one small step at a time. The owner is a developer but may be new to Claude Code workflows.
 - Before building a feature, state the plan in 3-5 bullets and wait for confirmation.
 - Explain new Laravel concepts (e.g. Policies, Filament resources, queues) briefly the first time they appear.
+- At the end of each phase: say what was built, how to check it in the browser, and which TODO placeholders remain. Update the "Current phase" line at the top of this file.
 - When unsure about a ministry decision (admin names, content, approvals), ask the owner instead of guessing.
