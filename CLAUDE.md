@@ -52,6 +52,7 @@ Details for each phase belong in `brain/Roadmap.md` and `brain/Features/`, not i
 Delegate instead of doing everything in the main conversation. This keeps context small.
 - `frontend-builder`: Blade, Tailwind, Alpine UI. Never touches migrations, models, or auth.
 - `backend-builder`: migrations, models, auth, roles, schedules, notifications, tests.
+- `fullstack`: features that span both front end and back end, built in slices; use when unsure which builder fits.
 - `reviewer`: read-only review of recent changes (bugs, security, Laravel conventions).
 - `brain-keeper`: edits only `brain/`.
 
