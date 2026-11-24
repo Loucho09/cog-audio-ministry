@@ -6,6 +6,8 @@
  * Theme tokens as space-separated RGB channels (used by tailwind.config.js).
  * `primary-dark` is "the blue that passes WCAG AA" for the current theme: dark blue in light mode,
  * light blue in dark mode, so `bg-primary-dark text-surface` stays readable in both.
+ * `accent` is the stage red for fills, glows and small highlights.
+ * `accent-text` is a deeper (light mode) or lighter (dark mode) red that passes AA for small text (eyebrows).
  */
 :root {
     --color-background: 248 250 252; /* #F8FAFC */
@@ -13,21 +15,24 @@
     --color-text: 15 23 42; /* #0F172A */
     --color-primary: 2 132 199; /* #0284C7 */
     --color-primary-dark: 3 105 161; /* #0369A1 */
-    --color-accent: 14 165 233; /* #0EA5E9 */
+    --color-accent: 225 29 72; /* #E11D48 (stage red) */
+    --color-accent-text: 190 18 60; /* #BE123C */
     color-scheme: light;
 }
 
 .dark {
-    --color-background: 15 23 42; /* #0F172A */
-    --color-surface: 30 41 59; /* #1E293B */
+    --color-background: 7 8 13; /* #07080D */
+    --color-surface: 17 19 27; /* #11131B */
     --color-text: 241 245 249; /* #F1F5F9 */
     --color-primary: 56 189 248; /* #38BDF8 */
     --color-primary-dark: 56 189 248; /* #38BDF8 */
-    --color-accent: 14 165 233; /* #0EA5E9 */
+    --color-accent: 244 63 94; /* #F43F5E */
+    --color-accent-text: 251 113 133; /* #FB7185 */
     color-scheme: dark;
 }
 
-/* Reduced motion: no smooth scrolling, and transitions and animations are effectively instant. */
+/* Reduced motion: no smooth scrolling, and transitions and animations are effectively instant.
+   Decorative animations use motion-safe: so they simply do not start (the EQ bars stay static). */
 @media (prefers-reduced-motion: reduce) {
     html {
         scroll-behavior: auto !important;

@@ -1,10 +1,14 @@
-<section id="what-we-do" aria-labelledby="what-we-do-title" class="bg-background py-16 sm:py-20">
-    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-2xl text-center">
-            <h2 id="what-we-do-title" class="text-2xl font-bold tracking-tight text-text sm:text-3xl">What We Do</h2>
-            <p class="mt-4 text-base leading-relaxed text-text/70">
-                Every service needs a team. These are the main roles we serve in.
-            </p>
+<section id="what-we-do" aria-labelledby="what-we-do-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
+    <div class="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
+        <x-site.section-header
+            id="what-we-do-title"
+            eyebrow="What we do"
+            title="What We Do"
+            lead="Every service needs a team. These are the main roles we serve in."
+        />
+
+        <div class="mx-auto mt-6 max-w-xs" aria-hidden="true">
+            <x-site.wave-divider gradient-id="what-we-do-wave" />
         </div>
 
         @php
@@ -33,19 +37,21 @@
             ];
         @endphp
 
-        <ul class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            @foreach ($roles as $role)
-                <li class="flex flex-col rounded-2xl border border-text/10 bg-surface p-6 shadow-sm transition-shadow duration-200 hover:shadow-md">
-                    {{-- Mobile: icon and title share a row. From sm up: stacked. --}}
-                    <div class="flex items-center gap-4 sm:block">
-                        <span aria-hidden="true" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-primary-dark">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+        <ul class="mt-12 grid gap-5 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+            @foreach ($roles as $index => $role)
+                <li class="group flex flex-col rounded-3xl border border-text/10 bg-surface p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl motion-reduce:transform-none sm:p-8 dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-accent/40">
+                    <div class="flex items-start justify-between">
+                        {{-- Glowing icon tile: gradient from primary to accent at low strength, with a ring. --}}
+                        <span aria-hidden="true" class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 text-primary-dark ring-1 ring-inset ring-primary/20 transition duration-300 motion-safe:group-hover:scale-105">
+                            <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                                 {!! $role['icon'] !!}
                             </svg>
                         </span>
-                        <h3 class="text-lg font-semibold text-text sm:mt-5">{{ $role['title'] }}</h3>
+                        <span aria-hidden="true" class="font-mono text-xs font-semibold tracking-wider text-text/50">{{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}</span>
                     </div>
-                    <p class="mt-3 text-sm leading-relaxed text-text/70 sm:mt-2">
+
+                    <h3 class="mt-6 text-lg font-bold text-text">{{ $role['title'] }}</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-text/70">
                         {{ $role['description'] }}
                     </p>
                 </li>

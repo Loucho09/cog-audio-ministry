@@ -58,6 +58,6 @@ it('merges extra classes with the component classes', function () {
     expect(substr_count($html, 'class="'))->toBe(1)
         ->and($html)->toContain('w-full')
         ->and($html)->toContain('sm:w-auto')
-        ->and($html)->toContain('rounded-md')
+        ->and($html)->toContain('rounded-full')
         ->and($html)->toContain('bg-primary-dark');
 });

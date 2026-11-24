@@ -1,3 +1,5 @@
+@props(['transparent' => false])
+
 @php
     $hasLogo = file_exists(public_path('images/logo.png'));
 
@@ -15,15 +17,27 @@
     $authUrl = auth()->check() ? route('dashboard') : route('login');
     $authLabel = auth()->check() ? 'Dashboard' : 'Member Login';
 
-    $linkClasses = 'inline-flex min-h-11 items-center whitespace-nowrap rounded-sm text-text/80 transition-colors duration-200 hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark';
+    // Colours follow the header's data-solid state: text-text on a solid bar, white over the transparent hero.
+    // The header is the `group`, so these group-data variants apply to every child.
+    $linkClasses = 'relative inline-flex min-h-11 items-center whitespace-nowrap rounded-sm text-text/80 transition-colors duration-200 hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark after:absolute after:inset-x-0 after:bottom-1.5 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-accent after:transition-transform after:duration-200 hover:after:scale-x-100 group-data-[solid=false]:text-white/85 group-data-[solid=false]:hover:text-white group-data-[solid=false]:focus-visible:ring-white';
+
+    $iconButtonClasses = 'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-text transition-colors duration-200 hover:bg-text/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark group-data-[solid=false]:text-white group-data-[solid=false]:hover:bg-white/10 group-data-[solid=false]:focus-visible:ring-white';
 @endphp
 
 <header
-    class="sticky top-0 z-50 border-b border-text/10 bg-surface/95 backdrop-blur"
-    x-data="{ open: false }"
+    class="group z-50 w-full border-b border-transparent transition-[background-color,box-shadow,border-color] duration-300 data-[solid=true]:border-text/10 data-[solid=true]:bg-surface/90 data-[solid=true]:shadow-lg data-[solid=true]:shadow-text/5 data-[solid=true]:backdrop-blur-md {{ $transparent ? 'fixed inset-x-0 top-0' : 'sticky top-0' }}"
+    data-solid="{{ $transparent ? 'false' : 'true' }}"
+    x-data="{
+        open: false,
+        transparent: {{ $transparent ? 'true' : 'false' }},
+        solid: {{ $transparent ? 'false' : 'true' }},
+    }"
+    x-init="solid = !transparent || window.scrollY > 24"
+    @scroll.window="solid = !transparent || window.scrollY > 24"
+    :data-solid="(solid || open).toString()"
     @keydown.escape.window="if (open) { open = false; $refs.menuButton.focus() }"
 >
-    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-6 lg:px-8">
 
         {{-- Brand --}}
         <a
@@ -47,12 +61,12 @@
             @endif
 
             <span class="min-w-0 leading-tight">
-                <span class="block truncate text-sm font-semibold text-text sm:text-base">{{ config('ministry.name') }}</span>
-                <span class="block truncate text-xs text-text/60">{{ config('ministry.subheader') }}</span>
+                <span class="block truncate text-sm font-bold text-text group-data-[solid=false]:text-white sm:text-base">{{ config('ministry.name') }}</span>
+                <span class="block truncate text-xs text-text/60 group-data-[solid=false]:text-white/75">{{ config('ministry.subheader') }}</span>
             </span>
         </a>
 
-        <div class="flex shrink-0 items-center gap-4 xl:gap-6">
+        <div class="flex shrink-0 items-center gap-3 xl:gap-5">
 
             {{-- Desktop links --}}
             <nav aria-label="Main" class="hidden shrink-0 lg:block">
@@ -95,7 +109,7 @@
                 aria-label="Dark mode"
                 aria-pressed="false"
                 :aria-pressed="dark.toString()"
-                class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-text transition-colors duration-200 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
+                class="{{ $iconButtonClasses }}"
             >
                 {{-- Sun (shown in dark mode) --}}
                 <svg x-show="dark" x-cloak class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -115,7 +129,7 @@
                 :aria-expanded="open.toString()"
                 aria-controls="mobile-menu"
                 aria-label="Toggle navigation menu"
-                class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-text transition-colors duration-200 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark lg:hidden"
+                class="{{ $iconButtonClasses }} lg:hidden"
             >
                 <svg x-show="!open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
@@ -127,7 +141,7 @@
         </div>
     </div>
 
-    {{-- Mobile menu (sized to the viewport below the 4rem header) --}}
+    {{-- Mobile menu: always a solid surface panel, sized to the viewport below the 4rem header. --}}
     <div
         id="mobile-menu"
         x-show="open"
@@ -137,21 +151,21 @@
         x-transition:enter-end="opacity-100"
         class="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-text/10 bg-surface lg:hidden"
     >
-        <nav aria-label="Mobile" class="mx-auto max-w-6xl px-4 py-4 sm:px-6">
-            <ul class="flex flex-col">
+        <nav aria-label="Mobile" class="mx-auto max-w-6xl px-5 py-4 sm:px-6">
+            <ul class="flex flex-col gap-1">
                 @foreach ($links as $link)
                     <li>
                         <a
                             href="{{ $link['href'] }}"
                             @click="open = false"
-                            class="block rounded-md px-3 py-3 text-base text-text transition-colors duration-200 hover:bg-background hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
+                            class="block rounded-2xl px-4 py-3.5 text-base font-medium text-text transition-colors duration-200 hover:bg-background hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
                         >{{ $link['label'] }}</a>
                     </li>
                 @endforeach
             </ul>
 
             <div class="mt-4 border-t border-text/10 pt-4">
-                <x-site.button :href="$authUrl" class="w-full">{{ $authLabel }}</x-site.button>
+                <x-site.button :href="$authUrl" size="lg" class="w-full">{{ $authLabel }}</x-site.button>
             </div>
         </nav>
     </div>

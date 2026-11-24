@@ -1,12 +1,15 @@
 @props([
     'title' => null,
     'description' => null,
+    // Navbar floats over a dark hero and turns solid on scroll. Defaults to true on the homepage only.
+    'transparentNav' => null,
 ])
 
 @php
     $siteName = config('ministry.name');
     $pageTitle = $title ? $title.' | '.$siteName : $siteName;
     $metaDescription = filled($description) ? $description : $siteName.', '.config('ministry.subheader').'.';
+    $transparentNav = $transparentNav ?? request()->routeIs('home');
 @endphp
 
 <!DOCTYPE html>
@@ -54,7 +57,7 @@
             Skip to content
         </a>
 
-        <x-site.navbar />
+        <x-site.navbar :transparent="$transparentNav" />
 
         <main id="main" class="flex-1">
             {{ $slot }}
