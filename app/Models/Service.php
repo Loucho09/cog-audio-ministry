@@ -17,13 +17,15 @@ class Service extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['branch_id', 'name', 'day_of_week', 'start_time', 'is_active', 'sort_order'];
+    protected $fillable = ['branch_id', 'name', 'day_of_week', 'start_time', 'is_active', 'starts_on', 'ends_on', 'sort_order'];
 
     protected function casts(): array
     {
         return [
             'day_of_week' => 'integer',
             'is_active' => 'boolean',
+            'starts_on' => 'date',
+            'ends_on' => 'date',
             'sort_order' => 'integer',
         ];
     }
@@ -59,23 +61,41 @@ class Service extends Model
         return [(int) $m[1], (int) $m[2]];
     }
 
-    /**
-     * Next start datetime (app timezone) at or after $from. If this week's
-     * time has already passed, returns the same slot next week.
-     */
-    public function nextOccurrence(?CarbonInterface $from = null): CarbonImmutable
+    /** Whether the service runs on the given date (date only; null bounds are open). */
+    public function runsOn(CarbonInterface $date): bool
     {
+        $day = $date->format('Y-m-d');
+
+        return ($this->starts_on === null || $day >= $this->starts_on->format('Y-m-d'))
+            && ($this->ends_on === null || $day <= $this->ends_on->format('Y-m-d'));
+    }
+
+    /**
+     * Next start datetime (app timezone) at or after $from, within the
+     * service's date window. Returns null once the window has ended.
+     */
+    public function nextOccurrence(?CarbonInterface $from = null): ?CarbonImmutable
+    {
+        $tz = config('app.timezone');
         $from = $from
-            ? CarbonImmutable::instance($from)->setTimezone(config('app.timezone'))
-            : CarbonImmutable::now(config('app.timezone'));
+            ? CarbonImmutable::instance($from)->setTimezone($tz)
+            : CarbonImmutable::now($tz);
 
         [$hour, $minute] = $this->startTimeParts();
+
+        if ($this->starts_on !== null && $from->format('Y-m-d') < $this->starts_on->format('Y-m-d')) {
+            $from = CarbonImmutable::parse($this->starts_on->format('Y-m-d'), $tz)->startOfDay();
+        }
 
         $candidate = $from
             ->startOfDay()
             ->addDays(((int) $this->day_of_week - $from->dayOfWeek + 7) % 7)
             ->setTime($hour, $minute);
 
-        return $candidate->lessThan($from) ? $candidate->addWeek() : $candidate;
+        if ($candidate->lessThan($from)) {
+            $candidate = $candidate->addWeek();
+        }
+
+        return $this->runsOn($candidate) ? $candidate : null;
     }
 }

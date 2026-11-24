@@ -18,7 +18,7 @@ class HomeController extends Controller
         $branch = Branch::mainBranch();
 
         $occurrences = $branch ? UpcomingServices::forBranch($branch, 4, $now) : collect();
-        $schedule = ServiceSchedule::build($occurrences, $now);
+        $schedule = ServiceSchedule::build($occurrences, $now, $branch);
 
         // Gallery is intentionally not branch-filtered in Phase 1 (see brain Backlog).
         $galleryImages = GalleryImage::query()

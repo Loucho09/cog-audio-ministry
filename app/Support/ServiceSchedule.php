@@ -2,12 +2,13 @@
 
 namespace App\Support;
 
+use App\Models\Branch;
 use App\Models\Service;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
 /**
- * Presentation data for the homepage services section, built from upcoming occurrences.
+ * Presentation data for the homepage services section, built from upcoming occurrences and the branch's services.
  */
 class ServiceSchedule
 {
@@ -20,7 +21,7 @@ class ServiceSchedule
      * @param  Collection<int, array{service: Service, starts_at: CarbonImmutable}>  $occurrences
      * @return array{soon: Collection, later: Collection, weekly: Collection}
      */
-    public static function build(Collection $occurrences, CarbonImmutable $now): array
+    public static function build(Collection $occurrences, CarbonImmutable $now, ?Branch $branch = null): array
     {
         $today = $now->startOfDay();
         $cutoff = $today->addDays(self::SOON_DAYS);
@@ -38,7 +39,7 @@ class ServiceSchedule
         return [
             'soon' => $days->filter(fn (array $d) => $d['date']->lessThan($cutoff))->values(),
             'later' => $days->filter(fn (array $d) => $d['date']->greaterThanOrEqualTo($cutoff))->values(),
-            'weekly' => self::weekly($occurrences),
+            'weekly' => self::weekly($branch, $today),
         ];
     }
 
@@ -53,30 +54,72 @@ class ServiceSchedule
 
     /**
      * One line per weekday + service name, e.g. "Sunday: Sunday Service, 5:30 AM, 7:30 AM".
+     * Built from the branch's active services, so paused services still appear.
+     * Services whose ends_on is before today are left out.
      *
-     * @return Collection<int, array{day: string, name: string, times: array<int, string>, text: string}>
+     * Optional keys: 'note' (one note for the whole line) or, when services on a
+     * line differ, 'notes' (list of ['time' => label, 'note' => text]).
+     *
+     * @return Collection<int, array{day: string, name: string, times: array<int, string>, calendar_urls: array<int, string>, text: string, note?: string, notes?: array<int, array{time: string, note: string}>}>
      */
-    private static function weekly(Collection $occurrences): Collection
+    private static function weekly(?Branch $branch, CarbonImmutable $today): Collection
     {
-        return $occurrences
-            ->unique(fn (array $o) => $o['service']->id)
-            ->sortBy(fn (array $o) => $o['service']->start_time)
-            ->groupBy(fn (array $o) => $o['service']->day_of_week.'|'.$o['service']->name)
-            ->map(function (Collection $items) {
-                $service = $items->first()['service'];
-                $day = self::WEEKDAYS[$service->day_of_week];
-                $times = $items->map(fn (array $o) => $o['starts_at']->format('g:i A'))->values()->all();
+        if ($branch === null) {
+            return collect();
+        }
 
-                return [
+        $todayDate = $today->format('Y-m-d');
+
+        return $branch->services()->active()->ordered()->get()
+            ->filter(fn (Service $s) => $s->ends_on === null || $s->ends_on->format('Y-m-d') >= $todayDate)
+            ->sortBy(fn (Service $s) => $s->start_time)
+            ->groupBy(fn (Service $s) => $s->day_of_week.'|'.$s->name)
+            ->map(function (Collection $items) use ($today) {
+                $service = $items->first();
+                $day = self::WEEKDAYS[$service->day_of_week];
+                $times = $items->map(fn (Service $s) => CarbonImmutable::parse($s->start_time)->format('g:i A'))->values()->all();
+                $notes = $items->map(fn (Service $s) => self::note($s, $today))->values()->all();
+
+                $line = [
                     'sort' => $service->day_of_week,
                     'day' => $day,
                     'name' => $service->name,
                     'times' => $times,
+                    'calendar_urls' => $items->map(fn (Service $s) => route('services.calendar', $s))->values()->all(),
                     'text' => $day.': '.$service->name.', '.implode(', ', $times),
                 ];
+
+                if (count(array_unique($notes, SORT_REGULAR)) === 1) {
+                    if ($notes[0] !== null) {
+                        $line['note'] = $notes[0];
+                    }
+                } else {
+                    $line['notes'] = collect($times)
+                        ->map(fn (string $time, int $i) => ['time' => $time, 'note' => $notes[$i]])
+                        ->filter(fn (array $n) => $n['note'] !== null)
+                        ->values()
+                        ->all();
+                }
+
+                return $line;
             })
             ->sortBy('sort')
             ->values()
             ->map(fn (array $l) => collect($l)->except('sort')->all());
+    }
+
+    private static function note(Service $service, CarbonImmutable $today): ?string
+    {
+        if ($service->starts_on !== null && $service->starts_on->format('Y-m-d') > $today->format('Y-m-d')) {
+            return 'Resumes '.$service->starts_on->format('M j, Y');
+        }
+
+        if ($service->ends_on !== null
+            && $service->ends_on->format('Y-m-d') >= $today->format('Y-m-d')
+            && $service->ends_on->format('Y-m-d') <= $today->addWeeks(8)->format('Y-m-d')) {
+            return 'Last service '.$service->ends_on->format('M j');
+        }
+
+        return null;
     }
 }
