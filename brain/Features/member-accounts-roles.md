@@ -1,5 +1,5 @@
 # Member accounts and roles
-Status: in progress. 2a done and merged to main 2026-11-25 (merge 13a516f). 2b in progress (branch `feature/phase-2b-filament`, started 2026-11-25).
+Status: done. 2a merged to main 2026-11-25 (merge 13a516f). 2b (branch `feature/phase-2b-filament`) done 2026-11-25, merged to main. Tasks: [[member-accounts-roles-tasks]].
 Phase: 2
 
 Goal: Only approved people have accounts. Each account has one role and, for branch staff, one branch. Every branch-scoped record is protected in Policies and query scopes, not only in the UI.

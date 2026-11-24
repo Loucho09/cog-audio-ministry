@@ -17,3 +17,12 @@ Related: [[member-accounts-roles]], [[super-admin-via-artisan-command]], [[phase
 - Role changes go only through `AssignRole` (super-admin only).
 - Branch field is set only by super-admin.
 - Branch-admin stays read-only on own-branch members.
+
+## Owner decisions (2026-11-25)
+- Only the super-admin can delete users. `UserPolicy::delete` returns false; the super-admin passes via `Gate::before`.
+- Only the super-admin can change a user's email. Branch-heads edit the name only, because an email change plus password reset would allow account takeover.
+- The super-admin gets a "Resend set-password email" action. If the mail send fails, the super-admin sees a warning instead of a crash.
+- Branch-admins see the member list only, with no view page.
+- Branch-heads can edit only plain members of their own branch, not other heads or admins.
+
+Related: [[member-accounts-roles-tasks]], [[Backlog]]

@@ -43,36 +43,49 @@ Result: 185 tests, 184 pass, 1 skipped. Pint clean.
 
 - [x] Merged 2a to main 2026-11-25 (owner go-ahead)
 
-## Phase 2b: Filament admin screens (in progress, started 2026-11-25)
+## Phase 2b: Filament admin screens (done 2026-11-25)
 
 Branch name: `feature/phase-2b-filament`. One commit per slice. Decision: [[admin-user-management]].
 
 Superseded list (kept for history): ~~Filament panel colors and brand name; Service resource; GalleryImage resource; TeamMember resource; Faq resource; Branch resource; User resource~~ (replaced by the slices below, 2026-11-25).
 
-- [ ] **Slice 1: panel brand and policies**
+- [x] **Slice 1: panel brand and policies**
   - Filament panel brand name "COG Audio Ministry", theme colors from theme tokens
   - Policies for GalleryImage, TeamMember, Faq, Branch
   - Global rule: `branch_id = null` is global; only super-admin edits. Branch staff view.
   - Branch-head may edit own branch records only (Branch: own branch only)
   - Tests for each policy (happy path + authorization failure)
-- [ ] **Slice 2: Service resource**
+- [x] **Slice 2: Service resource**
   - Query scoped by `visibleTo(user)`
   - Branch-head sees and edits own branch only; branch field locked to own branch
   - `starts_on` / `ends_on`; `ends_on >= starts_on`
   - Friendly error for duplicate branch/day/time slot
   - Tests: scoping, cross-branch denial, validation, duplicate error
-- [ ] **Slice 3: GalleryImage and TeamMember resources**
+- [x] **Slice 3: GalleryImage and TeamMember resources**
   - Uploads to public disk (`storage/app/public`), follow [[image-path-convention]]
   - Global (null branch) edits: super-admin only
   - Tests: upload path, policy denial for branch-head on global rows
-- [ ] **Slice 4: Faq and Branch resources (super-admin only)**
+- [x] **Slice 4: Faq and Branch resources (super-admin only)**
   - `branches.facebook_url` nullable migration
   - "Our churches" section reads `branches` table (main first); remove `ministry.churches` config
   - Update `HomepageChurchesTest`
   - Tests: non-super-admin cannot create/edit; homepage lists branches from DB
-- [ ] **Slice 5: User resource**
+- [x] **Slice 5: User resource**
   - Super-admin: create accounts by hand (no password typed; new user gets set-password email); assign roles only through `AssignRole`; set branch
   - Branch-head: sees own-branch members; may edit name and email only; no role field, no branch field
   - Branch-admin: read-only own-branch members (from 2a)
   - Tests: branch-head cannot change role/branch; cross-branch denial; super-admin create sends set-password email
-- [ ] **After slices:** `reviewer`, fixes, `brain-keeper`, merge to main
+- [x] **After slices:** `reviewer`, fixes, `brain-keeper`, merge to main
+
+Done 2026-11-25. Branch `feature/phase-2b-filament`. Commits:
+- af40cce: panel brand and policies
+- 9368d94: Service resource
+- 84a25e0: Gallery and Team resources
+- 6628460: bulk delete checks each record's policy
+- 49a4928: FAQ and Branch resources
+- b05aeb7: our churches section reads the branches table
+- b62d482: block deleting a branch with photos or team members
+- 2e05177: User resource
+- ec8770b: review hardening
+
+Tests: 266 total, 265 passed, 1 skipped. Owner approved merge to main 2026-11-25.
