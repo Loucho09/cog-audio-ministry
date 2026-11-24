@@ -2,9 +2,9 @@
 
 Related: [[services-section-v2]], [[00-Index]]
 
-- [ ] A. Service date window: nullable `starts_on`/`ends_on` on services; homepage hides dates outside window; weekly list shows "Resumes <date>" / "Last service <date>"; seeder sets Tuesday Revival Night and Wednesday Salvation Night `ends_on` 2026-11-24 (exact dates TODO; Wednesday name TODO confirm)
-- [ ] B. Next-service spotlight card; group upcoming services by day (Sunday's 7 times as chips in one card); remove "Show more dates"
-- [ ] C. Weekly schedule: compact 7-day list, today highlighted, folded behind a toggle; check 360px and dark mode
+- [x] A. Service date window: nullable `starts_on`/`ends_on` on services; homepage hides dates outside window; weekly list shows "Resumes <date>" / "Last service <date>"; seeder sets Tuesday Revival Night and Wednesday Salvation Night `ends_on` 2026-11-24 (exact dates TODO; Wednesday name TODO confirm)
+- [x] B. Next-service spotlight card; group upcoming services by day (Sunday's 7 times as chips in one card); remove "Show more dates"
+- [x] C. Weekly schedule: compact 7-day list, today highlighted, folded behind a toggle; check 360px and dark mode
 - [ ] D. Add-to-calendar: hand-built `.ics`, weekly RRULE, named route; tests (happy path, inactive and unknown service returns 404)
 - [ ] E. Get directions link from `config/ministry.php` address; hidden while address is empty
 - [ ] Roadmap: add "include starts_on/ends_on fields, branch-scoped for branch-head" to the Phase 2 Filament Service resource line

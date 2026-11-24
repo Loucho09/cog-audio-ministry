@@ -29,3 +29,7 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Gallery: responsive `srcset` or thumbnails for gallery images (added 2026-11-24; see [[homepage-sections]])
 - Replace the temporary local `cog_audio` MySQL password before any shared/production use; production gets its own credentials (added 2026-11-24)
 - Single cancelled service dates (one-off exceptions) for the homepage services list; v2 uses only a date window (added 2026-11-24; see [[services-section-v2]], [[service-date-window]])
+- Validate `ends_on >= starts_on` in the Phase 2 Filament Service resource (added 2026-11-24; see [[services-section-v2]])
+- Maybe merge same-weekday rows (two Wednesday rows) in the weekly list; ask owner first (added 2026-11-24; see [[services-section-v2]])
+- Windows dev note: "rename(): Access is denied" on compiled views; run `php artisan view:clear` (added 2026-11-24)
+- Consider gitignoring `.playwright-mcp/` (added 2026-11-24)
