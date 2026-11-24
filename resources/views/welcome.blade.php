@@ -6,6 +6,7 @@
     <x-home.impact :services-per-week="$servicesPerWeek" />
     <x-home.about />
     <x-home.what-we-do />
+    <x-home.churches />
     <x-home.team :members="$teamMembers" />
     <x-home.services :branch="$branch" :schedule="$schedule" />
     <x-home.gallery :images="$galleryImages" />
