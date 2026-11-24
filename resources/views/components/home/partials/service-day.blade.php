@@ -4,10 +4,10 @@
 @endphp
 
 <li class="rounded-2xl border border-text/10 bg-background p-5 transition-shadow duration-200 hover:shadow-md">
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
         <h3 class="text-base font-semibold text-text">{{ $day['date']->format('l, M j') }}</h3>
         @if ($badge)
-            <span class="rounded-full bg-primary-dark px-2.5 py-0.5 text-xs font-medium text-surface">{{ $badge }}</span>
+            <span class="shrink-0 rounded-full bg-primary-dark px-2.5 py-0.5 text-xs font-medium text-surface">{{ $badge }}</span>
         @endif
     </div>
     <div class="mt-3 space-y-4">

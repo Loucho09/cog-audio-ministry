@@ -19,14 +19,14 @@
             <p class="mt-12 text-center text-base text-text/70">Service times will be posted soon.</p>
         @else
             <div x-data="{ showMore: false }" class="mt-12">
-                <ul class="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     @foreach ($soon as $day)
                         @include('components.home.partials.service-day', ['day' => $day, 'badge' => $day['badge']])
                     @endforeach
                 </ul>
 
                 @if ($later->isNotEmpty())
-                    <ul id="more-service-dates" x-show="showMore" x-cloak class="mt-4 grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <ul id="more-service-dates" x-show="showMore" x-cloak class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         @foreach ($later as $day)
                             @include('components.home.partials.service-day', ['day' => $day, 'badge' => $day['badge']])
                         @endforeach
