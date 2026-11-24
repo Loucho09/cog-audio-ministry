@@ -32,3 +32,11 @@ Dark mode (`.dark`):
 - [[dark-mode-css-variable-tokens]]
 - [[section-backdrops]]
 - [[homepage-sections]]
+
+## Update 2026-11-24 (branch feature/light-mode-polish)
+Owner feedback: light mode was too bright and glary, "Our Churches" stayed dark in light mode, and "Join Us" looked blurry and hard on the eyes.
+- Light `background` changed #F8FAFC -> #EEF2F7. White `surface` cards now stand out. Dark mode unchanged.
+- Muted text one step stronger site-wide: `text/70` -> `/80`, `/75` -> `/80`, `/60` -> `/70`. Card borders `border-text/10` -> `/15`. Dark mode muted text is slightly brighter too.
+- Our Churches: theme-aware. Light = light background, church logo as faint watermark under a background veil, white cards, dark text, `primary-dark` links. Dark = unchanged dark photo band.
+- Join Us: light = clean white band with border, no glows or black-to-white fades. Dark = unchanged near-black stage band with glows.
+- This supersedes the earlier rule that Churches and Join are dark bands in both themes. The hero stays dark in both themes.
