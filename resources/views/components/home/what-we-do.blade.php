@@ -60,6 +60,14 @@
                     this.active = (i + this.count) % this.count;
                     if (focus) this.$nextTick(() => this.$refs['roleTab' + this.active].focus());
                 },
+                onKey(e) {
+                    {{-- Leave Alt/Ctrl/Meta combos (e.g. Alt+Left = browser Back) alone. --}}
+                    if (e.altKey || e.ctrlKey || e.metaKey) return;
+                    const target = { ArrowRight: this.active + 1, ArrowLeft: this.active - 1, Home: 0, End: this.count - 1 }[e.key];
+                    if (target === undefined) return;
+                    e.preventDefault();
+                    this.select(target, true);
+                },
             }"
         >
             {{-- Role picker: WAI-ARIA tabs pattern (arrow keys, Home/End). --}}
@@ -67,10 +75,7 @@
                 role="tablist"
                 aria-label="Audio ministry roles"
                 class="grid grid-cols-2 gap-3 sm:grid-cols-4"
-                @keydown.right.prevent="select(active + 1, true)"
-                @keydown.left.prevent="select(active - 1, true)"
-                @keydown.home.prevent="select(0, true)"
-                @keydown.end.prevent="select(count - 1, true)"
+                @keydown="onKey($event)"
             >
                 @foreach ($roles as $index => $role)
                     <button
@@ -85,8 +90,8 @@
                         :tabindex="active === {{ $index }} ? 0 : -1"
                         @click="select({{ $index }})"
                         @class([
-                            'group relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border px-2 py-4 text-center text-sm font-semibold transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:px-4 sm:py-5',
-                            'border-primary/40 bg-surface text-text shadow-md' => $index === 0,
+                            'group relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl border px-2 py-4 text-center text-sm font-semibold transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none sm:px-4 sm:py-5',
+                            'border-primary/40 bg-surface text-text shadow-md dark:shadow-[0_0_30px_-10px] dark:shadow-primary/40' => $index === 0,
                             'border-text/15 bg-surface/60 text-text/80 hover:border-primary/30 hover:bg-surface hover:text-text' => $index !== 0,
                         ])
                         :class="{
@@ -105,7 +110,7 @@
                         {{-- Active indicator: stage-light bar along the bottom edge. --}}
                         <span aria-hidden="true"
                             @class([
-                                'absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary to-accent transition-opacity duration-300',
+                                'absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary to-accent transition-opacity duration-300 motion-reduce:transition-none',
                                 'opacity-0' => $index !== 0,
                             ])
                             :class="{ 'opacity-100': active === {{ $index }}, 'opacity-0': active !== {{ $index }} }"></span>

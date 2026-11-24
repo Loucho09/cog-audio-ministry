@@ -95,8 +95,12 @@ it('renders the what-we-do role picker as accessible tabs with the first role se
         ->and($tabs->item(1)->getAttribute('aria-selected'))->toBe('false');
 
     foreach ($tabs as $i => $tab) {
+        $panelClasses = explode(' ', $panels->item($i)->getAttribute('class'));
+
         expect($tab->getAttribute('aria-controls'))->toBe($panels->item($i)->getAttribute('id'))
-            ->and($panels->item($i)->getAttribute('aria-labelledby'))->toBe($tab->getAttribute('id'));
+            ->and($panels->item($i)->getAttribute('aria-labelledby'))->toBe($tab->getAttribute('id'))
+            ->and($tab->getAttribute('tabindex'))->toBe($i === 0 ? '0' : '-1')
+            ->and(in_array('invisible', $panelClasses, true))->toBe($i !== 0);
     }
 });
 
