@@ -34,8 +34,16 @@ Slices:
 2. Hero, about us, what we do (done).
    - Hero (updated 2026-11-24, commit 41ac1fb): cover photo is a full-bleed background (`object-cover`) with an even black/65 overlay and centered white text. Decorative image (`alt=""`). See [[logo-and-cover-assets]].
    - ~~Hero cover shown as a banner below the hero text~~ (superseded 2026-11-24 by the full-bleed background above).
-3. Upcoming services and gallery with Alpine lightbox, `HomeController` (in progress).
-4. Join us CTA, FAQ accordion, contact with map only when address is set, meet the team behind the config flag (planned).
+3. Upcoming services and gallery with Alpine lightbox, `HomeController` (~~in progress~~ done, see [[homepage-sections-tasks]]).
+4. Join us CTA, FAQ accordion, contact with map only when address is set, meet the team behind the config flag (~~planned~~ done, commit 1c8d658; browser check pending).
+   - Join Us CTA links to `#contact` until the Phase 3 application form exists (owner choice, 2026-11-24).
+   - Hero "Join Us" button now points to `#join`.
+   - FAQ section is hidden when there are no published FAQs.
+   - Contact items are hidden when their config value is null.
+   - Map is a Google Maps iframe embed (no API key), shown only when `MINISTRY_ADDRESS` is set.
+   - Meet the Team is behind `ministry.show_team` (default OFF).
+   - Owner-confirm copy added (pending owner sign-off): Join Us heading and body, including the Tagalog line "Halina at sumama sa amin!"; Contact intro "We would love to hear from you."
+   - Status stays "in progress" until the mobile (360px) and dark-mode browser check is done. Blocked on MySQL being connected.
 
 Owner-confirm copy (placeholders until the owner confirms):
 - Hero sentence
