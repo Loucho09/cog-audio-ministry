@@ -1,13 +1,12 @@
 @php
-    // One name per service, with its start times as chips (same name at several times stays on one line).
+    // Compact card for one upcoming day. One name per service, with its start times as small chips.
     $groups = collect($day['items'])->groupBy(fn ($item) => $item['service']->name);
     $dateLabel = $day['date']->format('l, M j');
 @endphp
 
-<li class="group flex flex-col rounded-3xl border border-text/10 bg-background p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg motion-reduce:transform-none sm:p-6 dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-primary/20">
+<li class="group flex flex-col gap-3 rounded-3xl border border-text/10 bg-background p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg motion-reduce:transform-none dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-primary/20 sm:p-5">
     <div class="flex items-start gap-3">
-        {{-- The heading is the full date for screen readers. The visual block (weekday eyebrow + big "Nov 28") is
-             aria-hidden and placed first with CSS order, so the badge can sit right after the heading in the markup. --}}
+        {{-- Heading is the full date for screen readers; the visual block is aria-hidden and placed first with CSS order. --}}
         <h3 class="sr-only">{{ $dateLabel }}</h3>
 
         @if ($badge)
@@ -16,21 +15,18 @@
 
         <div aria-hidden="true" class="order-first min-w-0">
             <span class="block text-xs font-semibold uppercase tracking-[0.2em] text-text/70">{{ $day['date']->format('l') }}</span>
-            <span class="mt-1 block text-2xl font-extrabold leading-tight tracking-tight text-text">{{ $day['date']->format('M j') }}</span>
+            <time datetime="{{ $day['date']->format('Y-m-d') }}" class="mt-0.5 block text-xl font-extrabold leading-tight tracking-tight text-text">{{ $day['date']->format('M j') }}</time>
         </div>
     </div>
 
-    <div class="mt-5 space-y-4">
+    <div class="space-y-3">
         @foreach ($groups as $name => $items)
             <div>
                 <p class="text-sm font-semibold text-text">{{ $name }}</p>
-                <ul class="mt-2 flex flex-wrap gap-2">
+                <ul class="mt-1.5 flex flex-wrap gap-1.5">
                     @foreach ($items as $item)
-                        <li class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-text/10 bg-surface px-3 py-1 text-sm text-text">
-                            <svg class="h-3.5 w-3.5 shrink-0 text-primary-dark" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            {{ $item['starts_at']->format('g:i A') }}
+                        <li>
+                            <time datetime="{{ $item['starts_at']->format('c') }}" class="inline-flex whitespace-nowrap rounded-full border border-text/10 bg-surface px-2.5 py-0.5 text-xs text-text">{{ $item['starts_at']->format('g:i A') }}</time>
                         </li>
                     @endforeach
                 </ul>

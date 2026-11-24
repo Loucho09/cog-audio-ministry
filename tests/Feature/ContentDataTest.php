@@ -31,8 +31,8 @@ it('runs the seeders', function () {
     expect(Branch::count())->toBe(5)
         ->and(Branch::main()->count())->toBe(1)
         ->and(Branch::mainBranch()->slug)->toBe('dasma')
-        ->and(Service::count())->toBe(10)
-        ->and(Service::where('branch_id', Branch::mainBranch()->id)->count())->toBe(10)
+        ->and(Service::count())->toBe(11)
+        ->and(Service::where('branch_id', Branch::mainBranch()->id)->count())->toBe(11)
         ->and(Service::where('name', 'Sunday Service')->count())->toBe(7)
         ->and(Faq::published()->count())->toBeGreaterThanOrEqual(4)
         ->and(GalleryImage::published()->count())->toBe($expectedGallery)
@@ -45,7 +45,7 @@ it('keeps admin edits when seeders re-run and is idempotent', function () {
     $this->seed(DatabaseSeeder::class);
 
     expect(Faq::where('question', 'How do I apply?')->value('answer'))->toBe('Edited')
-        ->and(Service::count())->toBe(10)
+        ->and(Service::count())->toBe(11)
         ->and(User::where('email', 'test@example.com')->count())->toBe(1);
 });
 

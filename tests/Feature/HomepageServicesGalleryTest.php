@@ -29,7 +29,7 @@ it('shows today and upcoming services in chronological order', function () {
 
     $this->get('/')
         ->assertOk()
-        ->assertSeeInOrder(['Saturday, Nov 28', 'Empowered Night', '5:30 PM', 'Sunday, Nov 29', 'Sunday Service', '5:30 AM', '7:30 AM']);
+        ->assertSeeInOrder(['Saturday, Nov 28', '5:30 PM', 'Empowered Night', 'Sunday, Nov 29', 'Sunday Service', '5:30 AM', '7:30 AM']);
 });
 
 it('puts the Today and Tomorrow badges on the correct dates only', function () {
@@ -107,33 +107,27 @@ it('keeps the homepage query count small', function () {
     expect(count(DB::getQueryLog()))->toBeLessThanOrEqual(5); // + weekly services list
 });
 
-it('puts later dates only in the collapsible list', function () {
+it('does not render dates beyond the next 7 days', function () {
     seedServices();
 
-    $html = $this->get('/')->assertOk()->getContent();
-    $doc = new DOMDocument;
-    @$doc->loadHTML('<?xml encoding="utf-8"?>'.$html);
-    $xp = new DOMXPath($doc);
-
-    // Dec 5 is exactly 7 days after Nov 28, so it belongs in "later".
-    $more = $xp->query('//*[@id="more-service-dates"]')->item(0);
-    expect($more)->not->toBeNull()
-        ->and($more->textContent)->toContain('Saturday, Dec 5')
-        ->and($more->textContent)->not->toContain('Saturday, Nov 28');
-
-    $main = $xp->query('//*[@id="more-service-dates"]/preceding-sibling::ul[1]')->item(0);
-    expect($main->textContent)->toContain('Saturday, Nov 28')->not->toContain('Saturday, Dec 5');
+    // Dec 5 is exactly 7 days after Nov 28, so it is outside the upcoming window and not shown.
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('Saturday, Nov 28')
+        ->assertDontSee('Saturday, Dec 5')
+        ->assertDontSee('more-service-dates')
+        ->assertDontSee('Show more dates');
 });
 
 it('shows real weekly summary lines with the weekday', function () {
     seedServices();
 
     $this->get('/')
-        ->assertSee('Saturday:', false)
-        ->assertSeeInOrder(['Saturday:', 'Empowered Night', '5:30 PM'])
-        ->assertSeeInOrder(['Tuesday:', 'Revival Night', '7:00 PM'])
-        ->assertSee('Sunday:', false)
-        ->assertSeeInOrder(['Sunday:', 'Sunday Service', '5:30 AM', '7:30 AM', '11:30 AM']);
+        ->assertSee('Saturday', false)
+        ->assertSeeInOrder(['Saturday', 'Empowered Night', '5:30 PM'])
+        ->assertSeeInOrder(['Tuesday', 'Revival Night', '7:00 PM'])
+        ->assertSee('Sunday', false)
+        ->assertSeeInOrder(['Sunday', 'Sunday Service', '5:30 AM', '7:30 AM', '11:30 AM']);
 });
 
 it('puts a single real photo in the lightbox without prev and next', function () {

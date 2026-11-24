@@ -16,9 +16,11 @@ class ServiceSeeder extends Seeder
     {
         $main = Branch::main()->firstOrFail();
 
-        // Owner 2026-11-24: Revival Night and Salvation Night paused, resume first week of Jan 2027.
+        // Owner 2026-11-24: Revival Night, Audio Fellowship and Salvation Night paused,
+        // resume first week of Jan 2027. Audio Fellowship is public, before Salvation Night.
         $schedule = [
             [2, '19:00', 'Revival Night', '2027-01-05'],
+            [3, '18:00', 'Audio Fellowship', '2027-01-06'],
             [3, '19:00', 'Salvation Night', '2027-01-06'],
             [6, '17:30', 'Empowered Night', null],
         ];
