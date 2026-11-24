@@ -117,3 +117,13 @@ it('forbids members from the gallery page', function () {
 
     $this->get('/admin/gallery-images')->assertForbidden();
 });
+
+it('does not let a branch-head bulk delete global images', function () {
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+
+    Livewire::test(ListGalleryImages::class)
+        ->callTableBulkAction('delete', [$this->imageA, $this->imageGlobal]);
+
+    expect(GalleryImage::find($this->imageGlobal->id))->not->toBeNull()
+        ->and(GalleryImage::find($this->imageA->id))->toBeNull();
+});
