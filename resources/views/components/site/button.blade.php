@@ -6,11 +6,12 @@
 ])
 
 @php
-    $base = 'inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2';
+    $base = 'inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2';
 
+    // Both sizes are at least 44px tall for touch.
     $sizes = [
-        'default' => 'px-4 py-2 text-sm',
-        'lg' => 'px-6 py-3 text-base',
+        'default' => 'min-h-11 px-4 py-2 text-sm',
+        'lg' => 'min-h-11 px-6 py-3 text-base',
     ];
 
     $variants = [

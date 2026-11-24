@@ -7,15 +7,16 @@
         config('ministry.show_team') ? ['label' => 'Meet the Team', 'href' => route('home').'#team'] : null,
         ['label' => 'Services', 'href' => route('home').'#services'],
         ['label' => 'Gallery', 'href' => route('home').'#gallery'],
-        ['label' => 'Join Us', 'href' => route('home').'#join'],
-        ['label' => 'FAQ', 'href' => route('home').'#faq'],
-        ['label' => 'Contact', 'href' => route('home').'#contact'],
-    ])->filter()->values();
+        // TODO: re-enable these three when the #join, #faq and #contact sections are built (set 'ready' => true).
+        ['label' => 'Join Us', 'href' => route('home').'#join', 'ready' => false],
+        ['label' => 'FAQ', 'href' => route('home').'#faq', 'ready' => false],
+        ['label' => 'Contact', 'href' => route('home').'#contact', 'ready' => false],
+    ])->filter(fn ($link) => $link && ($link['ready'] ?? true))->values();
 
     $authUrl = auth()->check() ? route('dashboard') : route('login');
     $authLabel = auth()->check() ? 'Dashboard' : 'Member Login';
 
-    $linkClasses = 'whitespace-nowrap rounded-sm text-text/80 transition-colors hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark';
+    $linkClasses = 'inline-flex min-h-11 items-center whitespace-nowrap rounded-sm text-text/80 transition-colors duration-200 hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark';
 @endphp
 
 <header
@@ -28,7 +29,7 @@
         {{-- Brand --}}
         <a
             href="{{ route('home') }}"
-            class="flex min-w-0 flex-1 items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
+            class="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-md transition-opacity duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
         >
             @if ($hasLogo)
                 <img
@@ -76,7 +77,7 @@
                 :aria-expanded="open.toString()"
                 aria-controls="mobile-menu"
                 aria-label="Toggle navigation menu"
-                class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-text transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark lg:hidden"
+                class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-text transition-colors duration-200 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark lg:hidden"
             >
                 <svg x-show="!open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
@@ -105,7 +106,7 @@
                         <a
                             href="{{ $link['href'] }}"
                             @click="open = false"
-                            class="block rounded-md px-3 py-3 text-base text-text transition-colors hover:bg-background hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
+                            class="block rounded-md px-3 py-3 text-base text-text transition-colors duration-200 hover:bg-background hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
                         >{{ $link['label'] }}</a>
                     </li>
                 @endforeach

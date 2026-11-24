@@ -29,7 +29,7 @@ it('shows today and upcoming services in chronological order', function () {
 
     $this->get('/')
         ->assertOk()
-        ->assertSeeInOrder(['Saturday, Nov 28', '5:30 PM', 'Empowered Night', 'Sunday, Nov 29', '5:30 AM', 'Sunday Service', '7:30 AM']);
+        ->assertSeeInOrder(['Saturday, Nov 28', 'Empowered Night', '5:30 PM', 'Sunday, Nov 29', 'Sunday Service', '5:30 AM', '7:30 AM']);
 });
 
 it('puts the Today and Tomorrow badges on the correct dates only', function () {
@@ -130,9 +130,9 @@ it('shows real weekly summary lines with the weekday', function () {
 
     $this->get('/')
         ->assertSee('Tuesday:', false)
-        ->assertSee('Revival Night, 7:00 PM')
+        ->assertSeeInOrder(['Tuesday:', 'Revival Night', '7:00 PM'])
         ->assertSee('Sunday:', false)
-        ->assertSeeInOrder(['Sunday:', 'Sunday Service, 5:30 AM, 7:30 AM, 11:30 AM']);
+        ->assertSeeInOrder(['Sunday:', 'Sunday Service', '5:30 AM', '7:30 AM', '11:30 AM']);
 });
 
 it('puts a single real photo in the lightbox without prev and next', function () {

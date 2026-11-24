@@ -18,7 +18,7 @@
                 [
                     'title' => 'Monitors',
                     'description' => 'The monitor mix is what singers and musicians hear on stage, so they can hear themselves and each other while they serve.',
-                    'icon' => '<path stroke-linejoin="round" d="M5 19.5l2-8h10l2 8z" /><circle cx="12" cy="15.5" r="1.5" />',
+                    'icon' => '<rect x="5.5" y="3" width="13" height="18" rx="2" /><circle cx="12" cy="14" r="3.5" /><circle cx="12" cy="7.5" r="1.25" />',
                 ],
                 [
                     'title' => 'Livestream',
@@ -35,14 +35,17 @@
 
         <ul class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             @foreach ($roles as $role)
-                <li class="flex flex-col rounded-2xl border border-text/10 bg-surface p-6 shadow-sm">
-                    <span aria-hidden="true" class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-primary-dark">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                            {!! $role['icon'] !!}
-                        </svg>
-                    </span>
-                    <h3 class="mt-5 text-lg font-semibold text-text">{{ $role['title'] }}</h3>
-                    <p class="mt-2 text-sm leading-relaxed text-text/70">
+                <li class="flex flex-col rounded-2xl border border-text/10 bg-surface p-6 shadow-sm transition-shadow duration-200 hover:shadow-md">
+                    {{-- Mobile: icon and title share a row. From sm up: stacked. --}}
+                    <div class="flex items-center gap-4 sm:block">
+                        <span aria-hidden="true" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-primary-dark">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                {!! $role['icon'] !!}
+                            </svg>
+                        </span>
+                        <h3 class="text-lg font-semibold text-text sm:mt-5">{{ $role['title'] }}</h3>
+                    </div>
+                    <p class="mt-3 text-sm leading-relaxed text-text/70 sm:mt-2">
                         {{ $role['description'] }}
                     </p>
                 </li>

@@ -6,10 +6,10 @@
     // Only real photos open in the lightbox; placeholders stay plain images.
     $viewable = $images->reject(fn ($i) => $i['placeholder'])->values();
     $viewIndex = 0;
-    $controlClasses = 'rounded-full bg-surface p-2.5 text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2';
+    $controlClasses = 'rounded-full bg-surface p-2.5 text-text transition-colors duration-200 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2';
 @endphp
 
-<section id="gallery" aria-labelledby="gallery-title" class="bg-surface py-16 sm:py-20">
+<section id="gallery" aria-labelledby="gallery-title" class="bg-background py-16 sm:py-20">
     <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-2xl text-center">
             <h2 id="gallery-title" class="text-2xl font-bold tracking-tight text-text sm:text-3xl">Gallery</h2>
@@ -101,9 +101,9 @@
                                     type="button"
                                     x-on:click="show({{ $viewIndex++ }}, $el)"
                                     aria-label="View larger photo: {{ $image['alt'] }}"
-                                    class="block w-full rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2"
+                                    class="group block w-full overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2"
                                 >
-                                    <img src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" loading="lazy" decoding="async" class="aspect-[4/3] w-full rounded-lg object-cover">
+                                    <img src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" loading="lazy" decoding="async" class="aspect-[4/3] w-full rounded-lg object-cover transition duration-200 group-hover:opacity-90 motion-safe:group-hover:scale-[1.02]">
                                 </button>
                             @endif
                         </li>

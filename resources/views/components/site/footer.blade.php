@@ -15,7 +15,7 @@
                             href="{{ config('ministry.facebook_url') }}"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="rounded-sm text-text/80 transition-colors hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                            class="inline-flex min-h-11 items-center rounded-sm text-text/80 transition-colors duration-200 hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
                         >Facebook<span class="sr-only"> (opens in a new tab)</span></a>
                     </li>
                 @endif
@@ -26,7 +26,7 @@
                             href="{{ config('ministry.messenger_url') }}"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="rounded-sm text-text/80 transition-colors hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                            class="inline-flex min-h-11 items-center rounded-sm text-text/80 transition-colors duration-200 hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
                         >Messenger<span class="sr-only"> (opens in a new tab)</span></a>
                     </li>
                 @endif
@@ -35,7 +35,7 @@
                     <li>
                         <a
                             href="mailto:{{ config('ministry.email') }}"
-                            class="break-words rounded-sm text-text/80 transition-colors hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                            class="inline-flex min-h-11 max-w-full items-center break-words rounded-sm text-text/80 transition-colors duration-200 hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
                         >{{ config('ministry.email') }}</a>
                     </li>
                 @endif
