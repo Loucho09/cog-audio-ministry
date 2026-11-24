@@ -4,7 +4,9 @@ use App\Filament\Resources\Branches\Pages\CreateBranch;
 use App\Filament\Resources\Branches\Pages\EditBranch;
 use App\Filament\Resources\Branches\Pages\ListBranches;
 use App\Models\Branch;
+use App\Models\GalleryImage;
 use App\Models\Service;
+use App\Models\TeamMember;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
@@ -74,6 +76,15 @@ it('does not delete a branch that has services', function () {
 
     expect(Branch::find($this->other->id))->not->toBeNull();
 });
+
+it('does not delete a branch that has gallery photos or team members', function (string $model) {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    $model::factory()->create(['branch_id' => $this->other->id]);
+
+    Livewire::test(EditBranch::class, ['record' => $this->other->id])->callAction('delete');
+
+    expect(Branch::find($this->other->id))->not->toBeNull();
+})->with([GalleryImage::class, TeamMember::class]);
 
 it('deletes an empty non-main branch', function () {
     $this->actingAs(User::factory()->superAdmin()->create());

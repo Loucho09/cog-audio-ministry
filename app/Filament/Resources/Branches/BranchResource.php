@@ -6,6 +6,8 @@ use App\Filament\Resources\Branches\Pages\CreateBranch;
 use App\Filament\Resources\Branches\Pages\EditBranch;
 use App\Filament\Resources\Branches\Pages\ListBranches;
 use App\Models\Branch;
+use App\Models\GalleryImage;
+use App\Models\TeamMember;
 use BackedEnum;
 use Closure;
 use Filament\Actions\BulkActionGroup;
@@ -57,6 +59,11 @@ class BranchResource extends Resource
         }
         if ($branch->services()->exists()) {
             return "{$branch->name} still has services. Remove them first.";
+        }
+        // nullOnDelete would turn these into "all churches" records, so block instead.
+        if (GalleryImage::where('branch_id', $branch->id)->exists()
+            || TeamMember::where('branch_id', $branch->id)->exists()) {
+            return "{$branch->name} still has gallery photos or team members. Move or remove them first.";
         }
 
         return null;
