@@ -25,3 +25,5 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Testimonies section (owner idea 2026-11-24; see [[homepage-hooks]])
 - Sticky join CTA on mobile (owner idea 2026-11-24; see [[homepage-hooks]])
 - "No experience needed" steps on the join section (owner declined for now, 2026-11-24; see [[homepage-hooks]])
+- Gallery: with exactly 4 non-featured photos the md grid shows a lone tile; check the layout (added 2026-11-24; see [[homepage-sections]])
+- Gallery: responsive `srcset` or thumbnails for gallery images (added 2026-11-24; see [[homepage-sections]])
