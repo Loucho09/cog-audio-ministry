@@ -13,11 +13,28 @@ function flaggedUser(array $state = []): User
     ], $state));
 }
 
-it('redirects a flagged user from dashboard, profile and admin', function (string $url) {
-    $this->actingAs(flaggedUser());
+it('lands a flagged user on the dashboard after login, with the warning banner', function () {
+    $user = flaggedUser(['email' => 'flagged@example.test']);
 
-    $this->get($url)->assertRedirect(route('password.change'));
-})->with(['/dashboard', '/profile']);
+    $this->post('/login', ['email' => 'flagged@example.test', 'password' => 'temp-Pass-123'])
+        ->assertRedirect(route('dashboard'));
+
+    $this->get('/dashboard')
+        ->assertOk()
+        ->assertSee('You\'re using a temporary password', false)
+        ->assertSee(route('password.change'), false);
+});
+
+it('lets a flagged user use the profile and shows the banner there', function () {
+    $this->actingAs(flaggedUser())->get('/profile')
+        ->assertOk()
+        ->assertSee('temporary password');
+});
+
+it('shows no banner to an unflagged user', function () {
+    $this->actingAs(User::factory()->member(Branch::factory()->create())->create())
+        ->get('/dashboard')->assertOk()->assertDontSee('temporary password');
+});
 
 it('redirects a flagged branch-head away from the admin panel', function () {
     $user = User::factory()->branchHead(Branch::factory()->create())->create(['must_change_password' => true]);
@@ -54,7 +71,24 @@ it('clears the flag and redirects to the dashboard after a valid change', functi
     expect($user->must_change_password)->toBeFalse()
         ->and(Hash::check('Brand-new-Pass-9', $user->password))->toBeTrue();
 
-    $this->get('/dashboard')->assertOk();
+    $this->get('/dashboard')->assertOk()->assertDontSee('temporary password');
+});
+
+it('lets an admin into the panel once the password is changed', function () {
+    $user = User::factory()->superAdmin()->create([
+        'password' => Hash::make('temp-Pass-123'),
+        'must_change_password' => true,
+    ]);
+
+    $this->actingAs($user)->get('/admin')->assertRedirect(route('password.change'));
+
+    $this->post(route('password.change.store'), [
+        'current_password' => 'temp-Pass-123',
+        'password' => 'Brand-new-Pass-9',
+        'password_confirmation' => 'Brand-new-Pass-9',
+    ])->assertRedirect(route('dashboard'));
+
+    $this->get('/admin')->assertOk();
 });
 
 it('rejects a new password equal to the current one', function () {
@@ -108,20 +142,30 @@ it('allows a flagged user to log out through the Filament route', function () {
     $this->assertGuest();
 });
 
-it('blocks a flagged user from verification, password update and profile update', function () {
-    $user = flaggedUser(['email_verified_at' => null]);
-    $this->actingAs($user);
+it('refuses the profile password update for a flagged user', function () {
+    $user = flaggedUser();
 
-    $this->post(route('verification.send'))->assertRedirect(route('password.change'));
-    $this->put(route('password.update'), [
+    $this->actingAs($user)->put(route('password.update'), [
         'current_password' => 'temp-Pass-123',
         'password' => 'Brand-new-Pass-9',
         'password_confirmation' => 'Brand-new-Pass-9',
     ])->assertRedirect(route('password.change'));
-    $this->patch(route('profile.update'), ['name' => 'X', 'email' => 'x@example.test'])->assertRedirect(route('password.change'));
 
-    expect($user->refresh()->name)->not->toBe('X')
+    $user->refresh();
+    expect($user->must_change_password)->toBeTrue()
         ->and(Hash::check('temp-Pass-123', $user->password))->toBeTrue();
+});
+
+it('still lets an unflagged user update the password from the profile', function () {
+    $user = User::factory()->member(Branch::factory()->create())->create(['password' => Hash::make('Old-Pass-12345')]);
+
+    $this->actingAs($user)->from('/profile')->put(route('password.update'), [
+        'current_password' => 'Old-Pass-12345',
+        'password' => 'Brand-new-Pass-9',
+        'password_confirmation' => 'Brand-new-Pass-9',
+    ])->assertSessionHasNoErrors()->assertRedirect('/profile');
+
+    expect(Hash::check('Brand-new-Pass-9', $user->refresh()->password))->toBeTrue();
 });
 
 it('answers 403 to Livewire and JSON requests from a flagged user', function () {
@@ -129,6 +173,30 @@ it('answers 403 to Livewire and JSON requests from a flagged user', function () 
 
     $this->withHeader('X-Livewire', 'true')->post(Livewire::getUpdateUri(), [])->assertForbidden();
     $this->getJson('/dashboard')->assertForbidden();
+    $this->getJson('/admin')->assertForbidden();
+});
+
+it('blocks any livewire path for a flagged user without special headers', function () {
+    $this->actingAs(flaggedUser())->post(route('livewire.upload-file'))->assertForbidden();
+});
+
+it('refuses profile update for a flagged user', function () {
+    $user = flaggedUser(['email' => 'keep@example.test']);
+
+    $this->actingAs($user)->patch(route('profile.update'), [
+        'name' => 'Changed', 'email' => 'new@example.test',
+    ])->assertRedirect(route('password.change'));
+
+    expect($user->refresh()->email)->toBe('keep@example.test');
+});
+
+it('refuses profile deletion for a flagged user', function () {
+    $user = flaggedUser();
+
+    $this->actingAs($user)->delete(route('profile.destroy'), ['password' => 'temp-Pass-123'])
+        ->assertRedirect(route('password.change'));
+
+    $this->assertModelExists($user);
 });
 
 it('cycles the remember token after a change', function () {

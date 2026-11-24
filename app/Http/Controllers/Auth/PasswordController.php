@@ -15,6 +15,11 @@ class PasswordController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
+        // Flagged users have one path only: the throttled change-password flow.
+        if ($request->user()->must_change_password) {
+            return redirect()->route('password.change');
+        }
+
         $validated = $request->validateWithBag('updatePassword', [
             'current_password' => ['required', 'current_password'],
             'password' => ['required', Password::defaults(), 'confirmed'],

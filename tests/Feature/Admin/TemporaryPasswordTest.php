@@ -171,7 +171,7 @@ it('verifies the email of a user created with a temporary password so the full f
     $this->post('/login', ['email' => 'flow@example.test', 'password' => 'Temp-Pass-12345']);
     $this->assertAuthenticatedAs($user);
 
-    $this->get('/dashboard')->assertRedirect(route('password.change'));
+    $this->get('/dashboard')->assertOk()->assertSee('temporary password');
     $this->post(route('password.change.store'), [
         'current_password' => 'Temp-Pass-12345',
         'password' => 'Brand-new-Pass-9',
