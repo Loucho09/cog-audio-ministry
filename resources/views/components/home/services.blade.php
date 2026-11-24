@@ -22,16 +22,17 @@
         @if ($soon->isEmpty() && $weekly->isEmpty())
             <p class="mt-10 text-center text-base text-text/80 sm:mt-12">Service times will be posted soon.</p>
         @else
-            <div class="mt-10 sm:mt-12 lg:grid lg:grid-cols-12 lg:items-stretch lg:gap-8">
+            {{-- From md (tablet) up: featured service left, upcoming list right. --}}
+            <div class="mt-10 sm:mt-12 md:grid md:grid-cols-12 md:items-stretch md:gap-6 lg:gap-8">
                 @if ($spotlight)
-                    <div class="mx-auto max-w-3xl {{ $upcoming->isNotEmpty() ? 'lg:col-span-7' : 'lg:col-span-12' }} lg:mx-0 lg:flex lg:max-w-none lg:flex-col lg:[&>*]:flex-1">
+                    <div class="mx-auto max-w-3xl {{ $upcoming->isNotEmpty() ? 'md:col-span-7' : 'md:col-span-12' }} md:mx-0 md:flex md:max-w-none md:flex-col md:[&>*]:flex-1">
                         @include('components.home.partials.service-spotlight', ['day' => $spotlight, 'badge' => $spotlight['badge']])
                     </div>
                 @endif
 
                 @if ($upcoming->isNotEmpty())
-                    {{-- Flex + centred on mobile. On lg, a stacked list in the right column beside the featured service. --}}
-                    <ul class="mt-6 flex flex-wrap justify-center gap-4 sm:mt-8 [&>li]:w-full {{ $spotlight ? 'lg:col-span-5' : 'lg:col-span-12' }} lg:mt-0 lg:flex-col lg:flex-nowrap lg:justify-start lg:[&>li]:flex-1">
+                    {{-- Flex + centred on mobile. From md, a stacked list in the right column beside the featured service. --}}
+                    <ul class="mt-6 flex flex-wrap justify-center gap-4 sm:mt-8 [&>li]:w-full {{ $spotlight ? 'md:col-span-5' : 'md:col-span-12' }} md:mt-0 md:flex-col md:flex-nowrap md:justify-start md:[&>li]:flex-1">
                         @foreach ($upcoming as $day)
                             @include('components.home.partials.service-day', ['day' => $day, 'badge' => $day['badge']])
                         @endforeach
