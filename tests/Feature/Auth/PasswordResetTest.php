@@ -144,3 +144,57 @@ test('a 2-day-old normal reset token fails, even with a forged welcome marker', 
 
     expect(Hash::check('new-Password-123', $user->fresh()->password))->toBeFalse();
 });
+
+test('forgot password gives the same answer when throttled', function () {
+    $user = User::factory()->create();
+
+    $first = $this->from('/forgot-password')->post('/forgot-password', ['email' => $user->email]);
+    $second = $this->from('/forgot-password')->post('/forgot-password', ['email' => $user->email]);
+
+    expect($second->baseResponse->getSession()->get('status'))->toBe($first->baseResponse->getSession()->get('status'));
+    $second->assertSessionHasNoErrors();
+});
+
+test('an old invite token stops working after a profile password change', function () {
+    $user = User::factory()->create();
+    $token = Password::broker('invites')->createToken($user);
+
+    $this->actingAs($user)->put('/password', [
+        'current_password' => 'password',
+        'password' => 'brand-New-Pass-1',
+        'password_confirmation' => 'brand-New-Pass-1',
+    ])->assertSessionHasNoErrors();
+    auth()->logout();
+
+    $this->post('/reset-password', [
+        'token' => InviteToken::wrap($token),
+        'email' => $user->email,
+        'password' => 'another-Pass-123',
+        'password_confirmation' => 'another-Pass-123',
+    ])->assertSessionHasErrors(['email' => 'This link has expired or was replaced by a newer one. Please request a new link, or ask your branch head.']);
+});
+
+test('an old invite token fails for an account re-created with the same email', function () {
+    $user = User::factory()->create(['email' => 'again@example.com']);
+    $token = Password::broker('invites')->createToken($user);
+    $user->delete();
+    User::factory()->create(['email' => 'again@example.com']);
+
+    $this->post('/reset-password', [
+        'token' => InviteToken::wrap($token),
+        'email' => 'again@example.com',
+        'password' => 'another-Pass-123',
+        'password_confirmation' => 'another-Pass-123',
+    ])->assertSessionHasErrors('email');
+});
+
+test('profile update and delete are throttled', function () {
+    $user = User::factory()->create();
+
+    foreach (range(1, 5) as $i) {
+        $this->actingAs($user)->patch('/profile', ['name' => 'N', 'email' => $user->email, 'current_password' => 'password']);
+    }
+
+    $this->actingAs($user)->patch('/profile', ['name' => 'N', 'email' => $user->email, 'current_password' => 'password'])->assertStatus(429);
+    $this->actingAs($user)->delete('/profile', ['password' => 'password'])->assertStatus(429);
+});

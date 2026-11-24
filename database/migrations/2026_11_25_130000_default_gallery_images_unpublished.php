@@ -1,0 +1,23 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+// Changes only the column default. Existing rows keep their current value.
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('gallery_images', function (Blueprint $table) {
+            $table->boolean('is_published')->default(false)->change();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('gallery_images', function (Blueprint $table) {
+            $table->boolean('is_published')->default(true)->change();
+        });
+    }
+};

@@ -32,7 +32,10 @@ class PasswordResetLinkController extends Controller
 
         // Same answer for known and unknown emails, so this form cannot be used
         // to find out who has an account.
-        Password::sendResetLink($request->only('email'));
+        // The broker work (user lookup, token, throttle check) runs after the response is sent,
+        // so response time and content never depend on whether the email exists or is throttled.
+        $credentials = $request->only('email');
+        app()->terminating(fn () => Password::sendResetLink($credentials));
 
         return back()->with('status', __('If that email is registered, we sent a link to reset the password.'));
     }
