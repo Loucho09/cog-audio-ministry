@@ -84,7 +84,7 @@ it('renders the four team roles as h3 headings in what-we-do', function () {
     expect($titles)->toBe(['FOH (Front of House)', 'Monitors', 'Livestream', 'Stage Tech']);
 });
 
-it('renders the hero banner as a responsive picture with a jpg fallback', function () {
+it('renders the hero background as a responsive, decorative picture with a jpg fallback', function () {
     $xpath = homepageXPath($this->get('/')->assertOk()->getContent());
 
     $picture = '//section[@aria-labelledby="hero-title"]//picture';
@@ -99,7 +99,7 @@ it('renders the hero banner as a responsive picture with a jpg fallback', functi
             .asset('images/cover-1200.webp').' 1200w, '
             .asset('images/cover.webp').' 1600w'
         )
-        ->and($source->item(0)->getAttribute('sizes'))->toBe('(min-width: 1152px) 1152px, 100vw')
+        ->and($source->item(0)->getAttribute('sizes'))->toBe('100vw')
         ->and($img->length)->toBe(1)
         ->and($img->item(0)->getAttribute('src'))->toBe(asset('images/cover.jpg'))
         ->and($img->item(0)->getAttribute('width'))->toBe('1600')
@@ -107,7 +107,9 @@ it('renders the hero banner as a responsive picture with a jpg fallback', functi
         ->and($img->item(0)->getAttribute('fetchpriority'))->toBe('high')
         ->and($img->item(0)->getAttribute('decoding'))->toBe('async')
         ->and($img->item(0)->getAttribute('loading'))->toBe('')
-        ->and($img->item(0)->getAttribute('alt'))->toContain('COG Audio banner');
+        ->and($img->item(0)->hasAttribute('alt'))->toBeTrue()
+        ->and($img->item(0)->getAttribute('alt'))->toBe('')
+        ->and($img->item(0)->getAttribute('class'))->toContain('object-cover');
 });
 
 it('ships the cover image and its webp version in public/images', function () {
