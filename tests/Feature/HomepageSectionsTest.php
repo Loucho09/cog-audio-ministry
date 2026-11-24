@@ -140,3 +140,27 @@ it('hides the theme verse when no verse text is set', function () {
 
     expect($xpath->query('//section[@aria-labelledby="hero-title"]//figure')->length)->toBe(0);
 });
+
+it('shows the verse without a caption when no reference is set', function () {
+    config(['ministry.verse.reference' => null]);
+
+    $xpath = homepageXPath($this->get('/')->assertOk()->getContent());
+
+    $figure = '//section[@aria-labelledby="hero-title"]//figure';
+
+    expect($xpath->query($figure)->length)->toBe(1)
+        ->and($xpath->query($figure.'//figcaption')->length)->toBe(0);
+});
+
+it('hides every section backdrop from assistive technology', function () {
+    $xpath = homepageXPath($this->get('/')->assertOk()->getContent());
+
+    // Our variants only; Tailwind's own backdrop-blur-* utilities are not decorative layers.
+    $backdrops = $xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " backdrop-") and not(contains(@class, "backdrop-blur"))]/parent::*');
+
+    expect($backdrops->length)->toBeGreaterThan(0);
+
+    foreach ($backdrops as $backdrop) {
+        expect($backdrop->getAttribute('aria-hidden'))->toBe('true');
+    }
+});

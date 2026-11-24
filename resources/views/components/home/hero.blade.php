@@ -49,7 +49,7 @@
                         <p>&ldquo;{{ config('ministry.verse.text') }}&rdquo;</p>
                     </blockquote>
                     @if (filled(config('ministry.verse.reference')))
-                        <figcaption class="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/75">{{ config('ministry.verse.reference') }}</figcaption>
+                        <figcaption class="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/90">{{ config('ministry.verse.reference') }}</figcaption>
                     @endif
                 </figure>
             @endif

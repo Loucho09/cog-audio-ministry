@@ -78,7 +78,7 @@
         --ring-radius: 360px;
         background-image:
             radial-gradient(circle 140px at var(--ring-center), rgb(var(--color-accent) / var(--accent-alpha)), transparent 100%),
-            repeating-radial-gradient(circle at var(--ring-center), transparent 0 26px, rgb(var(--color-primary) / var(--ring-alpha)) 27px 28px, transparent 29px 56px);
+            repeating-radial-gradient(circle at var(--ring-center), transparent 0 26px, rgb(var(--color-primary) / var(--ring-alpha)) 27.5px, transparent 29px 56px);
         -webkit-mask-image: radial-gradient(circle var(--ring-radius) at var(--ring-center), rgb(0 0 0) 0%, transparent 100%);
         mask-image: radial-gradient(circle var(--ring-radius) at var(--ring-center), rgb(0 0 0) 0%, transparent 100%);
     }

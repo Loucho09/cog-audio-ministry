@@ -12,7 +12,9 @@
        Usage: fade-from="surface" (or omit it for no edge).
      - mirror: true flips the glow/rings horizontally (e.g. :mirror="true" on the team section).
 
-     Masks only use alpha, so the black stops in app.css are not a design colour. --}}
+     Masks only use alpha, so the black stops in app.css are not a design colour.
+     Keep every class name below as a full literal (never "backdrop-".$variant): Tailwind only keeps
+     @layer components classes it can find written out in scanned files. --}}
 @props([
     'variant' => 'spotlight-left',
     'fadeFrom' => null,
