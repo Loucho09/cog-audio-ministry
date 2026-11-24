@@ -1,7 +1,7 @@
 {{-- Our churches: one team serving every COG church. Names only; addresses and times are TODO.
      Light mode: soft watermark of the church logo behind dark text. Dark mode: the logo as a dark photo band.
      Text uses theme tokens, so it stays readable in both. --}}
-@php($churches = config('ministry.churches', []))
+@props(['churches' => collect()])
 
 <section id="churches" aria-labelledby="churches-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
     {{-- Church logo as a full-bleed background. The role="img" wrapper carries the accessible name; the image itself is decorative. --}}
@@ -34,17 +34,17 @@
                     @foreach ($churches as $church)
                         <li class="flex flex-col gap-2 rounded-2xl border border-text/15 bg-surface px-3 py-3 shadow-sm sm:px-4 dark:border-white/15 dark:bg-black/55 dark:shadow-none dark:backdrop-blur-sm">
                             <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                                <span class="min-w-0 break-words font-semibold text-text">{{ $church['name'] }}</span>
-                                @if ($church['is_main'] ?? false)
+                                <span class="min-w-0 break-words font-semibold text-text">{{ $church->name }}</span>
+                                @if ($church->is_main)
                                     <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary-dark dark:bg-white/15 dark:text-white">Main church</span>
                                 @endif
                             </div>
-                            @if (filled($church['facebook_url'] ?? null))
+                            @if (filled($church->facebook_url))
                                 <a
-                                    href="{{ $church['facebook_url'] }}"
+                                    href="{{ $church->facebook_url }}"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    aria-label="{{ $church['name'] }} on Facebook (opens in a new tab)"
+                                    aria-label="{{ $church->name }} on Facebook (opens in a new tab)"
                                     class="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-primary-dark underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-dark dark:text-white dark:focus-visible:outline-white"
                                 >
                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

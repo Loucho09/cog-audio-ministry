@@ -56,15 +56,6 @@ return [
     // "Meet the Team" section and nav link. Default OFF.
     'show_team' => filter_var(env('MINISTRY_SHOW_TEAM', false), FILTER_VALIDATE_BOOLEAN),
 
-    // Churches the ministry serves. Display-only until the Phase 2 branches table.
-    'churches' => [
-        ['name' => 'COG Dasma', 'is_main' => true, 'facebook_url' => $httpsUrl('https://www.facebook.com/COGAudioDasma')],
-        ['name' => 'COG Marilag', 'is_main' => false, 'facebook_url' => null],
-        ['name' => 'COG Trece', 'is_main' => false, 'facebook_url' => $httpsUrl('https://www.facebook.com/COGTreceMartires')],
-        ['name' => 'COG Silang', 'is_main' => false, 'facebook_url' => $httpsUrl('https://www.facebook.com/cogsilang')],
-        ['name' => 'COG Jabez', 'is_main' => false, 'facebook_url' => $httpsUrl('https://www.facebook.com/churchofgodjabez')],
-    ],
-
     // TODO: owner to provide the number of years serving. Null hides the stat.
     'years_serving' => ((int) env('MINISTRY_YEARS_SERVING')) > 0 ? (int) env('MINISTRY_YEARS_SERVING') : null,
 

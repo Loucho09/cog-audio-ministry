@@ -41,3 +41,7 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Refactor: shared ServiceIcs helper for "last service date" so `ServiceSchedule::note()` and `ServiceIcs::firstStart` do not drift (reviewer suggestion, 2026-11-24; see [[services-section-v2]])
 - Windows dev: "rename(): Access is denied" and 30s timeouts come from compiled view cache locking (first load after `view:clear` takes about 21s). Consider excluding `storage/framework/views` from Windows Defender (added 2026-11-24; see [[services-section-v2]])
 - Tap targets under 24px (church Facebook links 92x20, Add to calendar 115x20). Fix in Phase 7 accessibility pass. Found 2026-11-24 Playwright check (see [[Roadmap]]).
+- The set-password link expires in 60 minutes, which is short for new members. Consider a longer lifetime for new accounts (added 2026-11-25; see [[admin-user-management]], [[member-accounts-roles-tasks]]).
+- The branch-head user list shows other admins in the branch with no Edit button, which may confuse them (added 2026-11-25; see [[admin-user-management]]).
+- Deleting a user leaves sessions and password_reset_tokens rows behind. Phase 4 must decide cascade or restrict for duty_assignments → users before deleting users is safe (added 2026-11-25; see [[admin-user-management]], [[Roadmap]]).
+- Test gaps (added 2026-11-25; see [[member-accounts-roles-tasks]]): no direct-call test for the resend action's 403 by a non-super-admin; the bulk-delete test does not exercise the last-super-admin guard on its own.

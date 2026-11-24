@@ -1,9 +1,9 @@
 {{-- Impact strip: a few honest numbers. The years stat only shows when the owner sets it in config. --}}
-@props(['servicesPerWeek' => 0])
+@props(['servicesPerWeek' => 0, 'churchesCount' => 0])
 
 @php
     $stats = [
-        ['value' => count(config('ministry.churches', [])), 'label' => 'Churches served'],
+        ['value' => (int) $churchesCount, 'label' => 'Churches served'],
         ['value' => (int) $servicesPerWeek, 'label' => 'Services every week'],
         ['value' => (int) config('ministry.years_serving'), 'label' => 'Years serving'],
     ];

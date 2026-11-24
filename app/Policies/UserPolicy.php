@@ -36,14 +36,26 @@ class UserPolicy
             && ! $target->hasAnyRole(self::ADMIN_ROLES);
     }
 
+    /** Accounts are created by a super-admin only (Gate::before) until join applications exist. */
+    public function create(User $user): bool
+    {
+        return false;
+    }
+
     public function update(User $user, User $target): bool
     {
         return $this->manages($user, $target);
     }
 
+    /** Super-admin only (via Gate::before). */
     public function delete(User $user, User $target): bool
     {
-        return $this->manages($user, $target);
+        return false;
+    }
+
+    public function deleteAny(User $user): bool
+    {
+        return false;
     }
 
     public function assignRole(User $user, User $target): bool

@@ -7,8 +7,8 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 | # | Phase | Status |
 |---|-------|--------|
 | 1 | Setup and homepage | done (2026-11-24) |
-| 2 | Member accounts and roles | in progress (2a done 2026-11-25, pending merge; 2b next) |
-| 3 | Join applications | planned |
+| 2 | Member accounts and roles | done (2a and 2b merged to main 2026-11-25) |
+| 3 | Join applications | planned (next, not started) |
 | 4 | Duty roster | planned |
 | 5 | Notifications and reminders | planned |
 | 6 | Equipment, training, reports | planned |
@@ -58,7 +58,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 ## Phase 2: Member Accounts and Roles
 **Goal:** set up authentication, roles, and branch scoping so members can log in and admins can manage the organization.
 
-Status: in progress. Split into two parts (owner decision, 2026-11-24). Spec: [[member-accounts-roles]]. Tasks: [[member-accounts-roles-tasks]].
+Status: done. 2a and 2b merged to main 2026-11-25. Split into two parts (owner decision, 2026-11-24). Spec: [[member-accounts-roles]]. Tasks: [[member-accounts-roles-tasks]].
 - **2a Security core:** `branch_id` on users, Spatie roles, demo seed, `ministry:create-super-admin` command, register route removed, route throttles, `canAccessPanel`, `Gate::before`, `BelongsToBranch` scope, `AssignRole` action, Service and User policies, tests, themed auth screens. Decision: [[super-admin-via-artisan-command]].
 - **2b Filament screens:** Service, GalleryImage, TeamMember, Faq, Branch, and User resources. The "Our churches" list moves from config to the `branches` table (nullable `facebook_url`).
 
@@ -66,7 +66,7 @@ Status: in progress. Split into two parts (owner decision, 2026-11-24). Spec: [[
 - Breeze Blade login/register; accounts created by approval only (no open signup)
 - [x] Done 2026-11-25 (2a): disable the Breeze `/register` route (approval-only accounts)
 - [x] Done 2026-11-25 (2a): implement `canAccessPanel` on `User` for Filament (`/admin` by role)
-- [ ] Filament resources: Service, GalleryImage, Faq, TeamMember (moved from Phase 1 on 2026-11-24, see [[filament-resources-phase-2]]). Service resource needs a friendly error for the unique branch/day/time slot (from [[Backlog]]). Service resource: include starts_on/ends_on fields, branch-scoped for branch-head (see [[services-section-v2]], [[service-date-window]]).
+- [x] Done 2026-11-25 (2b): Filament resources: Service, GalleryImage, Faq, TeamMember, Branch, User (moved from Phase 1 on 2026-11-24, see [[filament-resources-phase-2]]). Service resource needs a friendly error for the unique branch/day/time slot (from [[Backlog]]). Service resource: include starts_on/ends_on fields, branch-scoped for branch-head (see [[services-section-v2]], [[service-date-window]]).
 - [x] Done 2026-11-25 (2a): `branches` table with seeder (main + 4 satellites)
 - [x] Done 2026-11-25 (2a): Spatie Permission: roles `super-admin` (project owner only), `branch-head` (admin of one branch), `branch-admin` (applications and roster for one branch; cannot assign roles), `member`
 - [x] Done 2026-11-25 (2a): Super-admin and branch-head seeders with fake data (`DemoUserSeeder`, local and testing only)

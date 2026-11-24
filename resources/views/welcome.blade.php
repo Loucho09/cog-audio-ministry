@@ -3,10 +3,10 @@
     description="Learn about the COG Audio Ministry in Dasmariñas and the sound, stage, and livestream roles we serve in."
 >
     <x-home.hero />
-    <x-home.impact :services-per-week="$servicesPerWeek" />
+    <x-home.impact :services-per-week="$servicesPerWeek" :churches-count="$churches->count()" />
     <x-home.about />
     <x-home.what-we-do />
-    <x-home.churches />
+    <x-home.churches :churches="$churches" />
     <x-home.team :members="$teamMembers" />
     <x-home.services :branch="$branch" :schedule="$schedule" />
     <x-home.gallery :images="$galleryImages" />

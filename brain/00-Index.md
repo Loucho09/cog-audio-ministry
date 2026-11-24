@@ -39,6 +39,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[desktop-container-and-splits]]: one `max-w-7xl` container and lg two-column splits on the homepage (2026-11-24)
 - [[join-form-link]]: homepage Join Us opens the Google Join Form as an interim link until Phase 3 (2026-11-24)
 - [[super-admin-via-artisan-command]]: real super-admin created by `ministry:create-super-admin`; seeders make fake demo admins only (2026-11-24)
+- [[admin-user-management]]: super-admin creates accounts by hand (set-password email, no typed password); branch-head edits own-branch name and email only (2026-11-25)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
@@ -47,7 +48,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[homepage-hooks]]: impact strip, "One sound, many churches", stay updated, FAQ hidden from homepage (Phase 1, done, owner browser check pending; tasks in [[homepage-hooks-tasks]])
 - [[homepage-theme-polish]]: stage lighting, section rhythm, card consistency on `/` (Phase 1, done, owner browser check pending; 2026-11-24)
 - [[services-section-v2]]: shorter Services section, spotlight, date window, calendar and directions (Phase 1 polish, in progress; tasks in [[services-section-v2-tasks]])
-- [[member-accounts-roles]]: branches on users, roles, route throttles, policies, branch scoping, themed auth (Phase 2, in progress: 2a done 2026-11-25, pending merge; 2b next; tasks in [[member-accounts-roles-tasks]])
+- [[member-accounts-roles]]: branches on users, roles, route throttles, policies, branch scoping, themed auth (Phase 2, in progress: 2a done and merged 2026-11-25; 2b in progress; tasks in [[member-accounts-roles-tasks]])
 
 ## Folders
 - `Features/`: one spec per feature (template in `CLAUDE.md`)

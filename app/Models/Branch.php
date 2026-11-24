@@ -15,7 +15,7 @@ class Branch extends Model
     use HasFactory;
 
     // is_main is intentionally NOT fillable: only seeders or super-admin code may set it explicitly.
-    protected $fillable = ['name', 'slug', 'address', 'contact_number', 'email'];
+    protected $fillable = ['name', 'slug', 'address', 'contact_number', 'email', 'facebook_url'];
 
     protected function casts(): array
     {

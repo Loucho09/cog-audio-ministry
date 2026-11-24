@@ -10,6 +10,7 @@ beforeEach(fn () => $this->withoutVite());
 
 it('shows the impact section with churches and services counts', function () {
     $branch = Branch::factory()->create(['is_main' => true]);
+    Branch::factory()->count(4)->create();
     Service::factory()->create(['branch_id' => $branch->id, 'day_of_week' => 0]);
     Service::factory()->create(['branch_id' => $branch->id, 'day_of_week' => 3]);
 
