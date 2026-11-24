@@ -30,7 +30,21 @@ it('hides the team section when the flag is on but nobody is featured', function
     $this->get('/')->assertOk()->assertDontSee('id="team"', false);
 });
 
-it('links the join button to #contact', function () {
+it('links the join button to the join form in a new tab', function () {
+    config()->set('ministry.join_form_url', 'https://forms.gle/example');
+
+    $html = $this->get('/')->assertOk()->getContent();
+
+    preg_match('/<section id="join".*?(<a href="https:\/\/forms\.gle\/example"[^>]*>)(.*?)<\/a>/s', $html, $m);
+
+    expect($m)->not->toBeEmpty()
+        ->and($m[1])->toContain('target="_blank"')->toContain('rel="noopener noreferrer"')
+        ->and($m[2])->toContain('Fill out the join form')->toContain('<span class="sr-only">(opens in a new tab)</span>');
+});
+
+it('falls back to #contact when the join form URL is not set', function () {
+    config()->set('ministry.join_form_url', null);
+
     $html = $this->get('/')->assertOk()->getContent();
 
     expect($html)->toMatch('/<section id="join".*?<a href="#contact"[^>]*>\s*Message us to join\s*<\/a>.*?<\/section>/s');

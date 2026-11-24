@@ -37,6 +37,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[card-style-and-section-rhythm]]: card background opposite its section; strict section alternation (2026-11-24)
 - [[service-date-window]]: two nullable dates (`starts_on`, `ends_on`) per service for season pauses (2026-11-24)
 - [[desktop-container-and-splits]]: one `max-w-7xl` container and lg two-column splits on the homepage (2026-11-24)
+- [[join-form-link]]: homepage Join Us opens the Google Join Form as an interim link until Phase 3 (2026-11-24)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
