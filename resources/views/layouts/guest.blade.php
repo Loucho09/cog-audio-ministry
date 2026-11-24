@@ -58,7 +58,7 @@
                             width="1600"
                             height="609"
                             decoding="async"
-                            class="absolute inset-0 -z-10 h-full w-full object-cover object-center"
+                            class="absolute inset-0 -z-10 h-full w-full object-cover object-left"
                         >
                     </picture>
                     {{-- The photo is always dark, so text on it uses white directly, not theme tokens. --}}

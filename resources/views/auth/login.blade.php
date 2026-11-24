@@ -80,6 +80,7 @@
                 />
                 <button
                     type="button"
+                    x-cloak
                     class="absolute inset-y-0 right-0 my-auto mr-1 inline-flex h-11 w-11 items-center justify-center rounded-lg text-text/70 transition-opacity duration-200 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark motion-reduce:transition-none"
                     x-bind:class="hasPassword ? 'opacity-100' : 'pointer-events-none opacity-0'"
                     x-bind:disabled="!hasPassword"
