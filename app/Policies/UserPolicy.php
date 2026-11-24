@@ -19,9 +19,21 @@ class UserPolicy
         return $user->branch_id !== null && $user->hasAnyRole(['branch-head', 'branch-admin']);
     }
 
+    /**
+     * Branch-heads view the members they manage. Branch-admins may view
+     * (never edit) plain members of their own branch, for the duty roster.
+     */
     public function view(User $user, User $target): bool
     {
-        return $this->manages($user, $target);
+        if ($this->manages($user, $target)) {
+            return true;
+        }
+
+        return $user->branch_id !== null
+            && $user->hasRole('branch-admin')
+            && ! $user->is($target)
+            && (int) $target->branch_id === (int) $user->branch_id
+            && ! $target->hasAnyRole(self::ADMIN_ROLES);
     }
 
     public function update(User $user, User $target): bool

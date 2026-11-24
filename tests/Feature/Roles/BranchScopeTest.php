@@ -66,3 +66,17 @@ it('limits UserPolicy to plain members of the same branch', function () {
         ->and($head->can('assignRole', $ownMember))->toBeFalse()
         ->and($super->can('assignRole', $ownMember))->toBeTrue();
 });
+
+it('lets a branch-admin view but never edit own-branch members', function () {
+    $admin = User::factory()->branchAdmin($this->trece)->create();
+    $ownMember = User::factory()->member($this->trece)->create();
+    $otherMember = User::factory()->member($this->dasma)->create();
+    $head = User::factory()->branchHead($this->trece)->create();
+
+    expect($admin->can('view', $ownMember))->toBeTrue()
+        ->and($admin->can('update', $ownMember))->toBeFalse()
+        ->and($admin->can('delete', $ownMember))->toBeFalse()
+        ->and($admin->can('view', $otherMember))->toBeFalse()
+        ->and($admin->can('view', $head))->toBeFalse()
+        ->and($admin->can('assignRole', $ownMember))->toBeFalse();
+});
