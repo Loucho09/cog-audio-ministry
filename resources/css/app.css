@@ -47,3 +47,74 @@
         scroll-behavior: auto !important;
     }
 }
+
+/* Section "stage" backdrops (components/site/section-backdrop.blade.php). Decorative only.
+   Alpha lives in --*-alpha variables so dark mode can be a little stronger.
+   Masks use alpha only (the black stops are not a design colour). No blur() filters: mobile performance. */
+@layer components {
+    /* About: soft primary glow from the top-left, with a faint dot grid fading toward the bottom-right. */
+    .backdrop-spotlight-left {
+        --glow-alpha: 0.12;
+        --dot-alpha: 0.07;
+        background-image:
+            radial-gradient(ellipse 70% 55% at 0% 0%, rgb(var(--color-primary) / var(--glow-alpha)), transparent 70%),
+            radial-gradient(rgb(var(--color-text) / var(--dot-alpha)) 1px, transparent 1.5px);
+        background-size: 100% 100%, 24px 24px;
+        -webkit-mask-image: linear-gradient(135deg, rgb(0 0 0) 15%, transparent 85%);
+        mask-image: linear-gradient(135deg, rgb(0 0 0) 15%, transparent 85%);
+    }
+
+    .dark .backdrop-spotlight-left {
+        --glow-alpha: 0.2;
+        --dot-alpha: 0.09;
+    }
+
+    /* What we do: concentric "sound wave" rings centred off the right edge (bottom-right on mobile,
+       so they stay out of the text), with a tiny accent glow at the centre. */
+    .backdrop-rings {
+        --ring-alpha: 0.12;
+        --accent-alpha: 0.1;
+        --ring-center: 100% 100%;
+        --ring-radius: 360px;
+        background-image:
+            radial-gradient(circle 140px at var(--ring-center), rgb(var(--color-accent) / var(--accent-alpha)), transparent 100%),
+            repeating-radial-gradient(circle at var(--ring-center), transparent 0 26px, rgb(var(--color-primary) / var(--ring-alpha)) 27px 28px, transparent 29px 56px);
+        -webkit-mask-image: radial-gradient(circle var(--ring-radius) at var(--ring-center), rgb(0 0 0) 0%, transparent 100%);
+        mask-image: radial-gradient(circle var(--ring-radius) at var(--ring-center), rgb(0 0 0) 0%, transparent 100%);
+    }
+
+    @media (min-width: 640px) {
+        .backdrop-rings {
+            --ring-center: 100% 50%;
+            --ring-radius: 560px;
+        }
+    }
+
+    .dark .backdrop-rings {
+        --ring-alpha: 0.14;
+        --accent-alpha: 0.14;
+    }
+
+    /* Services: a stage spotlight cone from the top centre. Primary core, faint accent tint at the edges,
+       fading out downward. Built from a conic wedge (apex at top centre) so no clip-path is needed. */
+    .backdrop-cone {
+        --beam-alpha: 0.14;
+        --edge-alpha: 0.06;
+        background-image: conic-gradient(
+            from 162deg at 50% 0%,
+            transparent 0deg,
+            rgb(var(--color-accent) / var(--edge-alpha)) 4deg,
+            rgb(var(--color-primary) / var(--beam-alpha)) 18deg,
+            rgb(var(--color-accent) / var(--edge-alpha)) 32deg,
+            transparent 36deg,
+            transparent 360deg
+        );
+        -webkit-mask-image: linear-gradient(to bottom, rgb(0 0 0) 0%, transparent 80%);
+        mask-image: linear-gradient(to bottom, rgb(0 0 0) 0%, transparent 80%);
+    }
+
+    .dark .backdrop-cone {
+        --beam-alpha: 0.2;
+        --edge-alpha: 0.08;
+    }
+}

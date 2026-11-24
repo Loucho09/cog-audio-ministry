@@ -1,4 +1,5 @@
 <section id="what-we-do" aria-labelledby="what-we-do-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
+    <x-site.section-backdrop variant="rings" fade-from="surface" />
     <div class="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
         <x-site.section-header
             id="what-we-do-title"

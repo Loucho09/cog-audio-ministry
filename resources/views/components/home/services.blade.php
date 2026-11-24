@@ -7,6 +7,7 @@
 @endphp
 
 <section id="services" aria-labelledby="services-title" class="relative isolate overflow-hidden bg-surface py-20 sm:py-24 lg:py-32">
+    <x-site.section-backdrop variant="cone" fade-from="background" />
     <div class="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
         <x-site.section-header
             id="services-title"

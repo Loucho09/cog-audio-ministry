@@ -1,4 +1,5 @@
 <section id="about" aria-labelledby="about-title" class="relative isolate overflow-hidden bg-surface py-20 sm:py-24 lg:py-32">
+    <x-site.section-backdrop variant="spotlight-left" />
     <div class="mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
         <div class="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
             <x-site.section-header
