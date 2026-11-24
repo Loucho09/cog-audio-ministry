@@ -7,6 +7,7 @@ use App\Filament\Resources\TeamMembers\Pages\EditTeamMember;
 use App\Filament\Resources\TeamMembers\Pages\ListTeamMembers;
 use App\Models\Branch;
 use App\Models\TeamMember;
+use App\Support\PublishGuard;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -21,7 +22,9 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -60,6 +63,12 @@ class TeamMemberResource extends Resource
         return $data;
     }
 
+    /** Server-side publish rule (see PublishGuard). */
+    public static function guardPublishing(array $data, ?TeamMember $record = null): array
+    {
+        return PublishGuard::apply($data, $record, ['name', 'role_title', 'photo_path', 'is_full_time', 'is_featured']);
+    }
+
     private static function isSuperAdmin(): bool
     {
         return (bool) auth()->user()?->hasRole('super-admin');
@@ -89,6 +98,11 @@ class TeamMemberResource extends Resource
                 Toggle::make('is_full_time')->label('Full-time'),
                 Toggle::make('is_featured')->label('Featured on homepage'),
                 TextInput::make('sort_order')->numeric()->minValue(0)->default(0),
+                Toggle::make('is_published')
+                    ->label('Published')
+                    ->helperText('Visible on the public homepage. Only a super-admin can publish.')
+                    ->default(true)
+                    ->visible(fn () => self::isSuperAdmin()),
             ]);
     }
 
@@ -105,6 +119,7 @@ class TeamMemberResource extends Resource
                 TextColumn::make('branch.name')->label('Branch')->placeholder('All churches')->sortable(),
                 IconColumn::make('is_full_time')->label('Full-time')->boolean(),
                 IconColumn::make('is_featured')->label('Featured')->boolean(),
+                IconColumn::make('is_published')->label('Published')->boolean(),
                 TextColumn::make('sort_order')->label('Order')->sortable(),
             ])
             ->defaultSort('sort_order')
@@ -114,6 +129,11 @@ class TeamMemberResource extends Resource
                 SelectFilter::make('branch_id')
                     ->label('Branch')
                     ->options(fn () => Branch::query()->orderBy('name')->pluck('name', 'id'))
+                    ->visible(fn () => self::isSuperAdmin()),
+                TernaryFilter::make('is_published')->label('Published'),
+                Filter::make('pending_approval')
+                    ->label('Pending approval')
+                    ->query(fn (Builder $query) => $query->where('team_members.is_published', false))
                     ->visible(fn () => self::isSuperAdmin()),
             ])
             ->recordActions([

@@ -19,7 +19,7 @@ class TeamMember extends Model
 
     protected $fillable = [
         'branch_id', 'name', 'role_title', 'photo_path',
-        'is_full_time', 'is_featured', 'sort_order',
+        'is_full_time', 'is_featured', 'is_published', 'sort_order',
     ];
 
     protected function casts(): array
@@ -27,6 +27,7 @@ class TeamMember extends Model
         return [
             'is_full_time' => 'boolean',
             'is_featured' => 'boolean',
+            'is_published' => 'boolean',
             'sort_order' => 'integer',
         ];
     }
@@ -39,6 +40,11 @@ class TeamMember extends Model
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('is_published', true);
     }
 
     public function scopeFeatured(Builder $query): Builder

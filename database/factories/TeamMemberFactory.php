@@ -11,6 +11,6 @@ class TeamMemberFactory extends Factory
     // For tests only. Never used by seeders (no invented people).
     public function definition(): array
     {
-        return ['name' => fake()->name()];
+        return ['name' => fake()->name(), 'is_published' => true];
     }
 }

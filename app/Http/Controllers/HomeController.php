@@ -36,7 +36,7 @@ class HomeController extends Controller
             ])
             ->values();
 
-        $teamMembers = config('ministry.show_team') ? TeamMember::query()->featured()->get() : collect();
+        $teamMembers = config('ministry.show_team') ? TeamMember::query()->published()->featured()->get() : collect();
 
         // Weekly services of the main branch (one count query; occurrences above are capped at 4).
         $servicesPerWeek = $branch ? Service::query()->active()->where('branch_id', $branch->id)->count() : 0;
