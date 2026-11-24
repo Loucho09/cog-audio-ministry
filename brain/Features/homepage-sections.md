@@ -1,0 +1,51 @@
+# Homepage sections
+Status: in progress
+Phase: 1
+
+Related: [[00-Index]], [[Roadmap]], [[Project-Brief]], [[public-layout]]
+
+Goal: build the homepage from Blade components, in the order set in [[Project-Brief]]: hero, about us, what we do, meet the team (behind a config flag, OFF by default), upcoming services, gallery (Alpine lightbox), join us CTA, FAQ (Alpine accordion), contact (map only when the address is set), footer.
+
+Users: visitor (public pages), member (same pages when logged in, no extra content yet)
+
+Screens / routes:
+- `/` named `home`, served by `HomeController`
+- Homepage section components under `resources/views/components/` (one component per section)
+
+Data changes (tables, columns):
+- `branches`: id, name, slug (unique), address (nullable), contact fields (nullable), is_main (boolean)
+- `services`: id, branch_id (FK), name, day_of_week, start_time, is_active; unique (branch_id, day_of_week, start_time)
+- `gallery_images`: id, branch_id (nullable, see Backlog), image path, alt text, sort order, is_active
+- `faqs`: id, question, answer, sort order, is_active
+- `team_members`: id, branch_id (nullable, see Backlog), name, role, employment type (full-time first), photo path, is_featured, sort order
+- Models and seeders for all five tables. Content seeders use `firstOrCreate` ([[seeders-first-or-create]]).
+- Image path rule: [[image-path-convention]]
+- Timezone for service times: [[timezone-asia-manila]]
+- Branch table decision: [[branches-table-in-phase-1]]
+- Logo and cover assets: [[logo-and-cover-assets]]
+
+Permissions:
+- Public read only. Homepage and its data are readable by visitors and members.
+- No write access from the public site. Editing content is in Filament (later slice or Phase 2 admin rules).
+- Meet the Team visibility is controlled by `config/ministry.php` (default OFF).
+
+Slices:
+1. Data (done): tables, models, seeders, `App\Actions\UpcomingServices`. See [[homepage-sections-tasks]].
+2. Hero, about us, what we do (done).
+3. Upcoming services and gallery with Alpine lightbox, `HomeController` (in progress).
+4. Join us CTA, FAQ accordion, contact with map only when address is set, meet the team behind the config flag (planned).
+
+Owner-confirm copy (placeholders until the owner confirms):
+- Hero sentence
+- About intro (vision and mission still pending)
+- What We Do role descriptions (FOH, Monitors, Livestream, Stage Tech)
+- Placeholder FAQ answers
+
+Out of scope:
+- Filament resources for services, gallery, FAQs, team members, branches (later phase, see [[Roadmap]])
+- The join application form itself (Phase 3)
+- Real gallery photos, team list, address, Messenger link (pending from the owner)
+- SEO meta, Open Graph, sitemap (Phase 7)
+
+Tasks: [[homepage-sections-tasks]]
+Notes / decisions: [[branches-table-in-phase-1]], [[timezone-asia-manila]], [[image-path-convention]], [[logo-and-cover-assets]], [[seeders-first-or-create]]

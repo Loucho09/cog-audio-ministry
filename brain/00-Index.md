@@ -21,9 +21,15 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[primary-dark-contrast-token]]: `primary-dark` token for white text on filled backgrounds, WCAG AA (2026-11-24)
 - [[menu-breakpoint-lg]]: full desktop menu from 1024px, hamburger below (2026-11-24)
 - [[footer-tagline]]: approved footer tagline, stored in config (2026-11-24)
+- [[branches-table-in-phase-1]]: branches table created in Phase 1 because services need `branch_id` (2026-11-24)
+- [[timezone-asia-manila]]: `APP_TIMEZONE=Asia/Manila`, no DST (2026-11-24)
+- [[image-path-convention]]: `images/` paths are bundled files; other paths are on the public disk (2026-11-24)
+- [[logo-and-cover-assets]]: owner-supplied logo and cover; navbar crop approved (2026-11-24)
+- [[seeders-first-or-create]]: content seeders use `firstOrCreate` so re-seeding keeps admin edits (2026-11-24)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
+- [[homepage-sections]]: homepage sections as Blade components (Phase 1, in progress; tasks in [[homepage-sections-tasks]])
 
 ## Folders
 - `Features/`: one spec per feature (template in `CLAUDE.md`)

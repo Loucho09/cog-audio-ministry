@@ -22,9 +22,9 @@ Work one phase at a time. A phase starts only after the previous one is marked d
    - Done 2026-11-24. Laravel 13.43, PHP 8.6, Breeze 2.4 Blade, Pest 5.3, Filament 5.12 (`/admin`; `canAccessPanel` returns false until Phase 2), Spatie Permission 8.5 (teams off, `HasRoles` on `User`, no roles yet), Pint, Tailwind 3.4 ([[tailwind-v3-with-breeze]]), Alpine 3, Vite.
 2. [x] Base layout: header, navigation, footer; theme tokens (background, surface, text, primary, accent); Inter font
    - Done 2026-11-24. See [[public-layout]]. Tests: 41 total (40 pass, 1 skipped until `public/images/logo.png` exists). Checked at 360px, 1024px and 1280px. Reviewer run, issues fixed.
-3. **Next:** Homepage sections as Blade components (in order): hero, about us, what we do, meet the team (config flag, OFF by default), upcoming services, gallery, join us, FAQ, contact, footer; commit per section group
-4. Services model, migration, seeder (main ministry schedule)
-5. `gallery_images`, `faqs`, `team_members` tables + seeders with placeholder data (team: `is_featured` flag, full-time first)
+3. **In progress:** Homepage sections as Blade components (in order): hero, about us, what we do, meet the team (config flag, OFF by default), upcoming services, gallery, join us, FAQ, contact, footer; commit per section group. Spec: [[homepage-sections]]. Slices 1 and 2 done; slice 3 in progress; slice 4 planned.
+4. [x] Services model, migration, seeder (main ministry schedule). Done via slice 1 of [[homepage-sections]]. Services seeded for COG Dasmariñas only.
+5. [x] `gallery_images`, `faqs`, `team_members` tables + seeders with placeholder data (team: `is_featured` flag, full-time first). Done via slice 1 of [[homepage-sections]].
 6. Semantic HTML and alt text now. SEO basics (meta, Open Graph, sitemap) can wait for the Phase 7 pass
 7. Mobile check at 360px; ensure responsive design
    - ~~Mobile check at 375px~~ (superseded 2026-11-24 by [[second-brief-merged]])

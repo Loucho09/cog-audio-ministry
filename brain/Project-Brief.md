@@ -8,6 +8,7 @@ Related: [[00-Index]], [[Roadmap]], [[new-project-brief-adopted]], [[second-brie
 - Subheader: **Dasmariñas**
 - Logo: use the official logo from the Facebook page, stored in `public/images/logo` (do not redraw)
 - Logo filename: `public/images/logo.png` (text placeholder until the file exists)
+- Logo received 2026-11-24 from the owner (Facebook blocks automated fetching). See [[logo-and-cover-assets]]
 
 ## Tone and Language
 - English, warm and simple, Tagalog-friendly copy
@@ -46,6 +47,8 @@ These tokens are set in the Tailwind config and can be customized per branch if 
 ## Branches
 - Main: COG Dasmariñas
 - Branches: Marilag, Trece, Silang, Jabez
+- Branch names use the "COG" prefix: COG Dasmariñas, COG Marilag, COG Trece, COG Silang, COG Jabez. See [[branches-table-in-phase-1]]
+- Services are seeded for the main branch (COG Dasmariñas) only. Other branches' service times are still open (see the open question below).
 - Each branch has its own branch-head. The super-admin (project owner) creates branches and assigns branch-heads.
 - Every branch-scoped record (members, events, applications, duties) has `branch_id`.
 - Open question: do all branches follow the same service times?
@@ -95,8 +98,10 @@ Meet the Team is OFF by default. Do not invent team members.
 ## Pending from the head
 - [ ] Vision and mission statement
 - [ ] "Meet the Team" list (full-time members first): name, role, photo
-- [ ] Gallery photos (sound booth, serving, services/events, group photo)
+- [ ] Gallery photos (sound booth, serving, services/events, group photo) (still pending as of 2026-11-24)
 - [ ] Messenger link and official church address
 - [ ] FAQ content
+- [ ] Confirm homepage copy (hero sentence, about intro, role descriptions)
+- [ ] Confirm placeholder FAQ answers
 - [ ] Confirm whether branches follow the same service times
 - [ ] Names of first super-admin and branch-heads (owner sets these)
