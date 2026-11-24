@@ -2,7 +2,7 @@
 
 Date: 2026-11-24
 Approved by: owner
-Status: accepted
+Status: accepted (accent values below are superseded by [[stage-palette]]: accent is now stage red #E11D48 / `accent-text` #BE123C)
 
 ## Decision
 Add theme token `primary-dark` #0369A1. Use it for filled backgrounds with white text (buttons, skip link, logo placeholder).

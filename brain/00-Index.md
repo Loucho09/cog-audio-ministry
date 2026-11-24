@@ -28,6 +28,9 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[seeders-first-or-create]]: content seeders use `firstOrCreate` so re-seeding keeps admin edits (2026-11-24)
 - [[dark-mode-css-variable-tokens]]: theme colors as CSS variables, `.dark` class, no flash of wrong theme (2026-11-24)
 - [[typography-matches-logo]]: Montserrat for all text, Mrs Saint Delafield script accent for "Audio" (2026-11-24)
+- [[stage-palette]]: stage blue and red theme tokens, replaces sky-blue accent (2026-11-24)
+- [[section-backdrops]]: subtle CSS gradient backdrops per homepage section, no blur (2026-11-24)
+- [[hero-theme-verse]]: Psalm 66:8 verse in the hero, stored in config (2026-11-24)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)

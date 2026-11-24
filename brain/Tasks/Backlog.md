@@ -14,7 +14,10 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Fix commit trailers on 43f4b05, c113b54 and 377c0f1 (they say Haiku instead of Opus) before opening the PR (added 2026-11-24; see [[homepage-sections]])
 - Optional grace window so a service stays visible briefly after its start time (added 2026-11-24; see [[homepage-sections]])
 - **NEXT (owner request 2026-11-24):** UI/UX polish pass on all homepage sections. First a read-only audit (360px and desktop, light and dark: spacing, type, contrast, touch targets, consistency, focus, motion). Owner picks fixes, then a "homepage polish" slice. Waiting for owner answers: what bothers them now, and whether to keep the current look or allow bolder changes. See [[homepage-sections]].
-- Contact section shows only heading and intro if email, Facebook, Messenger and address are all empty; consider a "coming soon" fallback (added 2026-11-24; see [[homepage-sections]])
+- Contact section shows only heading and intro if email, Facebook, Messenger and address are all empty; consider a "coming soon" fallback (added 2026-11-24; see [[homepage-sections]]) — **Done 2026-11-24:** contact section now shows "Contact details are coming soon."
 - FAQ panels use `role="region"`; drop it if FAQs grow beyond about 6 (WAI-ARIA guidance) (added 2026-11-24; see [[homepage-sections]])
 - Phase 7: consider a `sandbox` attribute on the map iframe as part of the CSP and privacy review (added 2026-11-24; see [[homepage-sections]])
 - The Join Us button focus ring is overridden with `!ring-surface`; a cleaner fix is an "on-dark" variant in the button component (added 2026-11-24; see [[homepage-sections]])
+- Owner browser check of homepage at 360px and desktop, light and dark, once MySQL runs: lightbox above navbar (open, close, Esc, arrows, Tab), backdrop strength, verse readability on mobile over the photo (added 2026-11-24; see [[homepage-sections]], [[hero-theme-verse]], [[section-backdrops]])
+- Vignette ellipse stretches on tall mobile sections; consider `farthest-corner` if it looks odd (added 2026-11-24; see [[section-backdrops]])
+- Backdrop fade seam colours assume default section order; check if team or FAQ is hidden (added 2026-11-24; see [[section-backdrops]])

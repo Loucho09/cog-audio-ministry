@@ -44,6 +44,12 @@ Slices:
    - Meet the Team is behind `ministry.show_team` (default OFF).
    - Owner-confirm copy added (pending owner sign-off): Join Us heading and body, including the Tagalog line "Halina at sumama sa amin!"; Contact intro "We would love to hear from you."
    - Status stays "in progress" until the mobile (360px) and dark-mode browser check is done. Blocked on MySQL being connected.
+5. Polish pass, stage backdrops and theme verse (done 2026-11-24, commits 0e95da6, 6abf5bb, 93afab1, ce75b8a, 7cd3941, 21e7723; browser check pending).
+   - Shared section header, glow, eq-bars and wave-divider components. Transparent navbar over the hero. Lightbox teleported above the navbar. AA contrast on small labels (`text-text/70`). Reduced-motion and forced-colors fallbacks.
+   - Contact fallback: "Contact details are coming soon." when all contact fields are empty.
+   - Subtle stage backdrops per section: [[section-backdrops]], colours in [[stage-palette]].
+   - Hero theme verse (Psalm 66:8, NIV) from config: [[hero-theme-verse]].
+   - Status stays "in progress" until the owner's browser check (360px and desktop, light and dark) is done.
 
 Owner-confirm copy (placeholders until the owner confirms):
 - Hero sentence
