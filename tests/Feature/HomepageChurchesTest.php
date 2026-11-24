@@ -11,7 +11,7 @@ it('shows our churches section with logo and no satellite wording', function () 
         ->assertOk()
         ->assertSee('One sound, all our churches')
         ->assertSee('Church of God logo: We Exalt You Jesus', false)
-        ->assertSee('cog-church-logo.png', false);
+        ->assertSee('cog-church-logo-256.png', false);
 
     foreach (['COG Dasma', 'COG Marilag', 'COG Trece', 'COG Silang', 'COG Jabez'] as $name) {
         $response->assertSee($name);

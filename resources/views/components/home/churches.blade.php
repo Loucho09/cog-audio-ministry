@@ -28,10 +28,10 @@
 
             <div class="rounded-3xl border border-text/10 bg-surface p-6 shadow-sm sm:p-8">
                 <img
-                    src="{{ asset('images/cog-church-logo.png') }}"
+                    src="{{ asset('images/cog-church-logo-256.png') }}"
                     alt="Church of God logo: We Exalt You Jesus"
-                    width="960"
-                    height="960"
+                    width="256"
+                    height="256"
                     loading="lazy"
                     class="mx-auto h-28 w-28 rounded-2xl object-cover sm:h-32 sm:w-32"
                 >

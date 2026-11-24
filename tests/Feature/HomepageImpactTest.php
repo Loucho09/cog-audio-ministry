@@ -16,9 +16,14 @@ it('shows the impact section with churches and services counts', function () {
     $this->get('/')
         ->assertOk()
         ->assertSee('Every sermon, every song, heard clearly.')
-        ->assertSeeInOrder(['Churches served', '5'], false)
-        ->assertSeeInOrder(['Services every week', '2'], false)
-        ->assertDontSee('Years serving');
+        ->assertSeeInOrder(['Churches served', '<span class="sr-only">5</span>'], false)
+        ->assertSeeInOrder(['Services every week', '<span class="sr-only">2</span>'], false);
+});
+
+it('hides the years stat when not configured', function () {
+    config(['ministry.years_serving' => null]);
+
+    $this->get('/')->assertOk()->assertDontSee('Years serving');
 });
 
 it('shows the years stat only when configured', function () {

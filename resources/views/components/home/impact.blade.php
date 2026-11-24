@@ -8,6 +8,11 @@
         ['value' => (int) config('ministry.years_serving'), 'label' => 'Years serving'],
     ];
     $stats = array_values(array_filter($stats, fn ($stat) => $stat['value'] > 0));
+    $gridCols = match (count($stats)) {
+        3 => 'sm:grid-cols-3',
+        2 => 'sm:grid-cols-2',
+        default => '',
+    };
 @endphp
 
 @if (count($stats) > 0)
@@ -17,7 +22,7 @@
                 Every sermon, every song, heard clearly.
             </h2>
 
-            <dl class="mx-auto mt-10 grid max-w-3xl gap-8 {{ count($stats) >= 3 ? "sm:grid-cols-3" : (count($stats) === 2 ? "sm:grid-cols-2" : "") }}">
+            <dl class="mx-auto mt-10 grid max-w-3xl gap-8 {{ $gridCols }}">
                 @foreach ($stats as $stat)
                     <div class="flex flex-col-reverse items-center gap-1">
                         <dt class="text-sm font-semibold uppercase tracking-wider text-text/70">{{ $stat['label'] }}</dt>
@@ -25,8 +30,14 @@
                             x-data="{ shown: 0, target: {{ $stat['value'] }} }"
                             x-init="
                                 if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { shown = target; return; }
-                                const step = () => { shown < target ? (shown++, setTimeout(step, 120)) : null };
-                                step();
+                                const duration = 1000;
+                                const start = performance.now();
+                                const tick = (now) => {
+                                    const progress = Math.min((now - start) / duration, 1);
+                                    shown = Math.round(target * progress);
+                                    if (progress < 1) requestAnimationFrame(tick);
+                                };
+                                requestAnimationFrame(tick);
                             "
                             class="text-5xl font-extrabold tabular-nums text-primary"
                         >
