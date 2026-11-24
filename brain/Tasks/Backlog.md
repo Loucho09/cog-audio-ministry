@@ -45,3 +45,4 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - The branch-head user list shows other admins in the branch with no Edit button, which may confuse them (added 2026-11-25; see [[admin-user-management]]).
 - Deleting a user leaves sessions and password_reset_tokens rows behind. Phase 4 must decide cascade or restrict for duty_assignments → users before deleting users is safe (added 2026-11-25; see [[admin-user-management]], [[Roadmap]]).
 - Test gaps (added 2026-11-25; see [[member-accounts-roles-tasks]]): no direct-call test for the resend action's 403 by a non-super-admin; the bulk-delete test does not exercise the last-super-admin guard on its own.
+- Super-admin can set a temporary password on another super-admin (Gate::before); acceptable, documented. (added 2026-11-25; see [[temp-password]])

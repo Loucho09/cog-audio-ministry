@@ -40,6 +40,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[join-form-link]]: homepage Join Us opens the Google Join Form as an interim link until Phase 3 (2026-11-24)
 - [[super-admin-via-artisan-command]]: real super-admin created by `ministry:create-super-admin`; seeders make fake demo admins only (2026-11-24)
 - [[admin-user-management]]: super-admin creates accounts by hand (set-password email, no typed password); branch-head edits own-branch name and email only (2026-11-25)
+- [[temp-password-and-demo-emails]]: temporary passwords with forced change, 10-character password rule, branch-style demo emails (2026-11-25)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
@@ -49,6 +50,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[homepage-theme-polish]]: stage lighting, section rhythm, card consistency on `/` (Phase 1, done, owner browser check pending; 2026-11-24)
 - [[services-section-v2]]: shorter Services section, spotlight, date window, calendar and directions (Phase 1 polish, in progress; tasks in [[services-section-v2-tasks]])
 - [[member-accounts-roles]]: branches on users, roles, route throttles, policies, branch scoping, themed auth (Phase 2, in progress: 2a done and merged 2026-11-25; 2b in progress; tasks in [[member-accounts-roles-tasks]])
+- [[temp-password]]: temporary passwords and forced password change, add-on to Phase 2 (done 2026-11-25, merge pending owner OK; tasks in [[temp-password-tasks]])
 
 ## Folders
 - `Features/`: one spec per feature (template in `CLAUDE.md`)
