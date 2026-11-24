@@ -32,13 +32,14 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[section-backdrops]]: subtle CSS gradient backdrops per homepage section, no blur (2026-11-24)
 - [[hero-theme-verse]]: Psalm 66:8 verse in the hero, stored in config (2026-11-24)
 - [[filament-resources-phase-2]]: Filament content resources moved from Phase 1 to Phase 2 (2026-11-24)
-- [[churches-list-in-config]]: satellite church list in config until the branches table is used in Phase 2 (2026-11-24)
+- [[churches-list-in-config]]: church list in config until the branches table is used in Phase 2 (2026-11-24)
+- [[owner-wording-our-churches]]: visitor copy says "our churches", not "satellite"; church logo only in churches section (2026-11-24)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
 - [[homepage-sections]]: homepage sections as Blade components (Phase 1, in progress; tasks in [[homepage-sections-tasks]])
 - [[dark-mode]]: light/dark theme toggle on public pages (Phase 1, done pending owner check; added 2026-11-24)
-- [[homepage-hooks]]: impact strip, "One sound, many churches", stay updated, FAQ hidden from homepage (Phase 1, planned; tasks in [[homepage-hooks-tasks]])
+- [[homepage-hooks]]: impact strip, "One sound, many churches", stay updated, FAQ hidden from homepage (Phase 1, done, owner browser check pending; tasks in [[homepage-hooks-tasks]])
 
 ## Folders
 - `Features/`: one spec per feature (template in `CLAUDE.md`)

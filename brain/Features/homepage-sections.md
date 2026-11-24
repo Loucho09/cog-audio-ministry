@@ -51,6 +51,10 @@ Slices:
    - Hero theme verse (Psalm 66:8, NIV) from config: [[hero-theme-verse]].
    - Status stays "in progress" until the owner's browser check (360px and desktop, light and dark) is done.
 
+6. Homepage hooks (done 2026-11-24, see [[homepage-hooks]]; browser check pending).
+   - FAQ section hidden from the homepage. `Faq` model, table, seeder and component kept.
+   - Section order: hero, impact, about, what-we-do, churches, team (flag), services, gallery, join, stay-updated, contact.
+
 Owner-confirm copy (placeholders until the owner confirms):
 - Hero sentence
 - About intro (vision and mission still pending)
