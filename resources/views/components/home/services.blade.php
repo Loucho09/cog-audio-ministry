@@ -41,7 +41,7 @@
                 @endif
             </div>
 
-            <div class="mx-auto mt-14 max-w-2xl rounded-3xl border border-text/10 bg-background p-6 shadow-sm dark:border-white/10 sm:p-8">
+            <div class="mx-auto mt-14 max-w-2xl rounded-3xl border border-text/10 bg-background p-6 shadow-sm sm:p-8">
                 <h3 class="text-lg font-bold text-text">Weekly schedule</h3>
                 <dl class="mt-5 divide-y divide-text/10">
                     @foreach ($weekly as $line)

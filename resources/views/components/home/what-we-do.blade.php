@@ -40,7 +40,7 @@
 
         <ul class="mt-12 grid gap-5 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
             @foreach ($roles as $index => $role)
-                <li class="group flex flex-col rounded-3xl border border-text/10 bg-surface p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl motion-reduce:transform-none sm:p-8 dark:border-white/10 dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-primary/20">
+                <li class="group flex flex-col rounded-3xl border border-text/10 bg-surface p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl motion-reduce:transform-none sm:p-8 dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-primary/20">
                     <div class="flex items-start justify-between">
                         {{-- Glowing icon tile: gradient from primary to accent at low strength, with a ring. --}}
                         <span aria-hidden="true" class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 text-primary-dark ring-1 ring-inset ring-primary/20 transition duration-300 motion-safe:group-hover:scale-105">
