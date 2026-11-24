@@ -34,3 +34,13 @@ brain/.obsidian/workspace-mobile.json
 
 # Separate personal Obsidian vault (not part of the project)
 /COG_AUDIO/
+*.log
+.DS_Store
+.phpactor.json
+/.codex
+/.cursor/
+/.vscode
+/auth.json
+/public/fonts-manifest.dev.json
+_ide_helper.php
+Thumbs.db
