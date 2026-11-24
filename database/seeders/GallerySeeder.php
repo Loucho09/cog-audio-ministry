@@ -12,14 +12,17 @@ use Illuminate\Support\Facades\File;
  */
 class GallerySeeder extends Seeder
 {
-    /** Captions for the bundled photos: filename => [title, alt text]. */
+    /**
+     * Bundled photos: filename => [title, alt text, sort order].
+     * The one landscape photo goes last: on mobile the last tile is wide (16:9).
+     */
     private const CAPTIONS = [
-        '01-team-on-stage.webp' => ['Team on stage', 'The audio and production team smiling together on stage in front of a big LED screen showing the number 36'],
-        '02-sound-console.webp' => ['At the sound console', 'View from the sound console during a worship service, with the stage and a full auditorium ahead'],
-        '03-fellowship-meal.webp' => ['Fellowship meal', 'Ministry members gathered around a long table of food served on banana leaves'],
-        '04-outreach-day.webp' => ['Outreach day', 'Smiling volunteers holding up gospel cards at an outdoor outreach booth'],
-        '05-sharing-together.webp' => ['Sharing together', 'Two members sitting under purple stage lights, one sharing while the other listens'],
-        '06-behind-the-scenes.webp' => ['Behind the scenes', 'A member in profile under warm red stage lighting'],
+        '01-team-on-stage.webp' => ['Team on stage', 'The audio and production team smiling together on stage in front of a big LED screen showing the number 36', 1],
+        '02-sound-console.webp' => ['At the sound console', 'View from the sound console during a worship service, with the stage and a full auditorium ahead', 2],
+        '03-fellowship-meal.webp' => ['Fellowship meal', 'Ministry members gathered around a long table of food served on banana leaves', 3],
+        '04-outreach-day.webp' => ['Outreach day', 'Smiling volunteers holding up gospel cards at an outdoor outreach booth', 6],
+        '05-sharing-together.webp' => ['Sharing together', 'Two members sitting under purple stage lights, one sharing while the other listens', 4],
+        '06-behind-the-scenes.webp' => ['Behind the scenes', 'A member in profile under warm red stage lighting', 5],
     ];
 
     public function run(): void
@@ -39,11 +42,11 @@ class GallerySeeder extends Seeder
 
             foreach ($files as $i => $file) {
                 $name = basename($file);
-                [$title, $alt] = self::CAPTIONS[$name] ?? [null, 'Photo from COG Audio Ministry'];
+                [$title, $alt, $order] = self::CAPTIONS[$name] ?? [null, 'Photo from COG Audio Ministry', $i + 1];
 
                 $image = GalleryImage::firstOrCreate(
                     ['path' => 'images/gallery/'.$name],
-                    ['title' => $title, 'alt_text' => $alt, 'sort_order' => $i + 1, 'is_published' => true],
+                    ['title' => $title, 'alt_text' => $alt, 'sort_order' => $order, 'is_published' => true],
                 );
                 $created = $created || $image->wasRecentlyCreated;
             }
