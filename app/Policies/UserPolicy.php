@@ -63,6 +63,15 @@ class UserPolicy
         return false;
     }
 
+    /**
+     * Set a temporary password. Super-admin passes via Gate::before (the action also
+     * refuses self). A branch-head may do it for plain members of their own branch only.
+     */
+    public function setTemporaryPassword(User $user, User $target): bool
+    {
+        return $this->manages($user, $target);
+    }
+
     private function manages(User $user, User $target): bool
     {
         return $user->branch_id !== null

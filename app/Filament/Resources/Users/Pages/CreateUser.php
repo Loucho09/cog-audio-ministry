@@ -18,6 +18,8 @@ class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
 
+    private bool $temporary = false;
+
     /**
      * Branch and role never go through mass assignment: branch is set explicitly and
      * the role goes through AssignRole, all in one transaction.
@@ -27,8 +29,16 @@ class CreateUser extends CreateRecord
         try {
             return DB::transaction(function () use ($data): User {
                 $user = new User(Arr::only($data, ['name', 'email']));
-                // Random and never shown; the user sets their own via the reset link.
-                $user->password = Str::password(40);
+                $this->temporary = ($data['password_mode'] ?? 'email') === 'temporary' && filled($data['password'] ?? null);
+
+                if ($this->temporary) {
+                    // Never shown or logged; the user must replace it at first login.
+                    $user->password = $data['password'];
+                    $user->forceFill(['must_change_password' => true]);
+                } else {
+                    // Random and never shown; the user sets their own via the reset link.
+                    $user->password = Str::password(40);
+                }
                 $user->branch_id = $data['branch_id'] ?? null;
                 $user->save();
 
@@ -46,6 +56,8 @@ class CreateUser extends CreateRecord
 
     protected function afterCreate(): void
     {
-        UserResource::sendSetPasswordLink($this->record);
+        if (! $this->temporary) {
+            UserResource::sendSetPasswordLink($this->record);
+        }
     }
 }
