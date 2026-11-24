@@ -166,6 +166,8 @@ class UserResource extends Resource
                 $record->forceFill([
                     'password' => $data['password'],
                     'must_change_password' => true,
+                    // The admin vouches for the address; otherwise /dashboard (verified) would trap the user.
+                    'email_verified_at' => $record->email_verified_at ?? now(),
                     'remember_token' => Str::random(60),
                 ])->save();
 

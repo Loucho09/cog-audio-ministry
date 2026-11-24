@@ -152,3 +152,82 @@ it('denies a branch-admin and a member', function () {
         expect($actor->can('setTemporaryPassword', $member))->toBeFalse();
     }
 });
+
+it('verifies the email of a user created with a temporary password so the full flow works', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+
+    Livewire::test(CreateUser::class)
+        ->fillForm([
+            'name' => 'Flow Person', 'email' => 'flow@example.test', 'branch_id' => $this->branchA->id,
+            'role' => 'member', 'password_mode' => 'temporary', 'password' => 'Temp-Pass-12345',
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $user = User::where('email', 'flow@example.test')->firstOrFail();
+    expect($user->email_verified_at)->not->toBeNull();
+
+    auth()->logout();
+    $this->post('/login', ['email' => 'flow@example.test', 'password' => 'Temp-Pass-12345']);
+    $this->assertAuthenticatedAs($user);
+
+    $this->get('/dashboard')->assertRedirect(route('password.change'));
+    $this->post(route('password.change.store'), [
+        'current_password' => 'Temp-Pass-12345',
+        'password' => 'Brand-new-Pass-9',
+        'password_confirmation' => 'Brand-new-Pass-9',
+    ])->assertRedirect(route('dashboard'));
+    $this->get('/dashboard')->assertOk();
+});
+
+it('verifies the email of an unverified existing user when a temporary password is set', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    $target = User::factory()->member($this->branchA)->unverified()->create();
+
+    Livewire::test(ListUsers::class)
+        ->callAction(TestAction::make('setTemporaryPassword')->table($target), ['password' => 'Temp-Pass-12345']);
+
+    expect($target->refresh()->email_verified_at)->not->toBeNull();
+});
+
+it('rejects a weak temporary password', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    $target = User::factory()->member($this->branchA)->create();
+
+    Livewire::test(ListUsers::class)
+        ->callAction(TestAction::make('setTemporaryPassword')->table($target), ['password' => 'short'])
+        ->assertHasActionErrors(['password']);
+
+    expect($target->refresh()->must_change_password)->toBeFalse();
+});
+
+it('refuses the table action when called directly on forbidden targets', function (string $actorType, string $targetType) {
+    $actor = $actorType === 'super'
+        ? User::factory()->superAdmin()->create()
+        : User::factory()->branchHead($this->branchA)->create();
+    $target = match ($targetType) {
+        'foreign' => User::factory()->member($this->branchB)->create(),
+        'admin' => User::factory()->branchAdmin($this->branchA)->create(),
+        'self' => $actor,
+    };
+    $before = $target->password;
+    $this->actingAs($actor);
+
+    // Bypass the visibility check the test helper performs: mount and run the action as a client could.
+    try {
+        Livewire::test(ListUsers::class)
+            ->call('mountAction', [['name' => 'setTemporaryPassword', 'context' => ['table' => true, 'recordKey' => (string) $target->getKey()]]])
+            ->call('callMountedAction', ['password' => 'Temp-Pass-12345']);
+    } catch (Throwable $e) {
+        // An abort is acceptable; the state checks below are what matter.
+    }
+
+    $target->refresh();
+    expect($target->must_change_password)->toBeFalse()
+        ->and($target->password)->toBe($before);
+})->with([
+    'head on foreign member' => ['head', 'foreign'],
+    'head on branch-admin' => ['head', 'admin'],
+    'head on self' => ['head', 'self'],
+    'super on self' => ['super', 'self'],
+]);

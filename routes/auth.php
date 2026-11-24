@@ -38,7 +38,7 @@ Route::middleware('auth')->group(function () {
         ->name('password.change');
 
     Route::post('change-password', [ChangePasswordController::class, 'store'])
-        ->middleware('throttle:6,1')
+        ->middleware('throttle:password-change')
         ->name('password.change.store');
 
     Route::get('verify-email', EmailVerificationPromptController::class)

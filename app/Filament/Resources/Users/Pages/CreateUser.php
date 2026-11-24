@@ -34,7 +34,7 @@ class CreateUser extends CreateRecord
                 if ($this->temporary) {
                     // Never shown or logged; the user must replace it at first login.
                     $user->password = $data['password'];
-                    $user->forceFill(['must_change_password' => true]);
+                    $user->forceFill(['must_change_password' => true, 'email_verified_at' => now()]);
                 } else {
                     // Random and never shown; the user sets their own via the reset link.
                     $user->password = Str::password(40);

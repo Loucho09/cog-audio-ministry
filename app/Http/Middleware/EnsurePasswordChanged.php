@@ -19,7 +19,7 @@ class EnsurePasswordChanged
             return $next($request);
         }
 
-        if ($request->routeIs('password.change', 'password.change.store', 'logout', 'verification.*')) {
+        if ($request->routeIs('password.change', 'password.change.store', 'logout', 'filament.*.auth.logout')) {
             return $next($request);
         }
 
