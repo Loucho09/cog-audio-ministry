@@ -60,7 +60,7 @@ class ServiceSchedule
      * Optional keys: 'note' (one note for the whole line) or, when services on a
      * line differ, 'notes' (list of ['time' => label, 'note' => text]).
      *
-     * @return Collection<int, array{day: string, name: string, times: array<int, string>, text: string, note?: string, notes?: array<int, array{time: string, note: string}>}>
+     * @return Collection<int, array{day: string, name: string, times: array<int, string>, calendar_urls: array<int, string>, text: string, note?: string, notes?: array<int, array{time: string, note: string}>}>
      */
     private static function weekly(?Branch $branch, CarbonImmutable $today): Collection
     {
@@ -85,6 +85,7 @@ class ServiceSchedule
                     'day' => $day,
                     'name' => $service->name,
                     'times' => $times,
+                    'calendar_urls' => $items->map(fn (Service $s) => route('services.calendar', $s))->values()->all(),
                     'text' => $day.': '.$service->name.', '.implode(', ', $times),
                 ];
 

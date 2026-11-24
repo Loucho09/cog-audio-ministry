@@ -52,6 +52,7 @@
 
                     <div id="weekly-schedule" x-show="openWeekly" x-cloak class="mx-auto mt-6 max-w-3xl rounded-3xl border border-text/10 bg-background p-5 shadow-sm sm:p-6">
                         <h3 class="text-lg font-bold text-text">Weekly schedule</h3>
+                        <p class="mt-1 text-sm text-text/70">Tap a time to add it to your calendar.</p>
                         <ul class="mt-4 space-y-1">
                             @foreach ($weekly as $line)
                                 @php
@@ -72,7 +73,11 @@
                                                     $timeNote = collect($line['notes'] ?? [])->firstWhere('time', $time);
                                                 @endphp
                                                 <li class="inline-flex flex-wrap items-center gap-1.5">
-                                                    <span class="whitespace-nowrap rounded-full border border-text/10 bg-surface px-3 py-1 text-sm text-text">{{ $time }}</span>
+                                                    <a href="{{ $line['calendar_urls'][$loop->index] }}" class="inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-full border border-text/10 bg-surface px-3 py-1.5 text-sm text-text hover:border-primary/40 hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                                                        {{ $time }}
+                                                        <svg aria-hidden="true" class="h-3.5 w-3.5 text-primary-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg>
+                                                        <span class="sr-only">: add {{ $line['name'] }} to calendar</span>
+                                                    </a>
                                                     @if ($timeNote)
                                                         <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary-dark ring-1 ring-inset ring-primary/25">{{ $timeNote['note'] }}</span>
                                                     @endif

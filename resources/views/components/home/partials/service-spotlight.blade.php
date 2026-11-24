@@ -28,6 +28,7 @@
             <time datetime="{{ $next['starts_at']->format('c') }}">{{ $next['starts_at']->format('g:i A') }}</time>
         </p>
         <p class="mt-1 text-base font-semibold text-text">{{ $next['service']->name }}</p>
+        <a href="{{ route('services.calendar', $next['service']) }}" class="mt-3 inline-block text-sm font-semibold text-primary-dark underline underline-offset-4 hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">Add to calendar<span class="sr-only">: {{ $next['service']->name }} {{ $next['starts_at']->format('g:i A') }}</span></a>
     </div>
 
     @if ($later->isNotEmpty())
