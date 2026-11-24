@@ -8,6 +8,7 @@ use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Branch;
 use App\Models\User;
+use App\Notifications\WelcomeSetPassword;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -93,7 +94,19 @@ class UserResource extends Resource
     public static function sendSetPasswordLink(User $record): bool
     {
         try {
-            $status = Password::broker()->sendResetLink(['email' => $record->email]);
+            // Welcome link: 3-day 'invites' broker, sent as our own queued notification
+            // (the broker would send the normal reset email). Throttled like sendResetLink.
+            $broker = Password::broker('invites');
+            $user = $broker->getUser(['email' => $record->email]);
+
+            if ($user === null) {
+                $status = Password::INVALID_USER;
+            } elseif ($broker->getRepository()->recentlyCreatedToken($user)) {
+                $status = Password::RESET_THROTTLED;
+            } else {
+                $user->notify(new WelcomeSetPassword($broker->createToken($user)));
+                $status = Password::RESET_LINK_SENT;
+            }
         } catch (Throwable $e) {
             report($e);
             $status = null;

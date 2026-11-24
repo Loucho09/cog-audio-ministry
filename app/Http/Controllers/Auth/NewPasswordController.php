@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\InviteToken;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -40,8 +41,17 @@ class NewPasswordController extends Controller
         // Here we will attempt to reset the user's password. If it is successful we
         // will update the password on an actual user model and persist it to the
         // database. Otherwise we will parse the error and return the response.
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
+        // Welcome links carry a signed marker and are checked by the 3-day 'invites'
+        // broker; everything else uses the default 60-minute broker.
+        $credentials = $request->only('email', 'password', 'password_confirmation', 'token');
+        $rawToken = InviteToken::unwrap((string) $request->input('token'));
+
+        if ($rawToken !== null) {
+            $credentials['token'] = $rawToken;
+        }
+
+        $status = Password::broker($rawToken !== null ? 'invites' : null)->reset(
+            $credentials,
             function (User $user) use ($request) {
                 $user->forceFill([
                     'password' => Hash::make($request->password),
