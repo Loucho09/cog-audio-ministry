@@ -30,3 +30,9 @@ Out of scope:
 - New packages (no calendar library).
 Tasks: [[services-section-v2-tasks]]
 Notes / decisions: [[service-date-window]], [[homepage-sections]]
+
+## Bug fixes (branch fix/services-section, 2026-11-24)
+- Weekly schedule grid is `7rem / minmax(9rem,1fr) / minmax(0,auto)` on desktop; time chips wrap, so a long day (Sunday, 7 times) no longer hides the service name.
+- Weekly list filters with `ServiceIcs::available` (same rule as the .ics link). A service whose last weekday before `ends_on` has passed is dropped, so no calendar link 404s.
+- "Last service <date>" shows the final matching weekday on or before `ends_on`, not `ends_on` itself.
+- Covered by 3 tests in `tests/Feature/ServiceScheduleTest.php`. Reviewer: no must-fix issues.

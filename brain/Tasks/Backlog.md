@@ -38,3 +38,5 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - ~~Services spotlight and upcoming list column heights are not matched on `lg` (added 2026-11-24; see [[desktop-container-and-splits]])~~ — **Done 2026-11-24:** cards stretch to equal height on `lg` (polish pass)
 - Contact with address filled: map may be narrow (about 330px) on `lg`; check when the address is added (added 2026-11-24; see [[desktop-container-and-splits]])
 - Cosmetic re-indent in `resources/views/components/home/contact.blade.php` (added 2026-11-24; see [[desktop-container-and-splits]])
+- Refactor: shared ServiceIcs helper for "last service date" so `ServiceSchedule::note()` and `ServiceIcs::firstStart` do not drift (reviewer suggestion, 2026-11-24; see [[services-section-v2]])
+- Windows dev: "rename(): Access is denied" and 30s timeouts come from compiled view cache locking (first load after `view:clear` takes about 21s). Consider excluding `storage/framework/views` from Windows Defender (added 2026-11-24; see [[services-section-v2]])

@@ -169,6 +169,30 @@ it('keeps a service ending today in weekly after its start time has passed', fun
         ->and($schedule['weekly']->first()['note'])->toBe('Last service Nov 28');
 });
 
+it('drops a service from weekly when its last occurrence before ends_on has passed', function () {
+    // Tuesday service, ends Monday Nov 30; now is Saturday Nov 28, so its last Tuesday (Nov 24) is over.
+    makeService($this->branch, 2, '19:00:00', 'Revival Night')->update(['ends_on' => '2026-11-30']);
+    makeService($this->branch, 0, '09:00:00', 'Sunday Service');
+
+    expect(scheduleFor($this->branch, $this->now)['weekly']->pluck('name')->all())->toBe(['Sunday Service']);
+});
+
+it('dates the last-service note on the final weekday, not on ends_on', function () {
+    // Tuesday service, ends Thursday Dec 10: the last service is Tuesday Dec 8.
+    makeService($this->branch, 2, '19:00:00', 'Revival Night')->update(['ends_on' => '2026-12-10']);
+
+    expect(scheduleFor($this->branch, $this->now)['weekly']->first()['note'])->toBe('Last service Dec 8');
+});
+
+it('only links weekly times whose calendar file exists', function () {
+    makeService($this->branch, 2, '19:00:00', 'Revival Night')->update(['ends_on' => '2026-11-30']);
+    makeService($this->branch, 0, '09:00:00', 'Sunday Service');
+
+    foreach (scheduleFor($this->branch, $this->now)['weekly']->pluck('calendar_urls')->flatten() as $url) {
+        $this->get($url)->assertOk();
+    }
+});
+
 it('lists per-time notes when services on one line differ', function () {
     makeService($this->branch, 0, '05:30:00', 'Sunday Service');
     makeService($this->branch, 0, '07:30:00', 'Sunday Service')->update(['ends_on' => '2026-12-13']);
