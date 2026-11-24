@@ -24,7 +24,8 @@
     {{-- The photo is always dark, so hero text uses white directly instead of theme tokens. --}}
     <div class="mx-auto flex min-h-[32rem] max-w-6xl items-center justify-center px-4 py-20 sm:min-h-[36rem] sm:px-6 sm:py-28 lg:px-8">
         <div class="flex flex-col items-center text-center">
-            <h1 id="hero-title" class="text-4xl font-bold tracking-tight text-white sm:text-5xl">{{ config('ministry.name') }}</h1>
+            {{-- "Audio" is set in the script font to echo the logo. The name is escaped first, so the replace is safe. --}}
+            <h1 id="hero-title" class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">{!! str_replace('Audio', '<span class="font-script text-6xl font-normal tracking-normal sm:text-7xl">Audio</span>', e(config('ministry.name'))) !!}</h1>
             <p class="mt-4 text-lg font-medium text-white sm:text-xl">{{ config('ministry.tagline') }}</p>
             <p class="mt-4 max-w-xl text-base leading-relaxed text-white/85">
                 We serve our church through sound. Whether you mix, stream, or set up the stage, there is a place for you to serve with us.

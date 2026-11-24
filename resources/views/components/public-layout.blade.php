@@ -37,7 +37,7 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=montserrat:400,500,600,700,800|mrs-saint-delafield:400&display=swap" rel="stylesheet" />
 
         <!-- Scripts / Styles -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

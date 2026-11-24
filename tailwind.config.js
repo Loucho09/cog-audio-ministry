@@ -29,7 +29,10 @@ export default {
                 DEFAULT: 'rgb(var(--color-background))',
             },
             fontFamily: {
-                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                // Matches the logo: "COG" is a heavy geometric sans (Montserrat), "Audio" a signature script.
+                sans: ['Montserrat', ...defaultTheme.fontFamily.sans],
+                // Decorative accent only (e.g. "Audio" in the hero title). Never for body text.
+                script: ['"Mrs Saint Delafield"', 'cursive'],
             },
         },
     },
