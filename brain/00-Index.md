@@ -17,6 +17,13 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[package-spatie-permission]]: roles and permissions, approved 2026-11-23
 - [[package-breeze]]: authentication scaffolding, approved 2026-11-23
 - [[package-pest]]: testing framework, approved 2026-11-23
+- [[tailwind-v3-with-breeze]]: Breeze 2.4 needs Tailwind v3; kept v3 while Laravel 13 ships v4 (2026-11-24)
+- [[primary-dark-contrast-token]]: `primary-dark` token for white text on filled backgrounds, WCAG AA (2026-11-24)
+- [[menu-breakpoint-lg]]: full desktop menu from 1024px, hamburger below (2026-11-24)
+- [[footer-tagline]]: approved footer tagline, stored in config (2026-11-24)
+
+## Features
+- [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
 
 ## Folders
 - `Features/`: one spec per feature (template in `CLAUDE.md`)
