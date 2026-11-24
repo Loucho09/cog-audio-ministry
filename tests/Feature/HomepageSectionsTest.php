@@ -83,6 +83,23 @@ it('renders the four team roles as h3 headings in what-we-do', function () {
     expect($titles)->toBe(['Front of House', 'Monitors', 'Livestream', 'Stage Tech']);
 });
 
+it('renders the what-we-do role picker as accessible tabs with the first role selected', function () {
+    $xpath = homepageXPath($this->get('/')->assertOk()->getContent());
+
+    $tabs = $xpath->query('//section[@id="what-we-do"]//*[@role="tablist"]/button[@role="tab"]');
+    $panels = $xpath->query('//section[@id="what-we-do"]//*[@role="tabpanel"]');
+
+    expect($tabs->length)->toBe(4)
+        ->and($panels->length)->toBe(4)
+        ->and($tabs->item(0)->getAttribute('aria-selected'))->toBe('true')
+        ->and($tabs->item(1)->getAttribute('aria-selected'))->toBe('false');
+
+    foreach ($tabs as $i => $tab) {
+        expect($tab->getAttribute('aria-controls'))->toBe($panels->item($i)->getAttribute('id'))
+            ->and($panels->item($i)->getAttribute('aria-labelledby'))->toBe($tab->getAttribute('id'));
+    }
+});
+
 it('renders the hero background as a responsive, decorative picture with a jpg fallback', function () {
     $xpath = homepageXPath($this->get('/')->assertOk()->getContent());
 
