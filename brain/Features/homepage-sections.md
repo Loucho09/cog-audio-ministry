@@ -32,6 +32,8 @@ Permissions:
 Slices:
 1. Data (done): tables, models, seeders, `App\Actions\UpcomingServices`. See [[homepage-sections-tasks]].
 2. Hero, about us, what we do (done).
+   - Hero (updated 2026-11-24, commit 41ac1fb): cover photo is a full-bleed background (`object-cover`) with an even black/65 overlay and centered white text. Decorative image (`alt=""`). See [[logo-and-cover-assets]].
+   - ~~Hero cover shown as a banner below the hero text~~ (superseded 2026-11-24 by the full-bleed background above).
 3. Upcoming services and gallery with Alpine lightbox, `HomeController` (in progress).
 4. Join us CTA, FAQ accordion, contact with map only when address is set, meet the team behind the config flag (planned).
 

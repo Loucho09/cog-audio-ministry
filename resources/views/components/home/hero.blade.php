@@ -1,4 +1,4 @@
-<section aria-labelledby="hero-title" class="relative isolate overflow-hidden bg-text">
+<section aria-labelledby="hero-title" class="relative isolate overflow-hidden bg-black">
     {{-- Cover photo as a full-bleed background. Decorative (the h1 carries the name), so alt is empty.
          Above the fold, so no lazy loading. --}}
     <picture>

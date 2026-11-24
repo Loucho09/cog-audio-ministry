@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Theme tokens as space-separated RGB channels (used by tailwind.config.js).
+ * `primary-dark` is "the blue that passes WCAG AA" for the current theme: dark blue in light mode,
+ * light blue in dark mode, so `bg-primary-dark text-surface` stays readable in both.
+ */
+:root {
+    --color-background: 248 250 252; /* #F8FAFC */
+    --color-surface: 255 255 255; /* #FFFFFF */
+    --color-text: 15 23 42; /* #0F172A */
+    --color-primary: 2 132 199; /* #0284C7 */
+    --color-primary-dark: 3 105 161; /* #0369A1 */
+    --color-accent: 14 165 233; /* #0EA5E9 */
+    color-scheme: light;
+}
+
+.dark {
+    --color-background: 15 23 42; /* #0F172A */
+    --color-surface: 30 41 59; /* #1E293B */
+    --color-text: 241 245 249; /* #F1F5F9 */
+    --color-primary: 56 189 248; /* #38BDF8 */
+    --color-primary-dark: 56 189 248; /* #38BDF8 */
+    --color-accent: 14 165 233; /* #0EA5E9 */
+    color-scheme: dark;
+}
+
 /* Reduced motion: no smooth scrolling, and transitions and animations are effectively instant. */
 @media (prefers-reduced-motion: reduce) {
     html {

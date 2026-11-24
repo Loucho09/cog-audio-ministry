@@ -119,13 +119,13 @@
                     aria-modal="true"
                     x-bind:aria-labelledby="(images[current]?.title || images[current]?.alt) ? 'gallery-caption' : null"
                     x-bind:aria-label="(images[current]?.title || images[current]?.alt) ? null : 'Photo viewer'"
-                    class="fixed inset-0 z-50 flex overflow-y-auto bg-text/95 p-4"
+                    class="fixed inset-0 z-50 flex overflow-y-auto bg-text/95 p-4 dark:bg-background/95"
                     x-on:click.self="close()"
                 >
                     <div class="m-auto flex w-full max-w-4xl flex-col items-center" x-on:click.self="close()">
                         <figure class="flex flex-col items-center">
                             <img x-bind:src="images[current]?.url" x-bind:alt="images[current]?.alt ?? ''" class="max-h-[70dvh] w-auto max-w-full rounded-lg object-contain">
-                            <figcaption id="gallery-caption" aria-live="polite" class="mt-3 text-center text-sm text-surface" x-text="images[current]?.title || images[current]?.alt"></figcaption>
+                            <figcaption id="gallery-caption" aria-live="polite" class="mt-3 text-center text-sm text-surface dark:text-text" x-text="images[current]?.title || images[current]?.alt"></figcaption>
                         </figure>
 
                         @if ($viewable->count() > 1)

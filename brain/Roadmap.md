@@ -17,6 +17,8 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 ## Phase 1: Setup and Homepage
 **Goal:** scaffold Laravel with required packages, build a mobile-first homepage.
 
+- Added 2026-11-24 (owner request): dark mode for public pages. See [[dark-mode]].
+
 ### Tasks
 1. [x] Scaffold Laravel (latest stable) + Tailwind, Alpine, Filament, Spatie Permission, Breeze Blade, Pest; commit
    - Done 2026-11-24. Laravel 13.43, PHP 8.6, Breeze 2.4 Blade, Pest 5.3, Filament 5.12 (`/admin`; `canAccessPanel` returns false until Phase 2), Spatie Permission 8.5 (teams off, `HasRoles` on `User`, no roles yet), Pint, Tailwind 3.4 ([[tailwind-v3-with-breeze]]), Alpine 3, Vite.

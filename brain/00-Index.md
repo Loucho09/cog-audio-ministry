@@ -26,10 +26,12 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[image-path-convention]]: `images/` paths are bundled files; other paths are on the public disk (2026-11-24)
 - [[logo-and-cover-assets]]: owner-supplied logo and cover; navbar crop approved (2026-11-24)
 - [[seeders-first-or-create]]: content seeders use `firstOrCreate` so re-seeding keeps admin edits (2026-11-24)
+- [[dark-mode-css-variable-tokens]]: theme colors as CSS variables, `.dark` class, no flash of wrong theme (2026-11-24)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
 - [[homepage-sections]]: homepage sections as Blade components (Phase 1, in progress; tasks in [[homepage-sections-tasks]])
+- [[dark-mode]]: light/dark theme toggle on public pages (Phase 1, done pending owner check; added 2026-11-24)
 
 ## Folders
 - `Features/`: one spec per feature (template in `CLAUDE.md`)
