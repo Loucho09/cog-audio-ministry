@@ -136,7 +136,8 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 ### Tasks
 - Accessibility, SEO (meta per page, Open Graph, sitemap), and performance pass. Target Lighthouse 90+
 - Check `text-primary` contrast for small text (e.g., the "DASMARIÑAS" eyebrow on the placeholder page); see [[primary-dark-contrast-token]]
-- Self-host the Inter font (see [[Backlog]])
+- ~~Self-host the Inter font (see [[Backlog]])~~ superseded 2026-11-24
+- Self-host Montserrat and Mrs Saint Delafield (see [[Backlog]], [[typography-matches-logo]])
 - Write `DEPLOY.md`: server reqs PHP 8.2+, MySQL 8, Composer, Node, extensions; `composer install --no-dev --optimize-autoloader`; `npm ci && npm run build`; production `.env` values; `key:generate`; `migrate --force`; seed only branches and roles; `storage:link`; config/route/view/event cache; HTTPS; queue worker; scheduler cron; backups of DB and uploads; first-login checklist (create super-admin, assign branch-heads, set logo, check schedule, check team flag)
 - Write `PRODUCTION-CHECKLIST.md`: pages load on phone and desktop; join form sends email; admin login works; non-admin cannot reach /admin; schedule correct; images load
 

@@ -27,6 +27,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[logo-and-cover-assets]]: owner-supplied logo and cover; navbar crop approved (2026-11-24)
 - [[seeders-first-or-create]]: content seeders use `firstOrCreate` so re-seeding keeps admin edits (2026-11-24)
 - [[dark-mode-css-variable-tokens]]: theme colors as CSS variables, `.dark` class, no flash of wrong theme (2026-11-24)
+- [[typography-matches-logo]]: Montserrat for all text, Mrs Saint Delafield script accent for "Audio" (2026-11-24)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)

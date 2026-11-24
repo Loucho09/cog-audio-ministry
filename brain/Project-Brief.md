@@ -27,7 +27,8 @@ Colors stored as Tailwind theme tokens (no custom hex values needed). Tokens are
 
 These tokens are set in the Tailwind config and can be customized per branch if needed in the future.
 
-- Font: Inter (Google Fonts)
+- ~~Font: Inter (Google Fonts)~~ superseded 2026-11-24
+- Font: Montserrat, with Mrs Saint Delafield as a script accent for "Audio" (matches the logo); see [[typography-matches-logo]]
 - Responsive from 360px wide (was 375px)
 
 ## Contacts and Configuration
