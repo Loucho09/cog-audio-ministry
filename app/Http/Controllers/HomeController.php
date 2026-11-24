@@ -15,7 +15,9 @@ class HomeController extends Controller
     public function __invoke(): View
     {
         $now = now()->toImmutable()->setTimezone(config('app.timezone'));
-        $branch = Branch::mainBranch();
+        // One branches query feeds the churches list, the churches count, and the main branch.
+        $churches = Branch::query()->orderByDesc('is_main')->orderBy('name')->get();
+        $branch = $churches->first(fn (Branch $church) => $church->is_main);
 
         $occurrences = $branch ? UpcomingServices::forBranch($branch, 4, $now) : collect();
         $schedule = ServiceSchedule::build($occurrences, $now, $branch);
@@ -41,6 +43,7 @@ class HomeController extends Controller
 
         return view('welcome', [
             'servicesPerWeek' => $servicesPerWeek,
+            'churches' => $churches,
             'branch' => $branch,
             'schedule' => $schedule,
             'galleryImages' => $galleryImages,
