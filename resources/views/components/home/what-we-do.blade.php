@@ -7,57 +7,46 @@
             </p>
         </div>
 
+        @php
+            // Icon markup is static SVG paths defined here, never user input.
+            $roles = [
+                [
+                    'title' => 'FOH (Front of House)',
+                    'description' => 'FOH mixes the sound the congregation hears, balancing vocals and instruments so every word and song comes through clearly.',
+                    'icon' => '<path stroke-linecap="round" d="M6 4v16M12 4v16M18 4v16M4 9h4M10 15h4M16 8h4" />',
+                ],
+                [
+                    'title' => 'Monitors',
+                    'description' => 'The monitor mix is what singers and musicians hear on stage, so they can hear themselves and each other while they serve.',
+                    'icon' => '<path stroke-linejoin="round" d="M5 19.5l2-8h10l2 8z" /><circle cx="12" cy="15.5" r="1.5" />',
+                ],
+                [
+                    'title' => 'Livestream',
+                    'description' => 'The livestream team shares our services online, with clear sound and steady video for those who join from home.',
+                    'icon' => '<rect x="3" y="6.5" width="13" height="11" rx="2" /><path stroke-linejoin="round" d="M16 10.5l5-3v9l-5-3" />',
+                ],
+                [
+                    'title' => 'Stage Tech',
+                    'description' => 'Stage tech sets up and cares for microphones, cables, and instruments so the stage is ready before each service begins.',
+                    'icon' => '<rect x="9" y="3" width="6" height="11" rx="3" /><path stroke-linecap="round" d="M6 11a6 6 0 0012 0M12 17v4" />',
+                ],
+            ];
+        @endphp
+
         <ul class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <li class="flex flex-col rounded-2xl border border-text/10 bg-surface p-6 shadow-sm">
-                <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-primary-dark">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" d="M6 4v16M12 4v16M18 4v16M4 9h4M10 15h4M16 8h4" />
-                    </svg>
-                </span>
-                <h3 class="mt-5 text-lg font-semibold text-text">FOH (Front of House)</h3>
-                <p class="mt-2 text-sm leading-relaxed text-text/70">
-                    FOH mixes the sound the congregation hears, balancing vocals and instruments so every word and song comes through clearly.
-                </p>
-            </li>
-
-            <li class="flex flex-col rounded-2xl border border-text/10 bg-surface p-6 shadow-sm">
-                <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-primary-dark">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linejoin="round" d="M5 19.5l2-8h10l2 8z" />
-                        <circle cx="12" cy="15.5" r="1.5" />
-                    </svg>
-                </span>
-                <h3 class="mt-5 text-lg font-semibold text-text">Monitors</h3>
-                <p class="mt-2 text-sm leading-relaxed text-text/70">
-                    The monitor mix is what singers and musicians hear on stage, so they can hear themselves and each other while they serve.
-                </p>
-            </li>
-
-            <li class="flex flex-col rounded-2xl border border-text/10 bg-surface p-6 shadow-sm">
-                <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-primary-dark">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <rect x="3" y="6.5" width="13" height="11" rx="2" />
-                        <path stroke-linejoin="round" d="M16 10.5l5-3v9l-5-3" />
-                    </svg>
-                </span>
-                <h3 class="mt-5 text-lg font-semibold text-text">Livestream</h3>
-                <p class="mt-2 text-sm leading-relaxed text-text/70">
-                    The livestream team shares our services online, with clear sound and steady video for those who join from home.
-                </p>
-            </li>
-
-            <li class="flex flex-col rounded-2xl border border-text/10 bg-surface p-6 shadow-sm">
-                <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-primary-dark">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <rect x="9" y="3" width="6" height="11" rx="3" />
-                        <path stroke-linecap="round" d="M6 11a6 6 0 0012 0M12 17v4" />
-                    </svg>
-                </span>
-                <h3 class="mt-5 text-lg font-semibold text-text">Stage Tech</h3>
-                <p class="mt-2 text-sm leading-relaxed text-text/70">
-                    Stage tech sets up and cares for microphones, cables, and instruments so the stage is ready before each service begins.
-                </p>
-            </li>
+            @foreach ($roles as $role)
+                <li class="flex flex-col rounded-2xl border border-text/10 bg-surface p-6 shadow-sm">
+                    <span aria-hidden="true" class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-primary-dark">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            {!! $role['icon'] !!}
+                        </svg>
+                    </span>
+                    <h3 class="mt-5 text-lg font-semibold text-text">{{ $role['title'] }}</h3>
+                    <p class="mt-2 text-sm leading-relaxed text-text/70">
+                        {{ $role['description'] }}
+                    </p>
+                </li>
+            @endforeach
         </ul>
     </div>
 </section>

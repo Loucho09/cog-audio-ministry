@@ -1,7 +1,7 @@
 <section aria-labelledby="hero-title" class="relative overflow-hidden bg-gradient-to-b from-background to-surface">
     {{-- Decorative accents (tokens only, no images) --}}
-    <div aria-hidden="true" class="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-accent/10 blur-3xl"></div>
-    <div aria-hidden="true" class="pointer-events-none absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent/10 blur-2xl"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-primary/10 blur-2xl"></div>
 
     <div class="relative mx-auto max-w-6xl px-4 pb-16 pt-20 sm:px-6 sm:pb-20 sm:pt-28 lg:px-8">
         <div class="flex flex-col items-center text-center">
@@ -21,13 +21,18 @@
         {{-- Cover banner, below the text and buttons. Above the fold on desktop, so no lazy loading. --}}
         <div class="mt-12 overflow-hidden rounded-2xl shadow-lg sm:mt-16">
             <picture>
-                <source srcset="{{ asset('images/cover.webp') }}" type="image/webp">
+                <source
+                    type="image/webp"
+                    srcset="{{ asset('images/cover-800.webp') }} 800w, {{ asset('images/cover-1200.webp') }} 1200w, {{ asset('images/cover.webp') }} 1600w"
+                    sizes="(min-width: 1152px) 1152px, 100vw"
+                >
                 <img
                     src="{{ asset('images/cover.jpg') }}"
                     alt="COG Audio banner showing a lit mixing console beside the COG Audio logo"
                     width="1600"
                     height="609"
                     fetchpriority="high"
+                    decoding="async"
                     class="block h-auto w-full"
                 >
             </picture>

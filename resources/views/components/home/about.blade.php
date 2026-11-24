@@ -11,13 +11,13 @@
             <article aria-labelledby="vision-title" class="rounded-2xl border border-text/10 bg-background p-6 sm:p-8">
                 <h3 id="vision-title" class="text-lg font-semibold text-text">Our Vision</h3>
                 {{-- TODO: vision/mission from the Audio Head --}}
-                <p class="mt-3 text-base leading-relaxed text-text/70">Coming soon. We're preparing this together with our ministry leaders.</p>
+                <p class="mt-3 text-base leading-relaxed text-text/70">Coming soon.</p>
             </article>
 
             <article aria-labelledby="mission-title" class="rounded-2xl border border-text/10 bg-background p-6 sm:p-8">
                 <h3 id="mission-title" class="text-lg font-semibold text-text">Our Mission</h3>
                 {{-- TODO: vision/mission from the Audio Head --}}
-                <p class="mt-3 text-base leading-relaxed text-text/70">Coming soon. We're preparing this together with our ministry leaders.</p>
+                <p class="mt-3 text-base leading-relaxed text-text/70">Coming soon.</p>
             </article>
         </div>
     </div>

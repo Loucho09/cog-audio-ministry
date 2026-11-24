@@ -15,7 +15,7 @@
     $authUrl = auth()->check() ? route('dashboard') : route('login');
     $authLabel = auth()->check() ? 'Dashboard' : 'Member Login';
 
-    $linkClasses = 'whitespace-nowrap rounded-sm text-text/80 transition-colors hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent';
+    $linkClasses = 'whitespace-nowrap rounded-sm text-text/80 transition-colors hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark';
 @endphp
 
 <header
@@ -28,7 +28,7 @@
         {{-- Brand --}}
         <a
             href="{{ route('home') }}"
-            class="flex min-w-0 flex-1 items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            class="flex min-w-0 flex-1 items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
         >
             @if ($hasLogo)
                 <img
@@ -76,7 +76,7 @@
                 :aria-expanded="open.toString()"
                 aria-controls="mobile-menu"
                 aria-label="Toggle navigation menu"
-                class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-text transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent lg:hidden"
+                class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-text transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark lg:hidden"
             >
                 <svg x-show="!open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
@@ -105,7 +105,7 @@
                         <a
                             href="{{ $link['href'] }}"
                             @click="open = false"
-                            class="block rounded-md px-3 py-3 text-base text-text transition-colors hover:bg-background hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                            class="block rounded-md px-3 py-3 text-base text-text transition-colors hover:bg-background hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
                         >{{ $link['label'] }}</a>
                     </li>
                 @endforeach
