@@ -36,7 +36,7 @@ Slices:
    - ~~Hero cover shown as a banner below the hero text~~ (superseded 2026-11-24 by the full-bleed background above).
 3. Upcoming services and gallery with Alpine lightbox, `HomeController` (~~in progress~~ done, see [[homepage-sections-tasks]]).
 4. Join us CTA, FAQ accordion, contact with map only when address is set, meet the team behind the config flag (~~planned~~ done, commit 1c8d658; browser check pending).
-   - Join Us CTA links to `#contact` until the Phase 3 application form exists (owner choice, 2026-11-24).
+   - Join Us CTA links to `#contact` until the Phase 3 application form exists (owner choice, 2026-11-24). Superseded 2026-11-24: the button now opens the Google Join Form in a new tab (`ministry.join_form_url`, env `MINISTRY_JOIN_FORM_URL`); falls back to `#contact` if the value is empty. See [[join-form-link]]. Phase 3 must replace this link.
    - Hero "Join Us" button now points to `#join`.
    - FAQ section is hidden when there are no published FAQs.
    - Contact items are hidden when their config value is null.

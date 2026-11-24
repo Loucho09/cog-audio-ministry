@@ -95,6 +95,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 - Queued email to that branch's branch-head, branch-admin, and super-admin when a new application arrives
 - Filament: list with filters by branch and status; view, approve, reject
 - Approve creates a user account (member role) and sends a set-password email
+- Replace the temporary homepage "Join Us" Google Form link with the in-app form: point the button to the new route, then remove or retire `ministry.join_form_url` / `MINISTRY_JOIN_FORM_URL`. See [[join-form-link]] and [[homepage-sections]].
 - Tests: saved, email queued, branch-head cannot see another branch's applications, approval creates account
 - ~~Old field list: age range, audio/tech experience, message~~ (superseded 2026-11-24 by [[second-brief-merged]])
 
