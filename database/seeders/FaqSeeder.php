@@ -5,6 +5,10 @@ namespace Database\Seeders;
 use App\Models\Faq;
 use Illuminate\Database\Seeder;
 
+/**
+ * Demo/initial content seeder. Uses firstOrCreate so re-running never
+ * overwrites edits made in Filament.
+ */
 class FaqSeeder extends Seeder
 {
     public function run(): void
@@ -19,7 +23,7 @@ class FaqSeeder extends Seeder
         ];
 
         foreach ($faqs as $i => [$q, $a]) {
-            Faq::updateOrCreate(['question' => $q], ['answer' => $a, 'sort_order' => $i + 1, 'is_published' => true]);
+            Faq::firstOrCreate(['question' => $q], ['answer' => $a, 'sort_order' => $i + 1, 'is_published' => true]);
         }
     }
 }

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use InvalidArgumentException;
 
 #[UseFactory(ServiceFactory::class)]
 class Service extends Model
@@ -37,6 +38,27 @@ class Service extends Model
         return $query->where('is_active', true);
     }
 
+    public function scopeOrdered(Builder $query): Builder
+    {
+        return $query->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * @return array{0: int, 1: int} [hour, minute]
+     *
+     * @throws InvalidArgumentException when start_time is missing or malformed
+     */
+    public function startTimeParts(): array
+    {
+        $time = (string) $this->start_time;
+
+        if (! preg_match('/^(\d{1,2}):(\d{2})(?::\d{2})?$/', $time, $m)) {
+            throw new InvalidArgumentException('Service start_time is missing or invalid.');
+        }
+
+        return [(int) $m[1], (int) $m[2]];
+    }
+
     /**
      * Next start datetime (app timezone) at or after $from. If this week's
      * time has already passed, returns the same slot next week.
@@ -47,7 +69,7 @@ class Service extends Model
             ? CarbonImmutable::instance($from)->setTimezone(config('app.timezone'))
             : CarbonImmutable::now(config('app.timezone'));
 
-        [$hour, $minute] = array_map('intval', explode(':', (string) $this->start_time));
+        [$hour, $minute] = $this->startTimeParts();
 
         $candidate = $from
             ->startOfDay()

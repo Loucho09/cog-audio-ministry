@@ -6,6 +6,10 @@ use App\Models\Branch;
 use App\Models\Service;
 use Illuminate\Database\Seeder;
 
+/**
+ * Demo/initial content seeder. Uses firstOrCreate so re-running never
+ * overwrites edits made in Filament.
+ */
 class ServiceSeeder extends Seeder
 {
     public function run(): void
@@ -22,7 +26,7 @@ class ServiceSeeder extends Seeder
         }
 
         foreach ($schedule as $i => [$day, $time, $name]) {
-            Service::updateOrCreate(
+            Service::firstOrCreate(
                 ['branch_id' => $main->id, 'day_of_week' => $day, 'start_time' => $time.':00'],
                 ['name' => $name, 'is_active' => true, 'sort_order' => $i + 1],
             );

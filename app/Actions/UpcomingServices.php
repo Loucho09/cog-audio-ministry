@@ -25,7 +25,7 @@ class UpcomingServices
 
         $items = collect();
 
-        foreach ($branch->services()->active()->get() as $service) {
+        foreach ($branch->services()->active()->ordered()->get() as $service) {
             $startsAt = $service->nextOccurrence($from);
 
             while ($startsAt->lessThan($until)) {

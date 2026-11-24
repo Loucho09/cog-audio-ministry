@@ -20,6 +20,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['branch_id', 'is_active']);
+            $table->unique(['branch_id', 'day_of_week', 'start_time']);
         });
     }
 

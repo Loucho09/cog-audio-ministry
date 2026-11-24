@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Support\ImageUrl;
 use Database\Factories\TeamMemberFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +28,11 @@ class TeamMember extends Model
             'is_featured' => 'boolean',
             'sort_order' => 'integer',
         ];
+    }
+
+    protected function photoUrl(): Attribute
+    {
+        return Attribute::get(fn () => ImageUrl::for($this->photo_path));
     }
 
     public function branch(): BelongsTo

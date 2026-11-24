@@ -27,6 +27,21 @@ class Branch extends Model
         return $this->hasMany(Service::class);
     }
 
+    public function galleryImages(): HasMany
+    {
+        return $this->hasMany(GalleryImage::class);
+    }
+
+    public function teamMembers(): HasMany
+    {
+        return $this->hasMany(TeamMember::class);
+    }
+
+    public function activeServices(): HasMany
+    {
+        return $this->services()->active()->ordered();
+    }
+
     public function scopeMain(Builder $query): Builder
     {
         return $query->where('is_main', true);

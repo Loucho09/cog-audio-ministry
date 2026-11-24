@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Support\ImageUrl;
 use Database\Factories\GalleryImageFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +21,11 @@ class GalleryImage extends Model
     protected function casts(): array
     {
         return ['sort_order' => 'integer', 'is_published' => 'boolean'];
+    }
+
+    protected function url(): Attribute
+    {
+        return Attribute::get(fn () => ImageUrl::for($this->path));
     }
 
     public function branch(): BelongsTo
