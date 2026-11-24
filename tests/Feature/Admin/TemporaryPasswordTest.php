@@ -214,13 +214,7 @@ it('refuses the table action when called directly on forbidden targets', functio
     $this->actingAs($actor);
 
     // Bypass the visibility check the test helper performs: mount and run the action as a client could.
-    try {
-        Livewire::test(ListUsers::class)
-            ->call('mountAction', [['name' => 'setTemporaryPassword', 'context' => ['table' => true, 'recordKey' => (string) $target->getKey()]]])
-            ->call('callMountedAction', ['password' => 'Temp-Pass-12345']);
-    } catch (Throwable $e) {
-        // An abort is acceptable; the state checks below are what matter.
-    }
+    directTemporaryPasswordCall($target);
 
     $target->refresh();
     expect($target->must_change_password)->toBeFalse()
@@ -231,3 +225,25 @@ it('refuses the table action when called directly on forbidden targets', functio
     'head on self' => ['head', 'self'],
     'super on self' => ['super', 'self'],
 ]);
+
+function directTemporaryPasswordCall(User $target)
+{
+    return Livewire::test(ListUsers::class)
+        ->call('mountAction', 'setTemporaryPassword', [], ['table' => true, 'recordKey' => (string) $target->getKey()])
+        ->set('mountedActions.0.data.password', 'Temp-Pass-12345')
+        ->call('callMountedAction');
+}
+
+it('runs the action through the direct-call path for an allowed target (positive control)', function () {
+    $head = User::factory()->branchHead($this->branchA)->create();
+    $target = User::factory()->member($this->branchA)->create();
+    $before = $target->password;
+    $this->actingAs($head);
+
+    directTemporaryPasswordCall($target);
+
+    $target->refresh();
+    expect($target->must_change_password)->toBeTrue()
+        ->and($target->password)->not->toBe($before)
+        ->and(Hash::check('Temp-Pass-12345', $target->password))->toBeTrue();
+});
