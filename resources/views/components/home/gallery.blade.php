@@ -90,22 +90,53 @@
                 x-on:keydown.arrow-right.window="open && next()"
                 x-on:keydown.arrow-left.window="open && prev()"
             >
-                <ul class="mt-12 grid grid-cols-2 gap-3 sm:mt-16 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
+                @php
+                    // Bento layout: with 5+ photos the first one is featured (2x2 on md+, full width on mobile).
+                    $featured = $images->count() >= 5;
+                    // On the 2-column mobile grid, stretch the last photo across both columns if it would sit alone.
+                    $mobileOrphan = ($images->count() - ($featured ? 1 : 0)) % 2 === 1;
+                    // Featured layout stays 3 columns on desktop (featured = 4 cells); fill any short last row.
+                    $wideRemainder = $featured ? ($images->count() + 3) % 3 : 0;
+                @endphp
+                <ul @class([
+                    'mt-12 grid grid-cols-2 gap-3 sm:mt-16 md:grid-cols-3 md:gap-4',
+                    'lg:grid-cols-4' => ! $featured,
+                ])>
                     @foreach ($images as $image)
-                        <li>
+                        @php
+                            $isFeatured = $featured && $loop->first;
+                            $isOrphan = $mobileOrphan && $loop->last && ! $isFeatured;
+                            $cell = match (true) {
+                                $isFeatured => 'col-span-2 aspect-[4/3] md:row-span-2 md:aspect-auto',
+                                $loop->last && $wideRemainder === 1 => 'col-span-2 aspect-[16/9] md:col-span-3 md:aspect-[21/9]',
+                                $loop->last && $wideRemainder === 2 => 'col-span-2 aspect-[16/9] md:aspect-auto',
+                                $isOrphan => 'col-span-2 aspect-[16/9] md:col-span-1 md:aspect-[4/3]',
+                                default => 'aspect-[4/3]',
+                            };
+                        @endphp
+                        <li class="{{ $cell }}">
                             @if ($image['placeholder'])
-                                <img src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" loading="lazy" decoding="async" class="{{ $tileClasses }}">
+                                <img src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" loading="lazy" decoding="async" class="h-full w-full rounded-3xl object-cover shadow-sm">
                             @else
                                 <button
                                     type="button"
                                     x-on:click="show({{ $viewIndex++ }}, $el)"
                                     aria-label="View larger photo: {{ $image['alt'] }}"
-                                    class="group relative block w-full overflow-hidden rounded-3xl shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2"
+                                    class="group relative block h-full w-full overflow-hidden rounded-3xl bg-text/5 shadow-sm ring-1 ring-text/10 transition-shadow duration-300 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2"
                                 >
-                                    <img src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" loading="lazy" decoding="async" class="aspect-[4/3] w-full object-cover transition duration-500 motion-safe:group-hover:scale-105">
-                                    {{-- Hover shade with the caption. Decorative copy: the button's aria-label already names the photo. --}}
-                                    <span aria-hidden="true" class="pointer-events-none absolute inset-0 flex items-end bg-gradient-to-t from-black/75 via-black/10 to-transparent p-4 text-left opacity-0 transition duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
-                                        <span class="line-clamp-2 text-sm font-medium text-white">{{ $image['title'] ?? $image['alt'] }}</span>
+                                    <img src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" @if (! $isFeatured) loading="lazy" @endif decoding="async" class="h-full w-full object-cover transition duration-700 ease-out motion-safe:group-hover:scale-105">
+                                    {{-- Caption shade. Decorative copy: the button's aria-label already names the photo.
+                                         The featured photo always shows its caption; others reveal it on hover/focus. --}}
+                                    <span aria-hidden="true" @class([
+                                        'pointer-events-none absolute inset-0 flex items-end bg-gradient-to-t from-black/75 via-black/10 to-transparent text-left transition duration-300',
+                                        'p-5 sm:p-6' => $isFeatured,
+                                        'p-4 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100' => ! $isFeatured,
+                                    ])>
+                                        <span @class([
+                                            'line-clamp-2 font-medium text-white',
+                                            'text-base sm:text-lg' => $isFeatured,
+                                            'text-sm' => ! $isFeatured,
+                                        ])>{{ $image['title'] ?? $image['alt'] }}</span>
                                     </span>
                                 </button>
                             @endif
