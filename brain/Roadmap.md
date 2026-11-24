@@ -61,6 +61,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 Status: done. 2a and 2b merged to main 2026-11-25. Split into two parts (owner decision, 2026-11-24). Spec: [[member-accounts-roles]]. Tasks: [[member-accounts-roles-tasks]].
 - **2a Security core:** `branch_id` on users, Spatie roles, demo seed, `ministry:create-super-admin` command, register route removed, route throttles, `canAccessPanel`, `Gate::before`, `BelongsToBranch` scope, `AssignRole` action, Service and User policies, tests, themed auth screens. Decision: [[super-admin-via-artisan-command]].
 - **2b Filament screens:** Service, GalleryImage, TeamMember, Faq, Branch, and User resources. The "Our churches" list moves from config to the `branches` table (nullable `facebook_url`).
+- [x] **Add-on done 2026-11-25** (built and reviewed on `feature/temp-password`; merge pending owner OK): temporary passwords and forced password change, plus branch-style demo emails. See [[temp-password]], [[temp-password-tasks]].
 
 ### Tasks
 - Breeze Blade login/register; accounts created by approval only (no open signup)

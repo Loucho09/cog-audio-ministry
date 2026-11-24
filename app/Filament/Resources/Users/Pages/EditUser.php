@@ -72,6 +72,7 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            UserResource::temporaryPasswordAction(),
             UserResource::resendAction(),
             DeleteAction::make()
                 ->visible(fn () => UserResource::isSuperAdmin())

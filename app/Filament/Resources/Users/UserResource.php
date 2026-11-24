@@ -13,10 +13,12 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -25,7 +27,10 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -125,6 +130,55 @@ class UserResource extends Resource
             });
     }
 
+    /** Policy check plus the rule that nobody (super-admin included) may use it on themselves. */
+    public static function canSetTemporaryPassword(?User $record): bool
+    {
+        $actor = auth()->user();
+
+        return $actor !== null
+            && $record !== null
+            && ! $actor->is($record)
+            && Gate::forUser($actor)->allows('setTemporaryPassword', $record);
+    }
+
+    public static function temporaryPasswordAction(): Action
+    {
+        return Action::make('setTemporaryPassword')
+            ->label('Set temporary password')
+            ->icon(Heroicon::OutlinedKey)
+            ->modalHeading('Set temporary password')
+            ->modalDescription('The user must choose a new password at their next login. Their current sessions are signed out.')
+            ->schema([
+                TextInput::make('password')
+                    ->label('Temporary password')
+                    ->password()
+                    ->revealable()
+                    ->required()
+                    ->rule(PasswordRule::defaults())
+                    ->autocomplete('new-password'),
+            ])
+            ->visible(fn (?User $record) => self::canSetTemporaryPassword($record))
+            ->action(function (User $record, array $data): void {
+                if (! self::canSetTemporaryPassword($record)) {
+                    abort(403);
+                }
+
+                $record->forceFill([
+                    'password' => $data['password'],
+                    'must_change_password' => true,
+                    // The admin vouches for the address; otherwise /dashboard (verified) would trap the user.
+                    'email_verified_at' => $record->email_verified_at ?? now(),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                if (config('session.driver') === 'database') {
+                    DB::table(config('session.table', 'sessions'))->where('user_id', $record->id)->delete();
+                }
+
+                Notification::make()->success()->title('Temporary password set')->send();
+            });
+    }
+
     /**
      * Maps AssignRole's validation errors onto the Filament form fields.
      */
@@ -152,6 +206,25 @@ class UserResource extends Resource
                     ->searchable()
                     ->rules(['nullable', 'exists:branches,id'])
                     ->visible(fn () => self::isSuperAdmin()),
+                Radio::make('password_mode')
+                    ->label('Password')
+                    ->options([
+                        'email' => 'Send set-password email',
+                        'temporary' => 'Set a temporary password',
+                    ])
+                    ->default('email')
+                    ->live()
+                    ->visible(fn (string $operation) => $operation === 'create' && self::isSuperAdmin()),
+                TextInput::make('password')
+                    ->label('Temporary password')
+                    ->password()
+                    ->revealable()
+                    ->autocomplete('new-password')
+                    ->required(fn (Get $get) => $get('password_mode') === 'temporary')
+                    ->rule(PasswordRule::defaults())
+                    ->visible(fn (Get $get, string $operation) => $operation === 'create'
+                        && self::isSuperAdmin()
+                        && $get('password_mode') === 'temporary'),
                 Select::make('role')
                     ->options(array_combine(AssignRole::ROLES, AssignRole::ROLES))
                     ->required()
@@ -189,6 +262,7 @@ class UserResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
+                self::temporaryPasswordAction(),
                 self::resendAction(),
             ])
             ->toolbarActions([

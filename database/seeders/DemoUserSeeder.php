@@ -17,14 +17,14 @@ class DemoUserSeeder extends Seeder
             return;
         }
 
-        $this->make('Demo Super Admin', 'superadmin@example.test', null, 'super-admin');
+        $this->make('Demo Super Admin', 'superadmin@cogdasma.audio', null, 'super-admin');
 
         foreach (Branch::all() as $branch) {
-            $this->make("Head {$branch->name}", "head.{$branch->slug}@example.test", $branch, 'branch-head');
-            $this->make("Admin {$branch->name}", "admin.{$branch->slug}@example.test", $branch, 'branch-admin');
+            $this->make("Head {$branch->name}", "head@cog{$branch->slug}.audio", $branch, 'branch-head');
+            $this->make("Admin {$branch->name}", "admin@cog{$branch->slug}.audio", $branch, 'branch-admin');
 
             for ($i = 1; $i <= 3; $i++) {
-                $this->make(fake()->name(), "member{$i}.{$branch->slug}@example.test", $branch, 'member');
+                $this->make(fake()->name(), "member{$i}@cog{$branch->slug}.audio", $branch, 'member');
             }
         }
     }

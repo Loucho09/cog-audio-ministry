@@ -3,6 +3,8 @@
         <h1 class="text-2xl font-bold tracking-tight text-text sm:text-3xl">{{ __('Dashboard') }}</h1>
     </x-slot>
 
+    <x-auth-session-status class="mb-4" :status="session('status')" />
+
     <section aria-labelledby="welcome-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
         <h2 id="welcome-heading" class="text-xl font-semibold text-text sm:text-2xl">
             {{ __('Welcome, :name', ['name' => auth()->user()->name]) }}

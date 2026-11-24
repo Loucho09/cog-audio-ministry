@@ -16,7 +16,7 @@ it('does not create demo users outside local/testing', function () {
         app()->detectEnvironment(fn () => 'testing');
     }
 
-    expect(User::where('email', 'superadmin@example.test')->exists())->toBeFalse();
+    expect(User::where('email', 'superadmin@cogdasma.audio')->exists())->toBeFalse();
 });
 
 it('throttles PUT /password after 6 attempts', function () {

@@ -46,7 +46,7 @@ it('keeps admin edits when seeders re-run and is idempotent', function () {
 
     expect(Faq::where('question', 'How do I apply?')->value('answer'))->toBe('Edited')
         ->and(Service::count())->toBe(11)
-        ->and(User::where('email', 'superadmin@example.test')->count())->toBe(1);
+        ->and(User::where('email', 'superadmin@cogdasma.audio')->count())->toBe(1);
 });
 
 it('keeps seeded FAQs out of the homepage', function () {
