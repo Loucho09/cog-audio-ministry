@@ -111,3 +111,12 @@ it('forbids members from the branches page', function () {
 
     $this->get('/admin/branches')->assertForbidden();
 });
+
+it('rejects a javascript: or http facebook_url', function (string $bad) {
+    $this->actingAs(User::factory()->superAdmin()->create());
+
+    Livewire::test(EditBranch::class, ['record' => $this->other->id])
+        ->fillForm(['facebook_url' => $bad])
+        ->call('save')
+        ->assertHasFormErrors(['facebook_url']);
+})->with(['javascript:alert(1)', 'http://www.facebook.com/x']);

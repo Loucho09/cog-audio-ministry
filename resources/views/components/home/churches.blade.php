@@ -39,9 +39,9 @@
                                     <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary-dark dark:bg-white/15 dark:text-white">Main church</span>
                                 @endif
                             </div>
-                            @if (filled($church->facebook_url))
+                            @if ($church->safeFacebookUrl())
                                 <a
-                                    href="{{ $church->facebook_url }}"
+                                    href="{{ $church->safeFacebookUrl() }}"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="{{ $church->name }} on Facebook (opens in a new tab)"

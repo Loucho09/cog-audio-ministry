@@ -58,3 +58,10 @@ it('does not overwrite an admin-edited facebook_url when reseeding', function ()
 
     expect(Branch::where('slug', 'trece')->value('facebook_url'))->toBe('https://www.facebook.com/edited');
 });
+
+it('does not render a stored non-https facebook_url as a link', function () {
+    (new BranchSeeder)->run();
+    Branch::where('slug', 'trece')->update(['facebook_url' => 'javascript:alert(1)']);
+
+    $this->get('/')->assertOk()->assertDontSee('javascript:alert(1)', false);
+});

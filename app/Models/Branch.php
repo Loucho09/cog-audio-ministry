@@ -22,6 +22,14 @@ class Branch extends Model
         return ['is_main' => 'boolean'];
     }
 
+    /** Facebook link for public pages: https only, otherwise null (never render javascript: or http: links). */
+    public function safeFacebookUrl(): ?string
+    {
+        $url = trim((string) $this->facebook_url);
+
+        return str_starts_with(strtolower($url), 'https://') ? $url : null;
+    }
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class);

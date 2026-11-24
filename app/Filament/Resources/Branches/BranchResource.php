@@ -106,7 +106,7 @@ class BranchResource extends Resource
                 TextInput::make('address')->maxLength(255),
                 TextInput::make('contact_number')->maxLength(255),
                 TextInput::make('email')->email()->maxLength(255),
-                TextInput::make('facebook_url')->label('Facebook URL')->url()->maxLength(255),
+                TextInput::make('facebook_url')->label('Facebook URL')->url()->rule('starts_with:https://')->maxLength(255),
                 Toggle::make('is_main')
                     ->label('Main branch')
                     ->rules([
