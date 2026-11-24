@@ -27,3 +27,4 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - "No experience needed" steps on the join section (owner declined for now, 2026-11-24; see [[homepage-hooks]])
 - Gallery: with exactly 4 non-featured photos the md grid shows a lone tile; check the layout (added 2026-11-24; see [[homepage-sections]])
 - Gallery: responsive `srcset` or thumbnails for gallery images (added 2026-11-24; see [[homepage-sections]])
+- Replace the temporary local `cog_audio` MySQL password before any shared/production use; production gets its own credentials (added 2026-11-24)

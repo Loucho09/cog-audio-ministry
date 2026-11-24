@@ -44,7 +44,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 - [x] Git repo initialization
 - [x] Git workflow and first feature branch (`feature/setup`)
 - [x] `.env` and `.env.example` setup
-- [ ] MySQL connection: MySQL80 service keeps stopping; `DB_PASSWORD` not set; `cog_audio` migrations not run. Keep open until the database is connected and migrated.
+- [x] MySQL connection (done 2026-11-24): MySQL80 service was set to Manual start, so it stopped after every reboot (no crashes in log). Now Automatic. App uses a dedicated local user `cog_audio` (temporary dev password in `.env` only; root untouched) with rights on `cog_audio` and `cog_audio_test%`. `migrate:fresh --seed` ran OK.
 
 ### Decisions (Phase 1)
 - [[tailwind-v3-with-breeze]]: Tailwind v3 kept because Breeze 2.4 requires it
