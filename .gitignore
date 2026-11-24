@@ -47,3 +47,6 @@ brain/.obsidian/workspace-mobile.json
 /public/fonts/filament
 _ide_helper.php
 Thumbs.db
+
+# Playwright MCP screenshots and snapshots (local only)
+/.playwright-mcp/
