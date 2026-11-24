@@ -28,7 +28,7 @@ class EditUser extends EditRecord
         $actor = auth()->user();
 
         if (! $actor->hasRole('super-admin')) {
-            $record->update(Arr::only($data, ['name', 'email']));
+            $record->update(Arr::only($data, ['name']));
 
             return $record;
         }
@@ -72,6 +72,7 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            UserResource::resendAction(),
             DeleteAction::make()
                 ->visible(fn () => UserResource::isSuperAdmin())
                 ->using(fn (User $record) => UserResource::deleteUser($record))

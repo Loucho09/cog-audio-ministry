@@ -10,6 +10,7 @@ use Filament\Facades\Filament;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
@@ -231,4 +232,103 @@ it('hides bulk delete from a branch-head', function () {
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     expect(User::find($member->id))->not->toBeNull();
+});
+
+it('denies delete to a branch-head by policy', function () {
+    $head = User::factory()->branchHead($this->branchA)->create();
+    $member = User::factory()->member($this->branchA)->create();
+
+    expect($head->can('delete', $member))->toBeFalse();
+});
+
+it('hides and rejects the delete action for a branch-head', function () {
+    $head = User::factory()->branchHead($this->branchA)->create();
+    $member = User::factory()->member($this->branchA)->create();
+    $this->actingAs($head);
+
+    Livewire::test(EditUser::class, ['record' => $member->id])->assertActionHidden('delete');
+
+    expect(User::find($member->id))->not->toBeNull();
+});
+
+it('keeps at least one super-admin on bulk delete', function () {
+    $me = User::factory()->superAdmin()->create();
+    $other = User::factory()->superAdmin()->create();
+    $this->actingAs($me);
+
+    Livewire::test(ListUsers::class)
+        ->selectTableRecords([$me->id, $other->id])
+        ->callAction(TestAction::make('delete')->table()->bulk());
+
+    expect(User::role('super-admin')->count())->toBeGreaterThanOrEqual(1)
+        ->and(User::find($me->id))->not->toBeNull();
+});
+
+it('ignores a submitted email from a branch-head but saves the name', function () {
+    $head = User::factory()->branchHead($this->branchA)->create();
+    $member = User::factory()->member($this->branchA)->create(['email' => 'keep@example.test']);
+    $this->actingAs($head);
+
+    Livewire::test(EditUser::class, ['record' => $member->id])
+        ->fillForm(['name' => 'New Name'])
+        ->set('data.email', 'changed@example.test')
+        ->call('save');
+
+    expect($member->fresh()->email)->toBe('keep@example.test')
+        ->and($member->fresh()->name)->toBe('New Name');
+});
+
+it('creates the user with a warning when the mail broker throws', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    Password::shouldReceive('broker')->andThrow(new RuntimeException('smtp down'));
+
+    Livewire::test(CreateUser::class)
+        ->fillForm(['name' => 'Mail Fail', 'email' => 'fail@example.test'])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertNotified('The set-password email could not be sent');
+
+    expect(User::where('email', 'fail@example.test')->exists())->toBeTrue();
+});
+
+it('lets a super-admin resend the set-password email', function () {
+    Notification::fake();
+    $this->actingAs(User::factory()->superAdmin()->create());
+    $target = User::factory()->member($this->branchA)->create();
+
+    Livewire::test(EditUser::class, ['record' => $target->id])->callAction('resendSetPassword');
+    Notification::assertSentTo($target, ResetPassword::class);
+});
+
+it('hides and rejects resend for a branch-head', function () {
+    Notification::fake();
+    $head = User::factory()->branchHead($this->branchA)->create();
+    $member = User::factory()->member($this->branchA)->create();
+    $this->actingAs($head);
+
+    Livewire::test(EditUser::class, ['record' => $member->id])
+        ->assertActionHidden('resendSetPassword');
+    Livewire::test(ListUsers::class)
+        ->assertActionHidden(TestAction::make('resendSetPassword')->table($member));
+
+    Notification::assertNothingSent();
+});
+
+it('rejects a forged non-existent branch id', function () {
+    Notification::fake();
+    $this->actingAs(User::factory()->superAdmin()->create());
+
+    Livewire::test(CreateUser::class)
+        ->fillForm(['name' => 'F', 'email' => 'forged@example.test', 'branch_id' => 999999])
+        ->call('create')
+        ->assertHasFormErrors(['branch_id']);
+
+    expect(User::where('email', 'forged@example.test')->exists())->toBeFalse();
+});
+
+it('rejects branch-head and branch-admin calling CreateUser directly', function () {
+    foreach ([User::factory()->branchHead($this->branchA)->create(), User::factory()->branchAdmin($this->branchA)->create()] as $actor) {
+        $this->actingAs($actor);
+        Livewire::test(CreateUser::class)->assertForbidden();
+    }
 });

@@ -47,9 +47,10 @@ class UserPolicy
         return $this->manages($user, $target);
     }
 
+    /** Super-admin only (via Gate::before). */
     public function delete(User $user, User $target): bool
     {
-        return $this->manages($user, $target);
+        return false;
     }
 
     public function deleteAny(User $user): bool

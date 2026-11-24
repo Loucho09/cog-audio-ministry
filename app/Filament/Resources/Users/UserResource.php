@@ -9,11 +9,13 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Branch;
 use App\Models\User;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -23,7 +25,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class UserResource extends Resource
 {
@@ -80,6 +84,47 @@ class UserResource extends Resource
         });
     }
 
+    /** Sends the set-password link and notifies the result. Never throws. */
+    public static function sendSetPasswordLink(User $record): bool
+    {
+        try {
+            $status = Password::broker()->sendResetLink(['email' => $record->email]);
+        } catch (Throwable $e) {
+            report($e);
+            $status = null;
+        }
+
+        if ($status === Password::RESET_LINK_SENT) {
+            Notification::make()->success()->title('Set-password email sent')->send();
+
+            return true;
+        }
+
+        Notification::make()->warning()
+            ->title($status === Password::RESET_THROTTLED
+                ? 'Please wait a moment before sending another email'
+                : 'The set-password email could not be sent')
+            ->send();
+
+        return false;
+    }
+
+    public static function resendAction(): Action
+    {
+        return Action::make('resendSetPassword')
+            ->label('Resend set-password email')
+            ->icon(Heroicon::OutlinedEnvelope)
+            ->requiresConfirmation()
+            ->visible(fn () => self::isSuperAdmin())
+            ->action(function (User $record): void {
+                if (! self::isSuperAdmin()) {
+                    abort(403);
+                }
+
+                self::sendSetPasswordLink($record);
+            });
+    }
+
     /**
      * Maps AssignRole's validation errors onto the Filament form fields.
      */
@@ -99,11 +144,13 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+                    ->unique(ignoreRecord: true)
+                    ->disabled(fn () => ! self::isSuperAdmin()),
                 Select::make('branch_id')
                     ->label('Branch')
                     ->options(fn () => Branch::query()->orderBy('name')->pluck('name', 'id'))
                     ->searchable()
+                    ->rules(['nullable', 'exists:branches,id'])
                     ->visible(fn () => self::isSuperAdmin()),
                 Select::make('role')
                     ->options(array_combine(AssignRole::ROLES, AssignRole::ROLES))
@@ -142,6 +189,7 @@ class UserResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
+                self::resendAction(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

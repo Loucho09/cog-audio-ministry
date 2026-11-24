@@ -11,7 +11,6 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -47,12 +46,6 @@ class CreateUser extends CreateRecord
 
     protected function afterCreate(): void
     {
-        $status = Password::broker()->sendResetLink(['email' => $this->record->email]);
-
-        if ($status === Password::RESET_LINK_SENT) {
-            Notification::make()->success()->title('Set-password email sent')->send();
-        } else {
-            Notification::make()->warning()->title('User created, but the set-password email could not be sent')->send();
-        }
+        UserResource::sendSetPasswordLink($this->record);
     }
 }
