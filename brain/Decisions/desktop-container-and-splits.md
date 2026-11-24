@@ -40,3 +40,11 @@ Related: [[00-Index]], [[homepage-theme-polish]], [[public-layout]], [[homepage-
 - Contact cards (no-address branch) are one column until `xl`, `max-w-xl` below `lg`, so the email never breaks mid-word. Footer `md` grid is `minmax(0,1.3fr) minmax(0,1fr) auto` so the email fits.
 - Church card name wraps with the Main church badge (`flex-wrap`, `break-words`). Navbar brand name is 13px `tracking-tight` on mobile so it fits at 360px.
 - Checks: Playwright at 360, 768, 1024, 1280, 1440 and 1920px in light and dark; no horizontal scroll; tests pass; reviewer found nothing blocking.
+
+## Update 2026-11-24 (mobile polish)
+- Bug fixed: at 360px the contact cards overflowed the viewport (right edge ~397px on a 345px page, clipped by `overflow-hidden`). Cause: CSS grid with no explicit columns uses an auto track sized to min-content, i.e. the full email width. Fix: `grid-cols-1` (`minmax(0,1fr)`) on the contact grids.
+- Rule of thumb: give grids that hold long unbreakable text an explicit `grid-cols-*` so the track can shrink.
+- Email in the contact card renders as escaped text with `<wbr>` after "@", so it wraps cleanly ("cogdasmaaudio@" / "gmail.com"). `text-sm sm:text-base` (relative units, follows the user's font size).
+- Impact: 2 stats sit side by side on mobile (`grid-cols-2`), tighter padding, xs labels.
+- Churches list: two columns on mobile; an odd last card spans both columns.
+- Result: page 255px shorter at 360px. Checked light and dark. No horizontal overflow. Tests pass.
