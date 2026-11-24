@@ -6,7 +6,7 @@
     // Only real photos open in the lightbox; placeholders stay plain images.
     $viewable = $images->reject(fn ($i) => $i['placeholder'])->values();
     $viewIndex = 0;
-    $controlClasses = 'rounded-full bg-surface p-2 text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2';
+    $controlClasses = 'rounded-full bg-surface p-2.5 text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2';
 @endphp
 
 <section id="gallery" aria-labelledby="gallery-title" class="bg-surface py-16 sm:py-20">
@@ -119,7 +119,7 @@
                     aria-modal="true"
                     x-bind:aria-labelledby="(images[current]?.title || images[current]?.alt) ? 'gallery-caption' : null"
                     x-bind:aria-label="(images[current]?.title || images[current]?.alt) ? null : 'Photo viewer'"
-                    class="fixed inset-0 z-50 flex overflow-y-auto bg-text/90 p-4"
+                    class="fixed inset-0 z-50 flex overflow-y-auto bg-text/95 p-4"
                     x-on:click.self="close()"
                 >
                     <div class="m-auto flex w-full max-w-4xl flex-col items-center" x-on:click.self="close()">
