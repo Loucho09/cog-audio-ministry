@@ -17,6 +17,31 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[package-spatie-permission]]: roles and permissions, approved 2026-11-23
 - [[package-breeze]]: authentication scaffolding, approved 2026-11-23
 - [[package-pest]]: testing framework, approved 2026-11-23
+- [[tailwind-v3-with-breeze]]: Breeze 2.4 needs Tailwind v3; kept v3 while Laravel 13 ships v4 (2026-11-24)
+- [[primary-dark-contrast-token]]: `primary-dark` token for white text on filled backgrounds, WCAG AA (2026-11-24)
+- [[menu-breakpoint-lg]]: full desktop menu from 1024px, hamburger below (2026-11-24)
+- [[footer-tagline]]: approved footer tagline, stored in config (2026-11-24)
+- [[branches-table-in-phase-1]]: branches table created in Phase 1 because services need `branch_id` (2026-11-24)
+- [[timezone-asia-manila]]: `APP_TIMEZONE=Asia/Manila`, no DST (2026-11-24)
+- [[image-path-convention]]: `images/` paths are bundled files; other paths are on the public disk (2026-11-24)
+- [[logo-and-cover-assets]]: owner-supplied logo and cover; navbar crop approved (2026-11-24)
+- [[seeders-first-or-create]]: content seeders use `firstOrCreate` so re-seeding keeps admin edits (2026-11-24)
+- [[dark-mode-css-variable-tokens]]: theme colors as CSS variables, `.dark` class, no flash of wrong theme (2026-11-24)
+- [[typography-matches-logo]]: Montserrat for all text, Mrs Saint Delafield script accent for "Audio" (2026-11-24)
+- [[stage-palette]]: stage blue and red theme tokens, replaces sky-blue accent (2026-11-24)
+- [[section-backdrops]]: subtle CSS gradient backdrops per homepage section, no blur (2026-11-24)
+- [[hero-theme-verse]]: Psalm 66:8 verse in the hero, stored in config (2026-11-24)
+- [[filament-resources-phase-2]]: Filament content resources moved from Phase 1 to Phase 2 (2026-11-24)
+- [[churches-list-in-config]]: church list in config until the branches table is used in Phase 2 (2026-11-24)
+- [[owner-wording-our-churches]]: visitor copy says "our churches", not "satellite"; church logo only in churches section (2026-11-24)
+- [[card-style-and-section-rhythm]]: card background opposite its section; strict section alternation (2026-11-24)
+
+## Features
+- [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
+- [[homepage-sections]]: homepage sections as Blade components (Phase 1, in progress; tasks in [[homepage-sections-tasks]])
+- [[dark-mode]]: light/dark theme toggle on public pages (Phase 1, done pending owner check; added 2026-11-24)
+- [[homepage-hooks]]: impact strip, "One sound, many churches", stay updated, FAQ hidden from homepage (Phase 1, done, owner browser check pending; tasks in [[homepage-hooks-tasks]])
+- [[homepage-theme-polish]]: stage lighting, section rhythm, card consistency on `/` (Phase 1, done, owner browser check pending; 2026-11-24)
 
 ## Folders
 - `Features/`: one spec per feature (template in `CLAUDE.md`)

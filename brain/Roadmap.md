@@ -1,6 +1,6 @@
 # Roadmap
 
-Related: [[00-Index]], [[Project-Brief]], [[new-project-brief-adopted]], [[second-brief-merged]]
+Related: [[00-Index]], [[Project-Brief]], [[new-project-brief-adopted]], [[second-brief-merged]], [[public-layout]]
 
 Work one phase at a time. A phase starts only after the previous one is marked done. Owner go-ahead before each phase.
 
@@ -17,12 +17,20 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 ## Phase 1: Setup and Homepage
 **Goal:** scaffold Laravel with required packages, build a mobile-first homepage.
 
+- Added 2026-11-24 (owner request): dark mode for public pages. See [[dark-mode]].
+- Moved 2026-11-24: Filament resources (Service, GalleryImage, Faq, TeamMember) go to Phase 2; Phase 1 closes without them. See [[filament-resources-phase-2]].
+- [x] Done 2026-11-24 (owner request): homepage hooks (impact strip, "One sound, many churches", stay updated, FAQ hidden from homepage). Browser check pending. See [[homepage-hooks]], tasks in [[homepage-hooks-tasks]]. Phase 1 stays open until the browser check and MySQL are done.
+- [x] Done 2026-11-24 (owner request): homepage theme polish (stage lighting, section rhythm, card consistency). Browser check at 360px and dark mode pending. See [[homepage-theme-polish]], [[card-style-and-section-rhythm]].
+- TODO (2026-11-24): Marilag Facebook link; confirm whether COG Dasmariñas has its own Facebook page (currently the Audio Ministry page); owner browser check at 360px and dark mode.
+
 ### Tasks
-1. Scaffold Laravel (latest stable) + Tailwind, Alpine, Filament, Spatie Permission, Breeze Blade, Pest; commit
-2. Base layout: header, navigation, footer; theme tokens (background, surface, text, primary, accent); Inter font
-3. Homepage sections as Blade components (in order): hero, about us, what we do, meet the team (config flag, OFF by default), upcoming services, gallery, join us, FAQ, contact, footer; commit per section group
-4. `services` model, migration, seeder (main ministry schedule)
-5. `gallery_images`, `faqs`, `team_members` tables + seeders with placeholder data (team: `is_featured` flag, full-time first)
+1. [x] Scaffold Laravel (latest stable) + Tailwind, Alpine, Filament, Spatie Permission, Breeze Blade, Pest; commit
+   - Done 2026-11-24. Laravel 13.43, PHP 8.6, Breeze 2.4 Blade, Pest 5.3, Filament 5.12 (`/admin`; `canAccessPanel` returns false until Phase 2), Spatie Permission 8.5 (teams off, `HasRoles` on `User`, no roles yet), Pint, Tailwind 3.4 ([[tailwind-v3-with-breeze]]), Alpine 3, Vite.
+2. [x] Base layout: header, navigation, footer; theme tokens (background, surface, text, primary, accent); Inter font
+   - Done 2026-11-24. See [[public-layout]]. Tests: 41 total (40 pass, 1 skipped until `public/images/logo.png` exists). Checked at 360px, 1024px and 1280px. Reviewer run, issues fixed.
+3. **In progress:** Homepage sections as Blade components (in order): hero, about us, what we do, meet the team (config flag, OFF by default), upcoming services, gallery, join us, FAQ, contact, footer; commit per section group. Spec: [[homepage-sections]]. All four slices are built (slice 4 in commit 1c8d658). Browser check at 360px and dark mode is pending; needs MySQL. Phase 1 stays open until that check passes.
+4. [x] Services model, migration, seeder (main ministry schedule). Done via slice 1 of [[homepage-sections]]. Services seeded for COG Dasmariñas only.
+5. [x] `gallery_images`, `faqs`, `team_members` tables + seeders with placeholder data (team: `is_featured` flag, full-time first). Done via slice 1 of [[homepage-sections]].
 6. Semantic HTML and alt text now. SEO basics (meta, Open Graph, sitemap) can wait for the Phase 7 pass
 7. Mobile check at 360px; ensure responsive design
    - ~~Mobile check at 375px~~ (superseded 2026-11-24 by [[second-brief-merged]])
@@ -32,15 +40,25 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 - [x] Subagents in `.claude/agents/`
 
 ### Still open
-- [ ] Git repo initialization
-- [ ] `.env` and `.env.example` setup + MySQL
-- [ ] Git workflow and first feature branch
+- [x] Git repo initialization
+- [x] Git workflow and first feature branch (`feature/setup`)
+- [x] `.env` and `.env.example` setup
+- [ ] MySQL connection: MySQL80 service keeps stopping; `DB_PASSWORD` not set; `cog_audio` migrations not run. Keep open until the database is connected and migrated.
+
+### Decisions (Phase 1)
+- [[tailwind-v3-with-breeze]]: Tailwind v3 kept because Breeze 2.4 requires it
+- [[primary-dark-contrast-token]]: new `primary-dark` token for white text on filled backgrounds
+- [[menu-breakpoint-lg]]: full menu from 1024px, hamburger below
+- [[footer-tagline]]: approved tagline, stored in config
 
 ## Phase 2: Member Accounts and Roles
 **Goal:** set up authentication, roles, and branch scoping so members can log in and admins can manage the organization.
 
 ### Tasks
 - Breeze Blade login/register; accounts created by approval only (no open signup)
+- [ ] Open (added 2026-11-24): disable the Breeze `/register` route (approval-only accounts)
+- [ ] Open (added 2026-11-24): implement `canAccessPanel` on `User` for Filament (currently returns false)
+- [ ] Filament resources: Service, GalleryImage, Faq, TeamMember (moved from Phase 1 on 2026-11-24, see [[filament-resources-phase-2]]). Service resource needs a friendly error for the unique branch/day/time slot (from [[Backlog]]).
 - `branches` table with seeder (main + 4 satellites)
 - Spatie Permission: roles `super-admin` (project owner only), `branch-head` (admin of one branch), `branch-admin` (applications and roster for one branch; cannot assign roles), `member`
 - Super-admin and branch-head seeders with fake data
@@ -122,6 +140,9 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 
 ### Tasks
 - Accessibility, SEO (meta per page, Open Graph, sitemap), and performance pass. Target Lighthouse 90+
+- Check `text-primary` contrast for small text (e.g., the "DASMARIÑAS" eyebrow on the placeholder page); see [[primary-dark-contrast-token]]
+- ~~Self-host the Inter font (see [[Backlog]])~~ superseded 2026-11-24
+- Self-host Montserrat and Mrs Saint Delafield (see [[Backlog]], [[typography-matches-logo]])
 - Write `DEPLOY.md`: server reqs PHP 8.2+, MySQL 8, Composer, Node, extensions; `composer install --no-dev --optimize-autoloader`; `npm ci && npm run build`; production `.env` values; `key:generate`; `migrate --force`; seed only branches and roles; `storage:link`; config/route/view/event cache; HTTPS; queue worker; scheduler cron; backups of DB and uploads; first-login checklist (create super-admin, assign branch-heads, set logo, check schedule, check team flag)
 - Write `PRODUCTION-CHECKLIST.md`: pages load on phone and desktop; join form sends email; admin login works; non-admin cannot reach /admin; schedule correct; images load
 

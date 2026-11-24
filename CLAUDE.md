@@ -26,7 +26,9 @@ Goal: take this project from first commit to a live, maintained production site.
 
 ## Brand and content
 - Name: "COG Audio Ministry", subheader "Dasmariñas". Logo: official Facebook logo at `public/images/logo.png` (do not redraw; show a text placeholder until the file exists).
-- Colors are Tailwind theme tokens, not hardcoded hex: `background` #F8FAFC, `surface` #FFFFFF, `text` #0F172A, `primary` #0284C7, `accent` #0EA5E9. Font: Inter. Style: clean minimalist light, spacious, mobile-first.
+- Colors are Tailwind theme tokens, not hardcoded hex: `background` #F8FAFC, `surface` #FFFFFF, `text` #0F172A, `primary` #0284C7 (stage blue), `accent` #E11D48 (stage red for fills, bars, glows; small red text uses `accent-text` #BE123C / dark #FB7185 for AA contrast; never body text) (light values; dark mode is near-black #07080D with #38BDF8 / #F43F5E, values live in `resources/css/app.css`). Palette matches the cover photo; see `brain/Decisions/stage-palette.md`. Exception: text and overlays on photos (e.g. the hero) may use `white`/`black`, since the photo is dark in both themes.
+- Light and dark mode: navbar toggle, defaults to the device setting. New public UI must work in both themes.
+- Fonts match the logo: Montserrat for all text; Mrs Saint Delafield (`font-script`) only as a decorative accent (e.g. "Audio" in the hero), never for body text. Style: clean minimalist, spacious, mobile-first.
 - Copy: English, warm, simple, respectful, Tagalog-friendly tone.
 - Contacts and flags live in `config/ministry.php`, never hardcoded in views. Service schedule is seeded into the `services` table and managed in Filament.
 - Gallery images, FAQs, and team members are stored in the database and managed in Filament. Placeholder images until real photos are added.
