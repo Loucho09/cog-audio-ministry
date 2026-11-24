@@ -161,3 +161,9 @@ it('shows the logo image with empty alt when the logo file exists', function () 
         ->assertSee('alt=""', false)
         ->assertDontSee('>COG</span>', false);
 })->skip(fn () => ! file_exists(public_path('images/logo.png')), 'public/images/logo.png does not exist yet.');
+
+it('rejects a non-https join form URL from the env', function () {
+    $config = loadMinistryConfigWithEnv(['MINISTRY_JOIN_FORM_URL' => 'javascript:alert(1)']);
+
+    expect($config['join_form_url'])->toBeNull();
+});

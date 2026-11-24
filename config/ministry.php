@@ -46,6 +46,10 @@ return [
     // TODO: owner to provide the Messenger link.
     'messenger_url' => $httpsUrl(env('MINISTRY_MESSENGER_URL')),
 
+    // Google Form for people who want to join (same link as the "Scan here to join" QR).
+    // Used by the Join Us button until the Phase 3 application form replaces it. Null falls back to #contact.
+    'join_form_url' => $httpsUrl(env('MINISTRY_JOIN_FORM_URL', 'https://forms.gle/xNm3WauUEjwKKkQg7')),
+
     // TODO: owner to provide the church address (the map shows only when filled in).
     'address' => env('MINISTRY_ADDRESS') ?: null,
 
