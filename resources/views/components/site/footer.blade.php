@@ -9,7 +9,6 @@
         ['label' => 'Services', 'href' => route('home').'#services'],
         ['label' => 'Gallery', 'href' => route('home').'#gallery'],
         ['label' => 'Join Us', 'href' => route('home').'#join'],
-        ['label' => 'FAQ', 'href' => route('home').'#faq'],
         ['label' => 'Contact', 'href' => route('home').'#contact'],
     ])->filter()->values();
 

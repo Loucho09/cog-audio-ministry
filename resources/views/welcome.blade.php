@@ -9,6 +9,5 @@
     <x-home.services :branch="$branch" :schedule="$schedule" />
     <x-home.gallery :images="$galleryImages" />
     <x-home.join />
-    <x-home.faq :faqs="$faqs" />
     <x-home.contact />
 </x-public-layout>

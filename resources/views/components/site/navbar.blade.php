@@ -10,7 +10,6 @@
         ['label' => 'Services', 'href' => route('home').'#services'],
         ['label' => 'Gallery', 'href' => route('home').'#gallery'],
         ['label' => 'Join Us', 'href' => route('home').'#join', 'ready' => true],
-        ['label' => 'FAQ', 'href' => route('home').'#faq', 'ready' => true],
         ['label' => 'Contact', 'href' => route('home').'#contact', 'ready' => true],
     ])->filter(fn ($link) => $link && ($link['ready'] ?? true))->values();
 

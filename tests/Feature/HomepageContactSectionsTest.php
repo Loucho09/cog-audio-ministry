@@ -36,34 +36,13 @@ it('links the join button to #contact', function () {
     expect($html)->toMatch('/<section id="join".*?<a href="#contact"[^>]*>\s*Message us to join\s*<\/a>.*?<\/section>/s');
 });
 
-it('escapes FAQ answers and keeps line breaks', function () {
-    Faq::factory()->create([
-        'question' => 'Is it safe?',
-        'answer' => 'Line one
-<script>alert(1)</script>',
-        'is_published' => true,
-    ]);
+it('does not show the FAQ on the homepage even when published FAQs exist', function () {
+    Faq::factory()->create(['question' => 'Can I serve?', 'answer' => 'Yes.', 'is_published' => true]);
 
     $this->get('/')->assertOk()
-        ->assertDontSee('<script>alert(1)</script>', false)
-        ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)
-        ->assertSee('Line one<br />', false);
-});
-
-it('renders published FAQs as accessible accordion buttons', function () {
-    $faq = Faq::factory()->create(['question' => 'Can I serve?', 'answer' => 'Yes.', 'is_published' => true]);
-    Faq::factory()->create(['question' => 'Unpublished one', 'is_published' => false]);
-
-    $this->get('/')->assertOk()
-        ->assertSee('id="faq"', false)
-        ->assertSee('Can I serve?')
-        ->assertSee('aria-controls="faq-panel-'.$faq->id.'"', false)
-        ->assertSee('id="faq-panel-'.$faq->id.'"', false)
-        ->assertDontSee('Unpublished one');
-});
-
-it('hides the FAQ section when there are no FAQs', function () {
-    $this->get('/')->assertOk()->assertDontSee('id="faq"', false);
+        ->assertDontSee('id="faq"', false)
+        ->assertDontSee('Can I serve?')
+        ->assertDontSee('#faq', false);
 });
 
 it('shows the map only when an address is set', function () {
@@ -100,9 +79,8 @@ it('shows the email and Facebook links in the contact section', function () {
         ->assertSee(config('ministry.facebook_url'), false);
 });
 
-it('shows Join Us, FAQ and Contact links in the navbar', function () {
+it('shows Join Us and Contact links in the navbar', function () {
     $this->get('/')->assertOk()
         ->assertSee(route('home').'#join', false)
-        ->assertSee(route('home').'#faq', false)
         ->assertSee(route('home').'#contact', false);
 });

@@ -49,6 +49,13 @@ it('keeps admin edits when seeders re-run and is idempotent', function () {
         ->and(User::where('email', 'test@example.com')->count())->toBe(1);
 });
 
+it('keeps seeded FAQs out of the homepage', function () {
+    $this->withoutVite();
+    $this->seed(DatabaseSeeder::class);
+
+    $this->get('/')->assertOk()->assertDontSee('id="faq"', false);
+});
+
 it('uses the Manila timezone by default', function () {
     expect(config('app.timezone'))->toBe('Asia/Manila');
 });

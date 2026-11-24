@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Actions\UpcomingServices;
 use App\Models\Branch;
-use App\Models\Faq;
 use App\Models\GalleryImage;
 use App\Models\TeamMember;
 use App\Support\ServiceSchedule;
@@ -40,7 +39,6 @@ class HomeController extends Controller
             'branch' => $branch,
             'schedule' => $schedule,
             'galleryImages' => $galleryImages,
-            'faqs' => Faq::query()->published()->get(),
             'teamMembers' => $teamMembers,
         ]);
     }
