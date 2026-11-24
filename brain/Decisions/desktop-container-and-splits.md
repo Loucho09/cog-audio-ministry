@@ -48,3 +48,10 @@ Related: [[00-Index]], [[homepage-theme-polish]], [[public-layout]], [[homepage-
 - Impact: 2 stats sit side by side on mobile (`grid-cols-2`), tighter padding, xs labels.
 - Churches list: two columns on mobile; an odd last card spans both columns.
 - Result: page 255px shorter at 360px. Checked light and dark. No horizontal overflow. Tests pass.
+
+## Update 2026-11-24 (tablet polish)
+- Services featured/upcoming split (7/5, equal heights) now starts at `md` (768px) instead of `lg`.
+- About: Vision and Mission cards sit side by side from `sm` (640px) until `lg`, where they stack in the right column again.
+- Footer `md` grid: `minmax(0,1fr) minmax(0,auto) minmax(0,auto)` with `md:gap-8`, so the brand name, "What We Do" and the email each fit on one line at 768px.
+- Footer email: `<wbr>` after "@" on escaped text, plus `break-words`, so long contact text cannot overflow.
+- Result: page about 340px shorter at 768px. No horizontal overflow. Checked at 768 and 834px in light and dark. Tests pass. Reviewer found nothing blocking.
