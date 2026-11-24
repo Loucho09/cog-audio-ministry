@@ -51,6 +51,12 @@ Slices:
   - Known limitation (accepted): without JS only the first role is visible.
   - Checked with Playwright: 1280px light, 360px dark, keyboard behaviour.
 
+- F. Desktop layout (branch `feature/desktop-layout`, commit 806ce7d), 2026-11-24:
+  - One container `max-w-7xl` for navbar, all sections and footer (replaces `max-w-6xl` shrinking to `max-w-2xl`-`max-w-4xl`). See [[desktop-container-and-splits]].
+  - lg two-column splits for impact, What We Do, services, contact and stay updated.
+  - Hero image width-fit on lg with bottom fade (fixes cropped wordmark behind text).
+  - Checked with Playwright at 360, 1440, 1920 and 2560px: no horizontal scroll. Tests 145 pass, 1 skipped.
+
 Skipped: audit item to re-add FAQ. Owner removed FAQ (see [[homepage-hooks]]).
 
 Data changes: none.

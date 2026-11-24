@@ -36,7 +36,7 @@
     :data-solid="(solid || open).toString()"
     @keydown.escape.window="if (open) { open = false; $refs.menuButton.focus() }"
 >
-    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-6 lg:px-8">
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-5 sm:px-6 lg:px-8">
 
         {{-- Brand --}}
         <a
@@ -150,7 +150,7 @@
         x-transition:enter-end="opacity-100"
         class="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-text/15 bg-surface lg:hidden"
     >
-        <nav aria-label="Mobile" class="mx-auto max-w-6xl px-5 py-4 sm:px-6">
+        <nav aria-label="Mobile" class="mx-auto max-w-7xl px-5 py-4 sm:px-6">
             <ul class="flex flex-col gap-1">
                 @foreach ($links as $link)
                     <li>
