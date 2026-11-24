@@ -16,7 +16,6 @@
     $authLabel = auth()->check() ? 'Dashboard' : 'Member Login';
 
     $linkClasses = 'whitespace-nowrap rounded-sm text-text/80 transition-colors hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent';
-    $buttonClasses = 'inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md bg-primary-dark px-4 py-2 text-sm font-medium text-surface transition-colors hover:bg-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2';
 @endphp
 
 <header
@@ -37,7 +36,7 @@
                     alt=""
                     width="40"
                     height="40"
-                    class="h-10 w-10 shrink-0 object-contain"
+                    class="h-10 w-10 shrink-0 rounded-full object-contain"
                 >
             @else
                 {{-- Placeholder until public/images/logo.png is added --}}
@@ -67,7 +66,7 @@
             </nav>
 
             {{-- Desktop auth button --}}
-            <a href="{{ $authUrl }}" class="hidden lg:inline-flex {{ $buttonClasses }}">{{ $authLabel }}</a>
+            <x-site.button :href="$authUrl" class="hidden lg:inline-flex">{{ $authLabel }}</x-site.button>
 
             {{-- Mobile menu toggle --}}
             <button
@@ -113,7 +112,7 @@
             </ul>
 
             <div class="mt-4 border-t border-text/10 pt-4">
-                <a href="{{ $authUrl }}" class="{{ $buttonClasses }} w-full">{{ $authLabel }}</a>
+                <x-site.button :href="$authUrl" class="w-full">{{ $authLabel }}</x-site.button>
             </div>
         </nav>
     </div>
