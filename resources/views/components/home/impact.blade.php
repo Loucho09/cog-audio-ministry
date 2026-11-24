@@ -10,7 +10,7 @@
     $stats = array_values(array_filter($stats, fn ($stat) => $stat['value'] > 0));
     $gridCols = match (count($stats)) {
         3 => 'sm:grid-cols-3',
-        2 => 'sm:grid-cols-2',
+        2 => 'grid-cols-2',
         default => '',
     };
     // Stats sit in a half-width column on lg, so three cards need a smaller number and tighter padding.
@@ -36,9 +36,9 @@
                 <dl class="mx-auto mt-10 grid max-w-3xl gap-4 text-center sm:gap-6 lg:mt-0 lg:max-w-none lg:gap-6 {{ $gridCols }}">
                 @foreach ($stats as $stat)
                     {{-- Stat card: white in light mode, with a thin stage-colour bar on top. --}}
-                    <div class="relative flex flex-col-reverse items-center gap-1 overflow-hidden rounded-3xl border border-text/15 bg-surface px-6 py-7 shadow-sm dark:bg-surface/60 {{ $lgCard }}">
+                    <div class="relative flex flex-col-reverse items-center gap-1 overflow-hidden rounded-3xl border border-text/15 bg-surface px-3 py-6 shadow-sm sm:px-6 sm:py-7 dark:bg-surface/60 {{ $lgCard }}">
                         <span aria-hidden="true" class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-accent"></span>
-                        <dt class="text-sm font-semibold uppercase tracking-wider text-text/80">{{ $stat['label'] }}</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-text/80 sm:text-sm">{{ $stat['label'] }}</dt>
                         <dd
                             x-data="{ shown: 0, target: {{ $stat['value'] }} }"
                             x-init="

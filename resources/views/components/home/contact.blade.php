@@ -19,9 +19,9 @@
                 <x-site.section-header id="contact-title" eyebrow="Contact" title="Contact Us" lead="We would love to hear from you." align="split" />
             </div>
 
-        <div class="mt-12 grid gap-8 sm:mt-16 lg:col-span-8 lg:mt-0 {{ $address ? 'lg:grid-cols-2 lg:items-stretch lg:gap-10' : '' }}">
+        <div class="mt-12 grid grid-cols-1 gap-8 sm:mt-16 lg:col-span-8 lg:mt-0 {{ $address ? 'lg:grid-cols-2 lg:items-stretch lg:gap-10' : '' }}">
             @if ($hasContact)
-            <ul class="grid w-full gap-4 {{ $address ? '' : 'mx-auto max-w-xl lg:mx-0 lg:max-w-none xl:grid-cols-2' }}">
+            <ul class="grid w-full grid-cols-1 gap-4 {{ $address ? '' : 'mx-auto max-w-xl lg:mx-0 lg:max-w-none xl:grid-cols-2' }}">
                 @if ($email)
                     <li>
                         <a href="mailto:{{ $email }}" class="{{ $cardClasses }}">
@@ -32,7 +32,8 @@
                             </span>
                             <span class="min-w-0 flex-1">
                                 <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-text/80">Email us</span>
-                                <span class="mt-1 block break-words font-semibold text-text">{{ $email }}</span>
+                                {{-- <wbr> after "@" lets a long address wrap at a clean point on small phones. The email is escaped first. --}}
+                                <span class="mt-1 block break-words text-[15px] font-semibold text-text sm:text-base">{!! str_replace('@', '@<wbr>', e($email)) !!}</span>
                             </span>
                             <svg class="h-5 w-5 shrink-0 text-text/40 transition duration-300 motion-safe:group-hover:translate-x-0.5 group-hover:text-primary-dark" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
