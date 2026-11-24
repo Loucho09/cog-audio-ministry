@@ -34,3 +34,7 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Windows dev note: "rename(): Access is denied" on compiled views; run `php artisan view:clear` (added 2026-11-24)
 - Consider gitignoring `.playwright-mcp/` (added 2026-11-24)
 - TODO: confirm service duration for calendar (90 min default) (added 2026-11-24; see [[services-section-v2]])
+- Supply a larger cover photo (about 2560px wide): the 1600px source looks soft on 1920px+ screens (added 2026-11-24; see [[desktop-container-and-splits]])
+- Services spotlight and upcoming list column heights are not matched on `lg` (added 2026-11-24; see [[desktop-container-and-splits]])
+- Contact with address filled: map may be narrow (about 330px) on `lg`; check when the address is added (added 2026-11-24; see [[desktop-container-and-splits]])
+- Cosmetic re-indent in `resources/views/components/home/contact.blade.php` (added 2026-11-24; see [[desktop-container-and-splits]])
