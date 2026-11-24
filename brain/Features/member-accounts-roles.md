@@ -51,3 +51,4 @@ Out of scope:
 
 Tasks: [[member-accounts-roles-tasks]]
 Notes / decisions: [[super-admin-via-artisan-command]], [[phase-order-roles-before-applications]], [[admin-user-management]], [[Roadmap]]
+UI polish of `/login` and `/dashboard`: [[login-dashboard-polish]]
