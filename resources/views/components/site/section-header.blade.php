@@ -16,7 +16,7 @@
 
 <div class="max-w-2xl {{ $centered ? 'mx-auto text-center' : 'text-left' }}">
     @if (filled($eyebrow))
-        <p class="inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] {{ $stage ? 'text-white/80' : 'text-accent-text' }} {{ $centered ? 'justify-center' : '' }}">
+        <p class="inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] {{ $stage ? 'text-white/90' : 'text-accent-text' }} {{ $centered ? 'justify-center' : '' }}">
             <span aria-hidden="true" class="h-0.5 w-8 rounded-full {{ $stage ? 'bg-white/70' : 'bg-accent' }}"></span>
             {{ $eyebrow }}
         </p>
@@ -28,6 +28,6 @@
     >{{ $title }}</h2>
 
     @if (filled($lead))
-        <p class="mt-4 text-base leading-relaxed sm:text-lg {{ $stage ? 'text-white/85' : 'text-text/70' }}">{{ $lead }}</p>
+        <p class="mt-4 text-base leading-relaxed sm:text-lg {{ $stage ? 'text-white/90' : 'text-text/80' }}">{{ $lead }}</p>
     @endif
 </div>

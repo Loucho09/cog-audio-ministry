@@ -20,7 +20,7 @@
         />
 
         @if ($soon->isEmpty() && $weekly->isEmpty())
-            <p class="mt-10 text-center text-base text-text/70 sm:mt-12">Service times will be posted soon.</p>
+            <p class="mt-10 text-center text-base text-text/80 sm:mt-12">Service times will be posted soon.</p>
         @else
             @if ($spotlight)
                 <div class="mx-auto mt-10 max-w-3xl sm:mt-12">
@@ -29,7 +29,8 @@
             @endif
 
             @if ($upcoming->isNotEmpty())
-                <ul class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3 sm:mt-8">
+                {{-- Flex + centred, so one or two day cards sit in the middle instead of hanging left. Three per row on large screens. --}}
+                <ul class="mt-6 flex flex-wrap justify-center gap-4 sm:mt-8 [&>li]:w-full lg:[&>li]:w-[calc((100%-2rem)/3)]">
                     @foreach ($upcoming as $day)
                         @include('components.home.partials.service-day', ['day' => $day, 'badge' => $day['badge']])
                     @endforeach
@@ -50,9 +51,9 @@
                         </x-site.button>
                     </div>
 
-                    <div id="weekly-schedule" x-show="openWeekly" x-cloak class="mx-auto mt-6 max-w-3xl rounded-3xl border border-text/10 bg-background p-5 shadow-sm sm:p-6">
+                    <div id="weekly-schedule" x-show="openWeekly" x-cloak class="mx-auto mt-6 max-w-3xl rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm sm:p-6">
                         <h3 class="text-lg font-bold text-text">Weekly schedule</h3>
-                        <p class="mt-1 text-sm text-text/70">Tap a time to add it to your calendar.</p>
+                        <p class="mt-1 text-sm text-text/80">Tap a time to add it to your calendar.</p>
                         <ul class="mt-4 space-y-1">
                             @foreach ($weekly as $line)
                                 @php
@@ -73,7 +74,7 @@
                                                     $timeNote = collect($line['notes'] ?? [])->firstWhere('time', $time);
                                                 @endphp
                                                 <li class="inline-flex flex-wrap items-center gap-1.5">
-                                                    <a href="{{ $line['calendar_urls'][$loop->index] }}" class="inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-full border border-text/10 bg-surface px-3 py-1.5 text-sm text-text hover:border-primary/40 hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                                                    <a href="{{ $line['calendar_urls'][$loop->index] }}" class="inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-full border border-text/15 bg-surface px-3 py-1.5 text-sm text-text hover:border-primary/40 hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                                                         {{ $time }}
                                                         <svg aria-hidden="true" class="h-3.5 w-3.5 text-primary-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg>
                                                         <span class="sr-only">: add {{ $line['name'] }} to calendar</span>

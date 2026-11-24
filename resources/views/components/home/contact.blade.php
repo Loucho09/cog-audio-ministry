@@ -7,7 +7,7 @@
 
     // Icon paths are static SVG markup defined here, never user input.
     $iconClasses = 'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 text-primary-dark ring-1 ring-inset ring-primary/20 transition duration-300 motion-safe:group-hover:scale-105';
-    $cardClasses = 'group flex min-h-11 items-center gap-4 rounded-3xl border border-text/10 bg-background p-5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark sm:p-6 dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-primary/20';
+    $cardClasses = 'group flex min-h-11 items-center gap-4 rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark sm:p-6 dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-primary/20';
 @endphp
 
 <section id="contact" aria-labelledby="contact-title" class="relative isolate overflow-hidden bg-surface py-20 sm:py-24 lg:py-32">
@@ -27,7 +27,7 @@
                                 </svg>
                             </span>
                             <span class="min-w-0 flex-1">
-                                <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-text/70">Email us</span>
+                                <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-text/80">Email us</span>
                                 <span class="mt-1 block break-words font-semibold text-text">{{ $email }}</span>
                             </span>
                             <svg class="h-5 w-5 shrink-0 text-text/40 transition duration-300 motion-safe:group-hover:translate-x-0.5 group-hover:text-primary-dark" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
@@ -46,7 +46,7 @@
                                 </svg>
                             </span>
                             <span class="min-w-0 flex-1">
-                                <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-text/70">Follow our page</span>
+                                <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-text/80">Follow our page</span>
                                 <span class="mt-1 block font-semibold text-text">Facebook<span class="sr-only"> (opens in a new tab)</span></span>
                             </span>
                             <svg class="h-5 w-5 shrink-0 text-text/40 transition duration-300 motion-safe:group-hover:translate-x-0.5 group-hover:text-primary-dark" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
@@ -65,7 +65,7 @@
                                 </svg>
                             </span>
                             <span class="min-w-0 flex-1">
-                                <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-text/70">Chat with us</span>
+                                <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-text/80">Chat with us</span>
                                 <span class="mt-1 block font-semibold text-text">Messenger<span class="sr-only"> (opens in a new tab)</span></span>
                             </span>
                             <svg class="h-5 w-5 shrink-0 text-text/40 transition duration-300 motion-safe:group-hover:translate-x-0.5 group-hover:text-primary-dark" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
@@ -76,7 +76,7 @@
                 @endif
 
                 @if ($address)
-                    <li class="flex min-h-11 items-center gap-4 rounded-3xl border border-text/10 bg-background p-5 shadow-sm sm:p-6">
+                    <li class="flex min-h-11 items-center gap-4 rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm sm:p-6">
                         <span aria-hidden="true" class="{{ $iconClasses }}">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -84,14 +84,14 @@
                             </svg>
                         </span>
                         <address class="min-w-0 flex-1 not-italic">
-                            <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-text/70">Visit us</span>
+                            <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-text/80">Visit us</span>
                             <span class="mt-1 block break-words font-semibold text-text">{{ $address }}</span>
                         </address>
                     </li>
                 @endif
             </ul>
             @else
-                <p class="mx-auto max-w-2xl text-center text-base text-text/70">Contact details are coming soon.</p>
+                <p class="mx-auto max-w-2xl text-center text-base text-text/80">Contact details are coming soon.</p>
             @endif
 
             @if ($address)
@@ -100,7 +100,7 @@
                     title="Map showing {{ $address }}"
                     loading="lazy"
                     referrerpolicy="no-referrer-when-downgrade"
-                    class="h-72 w-full rounded-3xl border border-text/10 shadow-sm lg:h-auto lg:min-h-80"
+                    class="h-72 w-full rounded-3xl border border-text/15 shadow-sm lg:h-auto lg:min-h-80"
                 ></iframe>
             @endif
         </div>

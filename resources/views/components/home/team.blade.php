@@ -17,7 +17,7 @@
 
             <ul class="mt-12 grid grid-cols-1 gap-5 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
                 @foreach ($members as $member)
-                    <li class="group rounded-3xl border border-text/10 bg-surface p-6 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl motion-reduce:transform-none sm:p-8 dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-primary/20">
+                    <li class="group rounded-3xl border border-text/15 bg-surface p-6 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl motion-reduce:transform-none sm:p-8 dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-primary/20">
                         {{-- Gradient ring around the photo (or initials). --}}
                         <div class="mx-auto flex h-36 w-36 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent p-[3px] transition duration-300 motion-safe:group-hover:rotate-3">
                             @if ($member->photo_url)
@@ -28,7 +28,7 @@
                         </div>
                         <h3 class="mt-5 text-lg font-bold text-text break-words">{{ $member->name }}</h3>
                         @if ($member->role_title)
-                            <p class="mt-1 text-sm text-text/70">{{ $member->role_title }}</p>
+                            <p class="mt-1 text-sm text-text/80">{{ $member->role_title }}</p>
                         @endif
                     </li>
                 @endforeach
