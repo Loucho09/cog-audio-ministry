@@ -28,10 +28,12 @@
                 title="Every sermon, every song, heard clearly."
             />
 
-            <dl class="mx-auto mt-10 grid max-w-3xl gap-8 {{ $gridCols }}">
+            <dl class="mx-auto mt-10 grid max-w-3xl gap-4 sm:gap-6 {{ $gridCols }}">
                 @foreach ($stats as $stat)
-                    <div class="flex flex-col-reverse items-center gap-1">
-                        <dt class="text-sm font-semibold uppercase tracking-wider text-text/70">{{ $stat['label'] }}</dt>
+                    {{-- Stat card: white in light mode, with a thin stage-colour bar on top. --}}
+                    <div class="relative flex flex-col-reverse items-center gap-1 overflow-hidden rounded-3xl border border-text/15 bg-surface px-6 py-7 shadow-sm dark:bg-surface/60">
+                        <span aria-hidden="true" class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-accent"></span>
+                        <dt class="text-sm font-semibold uppercase tracking-wider text-text/80">{{ $stat['label'] }}</dt>
                         <dd
                             x-data="{ shown: 0, target: {{ $stat['value'] }} }"
                             x-init="
@@ -45,7 +47,7 @@
                                 };
                                 requestAnimationFrame(tick);
                             "
-                            class="text-5xl font-extrabold tabular-nums text-primary"
+                            class="bg-gradient-to-r from-primary-dark to-accent bg-clip-text pb-1 text-5xl font-extrabold tabular-nums text-transparent sm:text-6xl forced-colors:bg-none forced-colors:text-[CanvasText]"
                         >
                             <span x-text="shown" aria-hidden="true">{{ $stat['value'] }}</span>
                             <span class="sr-only">{{ $stat['value'] }}</span>

@@ -11,7 +11,7 @@
                     @foreach ($faqs as $faq)
                         <div
                             class="overflow-hidden rounded-2xl border bg-surface transition-[border-color,box-shadow] duration-200"
-                            x-bind:class="open === {{ $faq->id }} ? 'border-primary/40 shadow-md' : 'border-text/10 shadow-sm'"
+                            x-bind:class="open === {{ $faq->id }} ? 'border-primary/40 shadow-md' : 'border-text/15 shadow-sm'"
                         >
                             <h3>
                                 <button

@@ -13,11 +13,11 @@
     ])->filter()->values();
 
     $linkClasses = 'inline-flex min-h-11 max-w-full items-center [overflow-wrap:anywhere] rounded-sm text-text/80 transition-colors duration-200 hover:text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark';
-    $headingClasses = 'text-xs font-semibold uppercase tracking-[0.2em] text-text/60';
+    $headingClasses = 'text-xs font-semibold uppercase tracking-[0.2em] text-text/70';
 @endphp
 
-<footer class="relative isolate overflow-hidden border-t border-text/10 bg-surface">
-    <x-site.glow tone="accent" class="-bottom-32 -right-24 h-72 w-72 opacity-60" />
+<footer class="relative isolate overflow-hidden border-t border-text/15 bg-surface">
+    <x-site.glow tone="accent" class="-bottom-32 -right-24 hidden h-72 w-72 opacity-60 dark:block" />
 
     <div class="mx-auto grid max-w-6xl gap-12 px-5 py-14 sm:px-6 sm:py-16 md:grid-cols-[1.4fr_1fr_1fr] lg:gap-16 lg:px-8">
 
@@ -43,7 +43,7 @@
                 @endif
                 <div class="min-w-0">
                     <p class="text-base font-bold text-text">{{ config('ministry.name') }}</p>
-                    <p class="text-sm text-text/60">{{ config('ministry.subheader') }}</p>
+                    <p class="text-sm text-text/70">{{ config('ministry.subheader') }}</p>
                 </div>
             </div>
 
@@ -98,8 +98,8 @@
         </nav>
     </div>
 
-    <div class="border-t border-text/10">
-        <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-text/60 sm:flex-row sm:px-6 lg:px-8">
+    <div class="border-t border-text/15">
+        <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-text/70 sm:flex-row sm:px-6 lg:px-8">
             <p>&copy; {{ now()->year }} {{ config('ministry.name') }}. All rights reserved.</p>
             <a
                 href="#main"

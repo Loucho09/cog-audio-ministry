@@ -9,7 +9,7 @@
         <x-site.section-backdrop variant="vignette" />
 
         <div class="relative mx-auto max-w-3xl px-5 text-center sm:px-6 lg:px-8">
-            <div class="rounded-3xl border border-text/10 bg-surface p-8 shadow-sm sm:p-10">
+            <div class="rounded-3xl border border-text/15 bg-surface p-8 shadow-sm sm:p-10">
                 <x-site.section-header
                     id="updates-title"
                     eyebrow="Stay Updated"

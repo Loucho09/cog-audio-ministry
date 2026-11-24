@@ -10,7 +10,7 @@
  * `accent-text` is a deeper (light mode) or lighter (dark mode) red that passes AA for small text (eyebrows).
  */
 :root {
-    --color-background: 248 250 252; /* #F8FAFC */
+    --color-background: 238 242 247; /* #EEF2F7 (softer than pure near-white, less glare) */
     --color-surface: 255 255 255; /* #FFFFFF */
     --color-text: 15 23 42; /* #0F172A */
     --color-primary: 2 132 199; /* #0284C7 */
@@ -51,7 +51,8 @@
 /* Section "stage" backdrops (components/site/section-backdrop.blade.php). Decorative only.
    Alpha lives in --*-alpha variables so dark mode can be a lot stronger (the stage is dark in both themes).
    Masks use alpha only (the black stops are not a design colour). No blur() filters: mobile performance.
-   Text sits above these layers, so light-mode alphas stay low enough that slate-900 text stays AA. */
+   Text sits above these layers, so light-mode alphas stay low enough that slate-900 text stays AA.
+   Light-mode alphas were cut again on 2026-11-24 (owner: big soft blobs looked blurry on a light page). */
 @layer components {
     /* Stage haze: a faint primary wash from the top that fades out by 40%. Every backdrop gets it
        (section-backdrop.blade.php renders it as .backdrop-haze, on top of the atmosphere layer). */
@@ -67,8 +68,8 @@
     /* About: soft primary glow from the top-left, a faint accent glow in the bottom-right corner,
        and a faint dot grid. */
     .backdrop-spotlight-left {
-        --glow-alpha: 0.22;
-        --accent-glow-alpha: 0.1;
+        --glow-alpha: 0.1;
+        --accent-glow-alpha: 0.05;
         --dot-alpha: 0.07;
         background-image:
             radial-gradient(ellipse 70% 55% at 0% 0%, rgb(var(--color-primary) / var(--glow-alpha)), transparent 70%),
@@ -90,8 +91,8 @@
     /* What we do: concentric "sound wave" rings centred off the right edge (bottom-right on mobile,
        so they stay out of the text), with a small accent glow at the centre. */
     .backdrop-rings {
-        --ring-alpha: 0.18;
-        --accent-alpha: 0.16;
+        --ring-alpha: 0.14;
+        --accent-alpha: 0.06;
         --ring-center: 100% 100%;
         --ring-radius: 360px;
         background-image:
@@ -117,9 +118,9 @@
        plus a narrower accent beam (about 30deg wide) angled off to the side, fading out downward.
        Built from conic wedges (apex at top centre) so no clip-path is needed. */
     .backdrop-cone {
-        --beam-alpha: 0.24;
-        --edge-alpha: 0.1;
-        --accent-beam-alpha: 0.14;
+        --beam-alpha: 0.08;
+        --edge-alpha: 0.04;
+        --accent-beam-alpha: 0.04;
         background-image:
             conic-gradient(
                 from 162deg at 50% 0%,
@@ -150,7 +151,7 @@
     /* Gallery: a gentle edge vignette (transparent centre, text colour at low alpha toward the edges)
        so the photos stand out a little more against the section. */
     .backdrop-vignette {
-        --vignette-alpha: 0.1;
+        --vignette-alpha: 0.04;
         background-image: radial-gradient(ellipse at center, transparent 55%, rgb(var(--color-text) / var(--vignette-alpha)) 100%);
     }
 
@@ -163,7 +164,7 @@
        ::before so their mask does not hide the glow. */
     .backdrop-grid {
         --grid-alpha: 0.07;
-        --accent-alpha: 0.16;
+        --accent-alpha: 0.06;
         background-image: radial-gradient(circle 320px at 100% 100%, rgb(var(--color-accent) / var(--accent-alpha)), transparent 100%);
     }
 
@@ -187,8 +188,8 @@
     /* Contact: a soft primary glow rising from the bottom edge, with a faint accent tint, so the
        page ends smoothly into the footer. */
     .backdrop-floor {
-        --glow-alpha: 0.22;
-        --accent-alpha: 0.1;
+        --glow-alpha: 0.08;
+        --accent-alpha: 0.04;
         background-image:
             radial-gradient(ellipse 60% 45% at 50% 100%, rgb(var(--color-accent) / var(--accent-alpha)), transparent 70%),
             radial-gradient(ellipse 80% 60% at 50% 100%, rgb(var(--color-primary) / var(--glow-alpha)), transparent 70%);
@@ -199,15 +200,34 @@
         --accent-alpha: 0.14;
     }
 
+    /* Join band: crisp white "sound wave" rings from both sides. Thin hard-edged lines (no soft glow),
+       so they stay sharp on the blue (light) and black (dark) bands. */
+    .backdrop-waves {
+        --wave-alpha: 0.12;
+        background-image:
+            repeating-radial-gradient(circle at 0% 50%, transparent 0 46px, rgb(255 255 255 / var(--wave-alpha)) 47px 48px, transparent 49px 56px),
+            repeating-radial-gradient(circle at 100% 50%, transparent 0 46px, rgb(255 255 255 / var(--wave-alpha)) 47px 48px, transparent 49px 56px);
+        /* Each ring set only covers its own half, so the two never cross into a grid. */
+        background-size: 50% 100%, 50% 100%;
+        background-position: left center, right center;
+        background-repeat: no-repeat;
+        -webkit-mask-image: linear-gradient(to right, rgb(0 0 0) 0%, transparent 32%, transparent 68%, rgb(0 0 0) 100%);
+        mask-image: linear-gradient(to right, rgb(0 0 0) 0%, transparent 32%, transparent 68%, rgb(0 0 0) 100%);
+    }
+
+    .dark .backdrop-waves {
+        --wave-alpha: 0.07;
+    }
+
     /* Glow orbs (components/site/glow.blade.php). Radial gradients instead of blur() filters, which
        keeps them cheap on phones. Fade to transparent at the edge of the element. */
     .glow-primary {
-        --orb-alpha: 0.3;
+        --orb-alpha: 0.12;
         background-image: radial-gradient(closest-side, rgb(var(--color-primary) / var(--orb-alpha)), transparent);
     }
 
     .glow-accent {
-        --orb-alpha: 0.28;
+        --orb-alpha: 0.1;
         background-image: radial-gradient(closest-side, rgb(var(--color-accent) / var(--orb-alpha)), transparent);
     }
 

@@ -21,7 +21,7 @@
         />
 
         @if ($images->isEmpty())
-            <p class="mt-12 text-center text-base text-text/70 sm:mt-16">Photos coming soon.</p>
+            <p class="mt-12 text-center text-base text-text/80 sm:mt-16">Photos coming soon.</p>
         @elseif ($allPlaceholders)
             <ul class="mt-12 grid grid-cols-2 gap-3 sm:mt-16 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
                 @foreach ($images as $image)

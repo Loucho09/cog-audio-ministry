@@ -24,7 +24,7 @@
 @endphp
 
 <header
-    class="group z-50 w-full border-b border-transparent transition-[background-color,box-shadow,border-color] duration-300 data-[solid=true]:border-text/10 data-[solid=true]:bg-surface/90 data-[solid=true]:shadow-lg data-[solid=true]:shadow-text/5 data-[solid=true]:backdrop-blur-md {{ $transparent ? 'fixed inset-x-0 top-0' : 'sticky top-0' }}"
+    class="group z-50 w-full border-b border-transparent transition-[background-color,box-shadow,border-color] duration-300 data-[solid=true]:border-text/15 data-[solid=true]:bg-surface/90 data-[solid=true]:shadow-lg data-[solid=true]:shadow-text/5 data-[solid=true]:backdrop-blur-md {{ $transparent ? 'fixed inset-x-0 top-0' : 'sticky top-0' }}"
     data-solid="{{ $transparent ? 'false' : 'true' }}"
     x-data="{
         open: false,
@@ -61,7 +61,7 @@
 
             <span class="min-w-0 leading-tight">
                 <span class="block truncate text-sm font-bold text-text group-data-[solid=false]:text-white sm:text-base">{{ config('ministry.name') }}</span>
-                <span class="block truncate text-xs text-text/60 group-data-[solid=false]:text-white/75">{{ config('ministry.subheader') }}</span>
+                <span class="block truncate text-xs text-text/70 group-data-[solid=false]:text-white/75">{{ config('ministry.subheader') }}</span>
             </span>
         </a>
 
@@ -148,7 +148,7 @@
         x-transition:enter="transition ease-out duration-150"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
-        class="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-text/10 bg-surface lg:hidden"
+        class="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-text/15 bg-surface lg:hidden"
     >
         <nav aria-label="Mobile" class="mx-auto max-w-6xl px-5 py-4 sm:px-6">
             <ul class="flex flex-col gap-1">
@@ -163,7 +163,7 @@
                 @endforeach
             </ul>
 
-            <div class="mt-4 border-t border-text/10 pt-4">
+            <div class="mt-4 border-t border-text/15 pt-4">
                 <x-site.button :href="$authUrl" size="lg" class="w-full">{{ $authLabel }}</x-site.button>
             </div>
         </nav>
