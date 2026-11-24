@@ -128,16 +128,16 @@
                                 >
                                     <img src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" @if (! $isFeatured) loading="lazy" @endif decoding="async" class="h-full w-full object-cover transition duration-700 ease-out motion-safe:group-hover:scale-105">
                                     {{-- Caption shade. Decorative copy: the button's aria-label already names the photo.
-                                         The featured photo always shows its caption; others reveal it on hover/focus. --}}
+                                         Captions always show on touch-size screens; on md+ only the featured one does, others reveal on hover/focus. --}}
                                     <span aria-hidden="true" @class([
                                         'pointer-events-none absolute inset-0 flex items-end bg-gradient-to-t from-black/75 via-black/10 to-transparent text-left transition duration-300',
                                         'p-5 sm:p-6' => $isFeatured,
-                                        'p-4 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100' => ! $isFeatured,
+                                        'p-3 sm:p-4 md:opacity-0 md:group-hover:opacity-100 md:group-focus-visible:opacity-100' => ! $isFeatured,
                                     ])>
                                         <span @class([
                                             'line-clamp-2 font-medium text-white',
                                             'text-base sm:text-lg' => $isFeatured,
-                                            'text-sm' => ! $isFeatured,
+                                            'text-xs sm:text-sm' => ! $isFeatured,
                                         ])>{{ $image['title'] ?: $image['alt'] }}</span>
                                     </span>
                                 </button>
