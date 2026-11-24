@@ -33,8 +33,8 @@
                 <ul class="mt-8 grid gap-3 sm:grid-cols-2">
                     @foreach ($churches as $church)
                         <li class="flex flex-col gap-2 rounded-2xl border border-text/15 bg-surface px-4 py-3 shadow-sm dark:border-white/15 dark:bg-black/55 dark:shadow-none dark:backdrop-blur-sm">
-                            <div class="flex items-center justify-between gap-3">
-                                <span class="font-semibold text-text">{{ $church['name'] }}</span>
+                            <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                                <span class="min-w-0 break-words font-semibold text-text">{{ $church['name'] }}</span>
                                 @if ($church['is_main'] ?? false)
                                     <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary-dark dark:bg-white/15 dark:text-white">Main church</span>
                                 @endif

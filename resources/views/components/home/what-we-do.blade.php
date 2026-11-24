@@ -52,7 +52,7 @@
         @endphp
 
         <div
-            class="mx-auto mt-12 sm:mt-16 lg:grid lg:grid-cols-12 lg:items-start lg:gap-8"
+            class="mx-auto mt-12 sm:mt-16 lg:grid lg:grid-cols-12 lg:items-stretch lg:gap-8"
             x-data="{
                 active: 0,
                 count: {{ $count }},
@@ -140,7 +140,7 @@
                         aria-labelledby="role-tab-{{ $index }}"
                         tabindex="0"
                         @class([
-                            'relative isolate overflow-hidden rounded-3xl border border-text/15 bg-surface p-6 shadow-sm transition-opacity duration-300 [grid-area:1/1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-10 motion-reduce:transition-none',
+                            'relative isolate overflow-hidden rounded-3xl border border-text/15 bg-surface p-6 shadow-sm transition-opacity duration-300 [grid-area:1/1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-10 motion-reduce:transition-none lg:flex lg:flex-col lg:justify-center lg:p-12',
                             'invisible opacity-0' => $index !== 0,
                         ])
                         :class="{ 'invisible opacity-0': active !== {{ $index }} }"
