@@ -7,7 +7,7 @@
     $viewable = $images->reject(fn ($i) => $i['placeholder'])->values();
     $viewIndex = 0;
     $controlClasses = 'rounded-full bg-surface p-2.5 text-text shadow-lg transition-colors duration-200 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2';
-    $tileClasses = 'aspect-[4/3] w-full rounded-2xl object-cover shadow-sm';
+    $tileClasses = 'aspect-[4/3] w-full rounded-3xl object-cover shadow-sm';
 @endphp
 
 <section id="gallery" aria-labelledby="gallery-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
@@ -100,7 +100,7 @@
                                     type="button"
                                     x-on:click="show({{ $viewIndex++ }}, $el)"
                                     aria-label="View larger photo: {{ $image['alt'] }}"
-                                    class="group relative block w-full overflow-hidden rounded-2xl shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2"
+                                    class="group relative block w-full overflow-hidden rounded-3xl shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2"
                                 >
                                     <img src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" loading="lazy" decoding="async" class="aspect-[4/3] w-full object-cover transition duration-500 motion-safe:group-hover:scale-105">
                                     {{-- Hover shade with the caption. Decorative copy: the button's aria-label already names the photo. --}}

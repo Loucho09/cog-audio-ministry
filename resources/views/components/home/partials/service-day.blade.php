@@ -4,7 +4,7 @@
     $dateLabel = $day['date']->format('l, M j');
 @endphp
 
-<li class="group flex flex-col rounded-3xl border border-text/10 bg-background p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg motion-reduce:transform-none sm:p-6">
+<li class="group flex flex-col rounded-3xl border border-text/10 bg-background p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg motion-reduce:transform-none sm:p-6 dark:border-white/10 dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-primary/20">
     <div class="flex items-start gap-3">
         {{-- The heading is the full date for screen readers. The visual block (weekday eyebrow + big "Nov 28") is
              aria-hidden and placed first with CSS order, so the badge can sit right after the heading in the markup. --}}

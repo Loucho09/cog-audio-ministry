@@ -41,15 +41,15 @@
                 @endif
             </div>
 
-            <div class="mx-auto mt-14 max-w-2xl rounded-3xl border border-text/10 bg-background p-6 shadow-sm sm:p-8">
+            <div class="mx-auto mt-14 max-w-2xl rounded-3xl border border-text/10 bg-background p-6 shadow-sm dark:border-white/10 sm:p-8">
                 <h3 class="text-lg font-bold text-text">Weekly schedule</h3>
                 <dl class="mt-5 divide-y divide-text/10">
                     @foreach ($weekly as $line)
-                        <div class="grid grid-cols-[6.5rem_1fr] gap-x-4 py-4 first:pt-0 last:pb-0 sm:grid-cols-[8rem_1fr]">
+                        <div class="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-x-4 py-4 first:pt-0 last:pb-0 sm:grid-cols-[8rem_minmax(0,1fr)]">
                             <dt class="whitespace-nowrap text-sm font-semibold text-text">{{ $line['day'] }}:</dt>
                             <dd class="min-w-0">
                                 <p class="text-sm text-text">{{ $line['name'] }}</p>
-                                <ul class="mt-2 flex flex-wrap gap-2">
+                                <ul class="mt-2 flex min-w-0 flex-wrap gap-2">
                                     @foreach ($line['times'] as $time)
                                         <li class="whitespace-nowrap rounded-full border border-text/10 bg-surface px-3 py-1 text-sm text-text">{{ $time }}</li>
                                     @endforeach

@@ -17,7 +17,7 @@
 
             <ul class="mt-12 grid grid-cols-1 gap-5 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
                 @foreach ($members as $member)
-                    <li class="group rounded-3xl border border-text/10 bg-surface p-6 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl motion-reduce:transform-none sm:p-8 dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-primary/40">
+                    <li class="group rounded-3xl border border-text/10 bg-surface p-6 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl motion-reduce:transform-none sm:p-8 dark:border-white/10 dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-primary/20">
                         {{-- Gradient ring around the photo (or initials). --}}
                         <div class="mx-auto flex h-36 w-36 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent p-[3px] transition duration-300 motion-safe:group-hover:rotate-3">
                             @if ($member->photo_url)
