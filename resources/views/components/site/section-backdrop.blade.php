@@ -12,6 +12,8 @@
        Usage: fade-from="surface" (or omit it for no edge).
      - mirror: true flips the glow/rings horizontally (e.g. :mirror="true" on the team section).
 
+     Every backdrop also gets a faint stage haze (.backdrop-haze), stronger in dark mode.
+
      Masks only use alpha, so the black stops in app.css are not a design colour.
      Keep every class name below as a full literal (never "backdrop-".$variant): Tailwind only keeps
      @layer components classes it can find written out in scanned files. --}}
@@ -41,6 +43,9 @@
         'backdrop-floor' => $variant === 'floor',
         'scale-x-[-1]' => $mirror,
     ])></div>
+
+    {{-- Stage haze: a faint primary wash from the top. Sits above the atmosphere, below the fade edge. --}}
+    <div class="absolute inset-0 backdrop-haze"></div>
 
     {{-- Soft top edge: previous section's colour fading to transparent. Drawn above the atmosphere. --}}
     @if ($fadeClass)
