@@ -46,3 +46,7 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Deleting a user leaves sessions and password_reset_tokens rows behind. Phase 4 must decide cascade or restrict for duty_assignments → users before deleting users is safe (added 2026-11-25; see [[admin-user-management]], [[Roadmap]]).
 - Test gaps (added 2026-11-25; see [[member-accounts-roles-tasks]]): no direct-call test for the resend action's 403 by a non-super-admin; the bulk-delete test does not exercise the last-super-admin guard on its own.
 - Super-admin can set a temporary password on another super-admin (Gate::before); acceptable, documented. (added 2026-11-25; see [[temp-password]])
+- Decide on the verify-email routes: the app does not implement `MustVerifyEmail`, so the routes and the `verified` middleware are dead code. Implement the interface or remove them. (added 2026-11-25; see [[full-review-2026-11-25]])
+- Optional DB-level constraint so only one branch has `is_main = true` on `branches`. (added 2026-11-25; see [[full-review-2026-11-25]])
+- Optional restore and forceDelete policy methods if soft deletes are added. (added 2026-11-25; see [[full-review-2026-11-25]])
+- The homepage queries services twice (minor). (added 2026-11-25; see [[full-review-2026-11-25]])

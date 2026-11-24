@@ -41,6 +41,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[super-admin-via-artisan-command]]: real super-admin created by `ministry:create-super-admin`; seeders make fake demo admins only (2026-11-24)
 - [[admin-user-management]]: super-admin creates accounts by hand (set-password email, no typed password); branch-head edits own-branch name and email only (2026-11-25)
 - [[temp-password-and-demo-emails]]: temporary passwords with forced change, 10-character password rule, branch-style demo emails (2026-11-25)
+- [[full-review-2026-11-25]]: owner decisions from the Phase 1-2 full review (3-day invite link, gallery/team approval, super-admin rescue path, member-only self-delete) (2026-11-25)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)

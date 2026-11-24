@@ -156,6 +156,12 @@ Status: done. 2a and 2b merged to main 2026-11-25. Split into two parts (owner d
 - Self-host Montserrat and Mrs Saint Delafield (see [[Backlog]], [[typography-matches-logo]])
 - Write `DEPLOY.md`: server reqs PHP 8.2+, MySQL 8, Composer, Node, extensions; `composer install --no-dev --optimize-autoloader`; `npm ci && npm run build`; production `.env` values; `key:generate`; `migrate --force`; seed only branches and roles; `storage:link`; config/route/view/event cache; HTTPS; queue worker; scheduler cron; backups of DB and uploads; first-login checklist (create super-admin, assign branch-heads, set logo, check schedule, check team flag)
 - Write `PRODUCTION-CHECKLIST.md`: pages load on phone and desktop; join form sends email; admin login works; non-admin cannot reach /admin; schedule correct; images load
+- Full review items (2026-11-25, see [[full-review-2026-11-25]]):
+  - HTTPS and proxies: `trustProxies`, `URL::forceHttps` in production, security-headers middleware (HSTS, X-Frame-Options, Referrer-Policy, CSP), `SESSION_SECURE_COOKIE=true`
+  - `SESSION_DRIVER=database` creates a row per visitor: use file or redis, or schedule `session:prune`
+  - **WARNING:** copying `.env.example` (APP_ENV=local) to production would run the demo seeder with a known super-admin password. Consider requiring an explicit `--demo` flag on the seeder path.
+  - Run the tests and `php artisan migrate:fresh --seed` once on MySQL 8 (tests use SQLite)
+  - PHP `upload_max_filesize` must be at least 4M for 4MB uploads
 
 ### Checklist (11 items)
 - [ ] APP_ENV=production, APP_DEBUG=false, strong APP_KEY generated
