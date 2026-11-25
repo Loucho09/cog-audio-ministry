@@ -37,7 +37,14 @@ class GalleryImage extends Model
     protected static function booted(): void
     {
         static::saved(function (self $image) {
-            if ($image->wasRecentlyCreated || $image->wasChanged('path')) {
+            if (! $image->wasRecentlyCreated && ! $image->wasChanged('path')) {
+                return;
+            }
+
+            // A photo another row already uses (bundled images can be shared) already has its thumbnails.
+            $sharedPath = static::query()->withoutGlobalScopes()->whereKeyNot($image->getKey())->where('path', $image->path)->exists();
+
+            if (! $sharedPath) {
                 GalleryThumbnail::generate($image->path);
             }
         });
@@ -67,12 +74,6 @@ class GalleryImage extends Model
     protected function url(): Attribute
     {
         return Attribute::get(fn () => ImageUrl::for($this->path));
-    }
-
-    /** URL of the small grid copy, or null when there is none (small original, or not generated yet). */
-    protected function thumbUrl(): Attribute
-    {
-        return Attribute::get(fn () => GalleryThumbnail::url($this->path));
     }
 
     public function isPlaceholder(): bool

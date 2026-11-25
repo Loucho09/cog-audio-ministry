@@ -7,8 +7,10 @@ use App\Models\Branch;
 use App\Models\GalleryImage;
 use App\Models\Service;
 use App\Models\TeamMember;
+use App\Support\GalleryThumbnail;
 use App\Support\ServiceSchedule;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 
 class HomeController extends Controller
 {
@@ -23,6 +25,7 @@ class HomeController extends Controller
         $schedule = ServiceSchedule::build($occurrences, $now, $branch);
 
         // Gallery is intentionally not branch-filtered in Phase 1 (see brain Backlog).
+        $thumbnails = GalleryThumbnail::index(); // one directory listing for all photos
         $galleryImages = GalleryImage::query()
             ->published()
             ->whereNotNull('path')
@@ -31,7 +34,8 @@ class HomeController extends Controller
             ->filter(fn (GalleryImage $image) => $image->url !== null)
             ->map(fn (GalleryImage $image) => [
                 'url' => $image->url,
-                'thumb' => $image->thumb_url,
+                'thumb' => Arr::first(GalleryThumbnail::variants($image->path, $thumbnails)),
+                'srcset' => collect(GalleryThumbnail::variants($image->path, $thumbnails))->map(fn (string $url, int $width) => "{$url} {$width}w")->implode(', '),
                 'alt' => $image->alt_text,
                 'title' => $image->title,
                 'placeholder' => $image->isPlaceholder(),
