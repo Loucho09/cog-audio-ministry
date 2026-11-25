@@ -1,6 +1,9 @@
 <section aria-labelledby="hero-title" class="relative isolate flex min-h-[100svh] items-center overflow-hidden bg-black sm:min-h-[44rem] lg:min-h-[clamp(44rem,85svh,52rem)]">
     {{-- Cover photo as a full-bleed background. Decorative (the h1 carries the name), so alt is empty.
-         Above the fold, so no lazy loading. --}}
+         Above the fold, so no lazy loading.
+         The frame caps the photo at 110rem and centres it, so on very wide screens the photo's wordmark stays
+         beside the text column instead of drifting to the far edge; its sides fade into the black section. --}}
+    <div aria-hidden="true" class="absolute inset-y-0 left-1/2 -z-10 w-full max-w-[110rem] -translate-x-1/2 min-[2300px]:[mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
     <picture>
         <source
             type="image/webp"
@@ -14,12 +17,13 @@
             height="609"
             fetchpriority="high"
             decoding="async"
-            class="absolute inset-0 -z-10 h-full w-full object-cover object-left lg:top-auto lg:h-auto lg:max-h-full lg:[mask-image:linear-gradient(to_top,black_65%,transparent)]"
+            class="absolute inset-0 h-full w-full object-cover object-left lg:top-auto lg:h-auto lg:max-h-full lg:[mask-image:linear-gradient(to_top,black_65%,transparent)]"
         >
         {{-- Desktop: fit the photo to the width (not cover) and pin it to the bottom, so the photo's own
              "COG Audio" wordmark sits low-right, below the h1 and right of the text column at 1024px and up.
              The top edge fades into the black section. --}}
     </picture>
+    </div>
 
     {{-- Readability overlay. Darker on the left where the text sits; the photo's wordmark stays visible on the right.
          The photo is always dark, so hero text uses white directly instead of theme tokens. --}}

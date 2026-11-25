@@ -31,6 +31,21 @@
     color-scheme: dark;
 }
 
+/* Big screens: grow the root size a little so the whole layout (rem-based spacing, type, max-w-7xl)
+   scales up instead of a small column floating in empty space. Percentages respect the user's
+   browser font-size setting. Phones, tablets and laptops (< 1920px) keep the default 16px. */
+@media (min-width: 1920px) {
+    html {
+        font-size: 112.5%; /* 18px: max-w-7xl becomes 1440px */
+    }
+}
+
+@media (min-width: 2400px) {
+    html {
+        font-size: 131.25%; /* 21px: max-w-7xl becomes 1680px */
+    }
+}
+
 /* Reduced motion: no smooth scrolling, and transitions and animations are effectively instant.
    Decorative animations use motion-safe: so they simply do not start (the EQ bars stay static). */
 @media (prefers-reduced-motion: reduce) {

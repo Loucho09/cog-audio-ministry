@@ -57,6 +57,13 @@ Slices:
   - Hero image width-fit on lg with bottom fade (fixes cropped wordmark behind text).
   - Checked with Playwright at 360, 1440, 1920 and 2560px: no horizontal scroll. Tests 145 pass, 1 skipped.
 
+- G. Wide-screen balance (branch `fix/wide-screen-layout`, commit 0872038, branched from `feature/remove-what-we-do`, unmerged), 2026-11-25:
+  - Problem (owner report, PC/laptop zoomed out or very wide window): content capped at `max-w-7xl` (1280px) while the hero photo stretched to the viewport. The photo's "COG Audio" wordmark drifted far right with empty space between, and everything looked small.
+  - `resources/css/app.css`: root font-size 112.5% (18px) at min-width 1920px, and 131.25% (21px) at 2400px. The rem-based layout scales, so `max-w-7xl` becomes 1440px / 1680px. Percentages respect the user's browser font setting. Below 1920px nothing changes.
+  - `resources/views/components/home/hero.blade.php`: photo wrapped in a centred frame capped at 110rem, with side fades from 2300px. The wordmark stays beside the text column.
+  - Checked with Playwright at 360, 768, 1024, 1440, 1920 and 2760px, light and dark. Tests: 434 (433 pass, 1 skipped).
+  - Owner browser check on a wide screen still pending.
+
 Skipped: audit item to re-add FAQ. Owner removed FAQ (see [[homepage-hooks]]). (obsolete: FAQ removed fully 2026-11-25, see [[faq-removed]])
 
 Data changes: none.
