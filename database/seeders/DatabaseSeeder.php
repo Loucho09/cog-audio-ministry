@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         // Demo accounts use a known password: never outside local/testing.
         if (app()->environment(['local', 'testing'])) {
             $seeders[] = DemoUserSeeder::class;
+            $seeders[] = JoinApplicationSeeder::class; // after DemoUserSeeder: needs real reviewers
         }
 
         $this->call([
@@ -26,7 +27,6 @@ class DatabaseSeeder extends Seeder
             ServiceSeeder::class,
             GallerySeeder::class,
             TeamMemberSeeder::class,
-            JoinApplicationSeeder::class,
         ]);
     }
 }

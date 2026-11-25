@@ -10,6 +10,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
+use Illuminate\Database\Eloquent\Builder;
 
 /** The 5 newest pending join applications in the admin's scope. Read-only; review happens on the view page. */
 class PendingApplicationsWidget extends TableWidget
@@ -28,9 +29,10 @@ class PendingApplicationsWidget extends TableWidget
         return auth()->user()?->can('viewAny', JoinApplication::class) ?? false;
     }
 
-    private function scoped()
+    /** One source of truth: the resource query (visibleTo + branch eager load), so widget and list cannot drift. */
+    private function scoped(): Builder
     {
-        return JoinApplication::query()->visibleTo(auth()->user())->pending();
+        return JoinApplicationResource::getEloquentQuery()->pending();
     }
 
     public function table(Table $table): Table
@@ -39,18 +41,18 @@ class PendingApplicationsWidget extends TableWidget
 
         return $table
             ->heading($count > 0 ? "Pending applications ({$count})" : 'Pending applications')
-            ->query($this->scoped()->with('branch')->latest()->orderByDesc('id')->limit(5))
+            ->query($this->scoped()->latest()->orderByDesc('id')->limit(5))
             ->columns([
                 TextColumn::make('full_name')->label('Name'),
                 TextColumn::make('branch.name')->label('Branch'),
                 TextColumn::make('created_at')->label('Submitted')->since(),
             ])
-            ->recordUrl(fn (JoinApplication $record) => JoinApplicationResource::getUrl('view', ['record' => $record]))
+            ->recordUrl(fn (JoinApplication $record) => JoinApplicationResource::getUrl('view', ['record' => $record], panel: 'admin'))
             ->headerActions([
                 Action::make('viewAll')
                     ->label('View all')
                     ->icon(Heroicon::OutlinedArrowRight)
-                    ->url(fn () => JoinApplicationResource::getUrl('index')),
+                    ->url(fn () => JoinApplicationResource::getUrl('index', panel: 'admin')),
             ])
             ->emptyStateIcon(Heroicon::OutlinedInboxArrowDown)
             ->emptyStateHeading('No pending applications')

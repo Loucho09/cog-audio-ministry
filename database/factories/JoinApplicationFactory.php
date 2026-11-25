@@ -32,21 +32,22 @@ class JoinApplicationFactory extends Factory
         return $this->afterMaking(fn (JoinApplication $a) => $a->forceFill(['status' => JoinApplication::STATUS_PENDING]));
     }
 
-    public function approved(): static
+    // Pass a real staff reviewer for demo data; without one (tests) a throwaway user is created.
+    public function approved(?User $reviewer = null): static
     {
-        return $this->reviewed(JoinApplication::STATUS_APPROVED);
+        return $this->reviewed(JoinApplication::STATUS_APPROVED, $reviewer);
     }
 
-    public function rejected(): static
+    public function rejected(?User $reviewer = null): static
     {
-        return $this->reviewed(JoinApplication::STATUS_REJECTED);
+        return $this->reviewed(JoinApplication::STATUS_REJECTED, $reviewer);
     }
 
-    // make() creates no rows; the reviewer user is only created on create().
-    private function reviewed(string $status): static
+    // make() creates no rows; the fallback reviewer is only created on create().
+    private function reviewed(string $status, ?User $reviewer): static
     {
         return $this
             ->afterMaking(fn (JoinApplication $a) => $a->forceFill(['status' => $status, 'reviewed_at' => now()]))
-            ->afterCreating(fn (JoinApplication $a) => $a->forceFill(['reviewed_by' => User::factory()->create()->id])->save());
+            ->afterCreating(fn (JoinApplication $a) => $a->forceFill(['reviewed_by' => $reviewer?->id ?? User::factory()->create()->id])->save());
     }
 }

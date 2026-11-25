@@ -77,3 +77,37 @@ it('is registered on the dashboard for a branch head and heads show the count', 
     Livewire::test(PendingApplicationsWidget::class)->assertSee('Pending applications (1)');
     Livewire::test(Dashboard::class)->assertSeeLivewire(PendingApplicationsWidget::class);
 });
+
+it('gives a branchless head or admin no access and no rows', function (string $role) {
+    $user = User::factory()->create(['branch_id' => null, 'must_change_password' => false]);
+    $user->assignRole($role);
+    $this->actingAs($user);
+
+    expect(PendingApplicationsWidget::canView())->toBeFalse();
+    Livewire::test(PendingApplicationsWidget::class)->assertForbidden();
+})->with(['branch-head', 'branch-admin']);
+
+it('orders newest first', function () {
+    $this->appA->forceFill(['created_at' => now()->subDays(2)])->save();
+    $newest = JoinApplication::factory()->create(['branch_id' => $this->a->id, 'created_at' => now()]);
+    $middle = JoinApplication::factory()->create(['branch_id' => $this->a->id, 'created_at' => now()->subDay()]);
+    $this->actingAs(User::factory()->branchHead($this->a)->create());
+
+    Livewire::test(PendingApplicationsWidget::class)
+        ->assertCanSeeTableRecords([$newest, $middle, $this->appA], inOrder: true);
+});
+
+it('shows a member mounting the component directly no rows', function () {
+    $this->actingAs(User::factory()->member($this->a)->create());
+
+    Livewire::test(PendingApplicationsWidget::class)->assertForbidden();
+});
+
+it('counts only own-branch pending rows in the heading', function () {
+    JoinApplication::factory()->create(['branch_id' => $this->a->id]);
+    $this->appB->delete();
+    JoinApplication::factory()->create(['branch_id' => $this->b->id]);
+    $this->actingAs(User::factory()->branchHead($this->a)->create());
+
+    Livewire::test(PendingApplicationsWidget::class)->assertSee('Pending applications (2)');
+});
