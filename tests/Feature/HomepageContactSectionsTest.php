@@ -29,24 +29,19 @@ it('hides the team section when the flag is on but nobody is featured', function
     $this->get('/')->assertOk()->assertDontSee('id="team"', false);
 });
 
-it('links the join button to the join form in a new tab', function () {
-    config()->set('ministry.join_form_url', 'https://forms.gle/example');
-
+it('links the join button to the application form in the same tab', function () {
     $html = $this->get('/')->assertOk()->getContent();
+    $url = preg_quote(route('join.create'), '/');
 
-    preg_match('/<section id="join".*?(<a href="https:\/\/forms\.gle\/example"[^>]*>)(.*?)<\/a>/s', $html, $m);
+    preg_match('/<section id="join".*?(<a href="'.$url.'"[^>]*>)(.*?)<\/a>/s', $html, $m);
 
     expect($m)->not->toBeEmpty()
-        ->and($m[1])->toContain('target="_blank"')->toContain('rel="noopener noreferrer"')
-        ->and($m[2])->toContain('Fill out the join form')->toContain('<span class="sr-only">(opens in a new tab)</span>');
+        ->and($m[1])->not->toContain('target=')->not->toContain('rel=')
+        ->and($m[2])->toContain('Apply to join');
 });
 
-it('falls back to #contact when the join form URL is not set', function () {
-    config()->set('ministry.join_form_url', null);
-
-    $html = $this->get('/')->assertOk()->getContent();
-
-    expect($html)->toMatch('/<section id="join".*?<a href="#contact"[^>]*>\s*Message us to join\s*<\/a>.*?<\/section>/s');
+it('points the other join calls to action at the application form', function () {
+    $this->get('/')->assertOk()->assertSee('href="'.route('join.create').'"', false);
 });
 
 it('shows the map only when an address is set', function () {
@@ -85,6 +80,6 @@ it('shows the email and Facebook links in the contact section', function () {
 
 it('shows Join Us and Contact links in the navbar', function () {
     $this->get('/')->assertOk()
-        ->assertSee(route('home').'#join', false)
+        ->assertSee(route('join.create'), false)
         ->assertSee(route('home').'#contact', false);
 });

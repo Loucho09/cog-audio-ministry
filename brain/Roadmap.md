@@ -8,8 +8,8 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 |---|-------|--------|
 | 1 | Setup and homepage | done (2026-11-24) |
 | 2 | Member accounts and roles | done (2a and 2b merged to main 2026-11-25) |
-| 3 | Join applications | in progress (spec written 2026-11-25) |
-| 4 | Duty roster | planned |
+| 3 | Join applications | done (2026-11-25; slices 1-7 and final review, last commit cc05d36; merged into main; browser check at 360px and dark mode still owner-pending) |
+| 4 | Duty roster | next (not started) |
 | 5 | Notifications and reminders | planned |
 | 6 | Equipment, training, reports | planned |
 | 7 | Production launch | planned |
@@ -98,7 +98,7 @@ Status: done. 2a and 2b merged to main 2026-11-25. Split into two parts (owner d
 ## Phase 3: Join Applications
 **Goal:** public application form, branch approval, email notifications.
 
-Status: in progress (spec written 2026-11-25). Spec: [[join-applications]]. Tasks: [[join-applications-tasks]]. Owner decisions: [[join-application-rules]].
+Status: done (2026-11-25). Slices 1-7 and final review done; tests 552 total, 551 passed, 1 skipped (pre-existing). Owner browser check at 360px and dark mode still pending. Spec: [[join-applications]]. Tasks: [[join-applications-tasks]]. Owner decisions: [[join-application-rules]].
 
 ### Tasks
 - Public application form fields:
@@ -113,7 +113,7 @@ Status: in progress (spec written 2026-11-25). Spec: [[join-applications]]. Task
 - Queued email to that branch's branch-head, branch-admin, and super-admin when a new application arrives
 - Filament: list with filters by branch and status; view, approve, reject
 - Approve creates a user account (member role) and sends a set-password email
-- Replace the temporary homepage "Join Us" Google Form link with the in-app form: point the button to the new route, then remove or retire `ministry.join_form_url` / `MINISTRY_JOIN_FORM_URL`. See [[join-form-link]] and [[homepage-sections]].
+- ~~Replace the temporary homepage "Join Us" Google Form link with the in-app form~~ (done 7bc1fad, Slice 6; `ministry.join_form_url` / `MINISTRY_JOIN_FORM_URL` retired). See [[join-form-link]] (obsolete) and [[homepage-sections]].
 - Tests: saved, email queued, branch-head cannot see another branch's applications, approval creates account
 - ~~Old field list: age range, audio/tech experience, message~~ (superseded 2026-11-24 by [[second-brief-merged]])
 
@@ -169,6 +169,12 @@ Status: in progress (spec written 2026-11-25). Spec: [[join-applications]]. Task
 - **Gallery thumbnails deploy step (2026-11-25):** run `php artisan gallery:thumbnails` once on production after deploy to backfill thumbnails. Confirm the PHP GD extension is enabled on the server (`php -m`). Add to `DEPLOY.md`. See [[gallery-thumbnails-gd]].
 - Write `DEPLOY.md`: server reqs PHP 8.2+, MySQL 8, Composer, Node, extensions (including GD); `composer install --no-dev --optimize-autoloader`; `npm ci && npm run build`; production `.env` values; `key:generate`; `migrate --force`; seed only branches and roles; `storage:link`; `gallery:thumbnails`; config/route/view/event cache; HTTPS; queue worker; scheduler cron; backups of DB and uploads; first-login checklist (create super-admin, assign branch-heads, set logo, check schedule, check team flag)
 - Write `PRODUCTION-CHECKLIST.md`: pages load on phone and desktop; join form sends email; admin login works; non-admin cannot reach /admin; schedule correct; images load
+- **Phase 3 production notes (2026-11-25, see [[join-applications]]):**
+  - Set trusted proxies so the join-form throttle (5/min per IP) and login throttle see the real client IP behind the host proxy.
+  - Production `CACHE_STORE` must support atomic locks (database, redis or file). The join form uses `Cache::lock`.
+  - `APP_URL` must be set correctly. Queued staff emails build admin links from it.
+  - A queue worker must run for the staff email and the set-password email.
+  - Replace the old Google Form QR if it is still shared offline or on Facebook, with a link or QR to `/join`.
 - Full review items (2026-11-25, see [[full-review-2026-11-25]]):
   - HTTPS and proxies: `trustProxies`, `URL::forceHttps` in production, security-headers middleware (HSTS, X-Frame-Options, Referrer-Policy, CSP), `SESSION_SECURE_COOKIE=true`
   - `SESSION_DRIVER=database` creates a row per visitor: use file or redis, or schedule `session:prune`

@@ -24,24 +24,13 @@
         />
 
         <div class="mt-10">
-            {{-- Opens the Google join form (config ministry.join_form_url) in a new tab; falls back to #contact when unset.
-                 The Phase 3 application form will replace this later. --}}
             {{-- Light mode: white button on the blue band. Dark mode: the normal blue button. --}}
-            @php
-                $joinUrl = config('ministry.join_form_url');
-                $joinLabel = $joinUrl ? 'Fill out the join form' : 'Message us to join';
-            @endphp
             <x-site.button
                 size="lg"
-                :href="$joinUrl ?: '#contact'"
-                :target="$joinUrl ? '_blank' : null"
-                :rel="$joinUrl ? 'noopener noreferrer' : null"
+                :href="route('join.create')"
                 class="!bg-surface !text-primary-dark shadow-black/20 focus-visible:!ring-white focus-visible:!ring-offset-primary-dark dark:!bg-primary-dark dark:!text-surface dark:focus-visible:!ring-offset-black"
             >
-                {{ $joinLabel }}
-                @if ($joinUrl)
-                    <span class="sr-only">(opens in a new tab)</span>
-                @endif
+                Apply to join
             </x-site.button>
         </div>
     </div>

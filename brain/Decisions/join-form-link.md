@@ -1,6 +1,8 @@
+> OBSOLETE (2026-11-25, Phase 3 Slice 6, commit 7bc1fad): superseded by the Phase 3 join form (`join.create`). `ministry.join_form_url` and `MINISTRY_JOIN_FORM_URL` are retired. The Google Form is no longer linked. Kept for history.
+
 # Join form link (interim)
 Date: 2026-11-24
-Status: active until Phase 3 (see [[Roadmap]])
+Status: obsolete (superseded by the Phase 3 join form)
 
 Decision: the homepage "Join Us" button opens the ministry's existing Google Form in a new tab, as an interim join path until the Phase 3 application form replaces it (see [[Roadmap]] Phase 3).
 

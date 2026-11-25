@@ -17,6 +17,7 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Contact section shows only heading and intro if email, Facebook, Messenger and address are all empty; consider a "coming soon" fallback (added 2026-11-24; see [[homepage-sections]]) — **Done 2026-11-24:** contact section now shows "Contact details are coming soon."
 - ~~FAQ panels use `role="region"`; drop it if FAQs grow beyond about 6 (WAI-ARIA guidance)~~ (obsolete: FAQ removed, see [[faq-removed]]) (added 2026-11-24; see [[homepage-sections]])
 - List tabs (Services/Team/Gallery) run one count() per tab per request; combine into one grouped query if admin feels slow (added 2026-11-25; see [[admin-resources-polish]])
+- Thanks page `noindex`: public-layout has no head slot or `@stack`; add one (Phase 7 SEO pass) (added 2026-11-25; see [[join-applications]])
 - Phase 7: consider a `sandbox` attribute on the map iframe as part of the CSP and privacy review (added 2026-11-24; see [[homepage-sections]])
 - The Join Us button focus ring is overridden with `!ring-surface`; a cleaner fix is an "on-dark" variant in the button component (added 2026-11-24; see [[homepage-sections]])
 - Owner browser check of homepage at 360px and desktop, light and dark, once MySQL runs: lightbox above navbar (open, close, Esc, arrows, Tab), backdrop strength, verse readability on mobile over the photo (added 2026-11-24; see [[homepage-sections]], [[hero-theme-verse]], [[section-backdrops]])
@@ -56,6 +57,7 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Duplication cleanup (added 2026-11-25; reviewer; see [[login-dashboard-polish]]): the login page still has its own copy of the eye toggle (could use `<x-password-input>` with caps-lock support); UserResource status colour and icon match blocks are duplicated (move to a helper next to `statusOf`); move `ROLE_COLORS` to the top of the class.
 - `SiteSetupChecklist` does not consider `ministry.show_team`: a featured team member counts as done even when the Meet the Team section is hidden (added 2026-11-25; see [[dashboards]])
 - Optional query-count test for the member dashboard (guards the N+1 fix) (added 2026-11-25; see [[dashboards]])
+- Staff notification ignores account status: if a deactivate/active flag is added to users, filter recipients in `NotifyStaffOfJoinApplication` (added 2026-11-25; see [[join-applications]])
 - Dashboard slice 5 (pending applications widget) belongs to Phase 3; tracked in [[join-applications-tasks]] (added 2026-11-25; see [[dashboards]])
 - JS behaviour (submit guard, progress bar filter, reveal fallback) has no automated JS or browser tests. Consider a Playwright smoke suite (added 2026-11-25; see [[loading-states]], [[loading-states-approach]])
 - Owner to review the loading wording: "Confirming…" (new) and "Signing in…" (was "Logging in…") (added 2026-11-25; see [[loading-states]])
