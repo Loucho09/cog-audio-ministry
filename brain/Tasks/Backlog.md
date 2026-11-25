@@ -56,3 +56,6 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - `SiteSetupChecklist` does not consider `ministry.show_team`: a featured team member counts as done even when the Meet the Team section is hidden (added 2026-11-25; see [[dashboards]])
 - Optional query-count test for the member dashboard (guards the N+1 fix) (added 2026-11-25; see [[dashboards]])
 - Dashboard slice 5 (pending applications widget) belongs to Phase 3; tracked in [[join-applications-tasks]] (added 2026-11-25; see [[dashboards]])
+- JS behaviour (submit guard, progress bar filter, reveal fallback) has no automated JS or browser tests. Consider a Playwright smoke suite (added 2026-11-25; see [[loading-states]], [[loading-states-approach]])
+- Owner to review the loading wording: "Confirming…" (new) and "Signing in…" (was "Logging in…") (added 2026-11-25; see [[loading-states]])
+- Nav "Log out" text is still hardcoded English, not translated with `__()` (added 2026-11-25; see [[loading-states]])

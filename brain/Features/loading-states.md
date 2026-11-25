@@ -1,5 +1,5 @@
 # Loading states
-Status: planned
+Status: done (merged 2026-11-25)
 Phase: UI polish add-on (owner request 2026-11-25, done before Phase 3). No schema change, no new packages.
 
 Goal: Every moment the user waits looks alive and polished: no blank gaps, no frozen screens, no double submits. Applies to the public site, member pages, and `/admin`.
@@ -42,5 +42,35 @@ Out of scope:
 - New packages (NProgress etc.): built by hand instead.
 - Skeletons for data that is not loaded asynchronously (server-rendered pages arrive complete).
 
+## Progress
+Test run at merge: 403 total, 402 pass, 1 pre-existing skip.
+
+- **Slice 1 (35bfd3f): navigation progress and page transitions.**
+  - `components/site/page-progress` and `resources/js/page-progress.js`: same-origin link clicks and form submits, 150ms delay, trickle, `pageshow` and bfcache reset, 30s stuck timeout, SVG links ignored.
+  - Cross-document view transitions: `@view-transition` in `app.css`, 200ms fade, off for reduced motion. Firefox just navigates.
+- **Slice 2 (5bd104d): image skeletons.**
+  - `.skeleton` shimmer CSS and `<x-skeleton-image>` (Alpine; cached-image and error handling; safe without JS).
+  - Used in gallery, team, churches.
+  - Hero and login cover photo deliberately not wrapped: the hero is the LCP image and uses `<picture>`, and the dark background already works as a fallback.
+- **Slice 3 (c0b6c1d): submit guard.**
+  - `resources/js/submit-guard.js`, `data-submit-guard` on 14 forms, `<x-spinner>`, `<x-loading-label>`, `loading-text` prop on primary, secondary and danger buttons.
+  - Labels: "Signing in…" (was "Logging in…"), "Saving…", "Sending…", "Confirming…" (new, owner to review), "Logging out…", "Deleting…".
+- **Slice 4 (113b026): admin widget skeletons.**
+  - `App\Filament\Widgets\Concerns\HasSkeletonPlaceholder` overrides Livewire `placeholder()`.
+  - View `filament/widgets/placeholders/skeleton.blade.php` with variants stats, table, checklist. Uses Filament CSS vars and the `cog-skel` keyframe.
+- **Slice 5 (93fee43): primitives, scroll reveal, live region.**
+  - `<x-skeleton>` primitives (line, block, circle, card) for future async UI.
+  - Scroll reveal: `resources/js/reveal.js`, `data-reveal` on homepage sections (except hero) and dashboard cards.
+  - One shared live region: `resources/js/live-region.js`.
+- **Review and browser-check fixes (2af8ee2):**
+  - Reveal could leave tall sections invisible. Fixed: threshold 0, scroll, hash and beforeprint safety net. Hiding only starts when `reveal.js` runs (`reveal-ready` class on `<html>`). Reveal transition removed after animating so card hover transitions still work.
+  - App JS inits isolated with try/catch.
+  - Submit guard disables buttons on the next tick so the clicked button's name and value are still sent. Skips forms that stay on the page (target `_blank`, dialog, `data-no-progress`). Unlocks after 30s.
+  - Live region re-announces repeated text.
+  - Admin skeleton had two `style` attributes (padding ignored); merged via `->style()`.
+  - Hidden `autocomplete="username"` field on update-password, change-password and confirm-password forms.
+- **Browser check (Playwright):** homepage at 360px light; reveal after fast scroll; profile form lock ("Saving…", live region, progress bar); `/admin` skeletons in dark mode; console clean.
+
+Decision: [[loading-states-approach]]
 Tasks: [[loading-states-tasks]]
-Notes / decisions: [[filament-widget-styling]], [[dark-mode]], [[Roadmap]]
+Backlog: [[Backlog]]

@@ -46,6 +46,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[login-and-dashboard-decisions]]: split-photo login and all-branch services on the dashboard (2026-11-25)
 - [[join-application-rules]]: no rejection email, duplicates blocked, no age minimum (2026-11-25)
 - [[filament-widget-styling]]: Filament widgets use Filament components only; custom theme later, owner approval first (2026-11-25)
+- [[loading-states-approach]]: hand-built loading UI, View Transitions, reveal fallback, submit buttons disabled on next tick (2026-11-25)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
@@ -59,6 +60,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[login-dashboard-polish]]: split-photo login and member dashboard with all-branch services (Phase 2 add-on, in progress, branch `feature/login-dashboard-polish`; tasks in [[login-dashboard-polish-tasks]])
 - [[dashboards]]: member dashboard and admin widgets (Phase 2 add-on, in progress, branch `feature/dashboards`, slices 1-4 built; replaces the missing slice 2 of [[login-dashboard-polish]]; tasks in [[dashboards-tasks]])
 - [[join-applications]]: public join form, branch review, approval creates member account (Phase 3, planned, spec written 2026-11-25; tasks in [[join-applications-tasks]])
+- [[loading-states]]: progress bar, view transitions, image skeletons, submit guard, admin skeletons, scroll reveal (UI polish add-on before Phase 3, done and merged 2026-11-25; tasks in [[loading-states-tasks]])
 
 ## Folders
 - `Features/`: one spec per feature (template in `CLAUDE.md`)
