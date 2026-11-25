@@ -89,5 +89,10 @@ Slice 5 notes (2026-11-25, commit 40e4815):
   - The race test runs on one DB connection, so it is not a true concurrent race.
   - SQLite is case-sensitive, MySQL is not. A mixed-case duplicate is caught by MySQL collation, or by the unique-violation fallback.
 
+Slice 6 notes (2026-11-25, commit 7bc1fad):
+- Links to `route('join.create')`, same tab: hero "Join Us", navbar "Join Us", footer "Join Us", churches section "Want to serve with us? Join the team", and the Join Us section button (label now "Apply to join").
+- Before, navbar, footer, hero and churches links pointed to `#join`.
+- `ministry.join_form_url` and `MINISTRY_JOIN_FORM_URL` retired. The Google Form is no longer linked anywhere on the site. See [[join-form-link]] (obsolete).
+
 Tasks: [[join-applications-tasks]]
 Notes / decisions: [[join-application-rules]], [[join-form-link]], [[homepage-sections]], [[member-accounts-roles]], [[temp-password-and-demo-emails]]

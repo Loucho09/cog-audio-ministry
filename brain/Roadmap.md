@@ -8,7 +8,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 |---|-------|--------|
 | 1 | Setup and homepage | done (2026-11-24) |
 | 2 | Member accounts and roles | done (2a and 2b merged to main 2026-11-25) |
-| 3 | Join applications | in progress (spec written 2026-11-25; Slices 1-5 done 2026-11-25: data layer 1d84d6a, public form 9103609, queued staff email 5156e62, Filament resource 3b52520, approve and reject 40e4815; branch `feature/join-applications`, unmerged) |
+| 3 | Join applications | in progress (spec written 2026-11-25; Slices 1-6 done 2026-11-25: data layer 1d84d6a, public form 9103609, queued staff email 5156e62, Filament resource 3b52520, approve and reject 40e4815, homepage join links 7bc1fad; branch `feature/join-applications`, unmerged) |
 | 4 | Duty roster | planned |
 | 5 | Notifications and reminders | planned |
 | 6 | Equipment, training, reports | planned |
@@ -113,7 +113,7 @@ Status: in progress (spec written 2026-11-25). Spec: [[join-applications]]. Task
 - Queued email to that branch's branch-head, branch-admin, and super-admin when a new application arrives
 - Filament: list with filters by branch and status; view, approve, reject
 - Approve creates a user account (member role) and sends a set-password email
-- Replace the temporary homepage "Join Us" Google Form link with the in-app form: point the button to the new route, then remove or retire `ministry.join_form_url` / `MINISTRY_JOIN_FORM_URL`. See [[join-form-link]] and [[homepage-sections]].
+- ~~Replace the temporary homepage "Join Us" Google Form link with the in-app form~~ (done 7bc1fad, Slice 6; `ministry.join_form_url` / `MINISTRY_JOIN_FORM_URL` retired). See [[join-form-link]] (obsolete) and [[homepage-sections]].
 - Tests: saved, email queued, branch-head cannot see another branch's applications, approval creates account
 - ~~Old field list: age range, audio/tech experience, message~~ (superseded 2026-11-24 by [[second-brief-merged]])
 

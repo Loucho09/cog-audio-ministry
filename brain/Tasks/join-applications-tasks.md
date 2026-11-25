@@ -14,7 +14,7 @@ Branch: feature/join-applications (in progress)
 - [x] Slice 5 (Done 2026-11-25, commit 40e4815): approval and reject actions (in a DB transaction: create member user with `branch_id`, set `status`, `reviewed_by`, `reviewed_at`, `user_id`; queue set-password email)
   - Done when: tests show the user is created with the member role and correct branch, the set-password mail is sent, and a failure rolls back everything.
   - Reminder: approve and reject must check `isPending()` themselves, because `Gate::before` lets super-admin pass. Also hide or disable the action visibility when not pending.
-- [ ] Slice 6: homepage "Join Us" button points to `join.create`; retire `ministry.join_form_url` and `MINISTRY_JOIN_FORM_URL` (config, `.env.example`, views, tests)
+- [x] Slice 6 (Done 2026-11-25, commit 7bc1fad): homepage "Join Us" button points to `join.create`; retire `ministry.join_form_url` and `MINISTRY_JOIN_FORM_URL` (config, `.env.example`, views, tests)
   - Done when: no reference to `join_form_url` remains in code; homepage tests pass; [[join-form-link]] updated by brain-keeper.
 
 - [ ] Slice 7: pending applications widget on `/admin` (dashboard slice 5, see [[dashboards]]): count and latest pending applications for the admin's branch (super-admin: all), link to the Filament list; scoped via the resource's `getEloquentQuery()`; `canView()` for admin roles.
