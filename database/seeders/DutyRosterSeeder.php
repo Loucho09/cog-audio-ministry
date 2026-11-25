@@ -22,11 +22,17 @@ class DutyRosterSeeder extends Seeder
 {
     public function run(EventGenerator $generator, DutyRosterService $roster): void
     {
+        if (! app()->environment(['local', 'testing'])) {
+            $this->command?->warn('Skipping demo duty roster outside local/testing.');
+
+            return;
+        }
+
         // TODO: real roles from owner
         // TODO: real counts from owner
         $roleCounts = ['Duty role A' => 1, 'Duty role B' => 1, 'Duty role C' => 2];
 
-        $from = CarbonImmutable::now('Asia/Manila')->startOfDay();
+        $from = CarbonImmutable::now(config('app.timezone'))->startOfDay();
         $to = $from->addWeeks(4);
         $n = 0; // rotation counter across the whole seed
 

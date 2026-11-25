@@ -1,10 +1,13 @@
 <?php
 
 use App\Enums\DutyStatus;
+use App\Models\Branch;
 use App\Models\DutyAssignment;
 use App\Models\Event;
 use App\Models\EventDutySlot;
+use App\Models\Service;
 use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\DutyRosterSeeder;
 
 it('seeds a demo roster with every status and no overfull slot', function () {
     $this->seed(DatabaseSeeder::class);
@@ -34,4 +37,13 @@ it('can be seeded twice without error', function () {
     $this->seed(DatabaseSeeder::class);
 
     expect(Event::count())->toBeGreaterThan(0);
+});
+
+it('skips the demo roster outside local and testing', function () {
+    Service::factory()->create(['branch_id' => Branch::factory()->create()->id]);
+    $this->app['env'] = 'production';
+
+    app()->call([new DutyRosterSeeder, 'run']);
+
+    expect(Event::count())->toBe(0);
 });
