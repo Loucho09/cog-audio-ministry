@@ -20,15 +20,20 @@ trait ReturnsToGalleryList
         $this->returnUrl = static::safeListUrl(url()->previous());
     }
 
-    protected function getRedirectUrl(): string
+    protected function listUrl(): string
     {
         return static::safeListUrl($this->returnUrl) ?? GalleryImageResource::getUrl('index');
     }
 
-    /** Returns the URL (with its query string) only if it is this app's gallery index page. */
-    public static function safeListUrl(?string $candidate): ?string
+    protected function getRedirectUrl(): string
     {
-        if (blank($candidate)) {
+        return $this->listUrl();
+    }
+
+    /** Returns the URL (with its query string) only if it is this app's gallery index page. */
+    protected static function safeListUrl(?string $candidate): ?string
+    {
+        if (blank($candidate) || strlen($candidate) > 2000 || preg_match('/[^!-\[\]-~]/', $candidate)) {
             return null;
         }
 
@@ -38,7 +43,7 @@ trait ReturnsToGalleryList
 
         if ($got === false
             || ($got['scheme'] ?? null) !== ($want['scheme'] ?? null)
-            || ($got['host'] ?? null) !== ($want['host'] ?? null)
+            || strtolower($got['host'] ?? '') !== strtolower($want['host'] ?? '')
             || ($got['port'] ?? null) !== ($want['port'] ?? null)
             || rtrim($got['path'] ?? '', '/') !== rtrim($want['path'] ?? '', '/')
             || isset($got['user']) || isset($got['pass'])) {

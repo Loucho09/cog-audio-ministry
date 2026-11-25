@@ -136,3 +136,82 @@ it('still supports create another', function () {
 
     expect(GalleryImage::where('alt_text', 'One')->exists())->toBeTrue();
 });
+
+// Livewire::test sends no Referer header, so these tests set the session previous URL,
+// which is what url()->previous() falls back to.
+
+it('falls back to the index for bypass attempts', function (string $previous) {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    session()->setPreviousUrl($previous);
+
+    Livewire::test(CreateGalleryImage::class)
+        ->fillForm(['path' => UploadedFile::fake()->image('a.jpg'), 'alt_text' => 'Bypass'])
+        ->call('create')
+        ->assertRedirect(GalleryImageResource::getUrl('index'));
+})->with([
+    'dot dot' => 'http://localhost/admin/gallery-images/../branches',
+    'record edit' => 'http://localhost/admin/gallery-images/5/edit',
+    'protocol relative' => '//evil.example/admin/gallery-images',
+    'backslash userinfo' => 'http://localhost\@evil.example/admin/gallery-images',
+    'encoded slashes' => 'http://localhost/admin/gallery-images%2f..%2fx',
+    'other port' => 'http://localhost:8080/admin/gallery-images?page=2',
+    'whitespace' => 'http://localhost/admin/gallery-images?x=a b',
+    'too long' => 'http://localhost/admin/gallery-images?x='.str_repeat('a', 2100),
+]);
+
+it('keeps a trailing slash list url and normalises it', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    session()->setPreviousUrl(GalleryImageResource::getUrl('index').'/?page=3');
+
+    Livewire::test(CreateGalleryImage::class)
+        ->fillForm(['path' => UploadedFile::fake()->image('a.jpg'), 'alt_text' => 'Slash'])
+        ->call('create')
+        ->assertRedirect(GalleryImageResource::getUrl('index').'?page=3');
+});
+
+it('does not let the client tamper with the locked return url', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+
+    expect(fn () => Livewire::test(CreateGalleryImage::class)->set('returnUrl', 'https://evil.example/'))
+        ->toThrow(Exception::class);
+});
+
+it('keeps the return url after a validation failure and after create another', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    $list = GalleryImageResource::getUrl('index').'?page=2&tab=pending';
+    session()->setPreviousUrl($list);
+
+    Livewire::test(CreateGalleryImage::class)
+        ->fillForm(['path' => UploadedFile::fake()->image('a.jpg'), 'alt_text' => ''])
+        ->call('create')
+        ->assertHasFormErrors(['alt_text'])
+        ->fillForm(['path' => UploadedFile::fake()->image('a.jpg'), 'alt_text' => 'First'])
+        ->call('create', true)
+        ->assertNoRedirect()
+        ->fillForm(['path' => UploadedFile::fake()->image('b.jpg'), 'alt_text' => 'Second'])
+        ->call('create')
+        ->assertRedirect($list);
+});
+
+it('ignores a foreign previous url on the edit page', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    $image = GalleryImage::factory()->create(['branch_id' => null]);
+    session()->setPreviousUrl('https://evil.example/admin/gallery-images?page=2');
+
+    Livewire::test(EditGalleryImage::class, ['record' => $image->getKey()])
+        ->call('save')
+        ->assertRedirect(GalleryImageResource::getUrl('index'));
+});
+
+it('returns to the preserved list after deleting from the edit page', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    $image = GalleryImage::factory()->create(['branch_id' => null]);
+    $list = GalleryImageResource::getUrl('index').'?page=2&tab=pending';
+    session()->setPreviousUrl($list);
+
+    Livewire::test(EditGalleryImage::class, ['record' => $image->getKey()])
+        ->callAction('delete')
+        ->assertRedirect($list);
+
+    expect(GalleryImage::find($image->getKey()))->toBeNull();
+});
