@@ -48,6 +48,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[filament-widget-styling]]: Filament widgets use Filament components only; custom theme later, owner approval first (2026-11-25)
 - [[loading-states-approach]]: hand-built loading UI, View Transitions, reveal fallback, submit buttons disabled on next tick (2026-11-25)
 - [[faq-removed]]: owner removed FAQ fully (resource, model, policy, seeder, factory, component, tests); drop migration (2026-11-25)
+- [[what-we-do-removed]]: owner removed the What We Do homepage section, component kept unused (2026-11-25)
 - [[gallery-upload-fix]]: gallery upload limits, storage symlink, return to list after save/delete; branch `fix/gallery-upload`, not merged (2026-11-25)
 
 ## Features

@@ -32,7 +32,7 @@ Slices:
   - Gallery `rounded-3xl`.
   - Services list 360px overflow fix.
 
-- D. What We Do cards (branch `feature/what-we-do-cards`, commit 8d2e5e5), 2026-11-24:
+- D. (superseded 2026-11-25: What We Do section removed, see [[what-we-do-removed]]) What We Do cards (branch `feature/what-we-do-cards`, commit 8d2e5e5), 2026-11-24:
   - ~~2x2 grid at md+ (`max-w-5xl`), icon beside text from sm+, stacked on mobile.~~ (superseded 2026-11-24 by slice E)
   - ~~Titles shortened: "FOH (Front of House)" to "Front of House".~~ (superseded by slice E: tab buttons use short names)
   - ~~Tag pills (FOH, On stage, Online, Setup) use primary tokens.~~ (superseded by slice E: tags now shown in the panel only)
@@ -40,7 +40,7 @@ Slices:
   - Test `tests/Feature/HomepageSectionsTest.php` expects "Front of House" (still valid; slice E adds a tabs ARIA test).
   - Checked (commit 8d2e5e5): 1280px light, 360px dark, no horizontal scroll. Tag contrast about 5.2:1 light, 8:1 dark.
 
-- E. What We Do role picker (branch `feature/what-we-do-cards`, commits 81ab9a8 and 287a5c9), 2026-11-24:
+- E. (superseded 2026-11-25: What We Do section removed, see [[what-we-do-removed]]) What We Do role picker (branch `feature/what-we-do-cards`, commits 81ab9a8 and 287a5c9), 2026-11-24:
   - Owner asked for "more interactive, less text". 2x2 cards replaced by a role picker in `resources/views/components/home/what-we-do.blade.php`.
   - 4 tab buttons (icon + short name: FOH, Monitors, Livestream, Stage Tech) and one panel with title, tag pill, bold one-line summary and one short detail line.
   - Alpine.js, WAI-ARIA tabs pattern: arrow keys wrap, Home/End, roving tabindex. Alt/Ctrl/Meta combos ignored (Alt+Left still goes Back).
