@@ -58,7 +58,7 @@ it('assigns a member to a slot', function () {
 
 it('shows a danger notification and creates nothing when over capacity', function () {
     makeAssignment($this);
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     manager($this->event)
         ->callTableAction('assign', data: ['duty_role_id' => $this->role->id, 'user_id' => $this->member->id])
@@ -184,7 +184,7 @@ it('cannot assign or remove a guest on another branch event', function () {
         'event_id' => $foreign->id, 'branch_id' => $this->branchB->id, 'duty_role_id' => $this->role->id,
     ]);
 
-    foreach ([User::factory()->branchAdmin($this->branchA)->create(), User::factory()->branchHead($this->branchA)->create()] as $admin) {
+    foreach ([User::factory()->branchAdmin($this->branchA)->create(), User::factory()->branchAdmin($this->branchA)->create()] as $admin) {
         $this->actingAs($admin);
 
         manager($foreign)->assertForbidden();

@@ -67,7 +67,7 @@ class DutyRosterSeeder extends Seeder
             if ($members->isEmpty()) {
                 continue;
             }
-            $head = User::where('branch_id', $branch->id)->role('branch-head')->first();
+            $head = User::where('branch_id', $branch->id)->role('branch-admin')->first();
 
             $events = Event::where('branch_id', $branch->id)->upcoming()->orderBy('starts_at')->get();
             foreach ($events as $i => $event) {

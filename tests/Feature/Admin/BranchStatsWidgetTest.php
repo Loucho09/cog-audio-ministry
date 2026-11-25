@@ -36,8 +36,8 @@ function statValues(): array
     return collect($stats)->mapWithKeys(fn ($s) => [(string) $s->getLabel() => $s->getValue()])->all();
 }
 
-it('limits a branch-head to their own branch counts', function () {
-    $this->actingAs(User::factory()->branchHead($this->a)->create());
+it('limits a branch-admin to their own branch counts', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->a)->create());
 
     $values = statValues();
 
@@ -47,10 +47,10 @@ it('limits a branch-head to their own branch counts', function () {
         ->and($values['Team members'])->toBe(0);
 });
 
-it('shows zero counts to a branch-head without a branch', function () {
+it('shows zero counts to a branch-admin without a branch', function () {
     $user = User::factory()->create(['branch_id' => null]);
-    Role::findOrCreate('branch-head', 'web');
-    $user->assignRole('branch-head');
+    Role::findOrCreate('branch-admin', 'web');
+    $user->assignRole('branch-admin');
     $this->actingAs($user);
 
     expect(BranchStatsWidget::canView())->toBeFalse()

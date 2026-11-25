@@ -42,8 +42,8 @@ it('denies role assignment to non super-admins', function (string $state) {
     $actor = User::factory()->{$state}($branch)->create();
     $target = User::factory()->member($branch)->create();
 
-    app(AssignRole::class)->handle($actor, $target, 'branch-head');
-})->with(['branchHead', 'branchAdmin', 'member'])->throws(AuthorizationException::class);
+    app(AssignRole::class)->handle($actor, $target, 'branch-admin');
+})->with(['branchAdmin', 'member'])->throws(AuthorizationException::class);
 
 it('rejects unknown roles', function () {
     $actor = User::factory()->superAdmin()->create();
@@ -87,4 +87,4 @@ it('rejects branch roles for users without a branch', function (string $role) {
 
     expect(fn () => app(AssignRole::class)->handle($actor, $target, $role))
         ->toThrow(ValidationException::class);
-})->with(['branch-head', 'branch-admin']);
+})->with(['branch-admin', 'branch-admin']);

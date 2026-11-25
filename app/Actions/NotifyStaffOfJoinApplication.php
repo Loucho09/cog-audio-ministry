@@ -12,7 +12,7 @@ use Throwable;
 class NotifyStaffOfJoinApplication
 {
     /**
-     * Branch-head and branch-admin users of the application's branch, plus all super-admins.
+     * Branch-admin users of the application's branch, plus all super-admins.
      * One row per user, even when they hold several of these roles.
      *
      * @return Collection<int, User>
@@ -24,7 +24,7 @@ class NotifyStaffOfJoinApplication
                 $query->whereHas('roles', fn ($roles) => $roles->where('name', 'super-admin'))
                     ->orWhere(function ($query) use ($application) {
                         $query->where('branch_id', $application->branch_id)
-                            ->whereHas('roles', fn ($roles) => $roles->whereIn('name', ['branch-head', 'branch-admin']));
+                            ->whereHas('roles', fn ($roles) => $roles->where('name', 'branch-admin'));
                     });
             })
             ->get();

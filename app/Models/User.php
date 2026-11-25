@@ -112,7 +112,7 @@ class User extends Authenticatable implements FilamentUser
         }
 
         // Branch admins need a branch; an admin without one gets nothing.
-        return $this->branch_id !== null && $this->hasAnyRole(['branch-head', 'branch-admin']);
+        return $this->branch_id !== null && $this->hasRole('branch-admin');
     }
 
     /**

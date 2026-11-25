@@ -17,7 +17,7 @@ use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     Filament::setCurrentPanel('admin');
-    foreach (['super-admin', 'branch-head', 'branch-admin', 'member'] as $role) {
+    foreach (['super-admin', 'branch-admin', 'branch-admin', 'member'] as $role) {
         Role::findOrCreate($role, 'web');
     }
     $this->branchA = Branch::factory()->create();
@@ -63,7 +63,7 @@ it('shows a form error and creates nothing for a branch role without a branch', 
     $this->actingAs(User::factory()->superAdmin()->create());
 
     Livewire::test(CreateUser::class)
-        ->fillForm(['name' => 'X', 'email' => 'x@example.test', 'role' => 'branch-head'])
+        ->fillForm(['name' => 'X', 'email' => 'x@example.test', 'role' => 'branch-admin'])
         ->call('create')
         ->assertHasFormErrors(['role']);
 
@@ -103,12 +103,12 @@ it('changes a role through the form via AssignRole', function () {
         ->and($target->fresh()->hasRole('member'))->toBeFalse();
 });
 
-it('shows a form error, not a 500, for branch-head on a user with no branch', function () {
+it('shows a form error, not a 500, for branch-admin on a user with no branch', function () {
     $this->actingAs(User::factory()->superAdmin()->create());
     $target = User::factory()->member($this->branchA)->create(['branch_id' => null]);
 
     Livewire::test(EditUser::class, ['record' => $target->id])
-        ->fillForm(['role' => 'branch-head', 'name' => 'Changed'])
+        ->fillForm(['role' => 'branch-admin', 'name' => 'Changed'])
         ->call('save')
         ->assertHasFormErrors(['role']);
 
@@ -139,8 +139,8 @@ it('cannot demote themselves (or the last super-admin) through the form', functi
     expect($admin->fresh()->hasRole('super-admin'))->toBeTrue();
 });
 
-it('limits a branch-head to own-branch users', function () {
-    $head = User::factory()->branchHead($this->branchA)->create();
+it('limits a branch-admin to own-branch users', function () {
+    $head = User::factory()->branchAdmin($this->branchA)->create();
     $mine = User::factory()->member($this->branchA)->create();
     $other = User::factory()->member($this->branchB)->create();
     $this->actingAs($head);
@@ -153,8 +153,8 @@ it('limits a branch-head to own-branch users', function () {
     $this->get('/admin/users/create')->assertForbidden();
 });
 
-it('lets a branch-head edit a member name but ignores crafted role and branch', function () {
-    $head = User::factory()->branchHead($this->branchA)->create();
+it('lets a branch-admin edit a member name but ignores crafted role and branch', function () {
+    $head = User::factory()->branchAdmin($this->branchA)->create();
     $member = User::factory()->member($this->branchA)->create();
     $this->actingAs($head);
 
@@ -172,22 +172,12 @@ it('lets a branch-head edit a member name but ignores crafted role and branch', 
         ->and($member->branch_id)->toBe($this->branchA->id);
 });
 
-it('forbids a branch-head from editing another admin', function () {
-    $head = User::factory()->branchHead($this->branchA)->create();
+it('forbids a branch-admin from editing another admin', function () {
+    $head = User::factory()->branchAdmin($this->branchA)->create();
     $otherAdmin = User::factory()->branchAdmin($this->branchA)->create();
     $this->actingAs($head);
 
     $this->get("/admin/users/{$otherAdmin->id}/edit")->assertForbidden();
-});
-
-it('forbids a branch-admin from editing but lists own branch', function () {
-    $admin = User::factory()->branchAdmin($this->branchA)->create();
-    $member = User::factory()->member($this->branchA)->create();
-    $this->actingAs($admin);
-
-    Livewire::test(ListUsers::class)->assertCanSeeTableRecords([$member]);
-    $this->get("/admin/users/{$member->id}/edit")->assertForbidden();
-    $this->get('/admin/users/create')->assertForbidden();
 });
 
 it('forbids members from the users page', function () {
@@ -221,8 +211,8 @@ it('blocks deleting self but allows deleting another super-admin', function () {
     expect(User::find($other->id))->toBeNull();
 });
 
-it('hides bulk delete from a branch-head', function () {
-    $head = User::factory()->branchHead($this->branchA)->create();
+it('hides bulk delete from a branch-admin', function () {
+    $head = User::factory()->branchAdmin($this->branchA)->create();
     $member = User::factory()->member($this->branchA)->create();
     $this->actingAs($head);
 
@@ -233,15 +223,15 @@ it('hides bulk delete from a branch-head', function () {
     expect(User::find($member->id))->not->toBeNull();
 });
 
-it('denies delete to a branch-head by policy', function () {
-    $head = User::factory()->branchHead($this->branchA)->create();
+it('denies delete to a branch-admin by policy', function () {
+    $head = User::factory()->branchAdmin($this->branchA)->create();
     $member = User::factory()->member($this->branchA)->create();
 
     expect($head->can('delete', $member))->toBeFalse();
 });
 
-it('hides and rejects the delete action for a branch-head', function () {
-    $head = User::factory()->branchHead($this->branchA)->create();
+it('hides and rejects the delete action for a branch-admin', function () {
+    $head = User::factory()->branchAdmin($this->branchA)->create();
     $member = User::factory()->member($this->branchA)->create();
     $this->actingAs($head);
 
@@ -263,8 +253,8 @@ it('keeps at least one super-admin on bulk delete', function () {
         ->and(User::find($me->id))->not->toBeNull();
 });
 
-it('ignores a submitted email from a branch-head but saves the name', function () {
-    $head = User::factory()->branchHead($this->branchA)->create();
+it('ignores a submitted email from a branch-admin but saves the name', function () {
+    $head = User::factory()->branchAdmin($this->branchA)->create();
     $member = User::factory()->member($this->branchA)->create(['email' => 'keep@example.test']);
     $this->actingAs($head);
 
@@ -299,9 +289,9 @@ it('lets a super-admin resend the set-password email', function () {
     Notification::assertSentTo($target, WelcomeSetPassword::class);
 });
 
-it('hides and rejects resend for a branch-head', function () {
+it('hides and rejects resend for a branch-admin', function () {
     Notification::fake();
-    $head = User::factory()->branchHead($this->branchA)->create();
+    $head = User::factory()->branchAdmin($this->branchA)->create();
     $member = User::factory()->member($this->branchA)->create();
     $this->actingAs($head);
 
@@ -325,8 +315,8 @@ it('rejects a forged non-existent branch id', function () {
     expect(User::where('email', 'forged@example.test')->exists())->toBeFalse();
 });
 
-it('rejects branch-head and branch-admin calling CreateUser directly', function () {
-    foreach ([User::factory()->branchHead($this->branchA)->create(), User::factory()->branchAdmin($this->branchA)->create()] as $actor) {
+it('rejects branch-admin calling CreateUser directly', function () {
+    foreach ([User::factory()->branchAdmin($this->branchA)->create(), User::factory()->branchAdmin($this->branchA)->create()] as $actor) {
         $this->actingAs($actor);
         Livewire::test(CreateUser::class)->assertForbidden();
     }
@@ -335,7 +325,7 @@ it('rejects branch-head and branch-admin calling CreateUser directly', function 
 it('renders every list tab with the right rows', function () {
     $this->actingAs(User::factory()->superAdmin()->create());
     $head = User::factory()->create(['branch_id' => $this->branchA->id]);
-    $head->assignRole('branch-head');
+    $head->assignRole('branch-admin');
     $member = User::factory()->create(['branch_id' => $this->branchA->id]);
     $member->assignRole('member');
     $pending = User::factory()->create(['branch_id' => $this->branchA->id, 'must_change_password' => true]);

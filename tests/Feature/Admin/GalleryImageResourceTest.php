@@ -46,16 +46,16 @@ it('lets a super-admin create a global image with an upload', function () {
     expect($image->path)->toStartWith('gallery/');
 });
 
-it('shows a branch-head own and global records but not other branches', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+it('shows a branch-admin own and global records but not other branches', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(ListGalleryImages::class)
         ->assertCanSeeTableRecords([$this->imageA, $this->imageGlobal])
         ->assertCanNotSeeTableRecords([$this->imageB]);
 });
 
-it('forces a branch-head new image into their own branch', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+it('forces a branch-admin new image into their own branch', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(CreateGalleryImage::class)
         ->fillForm([
@@ -69,15 +69,15 @@ it('forces a branch-head new image into their own branch', function () {
     expect(GalleryImage::where('alt_text', 'Forced')->firstOrFail()->branch_id)->toBe($this->branchA->id);
 });
 
-it('returns 403 for a branch-head editing a global record and 404 for another branch', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+it('returns 403 for a branch-admin editing a global record and 404 for another branch', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     $this->get("/admin/gallery-images/{$this->imageGlobal->id}/edit")->assertForbidden();
     $this->get("/admin/gallery-images/{$this->imageB->id}/edit")->assertNotFound();
 });
 
 it('keeps the bundled image path when editing without re-uploading', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(EditGalleryImage::class, ['record' => $this->imageA->id])
         ->fillForm(['alt_text' => 'Updated alt'])
@@ -90,7 +90,7 @@ it('keeps the bundled image path when editing without re-uploading', function ()
 });
 
 it('requires alt text', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(CreateGalleryImage::class)
         ->fillForm(['path' => UploadedFile::fake()->image('photo.jpg'), 'alt_text' => ''])
@@ -99,7 +99,7 @@ it('requires alt text', function () {
 });
 
 it('rejects a non-image upload', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(CreateGalleryImage::class)
         ->fillForm([
@@ -118,8 +118,8 @@ it('forbids members from the gallery page', function () {
     $this->get('/admin/gallery-images')->assertForbidden();
 });
 
-it('does not let a branch-head bulk delete global images', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+it('does not let a branch-admin bulk delete global images', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(ListGalleryImages::class)
         ->callTableBulkAction('delete', [$this->imageA, $this->imageGlobal]);
@@ -128,10 +128,10 @@ it('does not let a branch-head bulk delete global images', function () {
         ->and(GalleryImage::find($this->imageA->id))->toBeNull();
 });
 
-it('shows tab counts scoped to the branch-head', function () {
+it('shows tab counts scoped to the branch-admin', function () {
     $this->imageA->update(['is_published' => false]);
     $this->imageB->update(['is_published' => false]);
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     $test = Livewire::test(ListGalleryImages::class)->assertSuccessful();
     $tabs = $test->instance()->getTabs();
@@ -147,7 +147,7 @@ it('shows tab counts scoped to the branch-head', function () {
 });
 
 it('renders the edit page summary card', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(EditGalleryImage::class, ['record' => $this->imageA->id])
         ->assertSuccessful()
@@ -155,9 +155,9 @@ it('renders the edit page summary card', function () {
         ->assertSee('Alpha');
 });
 
-it('excludes other branches from a branch-head tab counts', function () {
+it('excludes other branches from a branch-admin tab counts', function () {
     GalleryImage::factory()->count(3)->create(['branch_id' => $this->branchB->id, 'is_published' => false]);
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     $tabs = Livewire::test(ListGalleryImages::class)->instance()->getTabs();
 

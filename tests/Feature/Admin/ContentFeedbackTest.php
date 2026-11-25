@@ -29,8 +29,8 @@ beforeEach(function () {
     $this->branchB = Branch::factory()->create();
 });
 
-it('tells a branch-head the new team member waits for approval', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+it('tells a branch-admin the new team member waits for approval', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(CreateTeamMember::class)
         ->assertSee(ApprovalNotice::NOTE)
@@ -40,9 +40,9 @@ it('tells a branch-head the new team member waits for approval', function () {
         ->assertNotified(ApprovalNotice::SAVED_TITLE);
 });
 
-it('tells a branch-head a changed team member waits for approval', function () {
+it('tells a branch-admin a changed team member waits for approval', function () {
     $member = TeamMember::factory()->create(['branch_id' => $this->branchA->id]);
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(EditTeamMember::class, ['record' => $member->id])
         ->assertSee(ApprovalNotice::NOTE)
@@ -51,9 +51,9 @@ it('tells a branch-head a changed team member waits for approval', function () {
         ->assertNotified(ApprovalNotice::SAVED_TITLE);
 });
 
-it('tells a branch-head a new or changed gallery image waits for approval', function () {
+it('tells a branch-admin a new or changed gallery image waits for approval', function () {
     $image = GalleryImage::factory()->create(['branch_id' => $this->branchA->id]);
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(CreateGalleryImage::class)
         ->assertSee(ApprovalNotice::NOTE)
@@ -82,7 +82,7 @@ it('shows global rows as all churches in the branch column', function () {
     TeamMember::factory()->create(['branch_id' => null]);
     GalleryImage::factory()->create(['branch_id' => null]);
 
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
     Livewire::test(ListTeamMembers::class)->assertSee('All churches');
     Livewire::test(ListGalleryImages::class)->assertSee('All churches');
 
@@ -92,7 +92,7 @@ it('shows global rows as all churches in the branch column', function () {
 });
 
 it('defaults service sort order to 0 in the form and never saves NULL', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(CreateService::class)
         ->assertFormSet(['sort_order' => 0])
@@ -104,7 +104,7 @@ it('defaults service sort order to 0 in the form and never saves NULL', function
 });
 
 it('shows a friendly error instead of a 500 when the database rejects a duplicate service slot', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
     Service::factory()->create(['branch_id' => $this->branchA->id, 'day_of_week' => 3, 'start_time' => '19:00:00']);
 
     // Call the save step directly so the form rule is skipped and the DB constraint fires (race case).
@@ -126,7 +126,7 @@ it('shows a friendly error instead of a 500 when the database rejects a duplicat
 it('keeps events when a service is deleted', function () {
     $service = Service::factory()->create(['branch_id' => $this->branchA->id]);
     $event = Event::factory()->create(['branch_id' => $this->branchA->id, 'service_id' => $service->id]);
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(EditService::class, ['record' => $service->id])
         ->callAction('delete');
@@ -138,7 +138,7 @@ it('keeps events when a service is deleted', function () {
 it('cannot bulk delete another branch services', function () {
     $mine = Service::factory()->create(['branch_id' => $this->branchA->id]);
     $theirs = Service::factory()->create(['branch_id' => $this->branchB->id]);
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(ListServices::class)
         ->callTableBulkAction('delete', [$mine, $theirs]);
@@ -151,7 +151,7 @@ it('cannot bulk delete another branch or global team members', function () {
     $mine = TeamMember::factory()->create(['branch_id' => $this->branchA->id]);
     $theirs = TeamMember::factory()->create(['branch_id' => $this->branchB->id]);
     $global = TeamMember::factory()->create(['branch_id' => null]);
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(ListTeamMembers::class)
         ->callTableBulkAction('delete', [$mine, $theirs, $global]);

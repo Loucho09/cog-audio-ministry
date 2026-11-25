@@ -7,7 +7,7 @@ use Spatie\Permission\Models\Role;
 
 class RoleSeeder extends Seeder
 {
-    public const ROLES = ['super-admin', 'branch-head', 'branch-admin', 'member'];
+    public const ROLES = ['super-admin', 'branch-admin', 'member'];
 
     public function run(): void
     {

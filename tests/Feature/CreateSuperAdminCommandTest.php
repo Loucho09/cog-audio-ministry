@@ -31,12 +31,13 @@ it('rejects a duplicate email', function () {
     expect(User::where('email', 'owner@example.test')->count())->toBe(1);
 });
 
-it('seeds roles and one branch-head per branch', function () {
+it('seeds roles and branch-admins per branch (two in Dasma)', function () {
     $this->seed(DatabaseSeeder::class);
 
-    expect(Role::count())->toBe(4);
+    expect(Role::count())->toBe(3)
+        ->and(Role::where('name', 'branch-head')->exists())->toBeFalse();
 
     Branch::all()->each(function (Branch $branch) {
-        expect(User::role('branch-head')->where('branch_id', $branch->id)->count())->toBe(1);
+        expect(User::role('branch-admin')->where('branch_id', $branch->id)->count())->toBe($branch->slug === 'dasma' ? 2 : 1);
     });
 });

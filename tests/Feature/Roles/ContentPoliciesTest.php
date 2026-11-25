@@ -22,8 +22,8 @@ it('lets super-admin do everything on branch content', function (string $model) 
         ->and($user->can('delete', $record))->toBeTrue();
 })->with('branchContent');
 
-it('lets branch-head manage own-branch content only', function (string $model) {
-    $head = User::factory()->branchHead($this->branch)->create();
+it('lets branch-admin manage own-branch content only', function (string $model) {
+    $head = User::factory()->branchAdmin($this->branch)->create();
     $own = $model::factory()->create(['branch_id' => $this->branch->id]);
     $foreign = $model::factory()->create(['branch_id' => $this->other->id]);
     $global = $model::factory()->create(['branch_id' => null]);
@@ -41,20 +41,10 @@ it('lets branch-head manage own-branch content only', function (string $model) {
         ->and($head->can('forceDelete', $own))->toBeFalse();
 })->with('branchContent');
 
-it('lets branch-admin view but never edit branch content', function (string $model) {
-    $admin = User::factory()->branchAdmin($this->branch)->create();
-    $own = $model::factory()->create(['branch_id' => $this->branch->id]);
-
-    expect($admin->can('view', $own))->toBeTrue()
-        ->and($admin->can('create', $model))->toBeFalse()
-        ->and($admin->can('update', $own))->toBeFalse()
-        ->and($admin->can('delete', $own))->toBeFalse();
-})->with('branchContent');
-
 it('denies members and null-branch staff on branch content', function (string $model) {
     $record = $model::factory()->create(['branch_id' => $this->branch->id]);
     $member = User::factory()->member($this->branch)->create();
-    $noBranch = User::factory()->branchHead($this->branch)->create(['branch_id' => null]);
+    $noBranch = User::factory()->branchAdmin($this->branch)->create(['branch_id' => null]);
 
     foreach ([$member, $noBranch] as $user) {
         expect($user->can('viewAny', $model))->toBeFalse()
@@ -67,10 +57,10 @@ it('denies members and null-branch staff on branch content', function (string $m
 
 it('limits branch management to super-admin and own-branch viewing', function () {
     $super = User::factory()->superAdmin()->create();
-    $head = User::factory()->branchHead($this->branch)->create();
+    $head = User::factory()->branchAdmin($this->branch)->create();
     $admin = User::factory()->branchAdmin($this->branch)->create();
     $member = User::factory()->member($this->branch)->create();
-    $noBranch = User::factory()->branchHead($this->branch)->create(['branch_id' => null]);
+    $noBranch = User::factory()->branchAdmin($this->branch)->create(['branch_id' => null]);
 
     expect($super->can('create', Branch::class))->toBeTrue()
         ->and($super->can('update', $this->other))->toBeTrue()

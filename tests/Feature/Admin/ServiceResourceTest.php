@@ -25,22 +25,22 @@ it('lets a super-admin see every branch', function () {
         ->assertCanSeeTableRecords([$this->serviceA, $this->serviceB]);
 });
 
-it('limits a branch-head to their own branch', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+it('limits a branch-admin to their own branch', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(ListServices::class)
         ->assertCanSeeTableRecords([$this->serviceA])
         ->assertCanNotSeeTableRecords([$this->serviceB]);
 });
 
-it('hides another branch edit page from a branch-head', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+it('hides another branch edit page from a branch-admin', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     $this->get("/admin/services/{$this->serviceB->id}/edit")->assertNotFound();
 });
 
-it('forces a branch-head new service into their own branch', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+it('forces a branch-admin new service into their own branch', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(CreateService::class)
         ->fillForm(['name' => 'New', 'day_of_week' => 3, 'start_time' => '19:00', 'branch_id' => $this->branchB->id])
@@ -50,8 +50,8 @@ it('forces a branch-head new service into their own branch', function () {
     expect(Service::where('name', 'New')->firstOrFail()->branch_id)->toBe($this->branchA->id);
 });
 
-it('forces branch on update for a branch-head', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+it('forces branch on update for a branch-admin', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(EditService::class, ['record' => $this->serviceA->id])
         ->fillForm(['name' => 'Renamed', 'branch_id' => $this->branchB->id])
@@ -62,7 +62,7 @@ it('forces branch on update for a branch-head', function () {
 });
 
 it('rejects a duplicate branch/day/time slot', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(CreateService::class)
         ->fillForm(['name' => 'Dup', 'day_of_week' => 0, 'start_time' => '09:00'])
@@ -73,7 +73,7 @@ it('rejects a duplicate branch/day/time slot', function () {
 });
 
 it('allows saving an existing service without tripping the slot rule', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(EditService::class, ['record' => $this->serviceA->id])
         ->fillForm(['name' => 'Same slot'])
@@ -82,7 +82,7 @@ it('allows saving an existing service without tripping the slot rule', function 
 });
 
 it('rejects ends_on before starts_on', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(CreateService::class)
         ->fillForm([
@@ -112,10 +112,10 @@ it('forbids members from the services page', function () {
     $this->get('/admin/services')->assertForbidden();
 });
 
-it('shows tab counts scoped to the branch-head', function () {
+it('shows tab counts scoped to the branch-admin', function () {
     Service::factory()->create(['branch_id' => $this->branchA->id, 'is_active' => false, 'day_of_week' => 2, 'start_time' => '10:00:00']);
     Service::factory()->create(['branch_id' => $this->branchB->id, 'is_active' => false, 'day_of_week' => 2, 'start_time' => '10:00:00']);
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     $test = Livewire::test(ListServices::class)->assertSuccessful();
     $tabs = $test->instance()->getTabs();
@@ -152,13 +152,13 @@ it('renders the edit summary and filters by day', function () {
         ->assertCanNotSeeTableRecords([$this->serviceB]);
 });
 
-it('excludes other branches from a branch-head tab counts', function () {
+it('excludes other branches from a branch-admin tab counts', function () {
     Service::factory()->count(3)->sequence(
         ['day_of_week' => 1, 'start_time' => '08:00:00'],
         ['day_of_week' => 2, 'start_time' => '08:00:00', 'is_active' => false],
         ['day_of_week' => 3, 'start_time' => '08:00:00'],
     )->create(['branch_id' => $this->branchB->id]);
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     $tabs = Livewire::test(ListServices::class)->instance()->getTabs();
 

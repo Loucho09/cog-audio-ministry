@@ -11,8 +11,8 @@ beforeEach(function () {
     $this->treceService = Service::factory()->create(['branch_id' => $this->trece->id]);
 });
 
-it('stops a Trece branch-head from viewing or changing Dasma services', function () {
-    $head = User::factory()->branchHead($this->trece)->create();
+it('stops a Trece branch-admin from viewing or changing Dasma services', function () {
+    $head = User::factory()->branchAdmin($this->trece)->create();
 
     expect($head->can('view', $this->dasmaService))->toBeFalse()
         ->and($head->can('update', $this->dasmaService))->toBeFalse()
@@ -35,7 +35,7 @@ it('lets a super-admin manage any branch', function () {
 });
 
 it('scopes visibleTo by branch', function () {
-    $head = User::factory()->branchHead($this->trece)->create();
+    $head = User::factory()->branchAdmin($this->trece)->create();
     $super = User::factory()->superAdmin()->create();
     $member = User::factory()->create();
 
@@ -46,13 +46,13 @@ it('scopes visibleTo by branch', function () {
 });
 
 it('applies the visibleTo scope to a user without a branch', function () {
-    $head = User::factory()->branchHead($this->trece)->create(['branch_id' => null]);
+    $head = User::factory()->branchAdmin($this->trece)->create(['branch_id' => null]);
 
     expect(Service::visibleTo($head)->count())->toBe(0);
 });
 
 it('limits UserPolicy to plain members of the same branch', function () {
-    $head = User::factory()->branchHead($this->trece)->create();
+    $head = User::factory()->branchAdmin($this->trece)->create();
     $ownMember = User::factory()->member($this->trece)->create();
     $otherMember = User::factory()->member($this->dasma)->create();
     $ownAdmin = User::factory()->branchAdmin($this->trece)->create();
@@ -65,18 +65,4 @@ it('limits UserPolicy to plain members of the same branch', function () {
         ->and($head->can('update', $head))->toBeFalse()
         ->and($head->can('assignRole', $ownMember))->toBeFalse()
         ->and($super->can('assignRole', $ownMember))->toBeTrue();
-});
-
-it('lets a branch-admin view but never edit own-branch members', function () {
-    $admin = User::factory()->branchAdmin($this->trece)->create();
-    $ownMember = User::factory()->member($this->trece)->create();
-    $otherMember = User::factory()->member($this->dasma)->create();
-    $head = User::factory()->branchHead($this->trece)->create();
-
-    expect($admin->can('view', $ownMember))->toBeTrue()
-        ->and($admin->can('update', $ownMember))->toBeFalse()
-        ->and($admin->can('delete', $ownMember))->toBeFalse()
-        ->and($admin->can('view', $otherMember))->toBeFalse()
-        ->and($admin->can('view', $head))->toBeFalse()
-        ->and($admin->can('assignRole', $ownMember))->toBeFalse();
 });

@@ -64,11 +64,16 @@ class EditUser extends EditRecord
                     app(AssignRole::class)->handle($actor, $record, $role);
                 }
 
-                // Branch roles need a branch (AssignRole only checks when the role changes).
-                if ($record->branch_id === null && $record->hasAnyRole(['branch-head', 'branch-admin'])) {
-                    throw ValidationException::withMessages([
-                        'branch_id' => 'A branch-head or branch-admin needs a branch.',
-                    ]);
+                if ($record->hasRole('branch-admin')) {
+                    // Branch roles need a branch (AssignRole only checks when the role changes).
+                    if ($record->branch_id === null) {
+                        throw ValidationException::withMessages([
+                            'branch_id' => 'A branch-admin needs a branch.',
+                        ]);
+                    }
+
+                    // Moving an admin into a branch that is already full is blocked.
+                    app(AssignRole::class)->assertAdminSlotFree($record, 'branch_id');
                 }
             });
         } catch (ValidationException $e) {

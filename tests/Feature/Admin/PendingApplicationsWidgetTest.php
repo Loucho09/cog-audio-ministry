@@ -11,7 +11,7 @@ use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     Filament::setCurrentPanel('admin');
-    foreach (['super-admin', 'branch-head', 'branch-admin', 'member'] as $role) {
+    foreach (['super-admin', 'branch-admin', 'branch-admin', 'member'] as $role) {
         Role::findOrCreate($role, 'web');
     }
     $this->a = Branch::factory()->create();
@@ -34,12 +34,12 @@ it('limits staff to their own branch', function (string $state) {
     Livewire::test(PendingApplicationsWidget::class)
         ->assertCanSeeTableRecords([$this->appA])
         ->assertCanNotSeeTableRecords([$this->appB]);
-})->with(['branchHead', 'branchAdmin']);
+})->with(['branchAdmin']);
 
 it('hides approved and rejected applications', function () {
     $approved = JoinApplication::factory()->approved()->create(['branch_id' => $this->a->id]);
     $rejected = JoinApplication::factory()->rejected()->create(['branch_id' => $this->a->id]);
-    $this->actingAs(User::factory()->branchHead($this->a)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->a)->create());
 
     Livewire::test(PendingApplicationsWidget::class)
         ->assertCanSeeTableRecords([$this->appA])
@@ -48,7 +48,7 @@ it('hides approved and rejected applications', function () {
 
 it('lists at most 5 rows', function () {
     JoinApplication::factory()->count(6)->create(['branch_id' => $this->a->id]);
-    $this->actingAs(User::factory()->branchHead($this->a)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->a)->create());
 
     $component = Livewire::test(PendingApplicationsWidget::class);
 
@@ -57,7 +57,7 @@ it('lists at most 5 rows', function () {
 
 it('shows a friendly empty state', function () {
     JoinApplication::query()->delete();
-    $this->actingAs(User::factory()->branchHead($this->a)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->a)->create());
 
     Livewire::test(PendingApplicationsWidget::class)->assertSee('All caught up');
 });
@@ -70,7 +70,7 @@ it('is not viewable by a member and they cannot reach the admin panel', function
 });
 
 it('is registered on the dashboard for a branch head and heads show the count', function () {
-    $this->actingAs(User::factory()->branchHead($this->a)->create(['must_change_password' => false]));
+    $this->actingAs(User::factory()->branchAdmin($this->a)->create(['must_change_password' => false]));
 
     $this->get('/admin')->assertOk();
     expect(collect(Filament::getWidgets())->contains(PendingApplicationsWidget::class))->toBeTrue();
@@ -85,13 +85,13 @@ it('gives a branchless head or admin no access and no rows', function (string $r
 
     expect(PendingApplicationsWidget::canView())->toBeFalse();
     Livewire::test(PendingApplicationsWidget::class)->assertForbidden();
-})->with(['branch-head', 'branch-admin']);
+})->with(['branch-admin', 'branch-admin']);
 
 it('orders newest first', function () {
     $this->appA->forceFill(['created_at' => now()->subDays(2)])->save();
     $newest = JoinApplication::factory()->create(['branch_id' => $this->a->id, 'created_at' => now()]);
     $middle = JoinApplication::factory()->create(['branch_id' => $this->a->id, 'created_at' => now()->subDay()]);
-    $this->actingAs(User::factory()->branchHead($this->a)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->a)->create());
 
     Livewire::test(PendingApplicationsWidget::class)
         ->assertCanSeeTableRecords([$newest, $middle, $this->appA], inOrder: true);
@@ -107,7 +107,7 @@ it('counts only own-branch pending rows in the heading', function () {
     JoinApplication::factory()->create(['branch_id' => $this->a->id]);
     $this->appB->delete();
     JoinApplication::factory()->create(['branch_id' => $this->b->id]);
-    $this->actingAs(User::factory()->branchHead($this->a)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->a)->create());
 
     Livewire::test(PendingApplicationsWidget::class)->assertSee('Waiting for review (2)');
 });

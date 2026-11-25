@@ -68,7 +68,7 @@ class AssignmentsRelationManager extends RelationManager
     {
         return User::query()
             ->where('branch_id', $this->event()->branch_id)
-            ->whereHas('roles', fn (Builder $q) => $q->whereIn('name', ['member', 'branch-admin', 'branch-head']));
+            ->whereHas('roles', fn (Builder $q) => $q->whereIn('name', ['member', 'branch-admin']));
     }
 
     /** Assigning and removing duties is an event update, so the Event policy decides. */

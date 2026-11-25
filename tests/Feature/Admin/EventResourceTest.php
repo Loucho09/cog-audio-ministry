@@ -111,7 +111,7 @@ it('refuses a service from another branch', function () {
 
 it('edits an own event and its slots through the service', function () {
     $this->eventA->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]);
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(EditEvent::class, ['record' => $this->eventA->id])
         ->fillForm([

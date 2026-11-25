@@ -19,7 +19,7 @@ class JoinApplicationSeeder extends Seeder
             return;
         }
 
-        foreach (['super-admin', 'branch-head', 'member'] as $role) {
+        foreach (['super-admin', 'branch-admin', 'member'] as $role) {
             Role::findOrCreate($role, 'web');
         }
 
@@ -45,10 +45,10 @@ class JoinApplicationSeeder extends Seeder
         }
     }
 
-    /** The branch's head if DemoUserSeeder made one, otherwise a super-admin. */
+    /** The branch's admin if DemoUserSeeder made one, otherwise a super-admin. */
     private function reviewerFor(Branch $branch): ?User
     {
-        return User::role('branch-head')->where('branch_id', $branch->id)->first()
+        return User::role('branch-admin')->where('branch_id', $branch->id)->first()
             ?? User::role('super-admin')->first();
     }
 }

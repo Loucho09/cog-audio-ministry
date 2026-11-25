@@ -20,8 +20,12 @@ class DemoUserSeeder extends Seeder
         $this->make('Demo Super Admin', 'superadmin@cogdasma.audio', null, 'super-admin');
 
         foreach (Branch::all() as $branch) {
-            $this->make("Head {$branch->name}", "head@cog{$branch->slug}.audio", $branch, 'branch-head');
             $this->make("Admin {$branch->name}", "admin@cog{$branch->slug}.audio", $branch, 'branch-admin');
+
+            // The main branch has a second admin (see branch_admin_limit in config/ministry.php).
+            if ($branch->slug === 'dasma') {
+                $this->make("Head {$branch->name}", 'head@cogdasma.audio', $branch, 'branch-admin');
+            }
 
             for ($i = 1; $i <= 3; $i++) {
                 $this->make(fake()->name(), "member{$i}@cog{$branch->slug}.audio", $branch, 'member');

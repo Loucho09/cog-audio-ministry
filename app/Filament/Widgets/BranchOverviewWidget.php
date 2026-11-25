@@ -42,7 +42,7 @@ class BranchOverviewWidget extends TableWidget
                         'users',
                         'users as admins_count' => fn (Builder $q) => $q->role('branch-admin'),
                     ])
-                    ->with(['users' => fn ($q) => $q->role('branch-head')])
+                    ->with(['users' => fn ($q) => $q->role('branch-admin')])
                     ->orderByDesc('is_main')
                     ->orderBy('name')
             )
@@ -53,11 +53,10 @@ class BranchOverviewWidget extends TableWidget
                     ->description(fn (Branch $record) => $record->is_main ? 'Main branch' : null),
                 TextColumn::make('users_count')->label('Accounts'),
                 TextColumn::make('heads')
-                    ->label('Branch head')
-                    ->state(fn (Branch $record) => $record->users->isEmpty() ? 'No head' : $record->users->pluck('name')->implode(', '))
+                    ->label('Branch admins')
+                    ->state(fn (Branch $record) => $record->users->isEmpty() ? 'No admin' : $record->users->pluck('name')->implode(', '))
                     ->badge()
                     ->color(fn (Branch $record) => $record->users->isEmpty() ? 'danger' : 'gray'),
-                TextColumn::make('admins_count')->label('Branch admins'),
             ])
             ->paginated(false);
     }

@@ -23,7 +23,7 @@ class ListUsers extends ListRecords
     /** Quick views. Counts start from the resource query, so they stay branch scoped. */
     public function getTabs(): array
     {
-        $admins = fn (Builder $query) => $query->whereHas('roles', fn (Builder $r) => $r->whereIn('name', ['super-admin', 'branch-head', 'branch-admin']));
+        $admins = fn (Builder $query) => $query->whereHas('roles', fn (Builder $r) => $r->whereIn('name', ['super-admin', 'branch-admin']));
         $members = fn (Builder $query) => $query->whereHas('roles', fn (Builder $r) => $r->where('name', 'member'));
         $attention = fn (Builder $query) => $query->needsAttention(UserResource::isSuperAdmin());
 

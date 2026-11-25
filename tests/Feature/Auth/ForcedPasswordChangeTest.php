@@ -36,8 +36,8 @@ it('shows no banner to an unflagged user', function () {
         ->get('/dashboard')->assertOk()->assertDontSee('temporary password');
 });
 
-it('redirects a flagged branch-head away from the admin panel', function () {
-    $user = User::factory()->branchHead(Branch::factory()->create())->create(['must_change_password' => true]);
+it('redirects a flagged branch-admin away from the admin panel', function () {
+    $user = User::factory()->branchAdmin(Branch::factory()->create())->create(['must_change_password' => true]);
 
     $this->actingAs($user)->get('/admin')->assertRedirect(route('password.change'));
 });
@@ -135,7 +135,7 @@ it('does not allow mass assigning the flag', function () {
 });
 
 it('allows a flagged user to log out through the Filament route', function () {
-    $head = User::factory()->branchHead(Branch::factory()->create())->create(['must_change_password' => true]);
+    $head = User::factory()->branchAdmin(Branch::factory()->create())->create(['must_change_password' => true]);
 
     $this->actingAs($head)->post(route('filament.admin.auth.logout'))->assertRedirect();
 

@@ -13,7 +13,7 @@ class JoinApplicationPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->branch_id !== null && $user->hasAnyRole(['branch-head', 'branch-admin']);
+        return $user->branch_id !== null && $user->hasRole('branch-admin');
     }
 
     public function view(User $user, JoinApplication $application): bool

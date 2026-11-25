@@ -129,7 +129,7 @@ test('admins cannot delete their own account and do not see the section', functi
     $branch = Branch::factory()->create();
     $user = match ($role) {
         'super-admin' => User::factory()->superAdmin()->create(),
-        'branch-head' => User::factory()->branchHead($branch)->create(),
+        'branch-admin' => User::factory()->branchAdmin($branch)->create(),
         'branch-admin' => User::factory()->branchAdmin($branch)->create(),
     };
 
@@ -140,7 +140,7 @@ test('admins cannot delete their own account and do not see the section', functi
     expect($user->fresh())->not->toBeNull();
 
     $this->actingAs($user)->get('/profile')->assertOk()->assertDontSee('confirm-user-deletion');
-})->with(['super-admin', 'branch-head', 'branch-admin']);
+})->with(['super-admin', 'branch-admin', 'branch-admin']);
 
 test('a member with duty history gets a friendly refusal instead of an error', function () {
     $user = User::factory()->create();

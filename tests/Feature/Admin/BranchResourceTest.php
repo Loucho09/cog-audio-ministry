@@ -100,8 +100,8 @@ it('deletes an empty non-main branch', function () {
     expect(Branch::find($this->other->id))->toBeNull();
 });
 
-it('shows a branch-head only their own branch, read-only', function () {
-    $this->actingAs(User::factory()->branchHead($this->other)->create());
+it('shows a branch-admin only their own branch, read-only', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->other)->create());
 
     Livewire::test(ListBranches::class)
         ->assertCanSeeTableRecords([$this->other])
@@ -140,8 +140,8 @@ it('lists branches with member and service counts for the super-admin', function
     expect($row->users_count)->toBe(1)->and($row->services_count)->toBe(1);
 });
 
-it('lists only their own branch for a branch-head', function () {
-    $this->actingAs(User::factory()->branchHead($this->other)->create());
+it('lists only their own branch for a branch-admin', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->other)->create());
 
     Livewire::test(ListBranches::class)
         ->assertCanSeeTableRecords([$this->other])
@@ -227,7 +227,7 @@ it('keeps the slug read-only when editing', function () {
 });
 
 it('hides the branches nav item from non-super-admins', function () {
-    $this->actingAs(User::factory()->branchHead($this->other)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->other)->create());
     expect(BranchResource::shouldRegisterNavigation())->toBeFalse();
 
     $this->actingAs(User::factory()->superAdmin()->create());
