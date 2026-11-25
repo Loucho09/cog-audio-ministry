@@ -1,5 +1,5 @@
 # Duty guest assign
-Status: in progress
+Status: done (awaiting merge)
 Phase: 4
 Goal: when assigning a duty, the admin either picks an existing member of the event's branch (dropdown, as in v1) or types a guest name by hand for someone without an account (visitor, volunteer from another church).
 Users: branch-head, branch-admin (own branch), super-admin (any branch)
@@ -28,4 +28,11 @@ Permissions: same as v1 Assign (event's branch only, enforced in the service and
 Out of scope: guest phone/email, saved guest list, reminders/notifications to guests, guests in swaps (v2), member dashboard changes.
 
 Tasks: [[duty-guest-assign-tasks]]
-Notes / decisions: [[duty-roster]], [[Demo-Accounts]]
+Notes / decisions: [[duty-roster]], [[Demo-Accounts]], [[duty-guest-assign]] (decision note)
+
+## Notes
+- Guest auto-confirmed (owner decision 2026-11-26).
+- Branch row locked on guest assign to stop a duplicate-name race.
+- Name match is case-insensitive and accent-insensitive on MySQL (José = Jose). Intended.
+- Migration rollback deletes all guest rows (rows with `user_id` null).
+- Demo seeder adds one "Guest Volunteer" per branch.
