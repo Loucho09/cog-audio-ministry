@@ -34,9 +34,9 @@ Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./ve
 - [x] Feature tests: happy path, another member can't cancel, other branch can't claim
 
 ## Slice S6: Filament Swaps (backend-builder)
-- [ ] `app/Filament/Resources/DutySwaps/DutySwapResource.php` (+ List page): branch-scoped query, status filter, nav badge = claimed count
-- [ ] Row actions Approve / Reject (only `claimed`), calling the service; errors shown as notifications
-- [ ] Tests: other-branch admin can't see/approve, self-approval rule, member can't reach it
+- [x] `app/Filament/Resources/DutySwaps/DutySwapResource.php` (+ List page): branch-scoped query, status filter, nav badge = claimed count
+- [x] Row actions Approve / Reject (only `claimed`), calling the service; errors shown as notifications
+- [x] Tests: other-branch admin can't see/approve, self-approval rule, member can't reach it
 
 ## Slice S7: demo + wrap-up
 - [ ] `DutyRosterSeeder`: one open and one claimed swap per branch

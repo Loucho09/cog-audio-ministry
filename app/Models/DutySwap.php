@@ -26,6 +26,11 @@ class DutySwap extends Model
         ];
     }
 
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
     public function assignment(): BelongsTo
     {
         return $this->belongsTo(DutyAssignment::class, 'duty_assignment_id');
