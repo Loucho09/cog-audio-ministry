@@ -19,7 +19,6 @@
         <x-site.section-header
             id="join-title"
             tone="stage"
-            eyebrow="Join the team"
             title="Join Us"
             lead="Do you love serving through sound, stage, or livestream? You do not need to be an expert. We will gladly teach and walk with you. Halina at sumama sa amin!"
         />

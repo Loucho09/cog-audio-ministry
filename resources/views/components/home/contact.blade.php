@@ -7,7 +7,7 @@
 
     // Icon paths are static SVG markup defined here, never user input.
     $iconClasses = 'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 text-primary-dark ring-1 ring-inset ring-primary/20 transition duration-300 motion-safe:group-hover:scale-105';
-    $cardClasses = 'group flex min-h-11 items-center gap-4 rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark sm:p-6 dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-primary/20';
+    $cardClasses = 'group flex min-h-11 items-center gap-4 rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark sm:p-6 dark:hover:shadow-black/60';
 @endphp
 
 <section id="contact" data-reveal aria-labelledby="contact-title" class="relative isolate overflow-hidden bg-surface py-20 sm:py-24 lg:py-32">
@@ -16,7 +16,7 @@
         <div class="lg:grid lg:grid-cols-12 lg:items-start lg:gap-16">
             {{-- Desktop: heading in the left column, contact cards and map on the right. --}}
             <div class="lg:col-span-4">
-                <x-site.section-header id="contact-title" eyebrow="Contact" title="Contact Us" lead="We would love to hear from you." align="split" />
+                <x-site.section-header id="contact-title" title="Contact Us" lead="We would love to hear from you." align="split" />
             </div>
 
         <div class="mt-12 grid grid-cols-1 gap-8 sm:mt-16 lg:col-span-8 lg:mt-0 {{ $address ? 'lg:grid-cols-2 lg:items-stretch lg:gap-10' : '' }}">

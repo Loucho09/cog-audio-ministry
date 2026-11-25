@@ -14,7 +14,6 @@
     <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <x-site.section-header
             id="services-title"
-            eyebrow="Services"
             title="Upcoming Services"
             :lead="$branch ? 'At '.$branch->name : null"
         />

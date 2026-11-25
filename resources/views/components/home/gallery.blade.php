@@ -15,7 +15,6 @@
     <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <x-site.section-header
             id="gallery-title"
-            eyebrow="Photos"
             title="Gallery"
             :lead="$allPlaceholders ? 'Photos coming soon. These are placeholders.' : null"
         />
