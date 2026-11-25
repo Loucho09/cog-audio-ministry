@@ -120,6 +120,14 @@ Browser check (2026-11-25): passed. Covered:
 - Set-password link, then member login, then `/admin` returns 403
 - Admin list at 360px in dark mode
 
+Admin UX rework (2026-11-25, commit 1ba1f6d, branch `feature/join-admin-ux`, merged into main). Matches the Users screens:
+- List: tabs Pending (default), Approved, Rejected, All. Each tab shows a branch-scoped count. Pending count uses the warning colour and is hidden at 0. Tabs replace the status filter. Branch filter still shown to super-admin only.
+- Rows: Split/Stack reflow, no sideways scroll at 360px. Name with email under it, branch, status badge with icon, "Submitted … ago". Approve and Reject sit in an action menu.
+- View page: title is the applicant's name. Sections: Contact details, Application (submitted, consent), Review. Applicant summary card. Review links to the member account once approved.
+- Approve modal names applicant and branch, and says the set-password link works for 3 days. Reject modal names applicant and branch. Success messages name the applicant.
+- Dashboard widget renamed "Waiting for review (N)". Rows use the list style.
+- Browser check 2026-11-25: passed. Desktop in light mode, and 360px in dark mode.
+
 Definition of done:
 - [x] Matches its spec (routes, fields, duplicate rule, notifications, approval flow)
 - [x] Works on mobile and desktop: browser-checked 2026-11-25, passed (see Browser check above).
