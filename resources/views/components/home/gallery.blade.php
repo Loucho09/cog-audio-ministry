@@ -134,10 +134,10 @@
                                     class="group relative block h-full w-full overflow-hidden rounded-3xl bg-text/5 shadow-sm ring-1 ring-text/10 transition-shadow duration-300 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2"
                                 >
                                     {{-- The hover zoom sits on the wrapper (not the img) so it does not clash with the img's own fade transition. --}}
-                                    {{-- Grid shows the 800px thumbnail; the full photo is only a srcset option for big tiles on
-                                         sharp screens (its "1600w" is a hint, tiles crop with object-cover). Lazy: the gallery is far below the fold. --}}
+                                    {{-- Grid uses the WebP thumbnails (800w, and up to 1600w for big tiles on sharp screens); the full
+                                         photo is only loaded by the lightbox. Lazy: the gallery is far below the fold. --}}
                                     @if ($image['thumb'])
-                                        <x-skeleton-image src="{{ $image['thumb'] }}" srcset="{{ $image['thumb'] }} 800w, {{ $image['url'] }} 1600w" sizes="{{ $sizes }}" alt="{{ $image['alt'] }}" class="h-full w-full transition duration-700 ease-out motion-safe:group-hover:scale-105"/>
+                                        <x-skeleton-image src="{{ $image['thumb'] }}" srcset="{{ $image['srcset'] }}" sizes="{{ $sizes }}" alt="{{ $image['alt'] }}" class="h-full w-full transition duration-700 ease-out motion-safe:group-hover:scale-105"/>
                                     @else
                                         <x-skeleton-image src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" class="h-full w-full transition duration-700 ease-out motion-safe:group-hover:scale-105"/>
                                     @endif
