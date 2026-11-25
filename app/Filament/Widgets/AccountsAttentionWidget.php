@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Filament\Resources\Users\UserResource;
+use App\Filament\Widgets\Concerns\HasSkeletonPlaceholder;
 use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -12,6 +13,10 @@ use Illuminate\Database\Eloquent\Builder;
 /** Accounts still on a temporary password, plus (super-admin only) accounts with no branch. */
 class AccountsAttentionWidget extends TableWidget
 {
+    use HasSkeletonPlaceholder;
+
+    protected string $skeletonVariant = 'table';
+
     protected static ?int $sort = 4;
 
     protected int|string|array $columnSpan = 'full';

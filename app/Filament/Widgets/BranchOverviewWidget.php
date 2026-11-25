@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Filament\Resources\Branches\BranchResource;
+use App\Filament\Widgets\Concerns\HasSkeletonPlaceholder;
 use App\Models\Branch;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -12,6 +13,10 @@ use Illuminate\Database\Eloquent\Builder;
 /** Super-admin only: one row per branch with member, head and admin counts. Read-only. */
 class BranchOverviewWidget extends TableWidget
 {
+    use HasSkeletonPlaceholder;
+
+    protected string $skeletonVariant = 'table';
+
     protected static ?int $sort = 2;
 
     protected int|string|array $columnSpan = 'full';
