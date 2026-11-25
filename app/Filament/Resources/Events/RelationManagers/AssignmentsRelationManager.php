@@ -17,12 +17,20 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class AssignmentsRelationManager extends RelationManager
 {
     protected static string $relationship = 'assignments';
 
     protected static ?string $title = 'Assignments';
+
+    /** Also requires the Event policy, so another branch's event never opens this manager. */
+    public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
+    {
+        return parent::canViewForRecord($ownerRecord, $pageClass)
+            && (auth()->user()?->can('view', $ownerRecord) ?? false);
+    }
 
     private function event(): Event
     {

@@ -3,6 +3,7 @@
 use App\Enums\DutyStatus;
 use App\Filament\Resources\Events\EventResource;
 use App\Filament\Resources\Events\Pages\EditEvent;
+use App\Filament\Resources\Events\Pages\ViewEvent;
 use App\Filament\Resources\Events\RelationManagers\AssignmentsRelationManager;
 use App\Models\Branch;
 use App\Models\DutyAssignment;
@@ -136,4 +137,40 @@ it('is not reachable for another branch event', function () {
     $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     $this->get(EventResource::getUrl('edit', ['record' => $eventB]))->assertNotFound();
+});
+
+it('lets a branch-admin view a started own-branch event and see its assignments', function () {
+    $past = Event::factory()->create([
+        'branch_id' => $this->branchA->id,
+        'starts_at' => now()->subDay(),
+        'ends_at' => now()->subDay()->addHours(2),
+    ]);
+    $past->dutySlots()->create(['duty_role_id' => $this->role->id, 'quantity' => 1]);
+    $a = makeAssignment($this, $this->member, $past);
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    $this->get(EventResource::getUrl('edit', ['record' => $past]))->assertForbidden();
+    $this->get(EventResource::getUrl('view', ['record' => $past]))->assertOk();
+
+    Livewire::test(AssignmentsRelationManager::class, ['ownerRecord' => $past, 'pageClass' => ViewEvent::class])
+        ->assertCanSeeTableRecords([$a])
+        ->assertTableActionHidden('assign');
+});
+
+it('does not show another branch event view page', function () {
+    $foreign = Event::factory()->create([
+        'branch_id' => $this->branchB->id,
+        'starts_at' => now()->subDay(),
+        'ends_at' => now()->subDay()->addHours(2),
+    ]);
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    $this->get(EventResource::getUrl('view', ['record' => $foreign]))->assertNotFound();
+});
+
+it('cannot mount the assignments manager for another branch event', function () {
+    $foreign = Event::factory()->create(['branch_id' => $this->branchB->id]);
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    manager($foreign)->assertForbidden();
 });

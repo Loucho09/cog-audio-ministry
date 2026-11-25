@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Events;
 use App\Filament\Resources\Events\Pages\CreateEvent;
 use App\Filament\Resources\Events\Pages\EditEvent;
 use App\Filament\Resources\Events\Pages\ListEvents;
+use App\Filament\Resources\Events\Pages\ViewEvent;
 use App\Filament\Resources\Events\RelationManagers\AssignmentsRelationManager;
 use App\Models\Branch;
 use App\Models\DutyRole;
@@ -15,6 +16,7 @@ use Carbon\Carbon;
 use Closure;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -226,7 +228,11 @@ class EventResource extends Resource
                         default => $query,
                     }),
             ])
+            ->recordUrl(fn (Event $record) => self::isLocked($record)
+                ? self::getUrl('view', ['record' => $record])
+                : self::getUrl('edit', ['record' => $record]))
             ->recordActions([
+                ViewAction::make()->iconButton()->tooltip('View')->visible(fn (Event $record) => self::isLocked($record)),
                 EditAction::make()->iconButton()->tooltip('Edit')->hidden(fn (Event $record) => self::isLocked($record)),
                 DeleteAction::make()->iconButton()->modalDescription('This also removes every duty assigned for this event.')->hidden(fn (Event $record) => self::isLocked($record)),
             ]);
@@ -244,6 +250,7 @@ class EventResource extends Resource
         return [
             'index' => ListEvents::route('/'),
             'create' => CreateEvent::route('/create'),
+            'view' => ViewEvent::route('/{record}'),
             'edit' => EditEvent::route('/{record}/edit'),
         ];
     }
