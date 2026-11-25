@@ -25,7 +25,7 @@ class ServicePolicy
 
     public function create(User $user): bool
     {
-        return $user->branch_id !== null && $user->hasRole('branch-head');
+        return $user->branch_id !== null && $user->hasAnyRole(['branch-head', 'branch-admin']);
     }
 
     public function update(User $user, Service $service): bool

@@ -20,11 +20,11 @@ it('stops a Trece branch-head from viewing or changing Dasma services', function
         ->and($head->can('update', $this->treceService))->toBeTrue();
 });
 
-it('lets a branch-admin view but not edit own branch services', function () {
+it('lets a branch-admin manage own branch services but not another branch', function () {
     $admin = User::factory()->branchAdmin($this->trece)->create();
 
     expect($admin->can('view', $this->treceService))->toBeTrue()
-        ->and($admin->can('update', $this->treceService))->toBeFalse()
+        ->and($admin->can('update', $this->treceService))->toBeTrue()
         ->and($admin->can('view', $this->dasmaService))->toBeFalse();
 });
 
