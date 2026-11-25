@@ -8,7 +8,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 |---|-------|--------|
 | 1 | Setup and homepage | done (2026-11-24) |
 | 2 | Member accounts and roles | done (2a and 2b merged to main 2026-11-25) |
-| 3 | Join applications | in progress (spec written 2026-11-25) |
+| 3 | Join applications | in progress (spec written 2026-11-25; Slice 1 data layer done 2026-11-25, commit 1d84d6a, branch `feature/join-applications`, unmerged; 463 tests, 462 pass, 1 pre-existing skip) |
 | 4 | Duty roster | planned |
 | 5 | Notifications and reminders | planned |
 | 6 | Equipment, training, reports | planned |

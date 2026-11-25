@@ -1,5 +1,5 @@
 # Join applications
-Status: planned
+Status: in progress
 Phase: 3
 Goal: Visitors apply to join the Audio Ministry for a chosen branch. That branch's heads and admins, and the super-admin, review and approve or reject. Approval creates a member account and sends a set-password email.
 Users: visitor (submits), branch-head and branch-admin (review own branch only), super-admin (all branches)
@@ -35,5 +35,12 @@ Out of scope:
 - File uploads.
 - Age-based consent rules or an age minimum (age is info only).
 - Duty roster (Phase 4).
+Slice 1 notes (2026-11-25, commit 1d84d6a):
+- Status is string constants (`STATUS_PENDING`, `STATUS_APPROVED`, `STATUS_REJECTED`), not a PHP enum.
+- `branch_id` FK uses restrictOnDelete to keep application history.
+- Policy `create`, `update`, `delete` return false. Applications come only from the public form. No super-admin delete for now; owner can ask later.
+- Model overrides `BelongsToBranch` visibleTo so plain members see nothing.
+- `Gate::before` gives super-admin every ability, so the pending-only rule must be enforced inside the approve and reject actions (Slices 4 and 5).
+
 Tasks: [[join-applications-tasks]]
 Notes / decisions: [[join-application-rules]], [[join-form-link]], [[homepage-sections]], [[member-accounts-roles]], [[temp-password-and-demo-emails]]
