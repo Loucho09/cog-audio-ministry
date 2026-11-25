@@ -6,6 +6,7 @@ use App\Filament\Resources\Services\Pages\CreateService;
 use App\Filament\Resources\Services\Pages\EditService;
 use App\Filament\Resources\Services\Pages\ListServices;
 use App\Models\Branch;
+use App\Models\DutyRole;
 use App\Models\Service;
 use BackedEnum;
 use Closure;
@@ -14,6 +15,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
@@ -93,6 +95,44 @@ class ServiceResource extends Resource
 
             if ($exists) {
                 $fail('This branch already has a service on that day and time.');
+            }
+        };
+    }
+
+    /** The branch slot roles must belong to: the form branch for super-admins, else the user's own. */
+    private static function slotBranchId(mixed $formBranchId): ?int
+    {
+        $id = self::isSuperAdmin() ? $formBranchId : auth()->user()?->branch_id;
+
+        return blank($id) ? null : (int) $id;
+    }
+
+    /** Active roles of the service's branch. */
+    private static function roleOptions(mixed $formBranchId): array
+    {
+        $branchId = self::slotBranchId($formBranchId);
+
+        if ($branchId === null) {
+            return [];
+        }
+
+        return DutyRole::query()->active()->where('branch_id', $branchId)->ordered()->pluck('name', 'id')->all();
+    }
+
+    /** Server-side check that a chosen role is active and in the service's branch. */
+    private static function roleRule(mixed $formBranchId): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail) use ($formBranchId): void {
+            $branchId = self::slotBranchId($formBranchId);
+
+            $ok = $branchId !== null && DutyRole::query()
+                ->active()
+                ->where('branch_id', $branchId)
+                ->whereKey($value)
+                ->exists();
+
+            if (! $ok) {
+                $fail('Pick an active role from this branch.');
             }
         };
     }
@@ -199,6 +239,32 @@ class ServiceResource extends Resource
                                 ->native(false)
                                 ->prefixIcon(Heroicon::OutlinedStop)
                                 ->afterOrEqual('starts_on'),
+                        ]),
+                    Section::make('Default duty slots')
+                        ->description('How many people each role needs when events are made from this service.')
+                        ->icon(Heroicon::OutlinedUserGroup)
+                        ->schema([
+                            Repeater::make('dutySlots')
+                                ->hiddenLabel()
+                                ->relationship('dutySlots')
+                                ->addActionLabel('Add role')
+                                ->defaultItems(0)
+                                ->columns(2)
+                                ->schema([
+                                    Select::make('duty_role_id')
+                                        ->label('Role')
+                                        ->options(fn (Get $get) => self::roleOptions($get('../../branch_id')))
+                                        ->required()
+                                        ->distinct()
+                                        ->searchable()
+                                        ->rules([fn (Get $get) => self::roleRule($get('../../branch_id'))]),
+                                    TextInput::make('quantity')
+                                        ->required()
+                                        ->integer()
+                                        ->minValue(1)
+                                        ->maxValue(20)
+                                        ->default(1),
+                                ]),
                         ]),
                     Section::make('Settings')
                         ->description('Inactive services are hidden from the public schedule.')
