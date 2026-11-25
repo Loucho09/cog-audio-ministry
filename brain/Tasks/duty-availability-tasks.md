@@ -23,11 +23,11 @@ Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./ve
 - [x] Tests first: AM entry blocks 9:30, not 15:30; whole day blocks both; other date doesn't block
 
 ## Slice A4: member dashboard UI (fullstack)
-- [ ] Routes `availability.store`, `availability.destroy` (auth)
-- [ ] `AvailabilityController` (thin) + `StoreAvailabilityRequest`
-- [ ] `DashboardController`: pass upcoming entries
-- [ ] `dashboard.blade.php`: "My availability" section (form + list + Remove), light/dark, 360px
-- [ ] Feature tests: happy path, can't delete another member's entry, validation errors shown
+- [x] Routes `availability.store`, `availability.destroy` (auth)
+- [x] `AvailabilityController` (thin) + `StoreAvailabilityRequest`
+- [x] `DashboardController`: pass upcoming entries
+- [x] `dashboard.blade.php`: "My availability" section (form + list + Remove), light/dark, 360px
+- [x] Feature tests: happy path, can't delete another member's entry, validation errors shown
 
 ## Slice A5: Filament + demo (backend-builder)
 - [ ] `AssignmentsRelationManager`: unavailable members labelled "(unavailable)" and disabled in the dropdown

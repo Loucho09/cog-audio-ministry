@@ -6,6 +6,7 @@ use App\Actions\UpcomingServices;
 use App\Enums\DutyStatus;
 use App\Models\Branch;
 use App\Models\DutyAssignment;
+use App\Models\MemberUnavailability;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -51,7 +52,12 @@ class DashboardController extends Controller
             ->orderBy('events.starts_at')
             ->get();
 
+        $availability = $user->can('create', MemberUnavailability::class)
+            ? MemberUnavailability::query()->where('user_id', $user->id)->upcoming()->orderBy('date')->get()
+            : collect();
+
         return view('dashboard', [
+            'availability' => $availability,
             'duties' => $duties,
             'greeting' => $greeting,
             'branch' => $branch,

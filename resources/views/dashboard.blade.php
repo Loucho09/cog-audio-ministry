@@ -144,5 +144,73 @@
                 <p class="mt-3 text-sm text-text/70">{{ __('News from your branch will appear here.') }}</p>
             </section>
         </div>
+
+        @can('create', \App\Models\MemberUnavailability::class)
+            <section data-reveal aria-labelledby="availability-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+                <h2 id="availability-heading" class="text-lg font-semibold text-text">{{ __('My availability') }}</h2>
+                <p class="mt-1 text-sm text-text/70">
+                    {{ __("Let your admin know when you can't serve. AM = services before :time, PM = :time onward.", ['time' => \Illuminate\Support\Carbon::createFromFormat('H:i', config('ministry.duty_pm_starts_at'))->format('g:i A')]) }}
+                </p>
+
+                @if (session('availability_error'))
+                    <p role="alert" class="mt-3 rounded-xl border border-accent-text/40 bg-accent/10 px-3 py-2 text-sm text-accent-text">{{ session('availability_error') }}</p>
+                @endif
+                @if ($errors->any())
+                    <ul role="alert" class="mt-3 list-inside list-disc rounded-xl border border-accent-text/40 bg-accent/10 px-3 py-2 text-sm text-accent-text">
+                        @foreach ($errors->all() as $message)
+                            <li>{{ $message }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                <form method="POST" action="{{ route('availability.store') }}" data-submit-guard class="mt-4 grid gap-4 sm:grid-cols-2">
+                    @csrf
+                    <div>
+                        <label for="availability-date" class="block text-sm font-medium text-text">{{ __('Date') }}</label>
+                        <input id="availability-date" name="date" type="date" required min="{{ now()->format('Y-m-d') }}" value="{{ old('date') }}" class="mt-1 block w-full rounded-xl border border-text/20 bg-background px-3 py-2 text-sm text-text focus:border-primary focus:ring-primary">
+                    </div>
+                    <div>
+                        <label for="availability-part" class="block text-sm font-medium text-text">{{ __('Part of the day') }}</label>
+                        <select id="availability-part" name="part" required class="mt-1 block w-full rounded-xl border border-text/20 bg-background px-3 py-2 text-sm text-text focus:border-primary focus:ring-primary">
+                            @foreach (\App\Enums\AvailabilityPart::cases() as $part)
+                                <option value="{{ $part->value }}" @selected(old('part', 'whole_day') === $part->value)>{{ __($part->label()) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="availability-note" class="block text-sm font-medium text-text">{{ __('Note (optional)') }}</label>
+                        <input id="availability-note" name="note" type="text" maxlength="100" value="{{ old('note') }}" class="mt-1 block w-full rounded-xl border border-text/20 bg-background px-3 py-2 text-sm text-text focus:border-primary focus:ring-primary">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <x-primary-button>{{ __('Mark unavailable') }}</x-primary-button>
+                    </div>
+                </form>
+
+                @if ($availability->isEmpty())
+                    <p class="mt-6 text-sm text-text/70">{{ __('You have not marked any dates. You are open to be assigned.') }}</p>
+                @else
+                    <ul class="mt-6 divide-y divide-text/10">
+                        @foreach ($availability as $entry)
+                            <li class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3 first:pt-0 last:pb-0">
+                                <div class="min-w-0">
+                                    <p class="text-sm font-medium text-text">
+                                        <time datetime="{{ $entry->date->toDateString() }}">{{ $entry->date->format('D, M j') }}</time>
+                                        <span class="ms-2 rounded-full bg-text/10 px-2 py-0.5 text-xs font-medium text-text">{{ __($entry->part->label()) }}</span>
+                                    </p>
+                                    @if ($entry->note)
+                                        <p class="mt-0.5 break-words text-sm text-text/70">{{ $entry->note }}</p>
+                                    @endif
+                                </div>
+                                <form method="POST" action="{{ route('availability.destroy', $entry) }}" data-submit-guard onsubmit="return confirm(@js(__('Remove this date?')))">
+                                    @csrf
+                                    @method('DELETE')
+                                    <x-secondary-button type="submit" aria-label="{{ __('Remove :date', ['date' => $entry->date->format('D, M j')]) }}">{{ __('Remove') }}</x-secondary-button>
+                                </form>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </section>
+        @endcan
     </div>
 </x-app-layout>
