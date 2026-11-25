@@ -7,7 +7,7 @@
         config('ministry.show_team') ? ['label' => 'Meet the Team', 'href' => route('home').'#team'] : null,
         ['label' => 'Services', 'href' => route('home').'#services'],
         ['label' => 'Gallery', 'href' => route('home').'#gallery'],
-        ['label' => 'Join Us', 'href' => route('home').'#join'],
+        ['label' => 'Join Us', 'href' => route('join.create')],
         ['label' => 'Contact', 'href' => route('home').'#contact'],
     ])->filter()->values();
 

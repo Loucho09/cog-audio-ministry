@@ -74,7 +74,7 @@
             </p>
 
             <div class="mt-9 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
-                <x-site.button :href="route('home').'#join'" size="lg" class="w-full sm:w-auto">Join Us</x-site.button>
+                <x-site.button :href="route('join.create')" size="lg" class="w-full sm:w-auto">Join Us</x-site.button>
                 <x-site.button :href="route('home').'#services'" variant="outline-light" size="lg" class="w-full sm:w-auto">See Service Times</x-site.button>
             </div>
         </div>

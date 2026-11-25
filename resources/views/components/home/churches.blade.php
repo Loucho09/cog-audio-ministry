@@ -63,7 +63,7 @@
                     Before every service, the Audio team does a sound check, balances the mix, and makes sure the microphones and speakers are ready. During worship, we keep watch so every sermon and every song is heard clearly, by everyone in the room.
                 </p>
                 <p class="mt-3 text-center">
-                    <a href="#join" class="inline-block py-2.5 font-semibold text-primary-dark underline underline-offset-4 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-dark dark:text-white dark:hover:text-white/80 dark:focus-visible:outline-white">
+                    <a href="{{ route('join.create') }}" class="inline-block py-2.5 font-semibold text-primary-dark underline underline-offset-4 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-dark dark:text-white dark:hover:text-white/80 dark:focus-visible:outline-white">
                         Want to serve with us? Join the team
                     </a>
                 </p>
