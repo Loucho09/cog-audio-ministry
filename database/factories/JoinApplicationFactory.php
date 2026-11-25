@@ -19,9 +19,6 @@ class JoinApplicationFactory extends Factory
             'contact_number' => '09'.fake()->numerify('#########'),
             'email' => fake()->unique()->safeEmail(),
             'facebook_url' => null,
-            'interests' => fake()->randomElements(JoinApplication::INTERESTS, fake()->numberBetween(1, 3)),
-            'experience' => fake()->sentence(),
-            'availability' => fake()->sentence(),
             'consented_at' => now(),
         ];
     }

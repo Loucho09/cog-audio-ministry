@@ -5,7 +5,6 @@ Someone has applied to join the {{ $ministry }}. Here is a quick summary.
 
 - **Name:** {{ $name }}
 - **Branch:** {{ $branch }}
-- **Interests:** {{ $interests }}
 - **Submitted:** {{ $submitted }}
 
 <x-mail::button :url="$url">

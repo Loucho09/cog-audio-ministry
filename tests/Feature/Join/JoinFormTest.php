@@ -16,9 +16,6 @@ function joinPayload(array $overrides = []): array
         'email' => 'juan@example.com',
         'facebook_url' => 'https://facebook.com/juan',
         'branch_id' => Branch::factory()->create()->id,
-        'interests' => ['FOH', 'Livestream'],
-        'experience' => 'Some.',
-        'availability' => 'Sundays.',
         'consent' => '1',
         'website' => '',
     ], $overrides);
@@ -41,8 +38,7 @@ it('saves a pending application with server-side consent', function () {
     expect($app->status)->toBe(JoinApplication::STATUS_PENDING)
         ->and($app->user_id)->toBeNull()
         ->and($app->reviewed_by)->toBeNull()
-        ->and($app->consented_at->isToday())->toBeTrue()
-        ->and($app->interests)->toBe(['FOH', 'Livestream']);
+        ->and($app->consented_at->isToday())->toBeTrue();
 });
 
 it('rejects invalid input', function (array $override, string $field) {
@@ -54,13 +50,8 @@ it('rejects invalid input', function (array $override, string $field) {
     'bad email' => [['email' => 'nope'], 'email'],
     'non-https facebook' => [['facebook_url' => 'javascript:alert(1)'], 'facebook_url'],
     'unknown branch' => [['branch_id' => 99999], 'branch_id'],
-    'no interests' => [['interests' => []], 'interests'],
-    'invalid interest' => [['interests' => ['Hacking']], 'interests.0'],
-    'interests not an array' => [['interests' => 'FOH'], 'interests'],
-    'duplicate interests' => [['interests' => ['FOH', 'FOH']], 'interests.1'],
     'age zero' => [['age' => 0], 'age'],
     'no consent' => [['consent' => null], 'consent'],
-    'no experience' => [['experience' => ''], 'experience'],
 ]);
 
 it('silently drops honeypot submissions', function () {
@@ -115,10 +106,10 @@ it('rate limits submissions with 429', function () {
     $this->post(route('join.store'), joinPayload())->assertStatus(429);
 });
 
-it('renders interest errors accessibly after a failed submit', function () {
+it('renders field errors accessibly after a failed submit', function () {
     $this->followingRedirects()->from(route('join.create'))
-        ->post(route('join.store'), joinPayload(['interests' => ['FOH', 'FOH']]))
+        ->post(route('join.store'), joinPayload(['email' => 'not-an-email']))
         ->assertOk()
-        ->assertSee('id="interests-error"', false)
+        ->assertSee('id="email-error"', false)
         ->assertSee('aria-invalid="true"', false);
 });

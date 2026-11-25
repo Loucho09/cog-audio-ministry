@@ -40,10 +40,6 @@ class StoreJoinApplicationRequest extends FormRequest
             'email' => ['required', 'string', 'email:rfc', 'max:255'],
             'facebook_url' => ['nullable', 'url:https', 'max:255'],
             'branch_id' => ['required', 'integer', Rule::exists('branches', 'id')],
-            'interests' => ['required', 'array', 'min:1', 'max:'.count(JoinApplication::INTERESTS)],
-            'interests.*' => ['string', 'distinct', Rule::in(JoinApplication::INTERESTS)],
-            'experience' => ['required', 'string', 'max:2000'],
-            'availability' => ['required', 'string', 'max:2000'],
             'consent' => ['accepted'],
             'website' => ['nullable', 'string'],
         ];
@@ -53,7 +49,6 @@ class StoreJoinApplicationRequest extends FormRequest
     {
         return [
             'consent.accepted' => 'Please tick the box to let us contact you about your application.',
-            'interests.required' => 'Please choose at least one area you would like to serve in.',
             'branch_id.required' => 'Please choose a branch.',
             'branch_id.exists' => 'Please choose a branch from the list.',
         ];

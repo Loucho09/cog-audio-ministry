@@ -197,7 +197,7 @@ it('escapes applicant text on the view page', function () {
     $app = JoinApplication::factory()->create([
         'branch_id' => $this->branchA->id,
         'full_name' => '<script>alert(1)</script>',
-        'experience' => '<script>alert(2)</script>',
+        'contact_number' => '<script>alert(2)</script>',
     ]);
     $this->actingAs(User::factory()->superAdmin()->create());
 

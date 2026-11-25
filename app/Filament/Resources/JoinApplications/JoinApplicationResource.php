@@ -176,10 +176,8 @@ class JoinApplicationResource extends Resource
                 ]),
             Section::make('Application')
                 ->icon(Heroicon::OutlinedClipboardDocumentList)
+                ->columns(2)
                 ->schema([
-                    TextEntry::make('interests')->badge(),
-                    TextEntry::make('experience')->columnSpanFull(),
-                    TextEntry::make('availability')->columnSpanFull(),
                     TextEntry::make('consented_at')->label('Consent given')->dateTime('M j, Y g:i A'),
                     TextEntry::make('created_at')->label('Submitted')->dateTime('M j, Y g:i A'),
                 ]),
@@ -214,7 +212,6 @@ class JoinApplicationResource extends Resource
                     ->label('Branch')
                     ->icon(Heroicon::OutlinedBuildingLibrary)
                     ->iconColor('gray'),
-                TextColumn::make('interests')->badge()->wrap(),
                 TextColumn::make('status')
                     ->badge()
                     ->formatStateUsing(fn (string $state) => Str::headline($state))
