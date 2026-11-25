@@ -1,14 +1,19 @@
 <?php
 
+use App\Filament\Resources\Branches\BranchResource;
 use App\Filament\Resources\Branches\Pages\CreateBranch;
 use App\Filament\Resources\Branches\Pages\EditBranch;
 use App\Filament\Resources\Branches\Pages\ListBranches;
 use App\Models\Branch;
+use App\Models\DutyAssignment;
+use App\Models\DutyRole;
 use App\Models\Event;
 use App\Models\GalleryImage;
+use App\Models\JoinApplication;
 use App\Models\Service;
 use App\Models\TeamMember;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
 
@@ -169,4 +174,62 @@ it('does not delete a branch that has events and says why', function () {
         ->assertNotified('Cannot delete');
 
     expect(Branch::find($this->other->id))->not->toBeNull();
+});
+
+it('does not delete a branch with join applications, duty roles or duty assignments and says why', function (string $kind, string $message) {
+    $this->actingAs(User::factory()->superAdmin()->create());
+
+    match ($kind) {
+        'applications' => JoinApplication::factory()->create(['branch_id' => $this->other->id]),
+        'roles' => DutyRole::factory()->create(['branch_id' => $this->other->id]),
+        'assignments' => DutyAssignment::factory()->create([
+            'event_id' => Event::factory()->create(['branch_id' => $this->other->id])->id,
+        ]),
+    };
+
+    // Single delete.
+    Livewire::test(EditBranch::class, ['record' => $this->other->id])
+        ->callAction('delete')
+        ->assertNotified('Cannot delete');
+    expect(Branch::find($this->other->id))->not->toBeNull();
+
+    // Bulk delete.
+    Livewire::test(ListBranches::class)
+        ->selectTableRecords([$this->other->id])
+        ->callAction(TestAction::make('delete')->table()->bulk());
+    expect(Branch::find($this->other->id))->not->toBeNull()
+        ->and(BranchResource::deleteBlocker($this->other))->toContain($message);
+})->with([
+    ['applications', 'still has join applications'],
+    ['roles', 'still has duty roles'],
+    ['assignments', 'still has events'],
+]);
+
+it('rejects a duplicate branch name', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+
+    Livewire::test(CreateBranch::class)
+        ->fillForm(['name' => $this->other->name, 'slug' => 'something-else'])
+        ->call('create')
+        ->assertHasFormErrors(['name']);
+});
+
+it('keeps the slug read-only when editing', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    $slug = $this->other->slug;
+
+    Livewire::test(EditBranch::class, ['record' => $this->other->id])
+        ->assertFormFieldIsDisabled('slug')
+        ->fillForm(['name' => 'Renamed Branch', 'slug' => 'hacked'])
+        ->call('save');
+
+    expect($this->other->fresh()->slug)->toBe($slug);
+});
+
+it('hides the branches nav item from non-super-admins', function () {
+    $this->actingAs(User::factory()->branchHead($this->other)->create());
+    expect(BranchResource::shouldRegisterNavigation())->toBeFalse();
+
+    $this->actingAs(User::factory()->superAdmin()->create());
+    expect(BranchResource::shouldRegisterNavigation())->toBeTrue();
 });

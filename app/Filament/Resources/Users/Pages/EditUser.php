@@ -36,6 +36,18 @@ class EditUser extends EditRecord
             return $record;
         }
 
+        if ($actor->is($record)) {
+            // A super-admin cannot change their own role or branch.
+            unset($data['role'], $data['branch_id']);
+        }
+
+        $newBranch = array_key_exists('branch_id', $data) ? ($data['branch_id'] ?: null) : $record->branch_id;
+        if ($newBranch != $record->branch_id && $this->hasUpcomingDuties($record)) {
+            Notification::make()->danger()->title('Cannot move this user')
+                ->body("{$record->name} still has upcoming duties in their current branch. Remove those duties first, then move them.")->send();
+            $this->halt();
+        }
+
         try {
             DB::transaction(function () use ($record, $data, $actor): void {
                 $record->fill(Arr::only($data, ['name', 'email']));
@@ -70,6 +82,14 @@ class EditUser extends EditRecord
         }
 
         return $record;
+    }
+
+    /** Duties on events that have not started yet (past duties stay as history). */
+    private function hasUpcomingDuties(User $record): bool
+    {
+        return $record->dutyAssignments()
+            ->whereHas('event', fn ($q) => $q->where('starts_at', '>', now()))
+            ->exists();
     }
 
     protected function getHeaderActions(): array

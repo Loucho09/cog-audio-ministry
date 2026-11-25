@@ -39,6 +39,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -61,12 +62,12 @@ class UserResource extends Resource
         $query = parent::getEloquentQuery()->with(['branch', 'roles']);
         $user = auth()->user();
 
-        if ($user?->hasRole('super-admin')) {
-            return $query;
+        if (! $user?->hasAdminAccess()) {
+            return $query->whereRaw('1 = 0');
         }
 
-        if ($user?->branch_id === null) {
-            return $query->whereRaw('1 = 0');
+        if ($user->hasRole('super-admin')) {
+            return $query;
         }
 
         return $query->where('branch_id', $user->branch_id);
@@ -203,6 +204,8 @@ class UserResource extends Resource
                     DB::table(config('session.table', 'sessions'))->where('user_id', $record->id)->delete();
                 }
 
+                Log::info('Temporary password set', ['actor_id' => auth()->id(), 'target_id' => $record->id]);
+
                 Notification::make()->success()->title('Temporary password set')->send();
             });
     }
@@ -255,11 +258,13 @@ class UserResource extends Resource
                                 ->prefixIcon(Heroicon::OutlinedBuildingLibrary)
                                 ->helperText('Required for branch-head and branch-admin.')
                                 ->rules(['nullable', 'exists:branches,id'])
+                                ->disabled(fn (?User $record) => $record !== null && $record->is(auth()->user()))
                                 ->visible(fn () => self::isSuperAdmin()),
                             Select::make('role')
                                 ->options(array_combine(AssignRole::ROLES, AssignRole::ROLES))
                                 ->required()
                                 ->default('member')
+                                ->disabled(fn (?User $record) => $record !== null && $record->is(auth()->user()))
                                 ->prefixIcon(Heroicon::OutlinedKey)
                                 ->afterStateHydrated(function (Select $component, ?User $record): void {
                                     if ($record) {

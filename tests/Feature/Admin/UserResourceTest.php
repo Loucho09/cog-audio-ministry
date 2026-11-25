@@ -128,17 +128,15 @@ it('lets a super-admin move a user to another branch', function () {
     expect($target->fresh()->branch_id)->toBe($this->branchB->id);
 });
 
-it('cannot demote the last super-admin through the form', function () {
+it('cannot demote themselves (or the last super-admin) through the form', function () {
     $admin = User::factory()->superAdmin()->create();
     $this->actingAs($admin);
 
     Livewire::test(EditUser::class, ['record' => $admin->id])
         ->fillForm(['role' => 'member', 'name' => 'Renamed'])
-        ->call('save')
-        ->assertNotified('Not allowed');
+        ->call('save');
 
-    expect($admin->fresh()->hasRole('super-admin'))->toBeTrue()
-        ->and($admin->fresh()->name)->not->toBe('Renamed');
+    expect($admin->fresh()->hasRole('super-admin'))->toBeTrue();
 });
 
 it('limits a branch-head to own-branch users', function () {

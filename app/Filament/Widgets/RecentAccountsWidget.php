@@ -27,6 +27,11 @@ class RecentAccountsWidget extends TableWidget
         return (bool) auth()->user()?->hasAdminAccess();
     }
 
+    public function mount(): void
+    {
+        abort_unless(static::canView(), 403);
+    }
+
     public function table(Table $table): Table
     {
         return $table

@@ -6,7 +6,10 @@ use App\Filament\Resources\Branches\Pages\CreateBranch;
 use App\Filament\Resources\Branches\Pages\EditBranch;
 use App\Filament\Resources\Branches\Pages\ListBranches;
 use App\Models\Branch;
+use App\Models\DutyAssignment;
+use App\Models\DutyRole;
 use App\Models\GalleryImage;
+use App\Models\JoinApplication;
 use App\Models\TeamMember;
 use BackedEnum;
 use Closure;
@@ -46,6 +49,11 @@ class BranchResource extends Resource
 
     protected static ?string $modelLabel = 'branch';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (bool) auth()->user()?->hasRole('super-admin');
+    }
+
     /** Staff only ever see their own branch; super-admin sees all. */
     public static function getEloquentQuery(): Builder
     {
@@ -69,6 +77,16 @@ class BranchResource extends Resource
         }
         if ($branch->events()->exists()) {
             return "{$branch->name} still has events. Remove them first.";
+        }
+        if (JoinApplication::where('branch_id', $branch->id)->exists()) {
+            return "This branch still has join applications. Review or move them before deleting {$branch->name}.";
+        }
+        // duty_roles cascade on delete, which would silently wipe the roster setup.
+        if (DutyRole::where('branch_id', $branch->id)->exists()) {
+            return "This branch still has duty roles. Remove them first so the roster setup isn't lost with {$branch->name}.";
+        }
+        if (DutyAssignment::where('branch_id', $branch->id)->exists()) {
+            return "This branch still has duty assignments. Remove them first so the duty history isn't lost with {$branch->name}.";
         }
         // nullOnDelete would turn these into "all churches" records, so block instead.
         if (GalleryImage::where('branch_id', $branch->id)->exists()
@@ -113,6 +131,7 @@ class BranchResource extends Resource
                             TextInput::make('name')
                                 ->required()
                                 ->maxLength(255)
+                                ->unique(ignoreRecord: true)
                                 ->prefixIcon(Heroicon::OutlinedBuildingLibrary)
                                 ->live(onBlur: true)
                                 ->afterStateUpdated(function (Get $get, Set $set, ?Model $record, ?string $state) {
@@ -125,6 +144,9 @@ class BranchResource extends Resource
                                 ->maxLength(255)
                                 ->alphaDash()
                                 ->unique(ignoreRecord: true)
+                                ->disabled(fn (string $operation) => $operation === 'edit')
+                                ->dehydrated(fn (string $operation) => $operation !== 'edit')
+                                ->helperText(fn (string $operation) => $operation === 'edit' ? 'The web address name is fixed once the branch is created.' : null)
                                 ->prefixIcon(Heroicon::OutlinedLink),
                             Toggle::make('is_main')
                                 ->label('Main branch')
@@ -191,7 +213,7 @@ class BranchResource extends Resource
                     ->icon(Heroicon::OutlinedStar)
                     ->state(fn (Branch $record) => $record->is_main ? 'Main branch' : null),
                 TextEntry::make('summary_members')
-                    ->label('Members')
+                    ->label('Accounts')
                     ->icon(Heroicon::OutlinedUsers)
                     ->state(fn (Branch $record) => $record->users()->count()),
                 TextEntry::make('summary_services')
@@ -254,13 +276,11 @@ class BranchResource extends Resource
                     ])->space(1),
                     Stack::make([
                         TextColumn::make('users_count')
-                            ->counts('users')
                             ->badge()
                             ->color('gray')
                             ->icon(Heroicon::OutlinedUsers)
-                            ->formatStateUsing(fn ($state) => $state.' '.str('member')->plural((int) $state)),
+                            ->formatStateUsing(fn ($state) => $state.' '.str('account')->plural((int) $state)),
                         TextColumn::make('services_count')
-                            ->counts('services')
                             ->badge()
                             ->color('gray')
                             ->icon(Heroicon::OutlinedRectangleStack)
