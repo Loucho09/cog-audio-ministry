@@ -4,12 +4,12 @@ Branch: `feature/duty-availability`
 Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./vendor/bin/pint` green, then commit.
 
 ## Slice A1: data + AM/PM block (backend-builder)
-- [ ] `config/ministry.php`: `duty_pm_starts_at` => `'15:00'`
-- [ ] Enum `app/Enums/AvailabilityPart.php` (`whole_day`, `am`, `pm`, labels)
-- [ ] Migration `member_unavailabilities` (user_id cascade, branch_id, date, part, note 100 nullable, unique user_id+date)
-- [ ] Model `MemberUnavailability` (`$fillable`, casts, `user()`, `scopeUpcoming`); `User::unavailabilities()`
-- [ ] `Event::block()` returns `am`/`pm` from `starts_at` and the config cutoff
-- [ ] Tests: 13:30 = AM, 15:00 = PM, 15:30 = PM, cutoff read from config
+- [x] `config/ministry.php`: `duty_pm_starts_at` => `'15:00'`
+- [x] Enum `app/Enums/AvailabilityPart.php` (`whole_day`, `am`, `pm`, labels)
+- [x] Migration `member_unavailabilities` (user_id cascade, branch_id, date, part, note 100 nullable, unique user_id+date)
+- [x] Model `MemberUnavailability` (`$fillable`, casts, `user()`, `scopeUpcoming`); `User::unavailabilities()`
+- [x] `Event::block()` returns `am`/`pm` from `starts_at` and the config cutoff
+- [x] Tests: 13:30 = AM, 15:00 = PM, 15:30 = PM, cutoff read from config
 
 ## Slice A2: mark / remove rules (backend-builder)
 - [ ] `app/Services/AvailabilityService.php`: `mark(user, date, part, note)`, `remove(entry)`; violations throw `RosterRuleViolation`

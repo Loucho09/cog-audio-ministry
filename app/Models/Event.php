@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AvailabilityPart;
 use App\Models\Concerns\BelongsToBranch;
 use Database\Factories\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -49,6 +50,15 @@ class Event extends Model
     public function scopeUpcoming(Builder $query): Builder
     {
         return $query->where('ends_at', '>=', now());
+    }
+
+    /** AM or PM block of this event, from its start time vs the configured PM cutoff. */
+    public function block(): AvailabilityPart
+    {
+        $start = $this->starts_at->copy()->timezone(config('app.timezone'));
+        $cutoff = $start->copy()->setTimeFromTimeString(config('ministry.duty_pm_starts_at', '15:00'));
+
+        return $start->lt($cutoff) ? AvailabilityPart::Am : AvailabilityPart::Pm;
     }
 
     public function hasStarted(): bool
