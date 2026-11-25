@@ -336,6 +336,7 @@ class UserResource extends Resource
                     ->state(fn (User $record) => $record->branch?->name ?? 'No branch'),
                 TextEntry::make('summary_status')
                     ->label('Status')
+                    ->columnSpanFull()
                     ->badge()
                     ->state(fn (User $record) => self::statusOf($record))
                     ->color(fn (string $state) => match ($state) {
