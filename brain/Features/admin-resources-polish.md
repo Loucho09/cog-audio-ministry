@@ -38,3 +38,5 @@ Out of scope:
 
 Tasks: none separate (slices were done as commits on the branch).
 Notes / decisions: [[dashboards]], [[filament-widget-styling]], [[member-accounts-roles]], [[faq-removed]]
+
+Follow-ups: gallery upload and return-to-list fix, branch `fix/gallery-upload` (not merged yet): [[gallery-upload-fix]]
