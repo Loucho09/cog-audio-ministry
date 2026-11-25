@@ -5,39 +5,7 @@ use App\Exceptions\RosterRuleViolation;
 use App\Models\Branch;
 use App\Models\DutyAssignment;
 use App\Models\DutyRole;
-use App\Models\Event;
 use App\Models\User;
-use App\Services\DutyRosterService;
-use Illuminate\Support\Carbon;
-
-function rosterEvent(string $start = '09:00', string $end = '11:00', int $quantity = 1, ?DutyRole $role = null, ?Event $like = null): array
-{
-    $day = Carbon::now()->addWeek()->startOfDay();
-    $event = $like
-        ? Event::factory()->create([
-            'branch_id' => $like->branch_id,
-            'starts_at' => $day->copy()->setTimeFromTimeString($start),
-            'ends_at' => $day->copy()->setTimeFromTimeString($end),
-        ])
-        : Event::factory()->create([
-            'starts_at' => $day->copy()->setTimeFromTimeString($start),
-            'ends_at' => $day->copy()->setTimeFromTimeString($end),
-        ]);
-    $role ??= DutyRole::factory()->create(['branch_id' => $event->branch_id]);
-    $event->dutySlots()->create(['duty_role_id' => $role->id, 'quantity' => $quantity]);
-
-    return [$event, $role];
-}
-
-function rosterMember(Event $event): User
-{
-    return User::factory()->member($event->branch)->create();
-}
-
-function svc(): DutyRosterService
-{
-    return app(DutyRosterService::class);
-}
 
 test('assign creates an assigned duty in the event branch', function () {
     [$event, $role] = rosterEvent();
