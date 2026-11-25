@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Events;
 use App\Filament\Resources\Events\Pages\CreateEvent;
 use App\Filament\Resources\Events\Pages\EditEvent;
 use App\Filament\Resources\Events\Pages\ListEvents;
+use App\Filament\Resources\Events\RelationManagers\AssignmentsRelationManager;
 use App\Models\Branch;
 use App\Models\DutyRole;
 use App\Models\Event;
@@ -222,6 +223,13 @@ class EventResource extends Resource
                 EditAction::make()->iconButton()->tooltip('Edit')->hidden(fn (Event $record) => self::isLocked($record)),
                 DeleteAction::make()->iconButton()->modalDescription('This also removes every duty assigned for this event.')->hidden(fn (Event $record) => self::isLocked($record)),
             ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            AssignmentsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array
