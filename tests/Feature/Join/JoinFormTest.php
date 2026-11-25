@@ -27,7 +27,9 @@ it('renders the form and thank-you pages', function () {
     Branch::factory()->create(['name' => 'Branch Alpha']);
 
     $this->get(route('join.create'))->assertOk()->assertSee('Branch Alpha')->assertSee('<title>Join the Team', false);
-    $this->get(route('join.thanks'))->assertOk()->assertSee('Thank you for applying');
+    $this->get(route('join.thanks'))->assertOk()
+        ->assertSee('Thank you for applying')
+        ->assertSee('If you are approved, you will receive an email');
 });
 
 it('saves a pending application with server-side consent', function () {
