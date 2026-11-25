@@ -7,6 +7,7 @@ use App\Models\Concerns\BelongsToBranch;
 use Database\Factories\DutyAssignmentFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,7 +17,7 @@ class DutyAssignment extends Model
 {
     use BelongsToBranch, HasFactory;
 
-    protected $fillable = ['branch_id', 'event_id', 'duty_role_id', 'user_id', 'assigned_by', 'status', 'responded_at'];
+    protected $fillable = ['branch_id', 'event_id', 'duty_role_id', 'user_id', 'guest_name', 'assigned_by', 'status', 'responded_at'];
 
     protected function casts(): array
     {
@@ -24,6 +25,18 @@ class DutyAssignment extends Model
             'status' => DutyStatus::class,
             'responded_at' => 'datetime',
         ];
+    }
+
+    public function isGuest(): bool
+    {
+        return $this->user_id === null && filled($this->guest_name);
+    }
+
+    protected function displayName(): Attribute
+    {
+        return Attribute::get(fn () => $this->isGuest()
+            ? $this->guest_name.' (Guest)'
+            : $this->user?->name);
     }
 
     public function event(): BelongsTo
