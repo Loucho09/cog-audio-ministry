@@ -8,19 +8,19 @@
     @endif
 
     <div class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <form method="POST" action="{{ route('verification.send') }}">
+        <form method="POST" action="{{ route('verification.send') }}" data-submit-guard>
             @csrf
 
-            <x-primary-button class="w-full sm:w-auto">
+            <x-primary-button class="w-full sm:w-auto" :loading-text="__('Sending…')">
                 {{ __('Resend Verification Email') }}
             </x-primary-button>
         </form>
 
-        <form method="POST" action="{{ route('logout') }}">
+        <form method="POST" action="{{ route('logout') }}" data-submit-guard>
             @csrf
 
-            <button type="submit" class="inline-flex min-h-11 w-full items-center justify-center rounded-md px-3 text-sm font-medium text-primary-dark underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark sm:w-auto">
-                {{ __('Log Out') }}
+            <button type="submit" class="group inline-flex min-h-11 w-full items-center justify-center rounded-md px-3 text-sm font-medium text-primary-dark underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark disabled:cursor-wait disabled:opacity-70 sm:w-auto">
+                <x-loading-label :loading-text="__('Logging out…')">{{ __('Log Out') }}</x-loading-label>
             </button>
         </form>
     </div>

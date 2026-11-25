@@ -15,7 +15,7 @@
             <a href="{{ route('password.change') }}" class="font-semibold text-primary-dark underline">{{ __('Change password') }}</a>
         </p>
     @else
-        <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-5">
+        <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-5" data-submit-guard>
             @csrf
             @method('put')
 
@@ -38,7 +38,7 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-4">
-                <x-primary-button>{{ __('Save') }}</x-primary-button>
+                <x-primary-button :loading-text="__('Saving…')">{{ __('Save') }}</x-primary-button>
 
                 @if (session('status') === 'password-updated')
                     <p

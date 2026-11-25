@@ -9,11 +9,11 @@
         </p>
     </header>
 
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
+    <form id="send-verification" method="post" action="{{ route('verification.send') }}" data-submit-guard>
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-5">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-5" data-submit-guard>
         @csrf
         @method('patch')
 
@@ -33,8 +33,8 @@
                     <p class="mt-2 text-sm text-text">
                         {{ __('Your email address is unverified.') }}
 
-                        <button form="send-verification" class="inline-flex min-h-11 items-center rounded-md px-2 font-medium text-primary-dark underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark">
-                            {{ __('Click here to re-send the verification email.') }}
+                        <button form="send-verification" class="group inline-flex min-h-11 items-center rounded-md px-2 font-medium text-primary-dark underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark disabled:cursor-wait disabled:opacity-70">
+                            <x-loading-label :loading-text="__('Sending…')">{{ __('Click here to re-send the verification email.') }}</x-loading-label>
                         </button>
                     </p>
 
@@ -54,7 +54,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <x-primary-button :loading-text="__('Saving…')">{{ __('Save') }}</x-primary-button>
 
             @if (session('status') === 'profile-updated')
                 <p
