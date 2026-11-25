@@ -7,16 +7,16 @@ Screens / routes:
 - Public `GET` join form (`join.create`) and `POST` submit (`join.store`), then a thank-you page (`join.thanks`).
 - Filament `JoinApplication` resource: list with branch and status filters, view, approve, reject (pending only).
 - Homepage "Join Us" button points to `join.create`.
-Form fields:
+Form fields (current, 2026-11-25; see [[join-form-fields-trimmed]]):
 - Full name, age (integer, info only), contact number, email
 - Facebook profile link (optional, URL)
 - Branch (dropdown from `branches`)
-- Interest areas (checkboxes): FOH, Monitors, Livestream, Stage Tech, Other
-- Experience, availability
 - Consent checkbox (required)
+- ~~Interest areas (checkboxes): FOH, Monitors, Livestream, Stage Tech, Other~~ (obsolete: removed 2026-11-25)
+- ~~Experience, availability~~ (obsolete: removed 2026-11-25)
 - Honeypot field (hidden, must stay empty). Rate limit on submit.
 Data changes (tables, columns):
-- `join_applications` table: `id`, `branch_id` (FK), `full_name`, `age`, `contact_number`, `email`, `facebook_url` nullable, `interests` (json), `experience`, `availability`, `consented_at`, `status` (pending / approved / rejected, default pending), `reviewed_by` nullable FK users, `reviewed_at` nullable, `user_id` nullable FK users (set on approval), timestamps.
+- `join_applications` table: `id`, `branch_id` (FK), `full_name`, `age`, `contact_number`, `email`, `facebook_url` nullable, ~~`interests` (json), `experience`, `availability`~~ (dropped 2026-11-25 by migration `2026_11_25_140000_drop_interests_experience_availability_from_join_applications`; `down()` re-adds them as nullable), `consented_at`, `status` (pending / approved / rejected, default pending), `reviewed_by` nullable FK users, `reviewed_at` nullable, `user_id` nullable FK users (set on approval), timestamps.
 - `$fillable` excludes `status`, `reviewed_by`, `reviewed_at`, `user_id`. These are set by the approval action only.
 - Approval creates a `users` row with `branch_id` from the application and the `member` role.
 Permissions:
@@ -49,13 +49,13 @@ Slice 2 notes (2026-11-25, commit 9103609):
 - Duplicate block (existing user or pending application) uses one generic message, `StoreJoinApplicationRequest::DUPLICATE_MESSAGE`. Rejected and approved applicants may reapply.
 - `Cache::lock` per email wraps the re-check and create to stop races.
 - `consented_at` is set server-side.
-- Validation limits (spec silent): age 1-120; contact 7-30 chars, digits, `+-()` and spaces; `facebook_url` https only; experience and availability required, max 2000; interests required, array, min 1, distinct.
-- Not yet browser-checked at 360px or in dark mode.
+- Validation limits (spec silent): age 1-120; contact 7-30 chars, digits, `+-()` and spaces; `facebook_url` https only; ~~experience and availability required, max 2000; interests required, array, min 1, distinct~~ (obsolete 2026-11-25, see [[join-form-fields-trimmed]]).
+- Not yet browser-checked at 360px or in dark mode (checked 2026-11-25, see Browser check below).
 
 Slice 3 notes (2026-11-25, commit 5156e62):
 - `NewJoinApplication` notification: `ShouldQueue`, mail channel, `afterCommit`, `deleteWhenMissingModels`. Stores the branch name as a string.
 - Recipients via `App\Actions\NotifyStaffOfJoinApplication::recipients()`: super-admins plus branch-head and branch-admin with matching `branch_id`, deduped. Staff with null branch get nothing.
-- No applicant email. Mail has only name, branch, interests, submitted time (no contact, age or Facebook; data minimisation).
+- No applicant email. Mail has only name, branch, ~~interests~~ (removed 2026-11-25, see [[join-form-fields-trimmed]]), submitted time (no contact, age or Facebook; data minimisation).
 - Name and branch are Markdown-escaped to stop link injection.
 - Dispatch failure is `report()`ed; applicant is still redirected to thanks.
 - Local dev: `QUEUE_CONNECTION=database`, `MAIL_MAILER=log`. Run `php artisan queue:work`; mail appears in `storage/logs`.
@@ -109,9 +109,20 @@ Final review notes (2026-11-25, commit cc05d36):
 - Factory `approved()` and `rejected()` accept an optional reviewer.
 - Tests: 552 total, 551 passed, 1 skipped (pre-existing).
 
+Browser check (2026-11-25): passed. Covered:
+- `/join` at 360px, light and dark, no horizontal overflow
+- Submit, then the thanks page
+- Duplicate email gets the generic message
+- Staff email went to super-admin, Dasma head and Dasma admin only
+- Dashboard widget and list are scoped
+- Approve
+- Trece head opening a Dasma application gets 404
+- Set-password link, then member login, then `/admin` returns 403
+- Admin list at 360px in dark mode
+
 Definition of done:
 - [x] Matches its spec (routes, fields, duplicate rule, notifications, approval flow)
-- [ ] Works on mobile and desktop: NOT browser-checked yet. Owner to check `/join` and the admin screens at 360px and in dark mode.
+- [x] Works on mobile and desktop: browser-checked 2026-11-25, passed (see Browser check above).
 - [x] Validation and authorization in place (Form Requests, policies, branch scope, pending-only review)
 - [x] Tests pass (`php artisan test`: 552 total, 551 passed, 1 skipped pre-existing)
 - [x] `reviewer` run and issues addressed (final review, cc05d36)
@@ -125,4 +136,4 @@ Production notes (for Phase 7, see [[Roadmap]]):
 - Replace the old Google Form QR if it is still shared offline or on Facebook, with a link or QR to `/join`.
 
 Tasks: [[join-applications-tasks]]
-Notes / decisions: [[join-application-rules]], [[join-form-link]], [[homepage-sections]], [[member-accounts-roles]], [[temp-password-and-demo-emails]]
+Notes / decisions: [[join-application-rules]], [[join-form-fields-trimmed]], [[join-form-link]], [[homepage-sections]], [[member-accounts-roles]], [[temp-password-and-demo-emails]]
