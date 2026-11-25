@@ -24,11 +24,11 @@ Slices:
   - Join fades and accent hairline.
   - "Stay updated" spacing and backdrop.
   - Impact strip uses the section header.
-  - Eyebrows: "Our impact", "Who we are", "How we serve".
+  - ~~Eyebrows: "Our impact", "Who we are", "How we serve".~~ Partly superseded 2026-11-25 by slice K: only "Our impact" and "Our churches" keep an eyebrow.
   - AA contrast fixes on numbers and body text.
 - C. Cards:
   - `rounded-3xl`, `border-text/10`, `shadow-sm`.
-  - Dark mode: `border-text/10` (token flips), dark hover glow `dark:hover:shadow-primary/20`. Review follow-up removed raw `dark:border-white/10`.
+  - Dark mode: `border-text/10` (token flips), dark hover glow `dark:hover:shadow-primary/20`. Review follow-up removed raw `dark:border-white/10`. (Hover glow superseded 2026-11-25 by slice K: `dark:hover:shadow-black/60`.)
   - Gallery `rounded-3xl`.
   - Services list 360px overflow fix.
 
@@ -60,14 +60,20 @@ Slices:
 - G. Wide-screen balance (branch `fix/wide-screen-layout`, commit 0872038, branched from `feature/remove-what-we-do`, unmerged), 2026-11-25:
   - Problem (owner report, PC/laptop zoomed out or very wide window): content capped at `max-w-7xl` (1280px) while the hero photo stretched to the viewport. The photo's "COG Audio" wordmark drifted far right with empty space between, and everything looked small.
   - `resources/css/app.css`: root font-size 112.5% (18px) at min-width 1920px, and 131.25% (21px) at 2400px. The rem-based layout scales, so `max-w-7xl` becomes 1440px / 1680px. Percentages respect the user's browser font setting. Below 1920px nothing changes.
-  - `resources/views/components/home/hero.blade.php`: photo wrapped in a centred frame capped at 110rem, with side fades from 2300px. The wordmark stays beside the text column.
+  - `resources/views/components/home/hero.blade.php`: photo wrapped in a centred frame capped at 110rem, with side fades from 2300px. The wordmark stays beside the text column. (Cap and fade superseded 2026-11-25 by slice K.)
   - Checked with Playwright at 360, 768, 1024, 1440, 1920 and 2760px, light and dark. Tests: 434 (433 pass, 1 skipped).
   - Owner browser check on a wide screen still pending.
 
-- H. Homepage audit fixes (2026-11-25): impeccable audit at 360-2760px, light and dark, score 14/20. Items 1-6 fixed. Items 7-9 parked in [[Backlog]] (eyebrow + h2 pattern and gradient text; cover photo softness above about 2300px; global reduced-motion kill). Report in `.impeccable/audit/` (not committed; owner to decide commit vs `.gitignore`).
+- H. Homepage audit fixes (2026-11-25): impeccable audit at 360-2760px, light and dark, score 14/20. Items 1-6 fixed. Items 7-9 were parked in [[Backlog]] and are now done (see slice K). Report in `.impeccable/audit/` (not committed; owner to decide commit vs `.gitignore`).
 - I. Gallery thumbnails (branch `fix/gallery-image-performance`, commits eaa4fdf, fdb12f1, b0881a1), 2026-11-25: WebP thumbnails at 800 and 1600px (capped at photo width) via PHP GD. Grid uses srcset and lazy loading; lightbox image renders only while open. Backfill once on production with `php artisan gallery:thumbnails`. See [[gallery-thumbnails-gd]].
 - J. Mobile polish (branch `fix/mobile-polish`, commit 07d7f29), 2026-11-25: 44px tap targets on church Facebook links, Add to calendar, Get directions and the Join-the-team link; `text-wrap: pretty` on p, blockquote, figcaption and li; light-mode church-logo watermark removed from Our Churches (dark mode keeps the photo band); hero pill on one line at 320-360px; Sunday time chips in an equal-width grid.
 - Merged to main (merge 1bc4ff0), 2026-11-25. Tests: 447 total (446 pass, 1 skipped). Reviewer run; must-fix items addressed.
+- K. Homepage audit backlog items 7-9 (branch `fix/audit-backlog`, commits 4354f9f and f307974), 2026-11-25; merging to main:
+  - Item 7 (owner chose "Balanced"): removed section eyebrows that only repeated the heading (Who we are, Photos, Services, Join the team, Stay Updated, Contact, Our team). Kept "Our impact" and "Our churches". Impact numbers are solid `text-primary-dark` instead of gradient text (AA in both themes). Dark-mode coloured hover glows (`shadow-primary/20`) replaced by `dark:hover:shadow-black/60`. Hero "Audio" gradient kept (echoes the logo). Section backdrops and blobs kept.
+  - Item 8: hero photo frame `max-w-[min(110rem,2000px)]` (1760px at 16px root, 1980px from 1920px, 2000px from 2400px). Side fade from 1981px. The largest cover source is 1600px, so a wider cap needs a larger original (owner content TODO, see [[Backlog]]).
+  - Item 9: `prefers-reduced-motion` no longer sets all durations to 0.01ms. `transition-property` is limited to colour, opacity and shadow, so transforms snap but state fades remain. Animations still effectively off.
+  - Reviewer: no remaining issues. Nice-to-have: dark-mode hover feedback is now subtle (border and shadow); check on a device.
+  - Tests: 447 total (446 pass, 1 skipped).
 
 Skipped: audit item to re-add FAQ. Owner removed FAQ (see [[homepage-hooks]]). (obsolete: FAQ removed fully 2026-11-25, see [[faq-removed]])
 
@@ -76,6 +82,8 @@ Permissions: public, read-only.
 
 Remaining TODOs:
 - Owner browser check at 360px, light and dark mode.
+- Owner check of dark-mode hover feedback on a device (border and shadow only).
+- Larger cover photo (2560px+) so the hero frame cap can widen (see [[Backlog]]).
 
 Out of scope:
 - New sections or copy changes.

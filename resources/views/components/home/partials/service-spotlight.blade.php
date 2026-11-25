@@ -6,7 +6,7 @@
     $directionsUrl = \App\Support\Directions::url();
 @endphp
 
-<article class="relative overflow-hidden rounded-3xl border border-text/15 bg-surface p-6 dark:bg-background shadow-sm dark:shadow-[0_0_48px_-12px] dark:shadow-primary/20 sm:p-8">
+<article class="relative overflow-hidden rounded-3xl border border-text/15 bg-surface p-6 dark:bg-background shadow-sm sm:p-8">
     <span aria-hidden="true" class="absolute inset-x-0 top-0 h-1 bg-accent"></span>
 
     <div class="flex items-start gap-3">

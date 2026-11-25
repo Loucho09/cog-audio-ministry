@@ -13,7 +13,6 @@
                 <div class="lg:min-w-0 lg:flex-1">
                     <x-site.section-header
                         id="updates-title"
-                        eyebrow="Stay Updated"
                         title="Don't miss a Sunday"
                         lead="Follow us for service updates, behind-the-scenes moments, and ministry news."
                         align="split"

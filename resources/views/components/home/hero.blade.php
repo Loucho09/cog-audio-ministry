@@ -1,9 +1,12 @@
 <section aria-labelledby="hero-title" class="relative isolate flex min-h-[100svh] items-center overflow-hidden bg-black sm:min-h-[44rem] lg:min-h-[clamp(44rem,85svh,52rem)]">
     {{-- Cover photo as a full-bleed background. Decorative (the h1 carries the name), so alt is empty.
          Above the fold, so no lazy loading.
-         The frame caps the photo at 110rem and centres it, so on very wide screens the photo's wordmark stays
+         The frame caps the photo at 110rem (1760px at the default 16px root, 1980px at the 18px root from 1920px),
+         and at 2000px from 2400px (21px root), because the largest source is 1600px wide (more would look soft;
+         TODO: a larger original from the owner would allow a wider cap). The side fade starts once the frame is
+         narrower than the screen (above 1980px). It is centred, so on very wide screens the photo's wordmark stays
          beside the text column instead of drifting to the far edge; its sides fade into the black section. --}}
-    <div aria-hidden="true" class="absolute inset-y-0 left-1/2 -z-10 w-full max-w-[110rem] -translate-x-1/2 min-[2300px]:[mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
+    <div aria-hidden="true" class="absolute inset-y-0 left-1/2 -z-10 w-full max-w-[min(110rem,2000px)] -translate-x-1/2 min-[1981px]:[mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
     <picture>
         <source
             type="image/webp"

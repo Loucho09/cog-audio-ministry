@@ -56,7 +56,9 @@
     }
 }
 
-/* Reduced motion: no smooth scrolling, and transitions and animations are effectively instant.
+/* Reduced motion: no smooth scrolling, animations are effectively instant, and nothing moves or scales.
+   Soft fades of colour, opacity and shadow stay (they show state changes, like hover and menus opening,
+   without movement), so only those properties may transition; transform, translate and scale changes snap.
    Decorative animations use motion-safe: so they simply do not start (the EQ bars stay static). */
 @media (prefers-reduced-motion: reduce) {
     html {
@@ -68,7 +70,7 @@
     *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+        transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow !important;
         scroll-behavior: auto !important;
     }
 }

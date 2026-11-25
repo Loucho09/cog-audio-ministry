@@ -52,7 +52,7 @@
                                 };
                                 requestAnimationFrame(tick);
                             "
-                            class="bg-gradient-to-r from-primary-dark to-accent bg-clip-text pb-1 text-5xl font-extrabold tabular-nums text-transparent sm:text-6xl {{ $lgNumber }} forced-colors:bg-none forced-colors:text-[CanvasText]"
+                            class="pb-1 text-5xl font-extrabold tabular-nums text-primary-dark sm:text-6xl {{ $lgNumber }}"
                         >
                             <span x-text="shown" aria-hidden="true">{{ $stat['value'] }}</span>
                             <span class="sr-only">{{ $stat['value'] }}</span>
