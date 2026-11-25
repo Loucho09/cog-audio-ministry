@@ -287,3 +287,42 @@
         animation: none !important;
     }
 }
+
+/* Skeleton placeholders (shared primitive, used by <x-skeleton-image> and later features).
+   A moving highlight over a faint text-coloured base. Dark mode uses a slightly stronger base so it shows on near-black.
+   Once settled (data-state="loaded" or "error") the shimmer stops. Reduced motion: a static block, no shimmer. */
+@layer components {
+    .skeleton {
+        background-color: rgb(var(--color-text) / 0.06);
+        background-image: linear-gradient(90deg, transparent 0%, rgb(var(--color-surface) / 0.7) 50%, transparent 100%);
+        background-repeat: no-repeat;
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.4s ease-in-out infinite;
+    }
+
+    .dark .skeleton {
+        background-color: rgb(var(--color-text) / 0.08);
+        background-image: linear-gradient(90deg, transparent 0%, rgb(var(--color-text) / 0.1) 50%, transparent 100%);
+    }
+
+    .skeleton[data-state='loaded'],
+    .skeleton[data-state='error'] {
+        background-image: none;
+        animation: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .skeleton {
+            animation: none;
+        }
+    }
+}
+
+@keyframes skeleton-shimmer {
+    from {
+        background-position: 100% 0;
+    }
+    to {
+        background-position: -100% 0;
+    }
+}

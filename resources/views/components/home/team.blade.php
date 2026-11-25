@@ -21,7 +21,7 @@
                         {{-- Gradient ring around the photo (or initials). --}}
                         <div class="mx-auto flex h-36 w-36 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent p-[3px] transition duration-300 motion-safe:group-hover:rotate-3">
                             @if ($member->photo_url)
-                                <img src="{{ $member->photo_url }}" alt="{{ $member->name }}" width="128" height="128" loading="lazy" decoding="async" class="h-full w-full rounded-full border-4 border-surface object-cover">
+                                <x-skeleton-image src="{{ $member->photo_url }}" alt="{{ $member->name }}" width="128" height="128" rounded="rounded-full" class="h-full w-full" img-class="rounded-full border-4 border-surface"/>
                             @else
                                 <span aria-hidden="true" class="flex h-full w-full items-center justify-center rounded-full border-4 border-surface bg-background text-3xl font-extrabold tracking-tight text-text">{{ $initials($member->name) }}</span>
                             @endif

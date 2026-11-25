@@ -7,7 +7,7 @@
     $viewable = $images->reject(fn ($i) => $i['placeholder'])->values();
     $viewIndex = 0;
     $controlClasses = 'rounded-full bg-surface p-2.5 text-text shadow-lg transition-colors duration-200 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2';
-    $tileClasses = 'aspect-[4/3] w-full rounded-3xl object-cover shadow-sm';
+    $tileClasses = 'aspect-[4/3] w-full rounded-3xl shadow-sm';
 @endphp
 
 <section id="gallery" aria-labelledby="gallery-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
@@ -26,7 +26,7 @@
             <ul class="mt-12 grid grid-cols-2 gap-3 sm:mt-16 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
                 @foreach ($images as $image)
                     <li>
-                        <img src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" loading="lazy" decoding="async" class="{{ $tileClasses }}">
+                        <x-skeleton-image src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" class="{{ $tileClasses }}"/>
                     </li>
                 @endforeach
             </ul>
@@ -118,7 +118,7 @@
                         @endphp
                         <li class="{{ $cell }}">
                             @if ($image['placeholder'])
-                                <img src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" loading="lazy" decoding="async" class="h-full w-full rounded-3xl object-cover shadow-sm">
+                                <x-skeleton-image src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" class="h-full w-full rounded-3xl shadow-sm"/>
                             @else
                                 <button
                                     type="button"
@@ -126,7 +126,8 @@
                                     aria-label="View larger photo: {{ $image['alt'] }}"
                                     class="group relative block h-full w-full overflow-hidden rounded-3xl bg-text/5 shadow-sm ring-1 ring-text/10 transition-shadow duration-300 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2"
                                 >
-                                    <img src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" @if (! $isFeatured) loading="lazy" @endif decoding="async" class="h-full w-full object-cover transition duration-700 ease-out motion-safe:group-hover:scale-105">
+                                    {{-- The hover zoom sits on the wrapper (not the img) so it does not clash with the img's own fade transition. --}}
+                                    <x-skeleton-image src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" :loading="$isFeatured ? 'eager' : 'lazy'" class="h-full w-full transition duration-700 ease-out motion-safe:group-hover:scale-105"/>
                                     {{-- Caption shade. Decorative copy: the button's aria-label already names the photo.
                                          Captions always show on touch-size screens; on md+ only the featured one does, others reveal on hover/focus. --}}
                                     <span aria-hidden="true" @class([
