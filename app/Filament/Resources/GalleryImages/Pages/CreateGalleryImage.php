@@ -3,10 +3,13 @@
 namespace App\Filament\Resources\GalleryImages\Pages;
 
 use App\Filament\Resources\GalleryImages\GalleryImageResource;
+use App\Filament\Resources\GalleryImages\Pages\Concerns\ReturnsToGalleryList;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateGalleryImage extends CreateRecord
 {
+    use ReturnsToGalleryList;
+
     protected static string $resource = GalleryImageResource::class;
 
     protected function mutateFormDataBeforeCreate(array $data): array
