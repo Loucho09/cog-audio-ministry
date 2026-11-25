@@ -8,6 +8,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[Roadmap]]: phases and status (7 phases + production launch)
 - [[Subagents]]: workflow and agent roles
 - [[Backlog]]: parked ideas (in `Tasks/`)
+- [[Demo-Accounts]]: demo login emails and password (fixed, do not change)
 
 ## Decisions
 - [[new-project-brief-adopted]]: new brief replaces old 9-phase plan; branches/roles/Filament/packages approved
