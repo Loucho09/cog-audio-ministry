@@ -6,7 +6,7 @@ Parent: [[homepage-sections]]
 
 Each slice is about 5 files or fewer. Tests per slice. Commit after each slice.
 
-## Slice 1: hide FAQ on homepage
+## Slice 1: hide FAQ on homepage (obsolete: FAQ removed 2026-11-25, see [[faq-removed]])
 - [x] Remove `<x-home.faq>` from the welcome view
 - [x] Remove the FAQ query from `HomeController`
 - [x] Keep `Faq` model, table, seeder, factory and component

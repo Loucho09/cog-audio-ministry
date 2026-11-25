@@ -154,3 +154,14 @@ it('renders the edit page summary card', function () {
         ->assertSee('Summary')
         ->assertSee('Alpha');
 });
+
+it('excludes other branches from a branch-head tab counts', function () {
+    GalleryImage::factory()->count(3)->create(['branch_id' => $this->branchB->id, 'is_published' => false]);
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+
+    $tabs = Livewire::test(ListGalleryImages::class)->instance()->getTabs();
+
+    expect($tabs['all']->getBadge())->toEqual(2)
+        ->and($tabs['published']->getBadge())->toEqual(2)
+        ->and($tabs['pending']->getBadge())->toBeNull();
+});

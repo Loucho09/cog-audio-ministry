@@ -4,7 +4,7 @@ Date: 2026-11-24
 Related: [[Roadmap]], [[homepage-sections]], [[package-filament]], [[phase-order-roles-before-applications]], [[Backlog]]
 
 ## Decision
-Filament admin resources for Service, GalleryImage, Faq and TeamMember move from Phase 1 to Phase 2 (owner decision). Phase 1 closes without them.
+Filament admin resources for Service, GalleryImage, ~~Faq~~ (obsolete: FAQ removed, see [[faq-removed]]) and TeamMember move from Phase 1 to Phase 2 (owner decision). Phase 1 closes without them.
 
 ## Reason
 `/admin` is unusable until Phase 2 login and roles exist: `User::canAccessPanel` returns false. The resources cannot be tested before then.

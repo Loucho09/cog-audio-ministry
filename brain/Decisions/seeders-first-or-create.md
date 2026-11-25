@@ -4,7 +4,7 @@ Status: accepted
 
 Related: [[homepage-sections]], [[Roadmap]], [[00-Index]]
 
-Decision: content seeders (services, FAQs, gallery) use `firstOrCreate`, so re-running a seeder never overwrites admin edits.
+Decision: content seeders (services, ~~FAQs~~ (obsolete: FAQ removed, see [[faq-removed]]), gallery) use `firstOrCreate`, so re-running a seeder never overwrites admin edits.
 
 Why: content is managed in Filament later. A re-seed must not undo owner changes.
 

@@ -150,3 +150,11 @@ it('renders the edit page summary card', function () {
         ->assertSee('Summary')
         ->assertSee('Main branch');
 });
+
+it('does not delete the main branch from the edit page', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+
+    Livewire::test(EditBranch::class, ['record' => $this->main->id])->callAction('delete');
+
+    expect(Branch::find($this->main->id))->not->toBeNull();
+});

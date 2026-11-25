@@ -57,7 +57,7 @@ Slices:
   - Hero image width-fit on lg with bottom fade (fixes cropped wordmark behind text).
   - Checked with Playwright at 360, 1440, 1920 and 2560px: no horizontal scroll. Tests 145 pass, 1 skipped.
 
-Skipped: audit item to re-add FAQ. Owner removed FAQ (see [[homepage-hooks]]).
+Skipped: audit item to re-add FAQ. Owner removed FAQ (see [[homepage-hooks]]). (obsolete: FAQ removed fully 2026-11-25, see [[faq-removed]])
 
 Data changes: none.
 Permissions: public, read-only.

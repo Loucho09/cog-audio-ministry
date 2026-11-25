@@ -138,3 +138,18 @@ it('renders the edit summary and filters by day', function () {
         ->assertCanSeeTableRecords([$this->serviceA])
         ->assertCanNotSeeTableRecords([$this->serviceB]);
 });
+
+it('excludes other branches from a branch-head tab counts', function () {
+    Service::factory()->count(3)->sequence(
+        ['day_of_week' => 1, 'start_time' => '08:00:00'],
+        ['day_of_week' => 2, 'start_time' => '08:00:00', 'is_active' => false],
+        ['day_of_week' => 3, 'start_time' => '08:00:00'],
+    )->create(['branch_id' => $this->branchB->id]);
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+
+    $tabs = Livewire::test(ListServices::class)->instance()->getTabs();
+
+    expect($tabs['all']->getBadge())->toEqual(1)
+        ->and($tabs['active']->getBadge())->toEqual(1)
+        ->and($tabs['inactive']->getBadge())->toEqual(0);
+});

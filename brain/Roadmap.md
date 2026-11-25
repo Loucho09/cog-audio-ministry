@@ -19,8 +19,8 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 
 - Added 2026-11-24 (owner request): dark mode for public pages. See [[dark-mode]].
 - [x] Done 2026-11-24: services section v2 (next-service spotlight, day cards, folded weekly list, add-to-calendar and directions links; date window per service). Merged to main. See [[services-section-v2]].
-- Moved 2026-11-24: Filament resources (Service, GalleryImage, Faq, TeamMember) go to Phase 2; Phase 1 closes without them. See [[filament-resources-phase-2]].
-- [x] Done 2026-11-24 (owner request): homepage hooks (impact strip, "One sound, many churches", stay updated, FAQ hidden from homepage). Browser check pending. See [[homepage-hooks]], tasks in [[homepage-hooks-tasks]]. Phase 1 stays open until the browser check and MySQL are done.
+- Moved 2026-11-24: Filament resources (Service, GalleryImage, ~~Faq~~ (obsolete: FAQ removed, see [[faq-removed]]), TeamMember) go to Phase 2; Phase 1 closes without them. See [[filament-resources-phase-2]].
+- [x] Done 2026-11-24 (owner request): homepage hooks (impact strip, "One sound, many churches", stay updated, ~~FAQ hidden from homepage~~ obsolete: FAQ removed 2026-11-25, see [[faq-removed]]). Browser check pending. See [[homepage-hooks]], tasks in [[homepage-hooks-tasks]]. Phase 1 stays open until the browser check and MySQL are done.
 - [x] Done 2026-11-24 (owner request): homepage theme polish (stage lighting, section rhythm, card consistency). Browser check at 360px and dark mode pending. See [[homepage-theme-polish]], [[card-style-and-section-rhythm]].
 - [x] Done 2026-11-24 (owner request): gallery with real photos, captions and bento layout (merged to main, b3415eb). Still open: owner consent for everyone pictured before going live; re-run `GallerySeeder` on MySQL. See [[homepage-sections]]. Phase 1 stays open.
 - [x] Done 2026-11-24 (branch `feature/what-we-do-cards`, commits 8d2e5e5, 81ab9a8, 287a5c9): What We Do is now an interactive role picker (4 tabs: FOH, Monitors, Livestream, Stage Tech; one panel with summary and detail; WAI-ARIA tabs, keyboard support). Replaces the earlier 2x2 card grid (8d2e5e5, now superseded). Checked with Playwright at 1280px light, 360px dark, and keyboard; reviewer clean; 146 tests (145 pass, 1 skipped). Owner to check the wording. See [[homepage-theme-polish]] slice E.
@@ -34,7 +34,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
    - Done 2026-11-24. See [[public-layout]]. Tests: 41 total (40 pass, 1 skipped until `public/images/logo.png` exists). Checked at 360px, 1024px and 1280px. Reviewer run, issues fixed.
 3. [x] Done 2026-11-24: Homepage sections as Blade components (in order): hero, about us, what we do, meet the team (config flag, OFF by default), upcoming services, gallery, join us, FAQ, contact, footer; commit per section group. Spec: [[homepage-sections]]. Browser check at 360px and dark mode passed (see the Done line above).
 4. [x] Services model, migration, seeder (main ministry schedule). Done via slice 1 of [[homepage-sections]]. Services seeded for COG Dasmariñas only.
-5. [x] `gallery_images`, `faqs`, `team_members` tables + seeders with placeholder data (team: `is_featured` flag, full-time first). Done via slice 1 of [[homepage-sections]].
+5. [x] `gallery_images`, ~~`faqs`~~ (obsolete: FAQ removed, see [[faq-removed]]), `team_members` tables + seeders with placeholder data (team: `is_featured` flag, full-time first). Done via slice 1 of [[homepage-sections]].
 6. Semantic HTML and alt text now. SEO basics (meta, Open Graph, sitemap) can wait for the Phase 7 pass
 7. [x] Done 2026-11-24: Mobile check at 360px; ensure responsive design
    - ~~Mobile check at 375px~~ (superseded 2026-11-24 by [[second-brief-merged]])
@@ -60,16 +60,17 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 
 Status: done. 2a and 2b merged to main 2026-11-25. Split into two parts (owner decision, 2026-11-24). Spec: [[member-accounts-roles]]. Tasks: [[member-accounts-roles-tasks]].
 - **2a Security core:** `branch_id` on users, Spatie roles, demo seed, `ministry:create-super-admin` command, register route removed, route throttles, `canAccessPanel`, `Gate::before`, `BelongsToBranch` scope, `AssignRole` action, Service and User policies, tests, themed auth screens. Decision: [[super-admin-via-artisan-command]].
-- **2b Filament screens:** Service, GalleryImage, TeamMember, Faq, Branch, and User resources. The "Our churches" list moves from config to the `branches` table (nullable `facebook_url`).
+- **2b Filament screens:** Service, GalleryImage, TeamMember, ~~Faq~~ (obsolete: FAQ removed, see [[faq-removed]]), Branch, and User resources. The "Our churches" list moves from config to the `branches` table (nullable `facebook_url`).
 - [x] **Add-on done 2026-11-25** (built and reviewed on `feature/temp-password`; merge pending owner OK): temporary passwords and forced password change, plus branch-style demo emails. See [[temp-password]], [[temp-password-tasks]].
-- [ ] **Add-on before Phase 3 (owner decision 2026-11-25): member and admin dashboards** (`feature/dashboards`, not yet merged). Slices 1-4 built, reviewed, fixed (369 tests, 368 pass, 1 pre-existing skip); browser check at 360px and dark mode and merge still open. Slice 5 (pending applications widget) is built during Phase 3. See [[dashboards]], [[dashboards-tasks]], [[filament-widget-styling]].
+- [x] **Add-on before Phase 3 (owner decision 2026-11-25): member and admin dashboards** (`feature/dashboards`, done, merged to main 2026-11-25). Slices 1-4 built, reviewed, fixed (369 tests, 368 pass, 1 pre-existing skip); browser-checked at 360px and dark mode. Slice 5 (pending applications widget) is built during Phase 3. See [[dashboards]], [[dashboards-tasks]], [[filament-widget-styling]].
+- [ ] **Add-on before Phase 3 (owner request 2026-11-25): admin resources polish** (`feature/admin-resources-polish`, done, merge pending owner OK). Team, Services, Gallery and Branches resources restyled like Users (f20bccd); FAQ resource removed (see [[faq-removed]]). 406 tests pass. Browser check at 360px still open. See [[admin-resources-polish]].
 - [x] **UI polish add-on before Phase 3 (owner request 2026-11-25): loading states.** Progress bar and view transitions, image skeletons, submit guard, admin widget skeletons, scroll reveal. Merged to main 2026-11-25; 403 tests (402 pass, 1 pre-existing skip). See [[loading-states]], [[loading-states-approach]], [[loading-states-tasks]].
 
 ### Tasks
 - Breeze Blade login/register; accounts created by approval only (no open signup)
 - [x] Done 2026-11-25 (2a): disable the Breeze `/register` route (approval-only accounts)
 - [x] Done 2026-11-25 (2a): implement `canAccessPanel` on `User` for Filament (`/admin` by role)
-- [x] Done 2026-11-25 (2b): Filament resources: Service, GalleryImage, Faq, TeamMember, Branch, User (moved from Phase 1 on 2026-11-24, see [[filament-resources-phase-2]]). Service resource needs a friendly error for the unique branch/day/time slot (from [[Backlog]]). Service resource: include starts_on/ends_on fields, branch-scoped for branch-head (see [[services-section-v2]], [[service-date-window]]).
+- [x] Done 2026-11-25 (2b): Filament resources: Service, GalleryImage, ~~Faq~~ (obsolete: FAQ removed, see [[faq-removed]]), TeamMember, Branch, User (moved from Phase 1 on 2026-11-24, see [[filament-resources-phase-2]]). Service resource needs a friendly error for the unique branch/day/time slot (from [[Backlog]]). Service resource: include starts_on/ends_on fields, branch-scoped for branch-head (see [[services-section-v2]], [[service-date-window]]).
 - [x] Done 2026-11-25 (2a): `branches` table with seeder (main + 4 satellites)
 - [x] Done 2026-11-25 (2a): Spatie Permission: roles `super-admin` (project owner only), `branch-head` (admin of one branch), `branch-admin` (applications and roster for one branch; cannot assign roles), `member`
 - [x] Done 2026-11-25 (2a): Super-admin and branch-head seeders with fake data (`DemoUserSeeder`, local and testing only)

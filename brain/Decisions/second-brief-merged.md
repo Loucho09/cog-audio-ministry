@@ -9,7 +9,7 @@ The owner pasted a second brief that uses "chapters" instead of "branches". The 
 ## Adopted
 - New `branch-admin` role (see [[Project-Brief]])
 - Application notifications (queued) to branch-head + branch-admin of the chosen branch + super-admin
-- Gallery images and FAQs stored in DB, managed in Filament
+- Gallery images and ~~FAQs~~ (obsolete: FAQ removed, see [[faq-removed]]) stored in DB, managed in Filament
 - Team members from DB with `is_featured` flag (full-time first); section still behind flag, default OFF
 - Honeypot + rate limiting on join form
 - SEO: meta title/description per page, Open Graph, sitemap (Phase 7 pass)

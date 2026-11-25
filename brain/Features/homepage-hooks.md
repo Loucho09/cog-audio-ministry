@@ -10,10 +10,10 @@ Users: visitor
 
 Screens / routes:
 - `/` only (`home`, served by `HomeController`).
-- Section order: hero, impact strip, about, what we do, "One sound, many churches" (churches), meet the team (flag), upcoming services, gallery, join us, stay updated, contact, footer. FAQ hidden from the page.
+- Section order: hero, impact strip, about, what we do, "One sound, many churches" (churches), meet the team (flag), upcoming services, gallery, join us, stay updated, contact, footer. ~~FAQ hidden from the page.~~ (obsolete: FAQ removed, see [[faq-removed]])
 
 Changes (built):
-1. Hide FAQ from the homepage: `<x-home.faq>` removed from the welcome view and the FAQ query removed from `HomeController`. `Faq` model, table, seeder, factory and component kept (may return later).
+1. Hide FAQ from the homepage: `<x-home.faq>` removed from the welcome view and the FAQ query removed from `HomeController`. `Faq` model, table, seeder, factory and component kept (may return later). (obsolete: FAQ removed 2026-11-25, see [[faq-removed]])
 2. Impact strip right after the hero:
    - Churches served: 4 (COG Dasmariñas main + Trece, Silang, Jabez), counted from the `branches` table. See [[marilag-is-dasma-subdivision]].
    - Services per week: counted from the `services` table (active rows).

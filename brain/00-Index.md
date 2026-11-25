@@ -47,18 +47,20 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[join-application-rules]]: no rejection email, duplicates blocked, no age minimum (2026-11-25)
 - [[filament-widget-styling]]: Filament widgets use Filament components only; custom theme later, owner approval first (2026-11-25)
 - [[loading-states-approach]]: hand-built loading UI, View Transitions, reveal fallback, submit buttons disabled on next tick (2026-11-25)
+- [[faq-removed]]: owner removed FAQ fully (resource, model, policy, seeder, factory, component, tests); drop migration (2026-11-25)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
 - [[homepage-sections]]: homepage sections as Blade components (Phase 1, in progress; tasks in [[homepage-sections-tasks]])
 - [[dark-mode]]: light/dark theme toggle on public pages (Phase 1, done pending owner check; added 2026-11-24)
-- [[homepage-hooks]]: impact strip, "One sound, many churches", stay updated, FAQ hidden from homepage (Phase 1, done, owner browser check pending; tasks in [[homepage-hooks-tasks]])
+- [[homepage-hooks]]: impact strip, "One sound, many churches", stay updated, ~~FAQ hidden from homepage~~ (obsolete: FAQ removed, see [[faq-removed]]) (Phase 1, done, owner browser check pending; tasks in [[homepage-hooks-tasks]])
 - [[homepage-theme-polish]]: stage lighting, section rhythm, card consistency on `/` (Phase 1, done, owner browser check pending; 2026-11-24)
 - [[services-section-v2]]: shorter Services section, spotlight, date window, calendar and directions (Phase 1 polish, in progress; tasks in [[services-section-v2-tasks]])
 - [[member-accounts-roles]]: branches on users, roles, route throttles, policies, branch scoping, themed auth (Phase 2, in progress: 2a done and merged 2026-11-25; 2b in progress; tasks in [[member-accounts-roles-tasks]])
 - [[temp-password]]: temporary passwords and forced password change, add-on to Phase 2 (done 2026-11-25, merge pending owner OK; tasks in [[temp-password-tasks]])
 - [[login-dashboard-polish]]: split-photo login and member dashboard with all-branch services (Phase 2 add-on, in progress, branch `feature/login-dashboard-polish`; tasks in [[login-dashboard-polish-tasks]])
-- [[dashboards]]: member dashboard and admin widgets (Phase 2 add-on, in progress, branch `feature/dashboards`, slices 1-4 built; replaces the missing slice 2 of [[login-dashboard-polish]]; tasks in [[dashboards-tasks]])
+- [[dashboards]]: member dashboard and admin widgets (Phase 2 add-on, done, merged to main 2026-11-25; slice 5 built in Phase 3; replaces the missing slice 2 of [[login-dashboard-polish]]; tasks in [[dashboards-tasks]])
+- [[admin-resources-polish]]: Team, Services, Gallery, Branches Filament resources restyled like Users; add-on before Phase 3 (done, merge pending owner OK, branch `feature/admin-resources-polish`)
 - [[join-applications]]: public join form, branch review, approval creates member account (Phase 3, planned, spec written 2026-11-25; tasks in [[join-applications-tasks]])
 - [[loading-states]]: progress bar, view transitions, image skeletons, submit guard, admin skeletons, scroll reveal (UI polish add-on before Phase 3, done and merged 2026-11-25; tasks in [[loading-states-tasks]])
 

@@ -4,7 +4,7 @@ Phase: 1
 
 Related: [[00-Index]], [[Roadmap]], [[Project-Brief]], [[public-layout]], [[homepage-hooks]] (new planned slices: impact strip, satellites story, stay updated, FAQ hidden)
 
-Goal: build the homepage from Blade components, in the order set in [[Project-Brief]]: hero, about us, what we do, meet the team (behind a config flag, OFF by default), upcoming services, gallery (Alpine lightbox), join us CTA, FAQ (Alpine accordion), contact (map only when the address is set), footer.
+Goal: build the homepage from Blade components, in the order set in [[Project-Brief]]: hero, about us, what we do, meet the team (behind a config flag, OFF by default), upcoming services, gallery (Alpine lightbox), join us CTA, ~~FAQ (Alpine accordion)~~ (obsolete: FAQ removed, see [[faq-removed]]), contact (map only when the address is set), footer.
 
 Users: visitor (public pages), member (same pages when logged in, no extra content yet)
 
@@ -16,7 +16,7 @@ Data changes (tables, columns):
 - `branches`: id, name, slug (unique), address (nullable), contact fields (nullable), is_main (boolean)
 - `services`: id, branch_id (FK), name, day_of_week, start_time, is_active; unique (branch_id, day_of_week, start_time)
 - `gallery_images`: id, branch_id (nullable, see Backlog), image path, alt text, sort order, is_active
-- `faqs`: id, question, answer, sort order, is_active
+- ~~`faqs`: id, question, answer, sort order, is_active~~ (obsolete: FAQ removed, see [[faq-removed]])
 - `team_members`: id, branch_id (nullable, see Backlog), name, role, employment type (full-time first), photo path, is_featured, sort order
 - Models and seeders for all five tables. Content seeders use `firstOrCreate` ([[seeders-first-or-create]]).
 - Image path rule: [[image-path-convention]]
@@ -38,7 +38,7 @@ Slices:
 4. Join us CTA, FAQ accordion, contact with map only when address is set, meet the team behind the config flag (~~planned~~ done, commit 1c8d658; browser check pending).
    - Join Us CTA links to `#contact` until the Phase 3 application form exists (owner choice, 2026-11-24). Superseded 2026-11-24: the button now opens the Google Join Form in a new tab (`ministry.join_form_url`, env `MINISTRY_JOIN_FORM_URL`); falls back to `#contact` if the value is empty. See [[join-form-link]]. Phase 3 must replace this link.
    - Hero "Join Us" button now points to `#join`.
-   - FAQ section is hidden when there are no published FAQs.
+   - ~~FAQ section is hidden when there are no published FAQs.~~ (obsolete: FAQ removed, see [[faq-removed]])
    - Contact items are hidden when their config value is null.
    - Map is a Google Maps iframe embed (no API key), shown only when `MINISTRY_ADDRESS` is set.
    - Meet the Team is behind `ministry.show_team` (default OFF).
@@ -52,7 +52,7 @@ Slices:
    - Status stays "in progress" until the owner's browser check (360px and desktop, light and dark) is done.
 
 6. Homepage hooks (done 2026-11-24, see [[homepage-hooks]]; browser check pending).
-   - FAQ section hidden from the homepage. `Faq` model, table, seeder and component kept.
+   - FAQ section hidden from the homepage. `Faq` model, table, seeder and component kept. (obsolete: FAQ removed 2026-11-25, see [[faq-removed]])
    - Section order: hero, impact, about, what-we-do, churches, team (flag), services, gallery, join, stay-updated, contact.
 7. Gallery with real photos (done 2026-11-24, branch `feature/gallery-photos`, commit 4cc3e4d; merged to main in b3415eb; browser check pending).
    - 6 real photos in `public/images/gallery/01-team-on-stage.webp` to `06-behind-the-scenes.webp`. WebP, 1600px long edge, q80, about 800KB total. Converted with PHP GD.
@@ -67,7 +67,7 @@ Owner-confirm copy (placeholders until the owner confirms):
 - Hero sentence
 - About intro (vision and mission still pending)
 - What We Do role descriptions (FOH, Monitors, Livestream, Stage Tech)
-- Placeholder FAQ answers
+- ~~Placeholder FAQ answers~~ (obsolete: FAQ removed, see [[faq-removed]])
 
 Out of scope:
 - Filament resources for services, gallery, FAQs, team members, branches (moved to Phase 2, see [[filament-resources-phase-2]] and [[Roadmap]])

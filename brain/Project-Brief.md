@@ -91,7 +91,7 @@ Each section is a Blade component.
 6. **Upcoming Services:** pulled from `services` table, next 4 weeks, sorted by next occurrence
 7. **Gallery:** images from DB, Alpine lightbox. Placeholder images until photos arrive in `public/images/gallery/`
 8. **Join Us:** application form CTA + link to dedicated form
-9. **FAQ:** from DB, Alpine accordion (common questions about joining and participating)
+9. ~~**FAQ:** from DB, Alpine accordion (common questions about joining and participating)~~ (obsolete: FAQ removed, see [[faq-removed]])
 10. **Contact:** messaging, email, church address, map embed only when address is filled
 11. **Footer:** copyright, links
 
@@ -102,8 +102,8 @@ Meet the Team is OFF by default. Do not invent team members.
 - [ ] "Meet the Team" list (full-time members first): name, role, photo
 - [x] Gallery photos: 6 real photos added 2026-11-24 (commit 4cc3e4d). Owner to confirm everyone pictured is OK on the public site (photos include children)
 - [ ] Messenger link and official church address
-- [ ] FAQ content
+- ~~[ ] FAQ content~~ (obsolete: FAQ removed, see [[faq-removed]])
 - [ ] Confirm homepage copy (hero sentence, about intro, role descriptions)
-- [ ] Confirm placeholder FAQ answers
+- ~~[ ] Confirm placeholder FAQ answers~~ (obsolete: FAQ removed, see [[faq-removed]])
 - [ ] Confirm whether branches follow the same service times
 - [ ] Names of first super-admin and branch-heads (owner sets these)

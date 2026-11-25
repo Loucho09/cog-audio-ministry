@@ -6,7 +6,7 @@ Goal: Only approved people have accounts. Each account has one role and, for bra
 
 Split (owner decision, 2026-11-24):
 - **2a Security core:** backend, auth, roles, policies, tests, themed auth screens.
-- **2b Filament admin screens:** Service, GalleryImage, TeamMember, Faq, Branch, User resources.
+- **2b Filament admin screens:** Service, GalleryImage, TeamMember, ~~Faq~~ (obsolete: FAQ removed, see [[faq-removed]]), Branch, User resources.
 
 Users: super-admin, branch-head, branch-admin, member. Visitor = not logged in.
 
@@ -33,7 +33,7 @@ Permissions:
 - Member: own profile only. Cannot change own role or branch. Can delete own account, except that the last super-admin cannot delete self.
 - `/admin` access: super-admin always; branch-head and branch-admin only with a branch set; others 403.
 - Gate::before: super-admin passes all gates.
-- Global content (null `branch_id` on gallery and team; all FAQs): only super-admin edits. Branch staff may view.
+- Global content (null `branch_id` on gallery and team; ~~all FAQs~~ obsolete: FAQ removed, see [[faq-removed]]): only super-admin edits. Branch staff may view.
 - Scoping: `BelongsToBranch` trait with `visibleTo(User)` scope on Service, GalleryImage, TeamMember. Enforced in Policies and Filament queries.
 
 Security rules (2a):

@@ -14,7 +14,7 @@ Variants:
 - `rings`: what we do
 - `cone`: services
 - `vignette`: gallery
-- `grid`: FAQ
+- `grid`: ~~FAQ~~ (obsolete: FAQ removed, see [[faq-removed]])
 - `floor`: contact
 - Join band: no backdrop
 
@@ -30,7 +30,7 @@ Styles are `.backdrop-*` classes in `@layer components` in `resources/css/app.cs
 - `fadeFrom` sets the colour the section fades into at its edge. It assumes the default section order (see below).
 
 ## Known limitation
-- The seam colours assume the default section order. If the team or FAQ section is hidden, the seam between two neighbouring sections may be slightly off. Accepted for now. See [[Backlog]].
+- The seam colours assume the default section order. If the team section is hidden (FAQ section removed, see [[faq-removed]]), the seam between two neighbouring sections may be slightly off. Accepted for now. See [[Backlog]].
 
 ## See also
 - [[stage-palette]]
