@@ -68,3 +68,14 @@ test('the per-email login limit still triggers', function () {
     $this->post('/login', ['email' => $user->email, 'password' => 'password'])->assertStatus(429);
     $this->assertGuest();
 });
+
+test('login errors are linked to the email field for screen readers', function () {
+    $user = User::factory()->create();
+
+    $this->from('/login')->post('/login', ['email' => $user->email, 'password' => 'wrong-password']);
+
+    $this->get('/login')
+        ->assertSee('aria-invalid="true"', false)
+        ->assertSee('aria-describedby="email-error"', false)
+        ->assertSee('id="email-error"', false);
+});
