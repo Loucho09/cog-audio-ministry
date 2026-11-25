@@ -1,5 +1,5 @@
 # Join applications
-Status: in progress
+Status: done (closed 2026-11-25; merged into main)
 Phase: 3
 Goal: Visitors apply to join the Audio Ministry for a chosen branch. That branch's heads and admins, and the super-admin, review and approve or reject. Approval creates a member account and sends a set-password email.
 Users: visitor (submits), branch-head and branch-admin (review own branch only), super-admin (all branches)
@@ -93,6 +93,36 @@ Slice 6 notes (2026-11-25, commit 7bc1fad):
 - Links to `route('join.create')`, same tab: hero "Join Us", navbar "Join Us", footer "Join Us", churches section "Want to serve with us? Join the team", and the Join Us section button (label now "Apply to join").
 - Before, navbar, footer, hero and churches links pointed to `#join`.
 - `ministry.join_form_url` and `MINISTRY_JOIN_FORM_URL` retired. The Google Form is no longer linked anywhere on the site. See [[join-form-link]] (obsolete).
+
+Slice 7 notes (2026-11-25, commit 364f476):
+- `App\Filament\Widgets\PendingApplicationsWidget` is a TableWidget on the `/admin` dashboard, `$sort = 0`, full width.
+- Shows the 5 newest pending applications, built from `JoinApplicationResource::getEloquentQuery()->pending()`, so scoping is shared with the resource.
+- Heading count is scoped, e.g. "Pending applications (3)".
+- Each row links to the view page. A "View all" header action links to the list. All URLs use `panel: 'admin'`.
+- `canView` uses the policy's `viewAny`. Members and branchless staff are refused.
+- Empty state: "No pending applications".
+
+Final review notes (2026-11-25, commit cc05d36):
+- `JoinApplicationSeeder` runs only in local and testing.
+- Reviewed demo rows use the branch's branch-head, or the super-admin, as reviewer.
+- Approved demo rows get a real member account linked through `user_id`. Demo accounts have a verified email; the real approval flow leaves it unverified.
+- Factory `approved()` and `rejected()` accept an optional reviewer.
+- Tests: 552 total, 551 passed, 1 skipped (pre-existing).
+
+Definition of done:
+- [x] Matches its spec (routes, fields, duplicate rule, notifications, approval flow)
+- [ ] Works on mobile and desktop: NOT browser-checked yet. Owner to check `/join` and the admin screens at 360px and in dark mode.
+- [x] Validation and authorization in place (Form Requests, policies, branch scope, pending-only review)
+- [x] Tests pass (`php artisan test`: 552 total, 551 passed, 1 skipped pre-existing)
+- [x] `reviewer` run and issues addressed (final review, cc05d36)
+- [x] Brain updated (spec status, Roadmap, tasks, production notes)
+
+Production notes (for Phase 7, see [[Roadmap]]):
+- Set trusted proxies so the join-form throttle (5/min per IP) and the login throttle see the real client IP behind the host's proxy.
+- Production `CACHE_STORE` must support atomic locks (database, redis or file). The join form uses `Cache::lock`.
+- `APP_URL` must be set correctly. Queued staff emails build admin links from it.
+- A queue worker must run for the staff email and the set-password email.
+- Replace the old Google Form QR if it is still shared offline or on Facebook, with a link or QR to `/join`.
 
 Tasks: [[join-applications-tasks]]
 Notes / decisions: [[join-application-rules]], [[join-form-link]], [[homepage-sections]], [[member-accounts-roles]], [[temp-password-and-demo-emails]]

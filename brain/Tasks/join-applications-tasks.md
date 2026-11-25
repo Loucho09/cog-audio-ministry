@@ -1,6 +1,7 @@
 # Tasks: join applications
 Feature: [[join-applications]]
-Branch: feature/join-applications (in progress)
+Status: done (Phase 3 closed 2026-11-25)
+Branch: feature/join-applications (merged into main)
 
 - [x] Slice 1 (Done 2026-11-25, commit 1d84d6a): data layer (migration, `JoinApplication` model with `$fillable`, casts, branch relation, status constants, factory, policy, branch query scope, seeder with fake applications; tests for branch scoping and mass assignment)
   - Done when: `migrate:fresh --seed` shows fake applications; tests prove a branch-head cannot see another branch's rows and `status`/`user_id` cannot be mass-assigned.
@@ -17,7 +18,7 @@ Branch: feature/join-applications (in progress)
 - [x] Slice 6 (Done 2026-11-25, commit 7bc1fad): homepage "Join Us" button points to `join.create`; retire `ministry.join_form_url` and `MINISTRY_JOIN_FORM_URL` (config, `.env.example`, views, tests)
   - Done when: no reference to `join_form_url` remains in code; homepage tests pass; [[join-form-link]] updated by brain-keeper.
 
-- [ ] Slice 7: pending applications widget on `/admin` (dashboard slice 5, see [[dashboards]]): count and latest pending applications for the admin's branch (super-admin: all), link to the Filament list; scoped via the resource's `getEloquentQuery()`; `canView()` for admin roles.
+- [x] Slice 7 (Done 2026-11-25, commit 364f476): pending applications widget on `/admin` (dashboard slice 5, see [[dashboards]]): count and latest pending applications for the admin's branch (super-admin: all), link to the Filament list; scoped via the resource's `getEloquentQuery()`; `canView()` for admin roles.
   - Done when: test shows a branch-head sees only own-branch pending counts; a member cannot view the widget.
 
-After all slices: reviewer, fixes, brain-keeper. Then Phase 3 is marked done in [[Roadmap]].
+- [x] Final review and fixes (Done 2026-11-25, commit cc05d36): reviewer run, issues fixed, seeder and factory updates, brain-keeper record. Phase 3 marked done in [[Roadmap]].
