@@ -19,7 +19,7 @@
 @endphp
 
 @if (count($stats) > 0)
-    <section id="impact" aria-labelledby="impact-title" class="relative isolate overflow-hidden bg-background py-14 sm:py-16">
+    <section id="impact" data-reveal aria-labelledby="impact-title" class="relative isolate overflow-hidden bg-background py-14 sm:py-16">
         {{-- Thin primary-to-accent light bar on the top edge, and a subtle backdrop. Decorative. --}}
         <span aria-hidden="true" class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary to-accent"></span>
         <x-site.section-backdrop variant="vignette" />

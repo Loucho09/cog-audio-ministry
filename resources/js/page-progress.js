@@ -3,7 +3,10 @@
  *
  * Starts when the user follows an internal link or submits a form, trickles toward 90%,
  * and completes when the next page shows (pageshow). Written by hand (no package) on purpose.
+ * Its "Loading page" message goes through the shared live region (live-region.js).
  */
+
+import { announce, clearAnnouncement, hasAnnouncement } from './live-region';
 
 const SHOW_DELAY_MS = 150; // fast navigations never flash the bar
 const TRICKLE_INTERVAL_MS = 200;
@@ -18,7 +21,6 @@ export function initPageProgress() {
     }
 
     const bar = root.querySelector('[data-page-progress-bar]');
-    const status = root.querySelector('[data-page-progress-status]');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     let active = false;
@@ -27,6 +29,15 @@ export function initPageProgress() {
     let trickleTimer = null;
     let fadeTimer = null;
     let stuckTimer = null;
+    let ownsAnnouncement = false; // only clear the live region message this script wrote
+
+    // Clears "Loading page" only. A message from another script (e.g. "Saving…") is left alone.
+    const releaseAnnouncement = () => {
+        if (ownsAnnouncement) {
+            clearAnnouncement();
+            ownsAnnouncement = false;
+        }
+    };
 
     const setWidth = (value) => {
         bar.style.width = `${Math.round(value * 100)}%`;
@@ -46,7 +57,7 @@ export function initPageProgress() {
         active = false;
         progress = 0;
         delete root.dataset.active;
-        status.textContent = '';
+        releaseAnnouncement();
         bar.style.transition = 'none';
         setWidth(0);
         void bar.offsetWidth; // force a reflow so the next width change animates from 0
@@ -56,7 +67,11 @@ export function initPageProgress() {
     const show = () => {
         showTimer = null;
         root.dataset.active = 'true';
-        status.textContent = 'Loading page';
+
+        if (!hasAnnouncement()) {
+            announce('Loading page');
+            ownsAnnouncement = true;
+        }
 
         // Reduced motion: no trickle. The bar appears at its final-looking state straight away.
         if (reducedMotion.matches) {
@@ -91,7 +106,7 @@ export function initPageProgress() {
         active = false;
 
         if (!wasShown) {
-            status.textContent = '';
+            releaseAnnouncement();
             return;
         }
 
@@ -102,7 +117,7 @@ export function initPageProgress() {
 
         progress = 1;
         setWidth(1);
-        status.textContent = '';
+        releaseAnnouncement();
         fadeTimer = setTimeout(reset, COMPLETE_FADE_MS);
     };
 

@@ -3,7 +3,7 @@
      Text uses theme tokens, so it stays readable in both. --}}
 @props(['churches' => collect()])
 
-<section id="churches" aria-labelledby="churches-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
+<section id="churches" data-reveal aria-labelledby="churches-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
     {{-- Church logo as a full-bleed background. The role="img" wrapper carries the accessible name; the image itself is decorative. --}}
     <div role="img" aria-label="Church of God logo: We Exalt You Jesus" class="absolute inset-0 -z-10">
         {{-- Opacity sits on the wrapper so the img's own fade-in opacity is not overridden. --}}

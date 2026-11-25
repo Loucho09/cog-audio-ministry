@@ -8,8 +8,12 @@
  *   (see components/loading-label.blade.php).
  * - nothing calls preventDefault on a normal submit, so the navigation progress bar still starts.
  *
+ * - the loading label is announced once through the shared live region (live-region.js).
+ *
  * On pageshow (bfcache back/forward restore, or a reload) the buttons are unlocked again.
  */
+
+import { announce } from './live-region';
 
 const FORM_SELECTOR = 'form[data-submit-guard]';
 const BUSY_ATTRIBUTE = 'data-submitting';
@@ -20,11 +24,20 @@ const submitButtons = (form) => Array.from(form.elements).filter((element) => el
 const lock = (form) => {
     form.setAttribute(BUSY_ATTRIBUTE, 'true');
 
-    submitButtons(form).forEach((button) => {
+    const buttons = submitButtons(form);
+
+    buttons.forEach((button) => {
         button.disabled = true;
         button.setAttribute('aria-disabled', 'true');
         button.setAttribute('aria-busy', 'true');
     });
+
+    // Announce the first button's loading label ("Saving…") through the page's one live region.
+    const loadingLabel = buttons
+        .map((button) => button.querySelector('[data-loading-label]'))
+        .find(Boolean);
+
+    announce(loadingLabel?.textContent.trim() || 'Submitting');
 };
 
 const unlock = (form) => {

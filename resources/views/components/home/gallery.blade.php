@@ -10,7 +10,7 @@
     $tileClasses = 'aspect-[4/3] w-full rounded-3xl shadow-sm';
 @endphp
 
-<section id="gallery" aria-labelledby="gallery-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
+<section id="gallery" data-reveal aria-labelledby="gallery-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
     <x-site.section-backdrop variant="vignette" fade-from="surface" />
     <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <x-site.section-header

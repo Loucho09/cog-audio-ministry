@@ -6,7 +6,7 @@
 @props(['loadingText'])
 
 <span class="group-aria-busy:hidden">{{ $slot }}</span>
-<span class="hidden items-center gap-2 group-aria-busy:inline-flex">
+<span data-loading-label class="hidden items-center gap-2 group-aria-busy:inline-flex">
     <x-spinner />
     {{ $loadingText }}
 </span>

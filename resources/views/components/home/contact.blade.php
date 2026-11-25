@@ -10,7 +10,7 @@
     $cardClasses = 'group flex min-h-11 items-center gap-4 rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark sm:p-6 dark:hover:shadow-[0_0_40px_-8px] dark:hover:shadow-primary/20';
 @endphp
 
-<section id="contact" aria-labelledby="contact-title" class="relative isolate overflow-hidden bg-surface py-20 sm:py-24 lg:py-32">
+<section id="contact" data-reveal aria-labelledby="contact-title" class="relative isolate overflow-hidden bg-surface py-20 sm:py-24 lg:py-32">
     <x-site.section-backdrop variant="floor" fade-from="background" />
     <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div class="lg:grid lg:grid-cols-12 lg:items-start lg:gap-16">

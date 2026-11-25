@@ -10,7 +10,7 @@
 @endphp
 
 @if (config('ministry.show_team') && collect($members)->isNotEmpty())
-    <section id="team" aria-labelledby="team-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
+    <section id="team" data-reveal aria-labelledby="team-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
         <x-site.section-backdrop variant="spotlight-left" :mirror="true" />
         <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
             <x-site.section-header id="team-title" eyebrow="Our team" title="Meet the Team" />
