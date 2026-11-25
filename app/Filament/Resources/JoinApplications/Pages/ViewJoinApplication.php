@@ -9,5 +9,11 @@ class ViewJoinApplication extends ViewRecord
 {
     protected static string $resource = JoinApplicationResource::class;
 
-    // Approve and reject actions arrive in Slice 5.
+    protected function getHeaderActions(): array
+    {
+        return [
+            JoinApplicationResource::approveAction(),
+            JoinApplicationResource::rejectAction(),
+        ];
+    }
 }

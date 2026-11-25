@@ -2,13 +2,18 @@
 
 namespace App\Filament\Resources\JoinApplications;
 
+use App\Actions\ApproveJoinApplication;
+use App\Actions\RejectJoinApplication;
+use App\Exceptions\JoinApplicationReviewException;
 use App\Filament\Resources\JoinApplications\Pages\ListJoinApplications;
 use App\Filament\Resources\JoinApplications\Pages\ViewJoinApplication;
 use App\Models\Branch;
 use App\Models\JoinApplication;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -17,6 +22,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -93,6 +99,56 @@ class JoinApplicationResource extends Resource
             JoinApplication::STATUS_REJECTED => 'danger',
             default => 'warning',
         };
+    }
+
+    // visible() is only UI; the service classes re-authorize server-side on every call.
+    public static function approveAction(): Action
+    {
+        return Action::make('approve')
+            ->label('Approve')
+            ->icon(Heroicon::OutlinedCheckCircle)
+            ->color('success')
+            ->requiresConfirmation()
+            ->modalHeading('Approve this application?')
+            ->modalDescription('A member account is created and a set-password email is sent to the applicant.')
+            ->modalSubmitActionLabel('Approve')
+            ->visible(fn (JoinApplication $record) => $record->isPending() && (auth()->user()?->can('approve', $record) ?? false))
+            ->action(function (JoinApplication $record) {
+                self::review(fn () => app(ApproveJoinApplication::class)->handle($record, auth()->user()), 'Application approved', 'The set-password email is on its way.');
+            });
+    }
+
+    public static function rejectAction(): Action
+    {
+        return Action::make('reject')
+            ->label('Reject')
+            ->icon(Heroicon::OutlinedXCircle)
+            ->color('danger')
+            ->requiresConfirmation()
+            ->modalHeading('Reject this application?')
+            ->modalDescription('The applicant is not emailed.')
+            ->modalSubmitActionLabel('Reject')
+            ->visible(fn (JoinApplication $record) => $record->isPending() && (auth()->user()?->can('reject', $record) ?? false))
+            ->action(function (JoinApplication $record) {
+                self::review(fn () => app(RejectJoinApplication::class)->handle($record, auth()->user()), 'Application rejected');
+            });
+    }
+
+    private static function review(callable $run, string $successTitle, ?string $body = null): void
+    {
+        try {
+            $run();
+        } catch (JoinApplicationReviewException $e) {
+            Notification::make()->danger()->title('Could not complete')->body($e->getMessage())->send();
+
+            return;
+        } catch (AuthorizationException) {
+            Notification::make()->danger()->title('Not allowed')->send();
+
+            return;
+        }
+
+        Notification::make()->success()->title($successTitle)->body($body)->send();
     }
 
     public static function infolist(Schema $schema): Schema
@@ -191,6 +247,8 @@ class JoinApplicationResource extends Resource
             ])
             ->recordActions([
                 ViewAction::make(),
+                self::approveAction(),
+                self::rejectAction(),
             ])
             ->recordUrl(fn (JoinApplication $record) => static::getUrl('view', ['record' => $record]));
     }
