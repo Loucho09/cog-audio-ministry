@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\NotifyStaffOfJoinApplication;
+use App\Filament\Resources\JoinApplications\JoinApplicationResource;
 use App\Models\Branch;
 use App\Models\JoinApplication;
 use App\Models\User;
@@ -138,7 +139,7 @@ it('renders the mail with escaped applicant details', function () {
         ->and($html)->not->toContain('<script>alert(1)')
         ->and($html)->toContain('Trece &lt;b&gt;Branch')
         ->and($html)->toContain('FOH, Monitors')
-        ->and($html)->toContain(url('/admin'));
+        ->and($html)->toContain(JoinApplicationResource::getUrl('view', ['record' => $app], panel: 'admin'));
 });
 
 it('exposes recipients through the action', function () {

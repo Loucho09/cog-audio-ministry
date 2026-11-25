@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Filament\Resources\JoinApplications\JoinApplicationResource;
 use App\Models\JoinApplication;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -51,8 +52,8 @@ class NewJoinApplication extends Notification implements ShouldQueue
                 'branch' => self::escapeMarkdown($this->branchName),
                 'interests' => implode(', ', $application->interests ?? []),
                 'submitted' => $submitted,
-                // TODO: Slice 4 - link to the Filament JoinApplication resource view page.
-                'url' => url('/admin'),
+                // Panel passed explicitly: a queue worker has no current panel.
+                'url' => JoinApplicationResource::getUrl('view', ['record' => $application], panel: 'admin'),
             ]);
     }
 }
