@@ -2,7 +2,6 @@
 
 use App\Actions\UpcomingServices;
 use App\Models\Branch;
-use App\Models\Faq;
 use App\Models\GalleryImage;
 use App\Models\Service;
 use App\Models\TeamMember;
@@ -34,26 +33,16 @@ it('runs the seeders', function () {
         ->and(Service::count())->toBe(11)
         ->and(Service::where('branch_id', Branch::mainBranch()->id)->count())->toBe(11)
         ->and(Service::where('name', 'Sunday Service')->count())->toBe(7)
-        ->and(Faq::published()->count())->toBeGreaterThanOrEqual(4)
         ->and(GalleryImage::published()->count())->toBe($expectedGallery)
         ->and(TeamMember::count())->toBe(0);
 });
 
 it('keeps admin edits when seeders re-run and is idempotent', function () {
     $this->seed(DatabaseSeeder::class);
-    Faq::where('question', 'How do I apply?')->update(['answer' => 'Edited']);
     $this->seed(DatabaseSeeder::class);
 
-    expect(Faq::where('question', 'How do I apply?')->value('answer'))->toBe('Edited')
-        ->and(Service::count())->toBe(11)
+    expect(Service::count())->toBe(11)
         ->and(User::where('email', 'superadmin@cogdasma.audio')->count())->toBe(1);
-});
-
-it('keeps seeded FAQs out of the homepage', function () {
-    $this->withoutVite();
-    $this->seed(DatabaseSeeder::class);
-
-    $this->get('/')->assertOk()->assertDontSee('id="faq"', false);
 });
 
 it('uses the Manila timezone by default', function () {
@@ -190,16 +179,12 @@ it('orders featured team members full-time first', function () {
     expect(TeamMember::featured()->pluck('name')->all())->toBe(['A', 'C', 'B']);
 });
 
-it('returns only published faqs and gallery images in order', function () {
-    Faq::factory()->create(['question' => 'Second', 'sort_order' => 2]);
-    Faq::factory()->create(['question' => 'First', 'sort_order' => 1]);
-    Faq::factory()->create(['question' => 'Hidden', 'is_published' => false]);
+it('returns only published gallery images in order', function () {
     GalleryImage::factory()->create(['title' => 'Two', 'sort_order' => 2]);
     GalleryImage::factory()->create(['title' => 'One', 'sort_order' => 1]);
     GalleryImage::factory()->create(['title' => 'Hidden', 'is_published' => false]);
 
-    expect(Faq::published()->pluck('question')->all())->toBe(['First', 'Second'])
-        ->and(GalleryImage::published()->pluck('title')->all())->toBe(['One', 'Two']);
+    expect(GalleryImage::published()->pluck('title')->all())->toBe(['One', 'Two']);
 });
 
 it('resolves image urls for bundled and storage paths', function () {

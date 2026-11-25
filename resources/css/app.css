@@ -159,7 +159,7 @@
         --vignette-alpha: 0.14;
     }
 
-    /* FAQ: a light line grid (about 44px cells) that fades out from the centre-top, plus a soft
+    /* Grid variant: a light line grid (about 44px cells) that fades out from the centre-top, plus a soft
        accent glow in the bottom-right corner. The glow sits on the element itself; the grid lines are on
        ::before so their mask does not hide the glow. */
     .backdrop-grid {
