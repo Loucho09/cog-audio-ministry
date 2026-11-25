@@ -1,5 +1,5 @@
 # Duty guest assign
-Status: done (awaiting merge)
+Status: done (merged 2026-11-26)
 Phase: 4
 Goal: when assigning a duty, the admin either picks an existing member of the event's branch (dropdown, as in v1) or types a guest name by hand for someone without an account (visitor, volunteer from another church).
 Users: branch-head, branch-admin (own branch), super-admin (any branch)

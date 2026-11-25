@@ -9,7 +9,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 | 1 | Setup and homepage | done (2026-11-24) |
 | 2 | Member accounts and roles | done (2a and 2b merged to main 2026-11-25) |
 | 3 | Join applications | done (2026-11-25; slices 1-7 and final review, last commit cc05d36; merged into main; browser check at 360px and dark mode still owner-pending) |
-| 4 | Duty roster | v1 merged; guest assign built (awaiting merge); v2 (swaps + availability) next. See [[duty-roster]] |
+| 4 | Duty roster | v1 merged; guest assign merged; v2 (swaps + availability) next. See [[duty-roster]] |
 | 5 | Notifications and reminders | planned |
 | 6 | Equipment, training, reports | planned |
 | 7 | Production launch | planned |
