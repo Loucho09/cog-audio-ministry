@@ -11,9 +11,9 @@ Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./ve
 - [x] `DutyAssignment::scopeActive` excludes `swapped`; regression tests for capacity, overlap and slot-edit rules
 
 ## Slice S2: offer + cancel (backend-builder)
-- [ ] `app/Services/DutySwapService.php`: `offer(assignment, user)`, `cancel(swap, user)`
-- [ ] Rules: owner only, from `accepted` only, before start, one live swap per assignment, no guest rows; cancel returns assignment to `accepted`
-- [ ] Tests first
+- [x] `app/Services/DutySwapService.php`: `offer(assignment, user)`, `cancel(swap, user)`
+- [x] Rules: owner only, from `accepted` only, before start, one live swap per assignment, no guest rows; cancel returns assignment to `accepted`
+- [x] Tests first
 
 ## Slice S3: claim (backend-builder)
 - [ ] `DutySwapService::claim(swap, user)` with row lock (first claim wins)
