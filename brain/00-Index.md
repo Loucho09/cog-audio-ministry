@@ -54,6 +54,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[gallery-upload-fix]]: gallery upload limits, storage symlink, return to list after save/delete; branch `fix/gallery-upload`, not merged (2026-11-25)
 - [[gallery-thumbnails-gd]]: gallery WebP thumbnails with PHP GD, no new package, width in filename (no schema change); backfill on deploy (2026-11-25)
 - [[admins-equal-per-branch]]: branch-head and branch-admin equal powers, own branch only; branch-admins manage services (2026-11-25)
+- [[duty-guest-assign-decision]]: typed guest names on duty assignments, auto-confirmed (2026-11-26)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
@@ -69,6 +70,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[admin-resources-polish]]: Team, Services, Gallery, Branches Filament resources restyled like Users; add-on before Phase 3 (done, merged to main 2026-11-25)
 - [[join-applications]]: public join form, branch review, approval creates member account (Phase 3, planned, spec written 2026-11-25; tasks in [[join-applications-tasks]])
 - [[duty-roster]]: events, duty roles, slots, assignments, accept/decline (Phase 4 v1, built on `feature/duty-roster`, awaiting merge; tasks in [[duty-roster-tasks]])
+- [[duty-guest-assign]]: assign a typed guest name to a duty, auto-confirmed (Phase 4, done, awaiting merge; tasks in [[duty-guest-assign-tasks]])
 - [[loading-states]]: progress bar, view transitions, image skeletons, submit guard, admin skeletons, scroll reveal (UI polish add-on before Phase 3, done and merged 2026-11-25; tasks in [[loading-states-tasks]])
 
 ## Folders

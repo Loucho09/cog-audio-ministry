@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\DutyStatus;
 use App\Exceptions\RosterRuleViolation;
+use App\Models\Branch;
 use App\Models\DutyAssignment;
 use App\Models\DutyRole;
 use App\Models\Event;
@@ -85,6 +86,75 @@ class DutyRosterService
         });
     }
 
+    public function assignGuest(Event $event, DutyRole $role, string $name, ?User $by = null): DutyAssignment
+    {
+        $name = trim(preg_replace('/\s+/u', ' ', $name) ?? '');
+        $length = mb_strlen($name);
+
+        if ($length < 2 || $length > 100) {
+            throw new RosterRuleViolation('Please enter the name of the guest (2 to 100 characters).');
+        }
+
+        return DB::transaction(function () use ($event, $role, $name, $by) {
+            // Branch lock is taken first (before event/slot locks) so two admins adding the same guest
+            // name to overlapping events of one branch are serialized. An event never changes branch.
+            Branch::query()->whereKey($event->branch_id)->lockForUpdate()->first();
+
+            $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
+
+            $slot = EventDutySlot::query()
+                ->where('event_id', $event->id)
+                ->where('duty_role_id', $role->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($event->hasStarted()) {
+                throw new RosterRuleViolation('This event has already started, so duties can no longer be assigned.');
+            }
+
+            if (! $slot) {
+                throw new RosterRuleViolation('This event has no slot for that duty.');
+            }
+
+            // Name match is case-insensitive, and on MySQL also accent-insensitive via collation
+            // (José = Jose). That is intended: treat them as the same person.
+            $overlaps = DutyAssignment::query()
+                ->active()
+                ->whereNull('user_id')
+                ->where('branch_id', $event->branch_id)
+                ->whereRaw('LOWER(guest_name) = ?', [mb_strtolower($name)])
+                ->whereHas('event', fn ($q) => $q
+                    ->where('starts_at', '<', $event->ends_at)
+                    ->where('ends_at', '>', $event->starts_at))
+                ->exists();
+
+            if ($overlaps) {
+                throw new RosterRuleViolation('A guest with this name is already serving at that time.');
+            }
+
+            $filled = DutyAssignment::query()
+                ->active()
+                ->where('event_id', $event->id)
+                ->where('duty_role_id', $role->id)
+                ->count();
+
+            if ($filled >= $slot->quantity) {
+                throw new RosterRuleViolation('That duty is already full for this event.');
+            }
+
+            return DutyAssignment::create([
+                'branch_id' => $event->branch_id,
+                'event_id' => $event->id,
+                'duty_role_id' => $role->id,
+                'user_id' => null,
+                'guest_name' => $name,
+                'assigned_by' => $by?->id,
+                'status' => DutyStatus::Accepted,
+                'responded_at' => now(),
+            ]);
+        });
+    }
+
     public function remove(DutyAssignment $assignment): void
     {
         DB::transaction(function () use ($assignment) {
@@ -111,7 +181,7 @@ class DutyRosterService
         return DB::transaction(function () use ($assignment, $member, $answer) {
             $current = DutyAssignment::query()->whereKey($assignment->id)->lockForUpdate()->firstOrFail();
 
-            if ((int) $current->user_id !== (int) $member->id) {
+            if ($current->user_id === null || (int) $current->user_id !== (int) $member->id) {
                 throw new RosterRuleViolation('This duty is not yours to answer.');
             }
 
@@ -145,7 +215,7 @@ class DutyRosterService
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
 
             $memberIds = DutyAssignment::query()->active()->where('event_id', $event->id)
-                ->pluck('user_id')->unique()->sort()->values();
+                ->whereNotNull('user_id')->pluck('user_id')->unique()->sort()->values();
             User::query()->whereIn('id', $memberIds)->orderBy('id')->lockForUpdate()->get();
 
             $startsAt = Carbon::parse($attributes['starts_at'] ?? $event->starts_at);
@@ -205,7 +275,33 @@ class DutyRosterService
         $userIds = DutyAssignment::query()
             ->active()
             ->where('event_id', $event->id)
+            ->whereNotNull('user_id')
             ->pluck('user_id');
+
+        $guestNames = DutyAssignment::query()
+            ->active()
+            ->where('event_id', $event->id)
+            ->whereNull('user_id')
+            ->whereNotNull('guest_name')
+            ->pluck('guest_name')
+            ->map(fn ($n) => mb_strtolower($n))
+            ->unique()
+            ->values();
+
+        $guestClash = $guestNames->isNotEmpty() && DutyAssignment::query()
+            ->active()
+            ->whereNull('user_id')
+            ->where('branch_id', $event->branch_id)
+            ->where('event_id', '!=', $event->id)
+            ->whereIn(DB::raw('LOWER(guest_name)'), $guestNames->all())
+            ->whereHas('event', fn ($q) => $q
+                ->where('starts_at', '<', $endsAt)
+                ->where('ends_at', '>', $startsAt))
+            ->exists();
+
+        if ($guestClash) {
+            throw new RosterRuleViolation('A guest on this event is already serving at the new time.');
+        }
 
         $clash = DutyAssignment::query()
             ->active()

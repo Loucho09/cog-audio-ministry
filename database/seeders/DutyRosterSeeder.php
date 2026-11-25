@@ -100,6 +100,15 @@ class DutyRosterSeeder extends Seeder
                         }
                     }
                 }
+
+                // One demo guest per branch on the first event; Duty role C has a spare seat.
+                if ($i === 0) {
+                    try {
+                        $roster->assignGuest($event, $roles['Duty role C'], 'Guest Volunteer', $head);
+                    } catch (RosterRuleViolation) {
+                        // no room, skip
+                    }
+                }
             }
         }
     }

@@ -12,8 +12,11 @@ use App\Services\DutyRosterService;
 use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -80,11 +83,13 @@ class AssignmentsRelationManager extends RelationManager
             ->description(fn () => $this->slotSummary())
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['user', 'dutyRole']))
             ->columns([
-                TextColumn::make('user.name')->label('Member'),
+                TextColumn::make('displayName')->label('Member'),
                 TextColumn::make('dutyRole.name')->label('Role'),
                 TextColumn::make('status')
                     ->badge()
-                    ->formatStateUsing(fn (DutyStatus $state) => $state->label())
+                    ->formatStateUsing(fn (DutyStatus $state, DutyAssignment $record) => $record->isGuest() && $state === DutyStatus::Accepted
+                        ? 'Confirmed'
+                        : $state->label())
                     ->color(fn (DutyStatus $state) => match ($state) {
                         DutyStatus::Accepted => 'success',
                         DutyStatus::Assigned => 'warning',
@@ -103,32 +108,52 @@ class AssignmentsRelationManager extends RelationManager
                             ->options(fn () => $this->roleOptions())
                             ->required()
                             ->in(fn () => array_keys($this->roleOptions())),
+                        ToggleButtons::make('assignee_type')
+                            ->label('Assign to')
+                            ->options(['member' => 'Member', 'guest' => 'Guest (type a name)'])
+                            ->default('member')
+                            ->in(['member', 'guest'])
+                            ->inline()
+                            ->required()
+                            ->live(),
                         Select::make('user_id')
                             ->label('Member')
                             ->options(fn () => $this->memberQuery()->orderBy('name')->pluck('name', 'users.id')->all())
                             ->searchable()
-                            ->required()
+                            ->visible(fn (Get $get) => $get('assignee_type') !== 'guest')
+                            ->required(fn (Get $get) => $get('assignee_type') !== 'guest')
                             ->rules([fn () => function (string $attribute, mixed $value, Closure $fail): void {
                                 if (! $this->memberQuery()->whereKey($value)->exists()) {
                                     $fail('Pick a member from this event\'s branch.');
                                 }
                             }]),
+                        TextInput::make('guest_name')
+                            ->label('Guest name')
+                            ->helperText('For someone without an account.')
+                            ->minLength(2)
+                            ->maxLength(100)
+                            ->visible(fn (Get $get) => $get('assignee_type') === 'guest')
+                            ->required(fn (Get $get) => $get('assignee_type') === 'guest'),
                     ])
                     ->action(function (array $data): void {
+                        $guest = ($data['assignee_type'] ?? 'member') === 'guest';
+
                         try {
-                            app(DutyRosterService::class)->assign(
-                                $this->event(),
-                                DutyRole::findOrFail($data['duty_role_id']),
-                                User::findOrFail($data['user_id']),
-                                auth()->user(),
-                            );
+                            $roster = app(DutyRosterService::class);
+                            $role = DutyRole::findOrFail($data['duty_role_id']);
+
+                            if ($guest) {
+                                $roster->assignGuest($this->event(), $role, (string) ($data['guest_name'] ?? ''), auth()->user());
+                            } else {
+                                $roster->assign($this->event(), $role, User::findOrFail($data['user_id']), auth()->user());
+                            }
                         } catch (RosterRuleViolation $e) {
                             Notification::make()->danger()->title($e->getMessage())->send();
 
                             return;
                         }
 
-                        Notification::make()->success()->title('Member assigned')->send();
+                        Notification::make()->success()->title($guest ? 'Guest assigned' : 'Member assigned')->send();
                     }),
             ])
             ->recordActions([

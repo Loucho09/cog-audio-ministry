@@ -26,4 +26,14 @@ class DutyAssignmentFactory extends Factory
             'responded_at' => null,
         ];
     }
+
+    public function guest(): static
+    {
+        return $this->state(fn () => [
+            'user_id' => null,
+            'guest_name' => fake()->name(),
+            'status' => DutyStatus::Accepted,
+            'responded_at' => now(),
+        ]);
+    }
 }

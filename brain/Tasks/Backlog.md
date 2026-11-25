@@ -56,6 +56,8 @@ Parked ideas. Add them here instead of starting them mid-feature.
   - Extract shared `roleQuery` / `isSuperAdmin` helpers in Filament resources
   - Generator duplicate-check inside the transaction
   - Hide declined rows or style them on the dashboard
+- Guest names: optional index on (branch_id, guest_name) if guest rows grow (added 2026-11-26; see [[duty-guest-assign]])
+- Guest names must be escaped if ever used in emails (Phase 5) (added 2026-11-26; see [[duty-guest-assign]])
 - Test gaps (added 2026-11-25; see [[member-accounts-roles-tasks]]): no direct-call test for the resend action's 403 by a non-super-admin; the bulk-delete test does not exercise the last-super-admin guard on its own.
 - Super-admin can set a temporary password on another super-admin (Gate::before); acceptable, documented. (added 2026-11-25; see [[temp-password]])
 - Decide on the verify-email routes: the app does not implement `MustVerifyEmail`, so the routes and the `verified` middleware are dead code. Implement the interface or remove them. (added 2026-11-25; see [[full-review-2026-11-25]])
