@@ -53,7 +53,7 @@ Slices:
 
 6. Homepage hooks (done 2026-11-24, see [[homepage-hooks]]; browser check pending).
    - FAQ section hidden from the homepage. `Faq` model, table, seeder and component kept. (obsolete: FAQ removed 2026-11-25, see [[faq-removed]])
-   - Section order: hero, impact, about, what-we-do, churches, team (flag), services, gallery, join, stay-updated, contact.
+   - Section order (updated 2026-11-25): hero, impact, about, churches, team (flag), services, gallery, join, stay-updated, contact. What We Do removed at owner request, see [[what-we-do-removed]].
 7. Gallery with real photos (done 2026-11-24, branch `feature/gallery-photos`, commit 4cc3e4d; merged to main in b3415eb; browser check pending).
    - 6 real photos in `public/images/gallery/01-team-on-stage.webp` to `06-behind-the-scenes.webp`. WebP, 1600px long edge, q80, about 800KB total. Converted with PHP GD.
    - `GallerySeeder` has a `CAPTIONS` map (filename to title and alt text) with sort order. `04-outreach-day` (landscape) is last so it gets the wide 16:9 tile on mobile. When real photos are created, placeholder rows get `is_published = false`; the seeder only does this when new real photos were created, so Filament re-publishes survive a re-seed. Rows are never deleted.

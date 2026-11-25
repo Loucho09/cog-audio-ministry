@@ -11,7 +11,7 @@ it('marks the homepage sections for scroll reveal', function () {
     $html = $this->get('/')->assertOk()->getContent();
 
     expect($html)->toContain('id="about" data-reveal')
-        ->and($html)->toContain('id="what-we-do" data-reveal')
+        ->and($html)->not->toContain('id="what-we-do"')
         ->and($html)->toContain('id="join" data-reveal')
         ->and(substr_count($html, 'data-reveal'))->toBeGreaterThanOrEqual(5);
 });
