@@ -1,10 +1,35 @@
 # Duty Roster (v1)
-Status: planned
+Status: done (v1, awaiting owner merge)
 Phase: 4 (v1 of 2; v2 = swaps + availability, see "Out of scope")
 Goal: branch-heads and branch-admins put members on duty for dated events, in fixed slots per duty role; members accept or decline their duties from the dashboard.
 Users: member | branch-admin | branch-head | super-admin
 Tasks: [[duty-roster-tasks]] (written after the spec is approved)
 Notes / decisions: [[Roadmap]] Phase 4; [[login-and-dashboard-decisions]] (members may attend other branches' events)
+
+## Built (branch `feature/duty-roster`, not merged yet)
+- Duty roles per branch (Filament, Roster group).
+- Service default slots.
+- Events: one-off, or "Generate events" from the weekly schedule (max 3 months, skips already-started occurrences).
+- Event slots.
+- Assignments manager on the event page.
+- Read-only View page for started events.
+- Member dashboard "My upcoming duties" with Accept/Decline (decline asks for confirmation; buttons hidden once the event starts).
+- Demo seed (placeholder roles Duty role A/B/C, local/testing only).
+
+## Decisions made during the build
+- Started events are read-only for everyone (no edit, no delete, no assign/remove) to keep history; leaders see them via a View page.
+- Branch-heads and branch-admins can also be assigned duties (not only members).
+- Deleting a duty role in use, a user with duty history, or a branch with events is refused with a friendly message (deactivate roles instead).
+- Super-admin cannot move a duty role to another branch.
+- Event edits save atomically through `DutyRosterService::updateEvent` (locks, guards, slot sync).
+- Events cannot be created with a start time in the past.
+- Owner admin rule: [[admins-equal-per-branch]].
+
+## Known follow-ups
+- Editing an upcoming event's start time into the past locks it (needs the future-start rule on edit).
+- DutyRole bulk-delete test is weak on FK enforcement.
+- Real duty role names and counts still TODO from the owner.
+- See [[Backlog]] for parked items.
 
 ## Why
 Today the roster lives outside the app. Members need one place to see "where am I serving and when", and branch leaders need to see which slots are still empty before a service.

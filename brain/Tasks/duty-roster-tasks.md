@@ -1,4 +1,5 @@
 # Duty Roster v1 Implementation Plan
+Status: built 2026-11-25 on feature/duty-roster
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -37,11 +38,11 @@
 
 **Interfaces:** Produces `ServicePolicy::create()` true for branch-head and branch-admin with a branch.
 
-- [ ] Step 1: Add tests `branch-admin can create and update services in own branch` and `branch-admin cannot update another branch's service` (`$user->can('update', $service)` true / false; `User::factory()->branchAdmin($branch)`).
-- [ ] Step 2: Run `php artisan test --filter=ServiceResourceTest`. Expected: the new "can" test FAILS.
-- [ ] Step 3: `create()` uses `hasAnyRole(['branch-head', 'branch-admin'])`. Fix any existing test that asserted the old denial (it encoded the old rule).
-- [ ] Step 4: Run the filter again. Expected: PASS.
-- [ ] Step 5: Commit `feat(roles): branch-admins manage their branch's services`.
+- [x] Step 1: Add tests `branch-admin can create and update services in own branch` and `branch-admin cannot update another branch's service` (`$user->can('update', $service)` true / false; `User::factory()->branchAdmin($branch)`).
+- [x] Step 2: Run `php artisan test --filter=ServiceResourceTest`. Expected: the new "can" test FAILS.
+- [x] Step 3: `create()` uses `hasAnyRole(['branch-head', 'branch-admin'])`. Fix any existing test that asserted the old denial (it encoded the old rule).
+- [x] Step 4: Run the filter again. Expected: PASS.
+- [x] Step 5: Commit `feat(roles): branch-admins manage their branch's services`.
 
 ### Task 2: Duty roles and service default slots (schema + models)
 
@@ -54,11 +55,11 @@
 - Produces: `DutyRole` (fillable `branch_id, name, sort_order, is_active`; casts bool/int; `branch()`, `scopeActive()`, `scopeOrdered()`), `ServiceDutySlot` (fillable `service_id, duty_role_id, quantity`; `service()`, `dutyRole()`), `Service::dutySlots(): HasMany`. `DutyRoleFactory` default makes a branch via `Branch::factory()`.
 - Columns exactly as spec "Data changes": unique `(branch_id, name)` on roles; unique `(service_id, duty_role_id)` on slots; `quantity` unsignedTinyInteger; role FK on slots `restrictOnDelete`.
 
-- [ ] Step 1: Tests: `duty role names are unique per branch` (same name in two branches OK, same branch throws `QueryException`); `service has default duty slots`; `visibleTo scopes duty roles to the user's branch`.
-- [ ] Step 2: Run `php artisan test --filter=DutyRoleModelTest`. Expected: FAIL (class not found).
-- [ ] Step 3: Migrations, models, factory, `Service::dutySlots()`.
-- [ ] Step 4: Run filter. Expected: PASS.
-- [ ] Step 5: Commit `feat(roster): duty roles and service default slots`.
+- [x] Step 1: Tests: `duty role names are unique per branch` (same name in two branches OK, same branch throws `QueryException`); `service has default duty slots`; `visibleTo scopes duty roles to the user's branch`.
+- [x] Step 2: Run `php artisan test --filter=DutyRoleModelTest`. Expected: FAIL (class not found).
+- [x] Step 3: Migrations, models, factory, `Service::dutySlots()`.
+- [x] Step 4: Run filter. Expected: PASS.
+- [x] Step 5: Commit `feat(roster): duty roles and service default slots`.
 
 ### Task 3: Events, event slots, assignments (schema + models)
 
@@ -75,11 +76,11 @@
 - `EventFactory` default: branch factory, `starts_at` = next week 09:00, `ends_at` = +2h. `DutyAssignmentFactory` default status `assigned`, takes `branch_id` from its event.
 - FKs per spec: `events.branch_id` restrict, `events.service_id` nullOnDelete, unique `(service_id, starts_at)`; assignments: event cascade, role restrict, **user restrict**, `assigned_by` nullOnDelete.
 
-- [ ] Step 1: Tests: `deleting a user with assignments is blocked` (expects `QueryException`); `deleting an event deletes its slots and assignments`; `active scope excludes declined`.
-- [ ] Step 2: Run `--filter=EventModelTest`. Expected: FAIL.
-- [ ] Step 3: Implement.
-- [ ] Step 4: Run. Expected: PASS. Also `php artisan migrate:fresh --seed` still succeeds.
-- [ ] Step 5: Commit `feat(roster): events, event slots and duty assignments`.
+- [x] Step 1: Tests: `deleting a user with assignments is blocked` (expects `QueryException`); `deleting an event deletes its slots and assignments`; `active scope excludes declined`.
+- [x] Step 2: Run `--filter=EventModelTest`. Expected: FAIL.
+- [x] Step 3: Implement.
+- [x] Step 4: Run. Expected: PASS. Also `php artisan migrate:fresh --seed` still succeeds.
+- [x] Step 5: Commit `feat(roster): events, event slots and duty assignments`.
 
 ### Task 4: Assignment rules (TDD) in DutyRosterService
 
@@ -92,7 +93,7 @@
 - `DutyRosterService::assign(Event $event, DutyRole $role, User $member, ?User $by = null): DutyAssignment` (creates with status `assigned`, `branch_id = $event->branch_id`, in a DB transaction with `lockForUpdate` on the event's slot row).
 - `DutyRosterService::remove(DutyAssignment $assignment): void` (deletes if `assigned`/`accepted`; throws for `declined`).
 
-- [ ] Step 1: Write failing tests, each `expect(fn () => ...)->toThrow(RosterRuleViolation::class)`:
+- [x] Step 1: Write failing tests, each `expect(fn () => ...)->toThrow(RosterRuleViolation::class)`:
   - `cannot assign the same member twice to one event` (rule 1)
   - `cannot assign a member to overlapping events` (event 09:00-11:00 vs 10:00-12:00); `back-to-back events are allowed` (11:00 start) succeeds
   - `declined assignment on another event does not block overlap` (declined rows ignored)
@@ -101,10 +102,10 @@
   - `cannot assign a member from another branch` (rule 4, using member's current `branch_id`)
   - `cannot assign to an event that has started`
   - `remove deletes an accepted assignment and frees the slot`; `remove refuses a declined assignment`
-- [ ] Step 2: Run `--filter=AssignRulesTest`. Expected: FAIL (class not found).
-- [ ] Step 3: Implement `assign()` / `remove()`; checks in order: started, branch, slot exists, declined-before, overlap, capacity.
-- [ ] Step 4: Run. Expected: PASS.
-- [ ] Step 5: Commit `feat(roster): assignment rules in DutyRosterService`.
+- [x] Step 2: Run `--filter=AssignRulesTest`. Expected: FAIL (class not found).
+- [x] Step 3: Implement `assign()` / `remove()`; checks in order: started, branch, slot exists, declined-before, overlap, capacity.
+- [x] Step 4: Run. Expected: PASS.
+- [x] Step 5: Commit `feat(roster): assignment rules in DutyRosterService`.
 
 ### Task 5: Respond rules + event change guards (TDD)
 
@@ -117,11 +118,11 @@
 - `assertSlotChangesAllowed(Event $event, array $quantitiesByRoleId): void` (`[roleId => qty]`; a missing role id = slot removed).
 - `assertTimeChangeAllowed(Event $event, CarbonInterface $startsAt, CarbonInterface $endsAt): void` (no active member of this event would overlap another of their active duties; `ends_at` must be after `starts_at`).
 
-- [ ] Step 1: Failing tests: `member can accept own assigned duty`; `member can decline own assigned duty`; `cannot respond to someone else's duty`; `cannot respond twice` (accepted then declined throws); `cannot respond after the event started`; `cannot lower a slot below its active fill`; `cannot remove a slot with active assignments`; `can lower a slot when only declined rows remain`; `cannot move an event onto a member's other duty time`.
-- [ ] Step 2: Run both filters. Expected: FAIL.
-- [ ] Step 3: Implement.
-- [ ] Step 4: Run. Expected: PASS.
-- [ ] Step 5: Commit `feat(roster): respond rules and event change guards`.
+- [x] Step 1: Failing tests: `member can accept own assigned duty`; `member can decline own assigned duty`; `cannot respond to someone else's duty`; `cannot respond twice` (accepted then declined throws); `cannot respond after the event started`; `cannot lower a slot below its active fill`; `cannot remove a slot with active assignments`; `can lower a slot when only declined rows remain`; `cannot move an event onto a member's other duty time`.
+- [x] Step 2: Run both filters. Expected: FAIL.
+- [x] Step 3: Implement.
+- [x] Step 4: Run. Expected: PASS.
+- [x] Step 5: Commit `feat(roster): respond rules and event change guards`.
 
 ### Task 6: EventGenerator (TDD)
 
@@ -133,11 +134,11 @@
 - Produces: `EventGenerator::generate(Branch $branch, CarbonImmutable $from, CarbonImmutable $to): int` (count created). Throws `RosterRuleViolation` if `$to` < `$from` or range > 3 months.
 - Behaviour: for each active service of the branch, each date in range matching `day_of_week` and inside `starts_on`/`ends_on`: skip if an event with that `service_id` exists on that **date**; else create event (`name` = service name, `starts_at` = date + `start_time`, `ends_at` = +2h) and copy `dutySlots` into `event_duty_slots`.
 
-- [ ] Step 1: Failing tests: `generates one event per weekly occurrence with copied slots`; `running twice creates no duplicates` (second call returns 0); `changed service time does not duplicate a date`; `respects the service date window`; `ignores inactive services and other branches`; `rejects ranges over 3 months`.
-- [ ] Step 2: Run. Expected: FAIL.
-- [ ] Step 3: Implement.
-- [ ] Step 4: Run. Expected: PASS.
-- [ ] Step 5: Commit `feat(roster): generate events from the service schedule`.
+- [x] Step 1: Failing tests: `generates one event per weekly occurrence with copied slots`; `running twice creates no duplicates` (second call returns 0); `changed service time does not duplicate a date`; `respects the service date window`; `ignores inactive services and other branches`; `rejects ranges over 3 months`.
+- [x] Step 2: Run. Expected: FAIL.
+- [x] Step 3: Implement.
+- [x] Step 4: Run. Expected: PASS.
+- [x] Step 5: Commit `feat(roster): generate events from the service schedule`.
 
 ### Task 7: Policies (branch scoping)
 
@@ -150,11 +151,11 @@
 - `EventPolicy::delete()` also requires `! $event->hasStarted()` (past events kept). Super-admin bypasses via `Gate::before`, so also enforce the past-event rule in the Filament delete action (Task 9).
 - `DutyAssignmentPolicy::respond(User $user, DutyAssignment $a): bool` = `$a->user_id === $user->id`.
 
-- [ ] Step 1: Failing tests for each policy: own-branch head and admin allowed; other-branch admin denied; member denied `viewAny`; `respond` true only for the owner; `delete` false for a past event.
-- [ ] Step 2: Run `--filter=RosterPoliciesTest`. Expected: FAIL.
-- [ ] Step 3: Implement.
-- [ ] Step 4: Run. Expected: PASS.
-- [ ] Step 5: Commit `feat(roster): branch-scoped roster policies`.
+- [x] Step 1: Failing tests for each policy: own-branch head and admin allowed; other-branch admin denied; member denied `viewAny`; `respond` true only for the owner; `delete` false for a past event.
+- [x] Step 2: Run `--filter=RosterPoliciesTest`. Expected: FAIL.
+- [x] Step 3: Implement.
+- [x] Step 4: Run. Expected: PASS.
+- [x] Step 5: Commit `feat(roster): branch-scoped roster policies`.
 
 ### Task 8: Filament: Duty Roles resource + service default slots
 
@@ -165,11 +166,11 @@
 
 **Interfaces:** `getEloquentQuery()` uses `->visibleTo(auth()->user())`; `branch_id` Select visible only to super-admin, else filled from `auth()->user()->branch_id` (same as ServiceResource). Navigation group "Roster".
 
-- [ ] Step 1: Failing tests: list shows only own-branch roles; branch-admin can create a role; other branch's edit page returns 403/404; service form saves default slots.
-- [ ] Step 2: Run. Expected: FAIL.
-- [ ] Step 3: Implement.
-- [ ] Step 4: Run. Expected: PASS.
-- [ ] Step 5: Commit `feat(admin): duty roles and service default slots`.
+- [x] Step 1: Failing tests: list shows only own-branch roles; branch-admin can create a role; other branch's edit page returns 403/404; service form saves default slots.
+- [x] Step 2: Run. Expected: FAIL.
+- [x] Step 3: Implement.
+- [x] Step 4: Run. Expected: PASS.
+- [x] Step 5: Commit `feat(admin): duty roles and service default slots`.
 
 ### Task 9: Filament: Events resource + Generate action
 
@@ -183,11 +184,11 @@
 - Table: name, branch, starts_at, "filled / needed" count; filters: branch (super-admin), Upcoming (default) / Past. Delete action hidden when `hasStarted()`.
 - Generate action form: branch (super-admin only), from, to; calls `EventGenerator::generate()`; success notification "N events created"; violation shown as danger notification.
 
-- [ ] Step 1: Failing tests: branch-admin sees only own events; generate action creates events; lowering a filled slot shows the error and does not save; past event has no delete action.
-- [ ] Step 2: Run. Expected: FAIL.
-- [ ] Step 3: Implement.
-- [ ] Step 4: Run. Expected: PASS.
-- [ ] Step 5: Commit `feat(admin): events resource with generate action`.
+- [x] Step 1: Failing tests: branch-admin sees only own events; generate action creates events; lowering a filled slot shows the error and does not save; past event has no delete action.
+- [x] Step 2: Run. Expected: FAIL.
+- [x] Step 3: Implement.
+- [x] Step 4: Run. Expected: PASS.
+- [x] Step 5: Commit `feat(admin): events resource with generate action`.
 
 ### Task 10: Filament: Assignments relation manager
 
@@ -198,11 +199,11 @@
 
 **Interfaces:** Table rows = assignments (member, role, status badge, responded_at). Heading/description lists each slot "Role: filled of needed". "Assign" header action: Select role (event's slots), Select member (active members of event's branch), calls `DutyRosterService::assign($event, $role, $member, auth()->user())`. Row "Remove" action calls `remove()`, hidden for declined. Violations → danger notification, no save.
 
-- [ ] Step 1: Failing tests: assign happy path; assign over capacity shows error and creates nothing; remove frees slot.
-- [ ] Step 2: Run. Expected: FAIL.
-- [ ] Step 3: Implement.
-- [ ] Step 4: Run. Expected: PASS.
-- [ ] Step 5: Commit `feat(admin): assign members to event duty slots`.
+- [x] Step 1: Failing tests: assign happy path; assign over capacity shows error and creates nothing; remove frees slot.
+- [x] Step 2: Run. Expected: FAIL.
+- [x] Step 3: Implement.
+- [x] Step 4: Run. Expected: PASS.
+- [x] Step 5: Commit `feat(admin): assign members to event duty slots`.
 
 ### Task 11: Member side: dashboard duties + accept/decline
 
@@ -216,11 +217,11 @@
 - `$duties` = own upcoming active assignments + own upcoming declined (shown as "Declined"), eager-loaded `event.branch`, `dutyRole`, ordered by `events.starts_at`.
 - View: "My upcoming duties" list: event name, date/time (`D, M j · g:i A`), branch, role, status; Accept/Decline buttons (CSRF forms) only when `assigned`; empty state "No duties yet. Your branch leaders will assign you." Use existing theme tokens and the button component; Announcements box stays "Coming soon".
 
-- [ ] Step 1: Failing tests: dashboard lists own duty and not others'; accept changes status; decline changes status; accepting someone else's duty is 403; second submit after decline does not change status; past duties hidden.
-- [ ] Step 2: Run. Expected: FAIL.
-- [ ] Step 3: Implement.
-- [ ] Step 4: Run. Expected: PASS. Check `/dashboard` at 360px in light and dark mode.
-- [ ] Step 5: Commit `feat(dashboard): members see and answer their duties`.
+- [x] Step 1: Failing tests: dashboard lists own duty and not others'; accept changes status; decline changes status; accepting someone else's duty is 403; second submit after decline does not change status; past duties hidden.
+- [x] Step 2: Run. Expected: FAIL.
+- [x] Step 3: Implement.
+- [x] Step 4: Run. Expected: PASS. Check `/dashboard` at 360px in light and dark mode.
+- [x] Step 5: Commit `feat(dashboard): members see and answer their duties`.
 
 ### Task 12: Demo seed data
 
@@ -231,15 +232,15 @@
 
 **Interfaces:** Per branch: roles `Duty role A/B/C` (TODO comment), each seeded service gets slots A×1, B×1, C×2 (TODO real counts); `EventGenerator::generate()` for the next 4 weeks; assign demo members through `DutyRosterService::assign()` (so rules hold), then respond some as accepted/declined; leave some slots empty.
 
-- [ ] Step 1: Failing test: after `$this->seed(DatabaseSeeder::class)` there are events, at least one of each status, and no slot over capacity.
-- [ ] Step 2: Run. Expected: FAIL.
-- [ ] Step 3: Implement.
-- [ ] Step 4: Run, then `php artisan migrate:fresh --seed`. Expected: PASS, seed succeeds.
-- [ ] Step 5: Commit `feat(seed): demo duty roster`.
+- [x] Step 1: Failing test: after `$this->seed(DatabaseSeeder::class)` there are events, at least one of each status, and no slot over capacity.
+- [x] Step 2: Run. Expected: FAIL.
+- [x] Step 3: Implement.
+- [x] Step 4: Run, then `php artisan migrate:fresh --seed`. Expected: PASS, seed succeeds.
+- [x] Step 5: Commit `feat(seed): demo duty roster`.
 
 ### Task 13: Review and record
 
-- [ ] Step 1: Run full `php artisan test` and `./vendor/bin/pint --test`. Expected: all green.
-- [ ] Step 2: `reviewer` agent on the whole branch; fix findings.
-- [ ] Step 3: `brain-keeper`: spec status "done (v1)", Roadmap Phase 4 v1 done / v2 next, decision note for the owner admin rule, Backlog item "cascade/restrict duty_assignments -> users" settled (restrict), Backlog items: duty history page, calendar view, auto-fill, real duty role names and counts (TODO from owner).
-- [ ] Step 4: Commit, then merge `feature/duty-roster` into `main` when the owner OKs.
+- [x] Step 1: Run full `php artisan test` and `./vendor/bin/pint --test`. Expected: all green.
+- [x] Step 2: `reviewer` agent on the whole branch; fix findings.
+- [x] Step 3: `brain-keeper`: spec status "done (v1)", Roadmap Phase 4 v1 done / v2 next, decision note for the owner admin rule, Backlog item "cascade/restrict duty_assignments -> users" settled (restrict), Backlog items: duty history page, calendar view, auto-fill, real duty role names and counts (TODO from owner).
+- [x] Step 4: Commit, then merge `feature/duty-roster` into `main` when the owner OKs.
