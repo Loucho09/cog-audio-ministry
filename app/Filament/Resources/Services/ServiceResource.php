@@ -9,6 +9,7 @@ use App\Models\Branch;
 use App\Models\Service;
 use BackedEnum;
 use Closure;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -17,16 +18,24 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class ServiceResource extends Resource
 {
@@ -88,36 +97,166 @@ class ServiceResource extends Resource
         };
     }
 
+    /** "Sunday · 9:00 AM" */
+    public static function scheduleLabel(Service $record): string
+    {
+        $day = self::DAYS[(int) $record->day_of_week] ?? '';
+        $time = filled($record->start_time) ? Carbon::parse($record->start_time)->format('g:i A') : '';
+
+        return trim($day.' · '.$time, ' ·');
+    }
+
+    /** Active, Inactive, Scheduled (starts later) or Ended (end date passed). */
+    public static function statusOf(Service $record): string
+    {
+        $today = now()->startOfDay();
+
+        return match (true) {
+            ! $record->is_active => 'Inactive',
+            $record->ends_on !== null && $record->ends_on->lt($today) => 'Ended',
+            $record->starts_on !== null && $record->starts_on->gt($today) => 'Scheduled',
+            default => 'Active',
+        };
+    }
+
+    public static function statusColor(string $state): string
+    {
+        return match ($state) {
+            'Active' => 'success',
+            'Scheduled' => 'info',
+            'Ended' => 'warning',
+            default => 'gray',
+        };
+    }
+
+    public static function statusIcon(string $state): Heroicon
+    {
+        return match ($state) {
+            'Active' => Heroicon::OutlinedCheckCircle,
+            'Scheduled' => Heroicon::OutlinedCalendarDays,
+            'Ended' => Heroicon::OutlinedArchiveBox,
+            default => Heroicon::OutlinedPauseCircle,
+        };
+    }
+
+    public static function dateRangeLabel(Service $record): string
+    {
+        if ($record->starts_on === null && $record->ends_on === null) {
+            return 'No date limits';
+        }
+
+        $from = $record->starts_on?->format('M j, Y') ?? 'Anytime';
+        $to = $record->ends_on?->format('M j, Y') ?? 'no end date';
+
+        return "{$from} to {$to}";
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
+            ->columns(3)
             ->components([
-                Select::make('branch_id')
+                Group::make([
+                    Section::make('Details')
+                        ->description('What the service is called and where it happens.')
+                        ->icon(Heroicon::OutlinedRectangleStack)
+                        ->columns(2)
+                        ->schema([
+                            TextInput::make('name')
+                                ->required()
+                                ->maxLength(255)
+                                ->prefixIcon(Heroicon::OutlinedTag),
+                            Select::make('branch_id')
+                                ->label('Branch')
+                                ->options(fn () => Branch::query()->orderBy('name')->pluck('name', 'id'))
+                                ->required()
+                                ->searchable()
+                                ->live()
+                                ->prefixIcon(Heroicon::OutlinedBuildingLibrary)
+                                ->visible(fn () => self::isSuperAdmin()),
+                        ]),
+                    Section::make('Schedule')
+                        ->description('When it happens each week, and the dates it runs between (both optional).')
+                        ->icon(Heroicon::OutlinedCalendarDays)
+                        ->columns(2)
+                        ->schema([
+                            Select::make('day_of_week')
+                                ->label('Day')
+                                ->options(self::DAYS)
+                                ->required()
+                                ->live()
+                                ->prefixIcon(Heroicon::OutlinedCalendar),
+                            TimePicker::make('start_time')
+                                ->label('Start time')
+                                ->seconds(false)
+                                ->required()
+                                ->live()
+                                ->prefixIcon(Heroicon::OutlinedClock)
+                                ->rules([fn (Get $get, ?Model $record) => self::slotRule($get, $record)]),
+                            DatePicker::make('starts_on')->label('Starts on')->native(false)->prefixIcon(Heroicon::OutlinedPlay),
+                            DatePicker::make('ends_on')
+                                ->label('Ends on')
+                                ->native(false)
+                                ->prefixIcon(Heroicon::OutlinedStop)
+                                ->afterOrEqual('starts_on'),
+                        ]),
+                    Section::make('Settings')
+                        ->description('Inactive services are hidden from the public schedule.')
+                        ->icon(Heroicon::OutlinedCog6Tooth)
+                        ->columns(2)
+                        ->schema([
+                            Toggle::make('is_active')->label('Active')->default(true),
+                            TextInput::make('sort_order')
+                                ->numeric()
+                                ->minValue(0)
+                                ->prefixIcon(Heroicon::OutlinedArrowsUpDown),
+                        ]),
+                ])->columnSpan(fn (string $operation) => $operation === 'edit' ? ['default' => 3, 'lg' => 2] : 'full'),
+                self::summary(),
+            ]);
+    }
+
+    /** Read-only side card on the edit page. */
+    protected static function summary(): Section
+    {
+        return Section::make('Summary')
+            ->icon(Heroicon::OutlinedRectangleStack)
+            ->visible(fn (string $operation) => $operation === 'edit')
+            ->columnSpan(['default' => 3, 'lg' => 1])
+            ->columns(2)
+            ->schema([
+                TextEntry::make('summary_name')
+                    ->columnSpanFull()
+                    ->hiddenLabel()
+                    ->weight(FontWeight::Bold)
+                    ->size(TextSize::Large)
+                    ->state(fn (Service $record) => $record->name),
+                TextEntry::make('summary_schedule')
+                    ->columnSpanFull()
+                    ->hiddenLabel()
+                    ->color('gray')
+                    ->icon(Heroicon::OutlinedClock)
+                    ->state(fn (Service $record) => self::scheduleLabel($record)),
+                TextEntry::make('summary_branch')
                     ->label('Branch')
-                    ->options(fn () => Branch::query()->orderBy('name')->pluck('name', 'id'))
-                    ->required()
-                    ->searchable()
-                    ->live()
-                    ->visible(fn () => self::isSuperAdmin()),
-                TextInput::make('name')->required()->maxLength(255),
-                Select::make('day_of_week')
-                    ->label('Day')
-                    ->options(self::DAYS)
-                    ->required()
-                    ->live(),
-                TimePicker::make('start_time')
-                    ->label('Start time')
-                    ->seconds(false)
-                    ->required()
-                    ->live()
-                    ->rules([fn (Get $get, ?Model $record) => self::slotRule($get, $record)]),
-                DatePicker::make('starts_on')->label('Starts on')->native(false),
-                DatePicker::make('ends_on')
-                    ->label('Ends on')
-                    ->native(false)
-                    ->afterOrEqual('starts_on'),
-                TextInput::make('sort_order')->numeric()->minValue(0),
-                Toggle::make('is_active')->label('Active')->default(true),
+                    ->columnSpanFull()
+                    ->icon(Heroicon::OutlinedBuildingLibrary)
+                    ->state(fn (Service $record) => $record->branch?->name ?? 'No branch'),
+                TextEntry::make('summary_status')
+                    ->label('Status')
+                    ->columnSpanFull()
+                    ->badge()
+                    ->state(fn (Service $record) => self::statusOf($record))
+                    ->color(fn (string $state) => self::statusColor($state))
+                    ->icon(fn (string $state) => self::statusIcon($state)),
+                TextEntry::make('summary_dates')
+                    ->label('Runs')
+                    ->columnSpanFull()
+                    ->state(fn (Service $record) => self::dateRangeLabel($record)),
+                TextEntry::make('summary_updated')
+                    ->label('Last updated')
+                    ->state(fn (Service $record) => $record->updated_at)
+                    ->since(),
             ]);
     }
 
@@ -125,26 +264,62 @@ class ServiceResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('branch.name')->label('Branch')->sortable(),
-                TextColumn::make('day_of_week')
-                    ->label('Day')
-                    ->formatStateUsing(fn ($state) => self::DAYS[(int) $state] ?? $state)
-                    ->sortable(),
-                TextColumn::make('start_time')->label('Time')->time('g:i A')->sortable(),
-                TextColumn::make('starts_on')->label('Starts')->date()->placeholder('-')->sortable(),
-                TextColumn::make('ends_on')->label('Ends')->date()->placeholder('-')->sortable(),
-                IconColumn::make('is_active')->label('Active')->boolean(),
+                // Split/Stack reflow each row to the screen width, so the table never scrolls sideways.
+                Split::make([
+                    Stack::make([
+                        TextColumn::make('name')
+                            ->weight(FontWeight::SemiBold)
+                            ->searchable()
+                            ->sortable(),
+                        TextColumn::make('schedule')
+                            ->label('When')
+                            ->color('gray')
+                            ->size(TextSize::Small)
+                            ->state(fn (Service $record) => self::scheduleLabel($record))
+                            ->sortable(['day_of_week', 'start_time']),
+                    ]),
+                    TextColumn::make('branch.name')
+                        ->label('Branch')
+                        ->icon(Heroicon::OutlinedBuildingLibrary)
+                        ->iconColor('gray')
+                        ->size(TextSize::Small)
+                        ->sortable(),
+                    Stack::make([
+                        TextColumn::make('status')
+                            ->label('Status')
+                            ->badge()
+                            ->state(fn (Service $record) => self::statusOf($record))
+                            ->color(fn (string $state) => self::statusColor($state))
+                            ->icon(fn (string $state) => self::statusIcon($state)),
+                        TextColumn::make('date_range')
+                            ->label('Runs')
+                            ->color('gray')
+                            ->size(TextSize::Small)
+                            ->state(fn (Service $record) => self::dateRangeLabel($record))
+                            ->visibleFrom('lg'),
+                    ])->space(1)->grow(false),
+                ])->from('md'),
             ])
             ->defaultSort('sort_order')
+            ->striped()
+            ->searchPlaceholder('Search services')
+            ->paginated([10, 25, 50, 100])
+            ->emptyStateIcon(Heroicon::OutlinedRectangleStack)
+            ->emptyStateHeading('No services yet')
+            ->emptyStateDescription('Add your weekly services and they will show in the public schedule.')
             ->filters([
                 SelectFilter::make('branch_id')
                     ->label('Branch')
                     ->options(fn () => Branch::query()->orderBy('name')->pluck('name', 'id'))
                     ->visible(fn () => self::isSuperAdmin()),
+                SelectFilter::make('day_of_week')
+                    ->label('Day')
+                    ->options(self::DAYS),
+                TernaryFilter::make('is_active')->label('Active'),
             ])
+            ->filtersTriggerAction(fn (Action $action) => $action->button()->label('Filters'))
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->iconButton()->tooltip('Edit'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
