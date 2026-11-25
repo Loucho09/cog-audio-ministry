@@ -84,3 +84,8 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Homepage gallery and team mix all branches (max 12 photos); a branch can push out others. Owner: decide later (keep shared, main-only, or per-branch pages). Found in full admin review 2026-11-26. (added 2026-11-26)
 - Deleting an event silently removes its duty assignments; tell assigned members (Phase 5 notifications). (added 2026-11-26)
 - Join application from an email that already has an account: offer Reject from the failed-approve message. (added 2026-11-26)
+- Admin list/calendar of member availability (from [[duty-availability]]) (added 2026-11-26)
+- Recurring availability (e.g. every first Sunday) (added 2026-11-26; see [[duty-availability]])
+- Notify admins when a member marks unavailable (Phase 5) (added 2026-11-26; see [[duty-availability]])
+- Cross-branch swaps (super-admin approval) (added 2026-11-26; see [[duty-swaps]])
+- Swap history page (added 2026-11-26; see [[duty-swaps]])

@@ -1,5 +1,5 @@
 # Duty availability
-Status: planned
+Status: done (merged 2026-11-26)
 Phase: 4 (v2a of the duty roster; v2b = [[duty-swaps]])
 Goal: members mark dates and service blocks (AM / PM / whole day) when they can't serve, so admins stop assigning them and stop chasing replacements in Messenger.
 Users: member, branch-admin (as a member for their own availability; as admin when assigning), super-admin
@@ -42,4 +42,15 @@ Users: member, branch-admin (as a member for their own availability; as admin wh
 - Changing duties already assigned when a member marks a date (blocked instead, see rules).
 
 Tasks: [[duty-availability-tasks]] (to be written after spec approval)
-Notes / decisions: [[duty-roster]], [[duty-swaps]]
+Notes / decisions: [[duty-roster]], [[duty-swaps]], [[duty-availability-decision]]
+
+## Notes
+- AM/PM cutoff 15:00, from Sunday times (owner).
+- Members mark only from today to +6 months, one entry per date.
+- Marking is blocked when the member has an active (assigned/accepted) duty in that block that hasn't started yet. Already-started duties don't block.
+- Members with no branch get a friendly error.
+- One shared rule, `MemberUnavailability::scopeBlocking`, is used by both the assign rule and the Filament "(unavailable)" hint.
+- Dates are matched in the app timezone (tested).
+- "My availability" is a full-width card below duties and announcements.
+- Availability errors use a separate flash key, so they don't double up with duty errors.
+- Tests don't assert the "(unavailable)" label text (the Filament modal isn't rendered in tests). They assert only the flagged ids.

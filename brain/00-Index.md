@@ -58,6 +58,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[admin-review-2026-11-26]]: full admin review fixes (2026-11-26)
 - [[remove-branch-head-decision]]: branch-head role removed; 1 branch-admin per branch, 2 for Dasma (2026-11-26)
 - [[duty-guest-assign-decision]]: typed guest names on duty assignments, auto-confirmed (2026-11-26)
+- [[duty-availability-decision]]: AM/PM availability blocks with 15:00 cutoff; open-offer swaps and self-approval rule (2026-11-26)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
@@ -74,6 +75,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[join-applications]]: public join form, branch review, approval creates member account (Phase 3, planned, spec written 2026-11-25; tasks in [[join-applications-tasks]])
 - [[duty-roster]]: events, duty roles, slots, assignments, accept/decline (Phase 4 v1, merged to main 2026-11-26; tasks in [[duty-roster-tasks]])
 - [[duty-guest-assign]]: assign a typed guest name to a duty, auto-confirmed (Phase 4, done, merged; tasks in [[duty-guest-assign-tasks]])
+- [[duty-availability]]: members mark unavailable dates and AM/PM blocks; assign respects it (Phase 4 v2a, done, merged 2026-11-26; tasks in [[duty-availability-tasks]])
 - [[remove-branch-head]]: remove branch-head role, admin limit per branch (Phase 4, done, merged; tasks in [[remove-branch-head-tasks]])
 - [[loading-states]]: progress bar, view transitions, image skeletons, submit guard, admin skeletons, scroll reveal (UI polish add-on before Phase 3, done and merged 2026-11-25; tasks in [[loading-states-tasks]])
 
