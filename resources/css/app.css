@@ -239,3 +239,51 @@
         --orb-alpha: 0.4;
     }
 }
+
+/* Page transitions: cross-document View Transitions. Browsers without support just navigate normally.
+   Quick fade out, then the new page fades in with a small rise (~200ms). */
+@view-transition {
+    navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 200ms;
+    animation-timing-function: ease-out;
+}
+
+::view-transition-old(root) {
+    animation-name: page-fade-out;
+}
+
+::view-transition-new(root) {
+    animation-name: page-fade-rise;
+}
+
+@keyframes page-fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes page-fade-rise {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Reduced motion: page changes are instant (no snapshot animation). */
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation: none !important;
+    }
+}
