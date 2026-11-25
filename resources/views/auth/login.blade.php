@@ -55,8 +55,12 @@
         <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="mt-1" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$emailFieldErrors" class="mt-2" />
+            <x-text-input
+                id="email" class="mt-1" type="email" name="email" :value="old('email')" required autofocus autocomplete="username"
+                :aria-invalid="$emailFieldErrors ? 'true' : null"
+                :aria-describedby="$emailFieldErrors ? 'email-error' : null"
+            />
+            <x-input-error id="email-error" :messages="$emailFieldErrors" class="mt-2" />
         </div>
 
         <!-- Password -->
@@ -73,7 +77,8 @@
                     x-bind:type="showPassword ? 'text' : 'password'"
                     x-init="hasPassword = $el.value.length > 0"
                     x-on:input="hasPassword = $el.value.length > 0; if (!hasPassword) { showPassword = false; }"
-                    aria-describedby="caps-lock-warning"
+                    :aria-invalid="$errors->has('password') ? 'true' : null"
+                    x-bind:aria-describedby="[capsLock ? 'caps-lock-warning' : '', {{ $errors->has('password') ? 'true' : 'false' }} ? 'password-error' : ''].filter(Boolean).join(' ') || null"
                     x-on:keydown="capsLock = $event.getModifierState('CapsLock')"
                     x-on:keyup="capsLock = $event.getModifierState('CapsLock')"
                     x-on:blur="capsLock = false"
@@ -108,7 +113,7 @@
                     Caps Lock is on.
                 </p>
             </div>
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            <x-input-error id="password-error" :messages="$errors->get('password')" class="mt-2" />
         </div>
 
         <!-- Remember Me -->
