@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             ServiceSeeder::class,
             GallerySeeder::class,
             TeamMemberSeeder::class,
+            JoinApplicationSeeder::class,
         ]);
     }
 }
