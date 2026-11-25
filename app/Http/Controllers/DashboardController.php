@@ -46,7 +46,7 @@ class DashboardController extends Controller
             ->select('duty_assignments.*')
             ->join('events', 'events.id', '=', 'duty_assignments.event_id')
             ->where('duty_assignments.user_id', $user->id)
-            ->whereIn('duty_assignments.status', [DutyStatus::Assigned, DutyStatus::Accepted, DutyStatus::Declined])
+            ->whereIn('duty_assignments.status', [DutyStatus::Assigned, DutyStatus::Accepted, DutyStatus::Declined, DutyStatus::SwapRequested])
             ->where('events.ends_at', '>=', now())
             ->with(['event.branch', 'dutyRole'])
             ->orderBy('events.starts_at')

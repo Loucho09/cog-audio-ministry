@@ -4,11 +4,11 @@ Branch: `feature/duty-swaps` (start after [[duty-availability-tasks]] is merged)
 Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./vendor/bin/pint` green, then commit.
 
 ## Slice S1: data + statuses (backend-builder)
-- [ ] `DutyStatus`: add `swap_requested`, `swapped` (labels, badge colors)
-- [ ] Enum `app/Enums/SwapStatus.php` (`open`, `claimed`, `approved`, `rejected`, `cancelled`)
-- [ ] Migration `duty_swaps` (branch_id, duty_assignment_id cascade, offered_by, claimed_by nullable, status, claimed_at, decided_by nullOnDelete, decided_at)
-- [ ] Model `DutySwap` (`$fillable`, casts, relations, `scopeLive` = open/claimed on not-started events)
-- [ ] `DutyAssignment::scopeActive` excludes `swapped`; regression tests for capacity, overlap and slot-edit rules
+- [x] `DutyStatus`: add `swap_requested`, `swapped` (labels, badge colors)
+- [x] Enum `app/Enums/SwapStatus.php` (`open`, `claimed`, `approved`, `rejected`, `cancelled`)
+- [x] Migration `duty_swaps` (branch_id, duty_assignment_id cascade, offered_by, claimed_by nullable, status, claimed_at, decided_by nullOnDelete, decided_at)
+- [x] Model `DutySwap` (`$fillable`, casts, relations, `scopeLive` = open/claimed on not-started events)
+- [x] `DutyAssignment::scopeActive` excludes `swapped`; regression tests for capacity, overlap and slot-edit rules
 
 ## Slice S2: offer + cancel (backend-builder)
 - [ ] `app/Services/DutySwapService.php`: `offer(assignment, user)`, `cancel(swap, user)`

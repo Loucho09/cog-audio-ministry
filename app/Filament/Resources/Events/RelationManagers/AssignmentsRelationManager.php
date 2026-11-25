@@ -120,8 +120,9 @@ class AssignmentsRelationManager extends RelationManager
                         : $state->label())
                     ->color(fn (DutyStatus $state) => match ($state) {
                         DutyStatus::Accepted => 'success',
-                        DutyStatus::Assigned => 'warning',
+                        DutyStatus::Assigned, DutyStatus::SwapRequested => 'warning',
                         DutyStatus::Declined => 'danger',
+                        DutyStatus::Swapped => 'gray',
                     }),
                 TextColumn::make('responded_at')->label('Responded')->dateTime('M j, Y g:i A')->placeholder('-'),
             ])
