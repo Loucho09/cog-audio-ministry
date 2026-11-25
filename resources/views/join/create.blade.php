@@ -12,7 +12,7 @@
     <section class="mx-auto w-full max-w-2xl px-4 pb-16 pt-28 sm:px-6">
         <h1 class="text-3xl font-extrabold tracking-tight text-text sm:text-4xl">Join the Audio Ministry</h1>
         <p class="mt-3 text-base text-text/80">
-            Thank you for your heart to serve. Fill in the form below and the branch you choose will get back to you.
+            Thank you for your heart to serve. Fill in the form below and the leaders of the branch you choose will review your application. If you are approved, you will receive an email to set up your account.
             Fields marked * are required.
         </p>
 
