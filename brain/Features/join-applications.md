@@ -72,5 +72,22 @@ Slice 4 notes (2026-11-25, commit 3b52520, not browser-checked yet):
 - Global search is disabled.
 - Staff email links to `JoinApplicationResource::getUrl('view', ..., panel: 'admin')`. The queue worker relies on APP_URL being set, which matters in production.
 
+Slice 5 notes (2026-11-25, commit 40e4815):
+- Services: `App\Actions\ApproveJoinApplication` and `RejectJoinApplication`. Each runs in `DB::transaction` with `lockForUpdate`.
+- Check order: authorize `view` (branch), then explicit `isPending()` (applies to super-admin too, despite `Gate::before`), then authorize `approve` or `reject`. A cross-branch user gets "not allowed" whatever the status, so status does not leak.
+- Approve:
+  - Creates User: trimmed name, trimmed and lowercased email, `branch_id` from the application, random 40-char password.
+  - Assigns only `member` via `assignRole` directly (not the AssignRole action, which needs a super-admin actor).
+  - Sets status, `reviewed_by`, `reviewed_at`, `user_id` with `forceFill`.
+  - Queues Phase 2 `WelcomeSetPassword` (`invites` broker, 3-day link, afterCommit).
+  - `email_verified_at` stays null, matching the Phase 2 set-password path.
+  - Email already has an account: refused, application stays pending. A unique-index race returns the same friendly message.
+- Reject: sets status, reviewer, time. No email (owner decision).
+- Errors: `JoinApplicationReviewException` messages are safe to show staff.
+- Filament: Approve and Reject as view-page header actions and list row actions, with confirmation. `visible()` is UI only; services re-authorize.
+- Tests: 20 in `tests/Feature/Admin/JoinApplicationReviewTest.php`.
+  - The race test runs on one DB connection, so it is not a true concurrent race.
+  - SQLite is case-sensitive, MySQL is not. A mixed-case duplicate is caught by MySQL collation, or by the unique-violation fallback.
+
 Tasks: [[join-applications-tasks]]
 Notes / decisions: [[join-application-rules]], [[join-form-link]], [[homepage-sections]], [[member-accounts-roles]], [[temp-password-and-demo-emails]]

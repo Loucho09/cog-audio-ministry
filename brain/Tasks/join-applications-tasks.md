@@ -11,7 +11,7 @@ Branch: feature/join-applications (in progress)
 - [x] Slice 4 (Done 2026-11-25, commit 3b52520): Filament `JoinApplication` resource (list and view only; branch and status filters; scoped by `visibleTo`; approve and reject actions deferred to Slice 5)
   - Done when: tests show a branch-admin gets 403 or no row for another branch, and approve/reject on a non-pending row is refused.
   - [x] Sub-task (commit 3b52520): replaced `url('/admin')` TODO in `app/Notifications/NewJoinApplication.php` with the Filament view URL.
-- [ ] Slice 5: approval action class (in a DB transaction: create member user with `branch_id`, set `status`, `reviewed_by`, `reviewed_at`, `user_id`; send set-password email)
+- [x] Slice 5 (Done 2026-11-25, commit 40e4815): approval and reject actions (in a DB transaction: create member user with `branch_id`, set `status`, `reviewed_by`, `reviewed_at`, `user_id`; queue set-password email)
   - Done when: tests show the user is created with the member role and correct branch, the set-password mail is sent, and a failure rolls back everything.
   - Reminder: approve and reject must check `isPending()` themselves, because `Gate::before` lets super-admin pass. Also hide or disable the action visibility when not pending.
 - [ ] Slice 6: homepage "Join Us" button points to `join.create`; retire `ministry.join_form_url` and `MINISTRY_JOIN_FORM_URL` (config, `.env.example`, views, tests)

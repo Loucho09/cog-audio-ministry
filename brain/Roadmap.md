@@ -8,7 +8,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 |---|-------|--------|
 | 1 | Setup and homepage | done (2026-11-24) |
 | 2 | Member accounts and roles | done (2a and 2b merged to main 2026-11-25) |
-| 3 | Join applications | in progress (spec written 2026-11-25; Slices 1-4 done 2026-11-25: data layer 1d84d6a, public form 9103609, queued staff email 5156e62, Filament resource 3b52520, branch `feature/join-applications`, unmerged) |
+| 3 | Join applications | in progress (spec written 2026-11-25; Slices 1-5 done 2026-11-25: data layer 1d84d6a, public form 9103609, queued staff email 5156e62, Filament resource 3b52520, approve and reject 40e4815; branch `feature/join-applications`, unmerged) |
 | 4 | Duty roster | planned |
 | 5 | Notifications and reminders | planned |
 | 6 | Equipment, training, reports | planned |
