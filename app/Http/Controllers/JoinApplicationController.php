@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\NotifyStaffOfJoinApplication;
 use App\Http\Requests\StoreJoinApplicationRequest;
 use App\Models\Branch;
 use App\Models\JoinApplication;
@@ -20,7 +21,7 @@ class JoinApplicationController extends Controller
         ]);
     }
 
-    public function store(StoreJoinApplicationRequest $request): RedirectResponse
+    public function store(StoreJoinApplicationRequest $request, NotifyStaffOfJoinApplication $notifyStaff): RedirectResponse
     {
         // The honeypot is handled in the form request, before validation.
         // The lock stops two simultaneous submits with one email from both passing the duplicate check.
@@ -31,20 +32,21 @@ class JoinApplicationController extends Controller
                 return false;
             }
 
-            JoinApplication::create([
+            return JoinApplication::create([
                 ...$request->safe()->only([
                     'full_name', 'age', 'contact_number', 'email', 'facebook_url',
                     'branch_id', 'interests', 'experience', 'availability',
                 ]),
                 'consented_at' => now(),
             ]);
-
-            return true;
         });
 
         if (! $saved) {
             throw ValidationException::withMessages(['email' => StoreJoinApplicationRequest::DUPLICATE_MESSAGE]);
         }
+
+        // Dispatched after the lock is released; failures are logged, never shown to the applicant.
+        $notifyStaff->handle($saved);
 
         return redirect()->route('join.thanks');
     }
