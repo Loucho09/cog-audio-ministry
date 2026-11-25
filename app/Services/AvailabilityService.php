@@ -15,6 +15,10 @@ class AvailabilityService
 {
     public function mark(User $user, string|CarbonInterface $date, AvailabilityPart $part, ?string $note): MemberUnavailability
     {
+        if ($user->branch_id === null) {
+            throw new RosterRuleViolation('Your account has no branch yet. Please ask your admin.');
+        }
+
         $tz = config('app.timezone');
         $day = Carbon::parse($date, $tz)->startOfDay();
         $today = Carbon::now($tz)->startOfDay();

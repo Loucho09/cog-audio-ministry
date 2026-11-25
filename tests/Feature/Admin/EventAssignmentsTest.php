@@ -2,6 +2,7 @@
 
 use App\Enums\AvailabilityPart;
 use App\Enums\DutyStatus;
+use App\Exceptions\RosterRuleViolation;
 use App\Filament\Resources\Events\EventResource;
 use App\Filament\Resources\Events\Pages\EditEvent;
 use App\Filament\Resources\Events\Pages\ViewEvent;
@@ -13,6 +14,7 @@ use App\Models\Event;
 use App\Models\MemberUnavailability;
 use App\Models\User;
 use App\Policies\EventPolicy;
+use App\Services\DutyRosterService;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
@@ -321,4 +323,40 @@ it('flags only blocked members as unavailable for the dropdown', function () {
     $ids = (new ReflectionMethod($component, 'unavailableUserIds'))->invoke($component);
 
     expect($ids)->toHaveKey($this->member->id)->not->toHaveKey($free->id);
+});
+
+it('hint set equals the set of members assign() rejects for the event', function () {
+    $this->event->dutySlots()->update(['quantity' => 50]);
+    $date = $this->event->starts_at->copy()->setTimezone(config('app.timezone'))->toDateString();
+    $otherDate = $this->event->starts_at->copy()->addDay()->toDateString();
+
+    $members = collect([
+        [AvailabilityPart::WholeDay, $date], [AvailabilityPart::Am, $date], [AvailabilityPart::Pm, $date],
+        [AvailabilityPart::WholeDay, $otherDate], [null, null],
+    ])->map(function ($case) {
+        $user = User::factory()->member($this->branchA)->create();
+        if ($case[0]) {
+            MemberUnavailability::create([
+                'user_id' => $user->id, 'branch_id' => $this->branchA->id, 'date' => $case[1], 'part' => $case[0],
+            ]);
+        }
+
+        return $user;
+    });
+
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+    $component = manager($this->event)->instance();
+    $hinted = array_keys((new ReflectionMethod($component, 'unavailableUserIds'))->invoke($component));
+
+    $rejected = $members->filter(function (User $user) {
+        try {
+            app(DutyRosterService::class)->assign($this->event, $this->role, $user);
+
+            return false;
+        } catch (RosterRuleViolation $e) {
+            return str_contains($e->getMessage(), 'unavailable');
+        }
+    })->pluck('id')->all();
+
+    expect($hinted)->toEqualCanonicalizing($rejected)->and($rejected)->not->toBeEmpty();
 });

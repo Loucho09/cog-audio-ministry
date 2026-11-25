@@ -98,3 +98,29 @@ test('blocks() treats whole day as blocking both parts', function () {
     expect(MemberUnavailability::blocks($member, $am))->toBeTrue()
         ->and(MemberUnavailability::blocks($member, $pm))->toBeTrue();
 });
+
+test('blocks() uses the app timezone date when the UTC date differs', function () {
+    [$event] = rosterEvent('06:00', '08:00');
+    $member = rosterMember($event);
+    $localDate = $event->starts_at->copy()->setTimezone(config('app.timezone'))->toDateString();
+    $utcDate = $event->starts_at->copy()->utc()->toDateString();
+    expect($utcDate)->not->toBe($localDate);
+
+    markOff($member, $event, AvailabilityPart::Am, $utcDate);
+    expect(MemberUnavailability::blocks($member, $event))->toBeFalse();
+
+    markOff($member, $event, AvailabilityPart::Am, $localDate);
+    expect(MemberUnavailability::blocks($member, $event))->toBeTrue();
+});
+
+test('blocks() follows a changed config cutoff', function () {
+    [$event] = rosterEvent('10:30', '12:00');
+    $member = rosterMember($event);
+    markOff($member, $event, AvailabilityPart::Am);
+
+    expect(MemberUnavailability::blocks($member, $event))->toBeTrue();
+
+    config(['ministry.duty_pm_starts_at' => '10:00']);
+
+    expect(MemberUnavailability::blocks($member, $event))->toBeFalse();
+});

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Events\RelationManagers;
 
-use App\Enums\AvailabilityPart;
 use App\Enums\DutyStatus;
 use App\Exceptions\RosterRuleViolation;
 use App\Models\DutyAssignment;
@@ -73,21 +72,22 @@ class AssignmentsRelationManager extends RelationManager
             ->whereHas('roles', fn (Builder $q) => $q->whereIn('name', ['member', 'branch-admin']));
     }
 
+    /** @var array<int, array<int, true>> memoized per event id for this request */
+    private array $unavailableMemo = [];
+
     /**
      * Branch members who marked this event's date (whole day or its AM/PM block), keyed by user id.
-     * One query; same rule as MemberUnavailability::blocks().
+     * One query per request; same rule as MemberUnavailability::blocks().
      *
      * @return array<int, true>
      */
     private function unavailableUserIds(): array
     {
         $event = $this->event();
-        $date = $event->starts_at->copy()->setTimezone(config('app.timezone'))->toDateString();
 
-        return MemberUnavailability::query()
+        return $this->unavailableMemo[$event->id] ??= MemberUnavailability::query()
             ->where('branch_id', $event->branch_id)
-            ->whereDate('date', $date)
-            ->whereIn('part', [AvailabilityPart::WholeDay, $event->block()])
+            ->blocking($event)
             ->pluck('user_id')
             ->mapWithKeys(fn ($id) => [(int) $id => true])
             ->all();

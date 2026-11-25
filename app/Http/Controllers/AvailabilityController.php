@@ -16,8 +16,6 @@ class AvailabilityController extends Controller
 
     public function store(StoreAvailabilityRequest $request): RedirectResponse
     {
-        Gate::authorize('create', MemberUnavailability::class);
-
         $data = $request->validated();
 
         try {

@@ -35,6 +35,6 @@ Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./ve
 - [x] Test: Assign action refuses an unavailable member
 
 ## Wrap-up
-- [ ] `reviewer` on the branch, fix issues
+- [x] `reviewer` on the branch, fix issues
 - [ ] `brain-keeper`: spec status, Roadmap, Backlog (admin availability list)
 - [ ] Merge to main

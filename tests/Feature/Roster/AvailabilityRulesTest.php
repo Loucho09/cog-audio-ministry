@@ -177,3 +177,50 @@ test('policy: members and branch admins can create, others cannot', function () 
         ->and($admin->can('create', MemberUnavailability::class))->toBeTrue()
         ->and($roleless->can('create', MemberUnavailability::class))->toBeFalse();
 });
+
+test('a user with no branch cannot mark, and nothing is inserted', function () {
+    $user = User::factory()->create(['branch_id' => null]);
+
+    expect(fn () => avail()->mark($user, now()->addDay(), AvailabilityPart::Am, null))
+        ->toThrow(RosterRuleViolation::class, 'Your account has no branch yet. Please ask your admin.');
+    expect(MemberUnavailability::count())->toBe(0);
+});
+
+test('six month boundary: the day before is ok, the day after is rejected', function () {
+    $user = availMember();
+    $limit = now()->startOfDay()->addMonths(6);
+
+    expect(avail()->mark($user, $limit->copy()->subDay(), AvailabilityPart::Am, null))->toBeInstanceOf(MemberUnavailability::class);
+    expect(fn () => avail()->mark($user, $limit->copy()->addDay(), AvailabilityPart::Am, null))
+        ->toThrow(RosterRuleViolation::class);
+});
+
+test('marking is allowed when today duty already started (duties only block before the event starts)', function () {
+    $user = availMember();
+    [$event, $role] = rosterEvent('09:00', '11:00');
+    $event->update(['starts_at' => now()->subHour(), 'ends_at' => now()->addHour()]);
+    DutyAssignment::factory()->create([
+        'event_id' => $event->id, 'duty_role_id' => $role->id, 'user_id' => $user->id,
+        'branch_id' => $event->branch_id, 'status' => DutyStatus::Accepted,
+    ]);
+
+    expect(avail()->mark($user, now(), AvailabilityPart::WholeDay, null))->toBeInstanceOf(MemberUnavailability::class);
+});
+
+test('on-duty check uses the app timezone date, not UTC', function () {
+    $user = availMember();
+    // 06:00 Manila is still the previous day in UTC.
+    [$event] = rosterEvent('06:00', '08:00');
+    DutyAssignment::factory()->create([
+        'event_id' => $event->id, 'duty_role_id' => $event->dutySlots()->first()->duty_role_id, 'user_id' => $user->id,
+        'branch_id' => $event->branch_id, 'status' => DutyStatus::Accepted,
+    ]);
+    $localDate = $event->starts_at->copy()->setTimezone(config('app.timezone'))->toDateString();
+    expect($event->starts_at->copy()->utc()->toDateString())->not->toBe($localDate);
+
+    expect(fn () => avail()->mark($user, $localDate, AvailabilityPart::Am, null))
+        ->toThrow(RosterRuleViolation::class, "You're on duty");
+
+    $utcDate = $event->starts_at->copy()->utc()->toDateString();
+    expect(avail()->mark($user, $utcDate, AvailabilityPart::Am, null))->toBeInstanceOf(MemberUnavailability::class);
+});

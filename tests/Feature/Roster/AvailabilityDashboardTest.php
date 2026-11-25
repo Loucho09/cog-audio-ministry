@@ -70,6 +70,27 @@ it('forbids deleting another members entry', function () {
     expect(MemberUnavailability::count())->toBe(1);
 });
 
+it('shows an error when deleting a past entry via the route', function () {
+    $me = dashMember();
+    $entry = MemberUnavailability::create(['user_id' => $me->id, 'branch_id' => $me->branch_id, 'date' => now()->subDay()->toDateString(), 'part' => AvailabilityPart::Pm]);
+
+    $this->actingAs($me)->delete(route('availability.destroy', $entry))
+        ->assertRedirect(route('dashboard'))
+        ->assertSessionHas('availability_error');
+    expect(MemberUnavailability::count())->toBe(1);
+});
+
+it('validates the 6-month limit on the route', function () {
+    $me = dashMember();
+    $limit = now()->startOfDay()->addMonths(6);
+
+    $this->actingAs($me)->post(route('availability.store'), ['date' => $limit->copy()->addDay()->toDateString(), 'part' => 'am'])
+        ->assertSessionHasErrors('date');
+    $this->post(route('availability.store'), ['date' => $limit->copy()->subDay()->toDateString(), 'part' => 'am'])
+        ->assertSessionHasNoErrors();
+    expect(MemberUnavailability::count())->toBe(1);
+});
+
 it('redirects guests to login', function () {
     $this->post(route('availability.store'), [])->assertRedirect('/login');
     $this->delete(route('availability.destroy', 1))->assertRedirect('/login');
