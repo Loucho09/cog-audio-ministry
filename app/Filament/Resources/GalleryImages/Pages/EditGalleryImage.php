@@ -3,11 +3,14 @@
 namespace App\Filament\Resources\GalleryImages\Pages;
 
 use App\Filament\Resources\GalleryImages\GalleryImageResource;
+use App\Filament\Resources\GalleryImages\Pages\Concerns\ReturnsToGalleryList;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditGalleryImage extends EditRecord
 {
+    use ReturnsToGalleryList;
+
     protected static string $resource = GalleryImageResource::class;
 
     protected function mutateFormDataBeforeSave(array $data): array
@@ -24,7 +27,7 @@ class EditGalleryImage extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()->successRedirectUrl(fn () => $this->listUrl()),
         ];
     }
 }

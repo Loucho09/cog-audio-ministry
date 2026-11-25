@@ -60,3 +60,4 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - JS behaviour (submit guard, progress bar filter, reveal fallback) has no automated JS or browser tests. Consider a Playwright smoke suite (added 2026-11-25; see [[loading-states]], [[loading-states-approach]])
 - Owner to review the loading wording: "Confirming…" (new) and "Signing in…" (was "Logging in…") (added 2026-11-25; see [[loading-states]])
 - Nav "Log out" text is still hardcoded English, not translated with `__()` (added 2026-11-25; see [[loading-states]])
+- PRODUCTION (Phase 7 checklist): PHP `upload_max_filesize` at least 8M, `post_max_size` at least 10M; run `php artisan storage:link` (added 2026-11-25; see [[gallery-upload-fix]])
