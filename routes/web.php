@@ -22,8 +22,8 @@ Route::get('/join/thanks', [JoinApplicationController::class, 'thanks'])->name('
 Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified', 'throttle:30,1'])->group(function () {
-    Route::post('/duties/{assignment}/accept', [DutyResponseController::class, 'accept'])->name('duties.accept');
-    Route::post('/duties/{assignment}/decline', [DutyResponseController::class, 'decline'])->name('duties.decline');
+    Route::post('/duties/{assignment}/accept', [DutyResponseController::class, 'accept'])->whereNumber('assignment')->name('duties.accept');
+    Route::post('/duties/{assignment}/decline', [DutyResponseController::class, 'decline'])->whereNumber('assignment')->name('duties.decline');
 });
 
 Route::middleware('auth')->group(function () {

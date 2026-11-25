@@ -120,13 +120,13 @@
                                 </p>
                                 <p class="mt-0.5 text-sm text-text/70">{{ $duty->event->branch->name }} &middot; {{ $duty->dutyRole->name }}</p>
 
-                                @if ($duty->status === \App\Enums\DutyStatus::Assigned)
+                                @if ($duty->status === \App\Enums\DutyStatus::Assigned && ! $duty->event->hasStarted())
                                     <div class="mt-3 flex flex-wrap gap-3">
                                         <form method="POST" action="{{ route('duties.accept', $duty) }}" data-submit-guard>
                                             @csrf
                                             <x-primary-button aria-label="{{ __('Accept :event duty', ['event' => $duty->event->name]) }}">{{ __('Accept') }}</x-primary-button>
                                         </form>
-                                        <form method="POST" action="{{ route('duties.decline', $duty) }}" data-submit-guard>
+                                        <form method="POST" action="{{ route('duties.decline', $duty) }}" data-submit-guard onsubmit="return confirm(@js(__('Decline this duty? You won't be able to take it back.')))">
                                             @csrf
                                             <x-secondary-button type="submit" aria-label="{{ __('Decline :event duty', ['event' => $duty->event->name]) }}">{{ __('Decline') }}</x-secondary-button>
                                         </form>

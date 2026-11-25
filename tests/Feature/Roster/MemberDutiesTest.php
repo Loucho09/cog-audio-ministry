@@ -90,3 +90,21 @@ it('requires login to answer', function () {
     $a = memberDuty(User::factory()->member(Branch::factory()->create())->create());
     $this->post(route('duties.accept', $a))->assertRedirect(route('login'));
 });
+
+it('asks before declining and hides the buttons once the event has started', function () {
+    $me = User::factory()->member(Branch::factory()->create())->create();
+    memberDuty($me, ['name' => 'Fresh Event']);
+    memberDuty($me, [
+        'name' => 'Running Event',
+        'starts_at' => now()->subHour(),
+        'ends_at' => now()->addHour(),
+    ]);
+
+    $this->actingAs($me)->get('/dashboard')->assertOk()
+        ->assertSee('onsubmit="return confirm(', false)
+        ->assertSee('Decline this duty?', false)
+        ->assertSee('Accept Fresh Event duty', false)
+        ->assertSee('Running Event')
+        ->assertDontSee('Accept Running Event duty', false)
+        ->assertDontSee('Decline Running Event duty', false);
+});
