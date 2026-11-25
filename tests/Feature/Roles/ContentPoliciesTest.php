@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Branch;
-use App\Models\Faq;
 use App\Models\GalleryImage;
 use App\Models\TeamMember;
 use App\Models\User;
@@ -65,34 +64,6 @@ it('denies members and null-branch staff on branch content', function (string $m
             ->and($user->can('delete', $record))->toBeFalse();
     }
 })->with('branchContent');
-
-it('limits FAQ changes to super-admin', function () {
-    $faq = Faq::factory()->create();
-    $super = User::factory()->superAdmin()->create();
-    $head = User::factory()->branchHead($this->branch)->create();
-    $admin = User::factory()->branchAdmin($this->branch)->create();
-    $member = User::factory()->member($this->branch)->create();
-    $noBranch = User::factory()->branchAdmin($this->branch)->create(['branch_id' => null]);
-
-    expect($super->can('create', Faq::class))->toBeTrue()
-        ->and($super->can('update', $faq))->toBeTrue()
-        ->and($super->can('delete', $faq))->toBeTrue();
-
-    foreach ([$head, $admin] as $user) {
-        expect($user->can('viewAny', Faq::class))->toBeTrue()
-            ->and($user->can('view', $faq))->toBeTrue()
-            ->and($user->can('create', Faq::class))->toBeFalse()
-            ->and($user->can('update', $faq))->toBeFalse()
-            ->and($user->can('delete', $faq))->toBeFalse()
-            ->and($user->can('restore', $faq))->toBeFalse()
-            ->and($user->can('forceDelete', $faq))->toBeFalse();
-    }
-
-    foreach ([$member, $noBranch] as $user) {
-        expect($user->can('viewAny', Faq::class))->toBeFalse()
-            ->and($user->can('view', $faq))->toBeFalse();
-    }
-});
 
 it('limits branch management to super-admin and own-branch viewing', function () {
     $super = User::factory()->superAdmin()->create();

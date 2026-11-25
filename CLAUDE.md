@@ -31,7 +31,7 @@ Goal: take this project from first commit to a live, maintained production site.
 - Fonts match the logo: Montserrat for all text; Mrs Saint Delafield (`font-script`) only as a decorative accent (e.g. "Audio" in the hero), never for body text. Style: clean minimalist, spacious, mobile-first.
 - Copy: English, warm, simple, respectful, Tagalog-friendly tone.
 - Contacts and flags live in `config/ministry.php`, never hardcoded in views. Service schedule is seeded into the `services` table and managed in Filament.
-- Gallery images, FAQs, and team members are stored in the database and managed in Filament. Placeholder images until real photos are added.
+- Gallery images and team members are stored in the database and managed in Filament. Placeholder images until real photos are added.
 - "Meet the Team" is behind a config flag, default OFF. When on, it shows team members marked `is_featured` (full-time first).
 - Homepage sections are Blade components. Contact section shows a map only when the address is filled in.
 - Full details in `brain/Project-Brief.md`. Use TODO placeholders for pending content (vision/mission, team list, Messenger link, address, photos). Never invent names, phone numbers, or church facts.
@@ -45,7 +45,7 @@ Goal: take this project from first commit to a live, maintained production site.
 ## Roadmap: from start to production
 Work one phase at a time. Do not start a phase until the previous one is marked done in `brain/Roadmap.md`.
 
-1. **Setup and homepage:** scaffold Laravel + packages, layout and theme tokens, homepage sections (hero, about, what we do, meet the team behind flag, upcoming services, gallery, join us, FAQ, contact, footer), services, gallery, FAQ and team models + seeders, mobile check at 360px.
+1. **Setup and homepage:** scaffold Laravel + packages, layout and theme tokens, homepage sections (hero, about, what we do, meet the team behind flag, upcoming services, gallery, join us, contact, footer), services, gallery and team models + seeders (FAQ was later removed; see `brain/Decisions/faq-removed.md`), mobile check at 360px.
 2. **Member accounts and roles:** Breeze login, approval-only accounts, Spatie roles (incl. `branch-admin`), branches, seeders, rate-limited login and password reset, tests for role escalation, cross-branch access, mass assignment, and "branch-head cannot assign roles".
 3. **Join applications:** public form with honeypot and rate limiting, pending/approved/rejected status, queued email to branch-head + branch-admins + super-admin, Filament approve/reject with branch and status filters, approval creates account + set-password email, tests.
 4. **Duty roster:** events, duty assignments and swaps with rules in service classes (rule tests written first), Filament roster, member dashboard with accept/decline/swap, tests.

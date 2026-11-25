@@ -120,3 +120,41 @@ it('rejects a javascript: or http facebook_url', function (string $bad) {
         ->call('save')
         ->assertHasFormErrors(['facebook_url']);
 })->with(['javascript:alert(1)', 'http://www.facebook.com/x']);
+
+it('lists branches with member and service counts for the super-admin', function () {
+    User::factory()->member($this->other)->create();
+    Service::factory()->create(['branch_id' => $this->other->id]);
+    $this->actingAs(User::factory()->superAdmin()->create());
+
+    $test = Livewire::test(ListBranches::class)
+        ->assertSuccessful()
+        ->assertCanSeeTableRecords([$this->main, $this->other]);
+
+    $row = $test->instance()->getTableRecords()->firstWhere('id', $this->other->id);
+    expect($row->users_count)->toBe(1)->and($row->services_count)->toBe(1);
+});
+
+it('lists only their own branch for a branch-head', function () {
+    $this->actingAs(User::factory()->branchHead($this->other)->create());
+
+    Livewire::test(ListBranches::class)
+        ->assertCanSeeTableRecords([$this->other])
+        ->assertCanNotSeeTableRecords([$this->main]);
+});
+
+it('renders the edit page summary card', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+
+    Livewire::test(EditBranch::class, ['record' => $this->main->id])
+        ->assertSuccessful()
+        ->assertSee('Summary')
+        ->assertSee('Main branch');
+});
+
+it('does not delete the main branch from the edit page', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+
+    Livewire::test(EditBranch::class, ['record' => $this->main->id])->callAction('delete');
+
+    expect(Branch::find($this->main->id))->not->toBeNull();
+});

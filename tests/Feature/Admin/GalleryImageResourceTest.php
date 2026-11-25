@@ -127,3 +127,41 @@ it('does not let a branch-head bulk delete global images', function () {
     expect(GalleryImage::find($this->imageGlobal->id))->not->toBeNull()
         ->and(GalleryImage::find($this->imageA->id))->toBeNull();
 });
+
+it('shows tab counts scoped to the branch-head', function () {
+    $this->imageA->update(['is_published' => false]);
+    $this->imageB->update(['is_published' => false]);
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+
+    $test = Livewire::test(ListGalleryImages::class)->assertSuccessful();
+    $tabs = $test->instance()->getTabs();
+
+    // own + global rows only; the other branch's pending image is not counted.
+    expect($tabs['all']->getBadge())->toEqual(2)
+        ->and($tabs['published']->getBadge())->toEqual(1)
+        ->and($tabs['pending']->getBadge())->toEqual(1);
+
+    $test->set('activeTab', 'pending')
+        ->assertCanSeeTableRecords([$this->imageA])
+        ->assertCanNotSeeTableRecords([$this->imageB, $this->imageGlobal]);
+});
+
+it('renders the edit page summary card', function () {
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+
+    Livewire::test(EditGalleryImage::class, ['record' => $this->imageA->id])
+        ->assertSuccessful()
+        ->assertSee('Summary')
+        ->assertSee('Alpha');
+});
+
+it('excludes other branches from a branch-head tab counts', function () {
+    GalleryImage::factory()->count(3)->create(['branch_id' => $this->branchB->id, 'is_published' => false]);
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+
+    $tabs = Livewire::test(ListGalleryImages::class)->instance()->getTabs();
+
+    expect($tabs['all']->getBadge())->toEqual(2)
+        ->and($tabs['published']->getBadge())->toEqual(2)
+        ->and($tabs['pending']->getBadge())->toBeNull();
+});

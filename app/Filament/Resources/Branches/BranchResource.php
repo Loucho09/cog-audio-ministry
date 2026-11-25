@@ -10,18 +10,25 @@ use App\Models\GalleryImage;
 use App\Models\TeamMember;
 use BackedEnum;
 use Closure;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -92,46 +99,182 @@ class BranchResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema
+            ->columns(3)
             ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255)
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(function (Get $get, Set $set, ?Model $record, ?string $state) {
-                        if (! $record && blank($get('slug'))) {
-                            $set('slug', Str::slug((string) $state));
-                        }
-                    }),
-                TextInput::make('slug')->required()->maxLength(255)->alphaDash()->unique(ignoreRecord: true),
-                TextInput::make('address')->maxLength(255),
-                TextInput::make('contact_number')->maxLength(255),
-                TextInput::make('email')->email()->maxLength(255),
-                TextInput::make('facebook_url')->label('Facebook URL')->url()->rule('starts_with:https://')->maxLength(255),
-                Toggle::make('is_main')
-                    ->label('Main branch')
-                    ->rules([
-                        fn (?Model $record): Closure => function (string $attribute, mixed $value, Closure $fail) use ($record): void {
-                            if ($record?->is_main && ! $value
-                                && ! Branch::query()->whereKeyNot($record->getKey())->where('is_main', true)->exists()) {
-                                $fail('There must be one main branch. Mark another branch as main instead.');
-                            }
-                        },
-                    ]),
+                Group::make([
+                    Section::make('Details')
+                        ->description('The branch name and the short name used in its web address.')
+                        ->icon(Heroicon::OutlinedBuildingOffice2)
+                        ->columns(2)
+                        ->schema([
+                            TextInput::make('name')
+                                ->required()
+                                ->maxLength(255)
+                                ->prefixIcon(Heroicon::OutlinedBuildingLibrary)
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(function (Get $get, Set $set, ?Model $record, ?string $state) {
+                                    if (! $record && blank($get('slug'))) {
+                                        $set('slug', Str::slug((string) $state));
+                                    }
+                                }),
+                            TextInput::make('slug')
+                                ->required()
+                                ->maxLength(255)
+                                ->alphaDash()
+                                ->unique(ignoreRecord: true)
+                                ->prefixIcon(Heroicon::OutlinedLink),
+                            Toggle::make('is_main')
+                                ->label('Main branch')
+                                ->columnSpanFull()
+                                ->helperText('Only one branch can be the main one.')
+                                ->rules([
+                                    fn (?Model $record): Closure => function (string $attribute, mixed $value, Closure $fail) use ($record): void {
+                                        if ($record?->is_main && ! $value
+                                            && ! Branch::query()->whereKeyNot($record->getKey())->where('is_main', true)->exists()) {
+                                            $fail('There must be one main branch. Mark another branch as main instead.');
+                                        }
+                                    },
+                                ]),
+                        ]),
+                    Section::make('Contact')
+                        ->description('Where people can find and reach this branch (all optional).')
+                        ->icon(Heroicon::OutlinedPhone)
+                        ->columns(2)
+                        ->schema([
+                            TextInput::make('address')
+                                ->maxLength(255)
+                                ->columnSpanFull()
+                                ->prefixIcon(Heroicon::OutlinedMapPin),
+                            TextInput::make('contact_number')
+                                ->maxLength(255)
+                                ->prefixIcon(Heroicon::OutlinedPhone),
+                            TextInput::make('email')
+                                ->email()
+                                ->maxLength(255)
+                                ->prefixIcon(Heroicon::OutlinedEnvelope),
+                            TextInput::make('facebook_url')
+                                ->label('Facebook URL')
+                                ->url()
+                                ->rule('starts_with:https://')
+                                ->maxLength(255)
+                                ->columnSpanFull()
+                                ->prefixIcon(Heroicon::OutlinedGlobeAlt),
+                        ]),
+                ])->columnSpan(fn (string $operation) => $operation === 'edit' ? ['default' => 3, 'lg' => 2] : 'full'),
+                self::summary(),
+            ]);
+    }
+
+    /** Read-only side card on the edit page. */
+    protected static function summary(): Section
+    {
+        return Section::make('Summary')
+            ->icon(Heroicon::OutlinedBuildingOffice2)
+            ->visible(fn (string $operation) => $operation === 'edit')
+            ->columnSpan(['default' => 3, 'lg' => 1])
+            ->columns(2)
+            ->schema([
+                TextEntry::make('summary_name')
+                    ->columnSpanFull()
+                    ->hiddenLabel()
+                    ->weight(FontWeight::Bold)
+                    ->size(TextSize::Large)
+                    ->state(fn (Branch $record) => $record->name),
+                TextEntry::make('summary_main')
+                    ->columnSpanFull()
+                    ->hiddenLabel()
+                    ->badge()
+                    ->color('primary')
+                    ->icon(Heroicon::OutlinedStar)
+                    ->state(fn (Branch $record) => $record->is_main ? 'Main branch' : null),
+                TextEntry::make('summary_members')
+                    ->label('Members')
+                    ->icon(Heroicon::OutlinedUsers)
+                    ->state(fn (Branch $record) => $record->users()->count()),
+                TextEntry::make('summary_services')
+                    ->label('Services')
+                    ->icon(Heroicon::OutlinedRectangleStack)
+                    ->state(fn (Branch $record) => $record->services()->count()),
+                TextEntry::make('summary_created')
+                    ->label('Created')
+                    ->state(fn (Branch $record) => $record->created_at)
+                    ->date('M j, Y'),
+                TextEntry::make('summary_updated')
+                    ->label('Last updated')
+                    ->state(fn (Branch $record) => $record->updated_at)
+                    ->since(),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->withCount(['users', 'services']))
             ->columns([
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('slug'),
-                TextColumn::make('email')->placeholder('-'),
-                IconColumn::make('is_main')->label('Main')->boolean(),
+                // Split/Stack reflow each row to the screen width, so the table never scrolls sideways.
+                Split::make([
+                    Stack::make([
+                        TextColumn::make('name')
+                            ->weight(FontWeight::SemiBold)
+                            ->searchable()
+                            ->sortable(),
+                        TextColumn::make('main_badge')
+                            ->label('Main')
+                            ->badge()
+                            ->color('primary')
+                            ->icon(Heroicon::OutlinedStar)
+                            ->state(fn (Branch $record) => $record->is_main ? 'Main' : null),
+                        TextColumn::make('slug')
+                            ->color('gray')
+                            ->size(TextSize::Small),
+                    ])->space(1),
+                    Stack::make([
+                        TextColumn::make('address')
+                            ->icon(Heroicon::OutlinedMapPin)
+                            ->iconColor('gray')
+                            ->size(TextSize::Small)
+                            ->placeholder('No address yet')
+                            ->wrap(),
+                        TextColumn::make('contact_number')
+                            ->label('Contact')
+                            ->icon(Heroicon::OutlinedPhone)
+                            ->iconColor('gray')
+                            ->size(TextSize::Small)
+                            ->copyable()
+                            ->copyMessage('Number copied'),
+                        TextColumn::make('email')
+                            ->icon(Heroicon::OutlinedEnvelope)
+                            ->iconColor('gray')
+                            ->size(TextSize::Small)
+                            ->copyable()
+                            ->copyMessage('Email copied'),
+                    ])->space(1),
+                    Stack::make([
+                        TextColumn::make('users_count')
+                            ->counts('users')
+                            ->badge()
+                            ->color('gray')
+                            ->icon(Heroicon::OutlinedUsers)
+                            ->formatStateUsing(fn ($state) => $state.' '.str('member')->plural((int) $state)),
+                        TextColumn::make('services_count')
+                            ->counts('services')
+                            ->badge()
+                            ->color('gray')
+                            ->icon(Heroicon::OutlinedRectangleStack)
+                            ->formatStateUsing(fn ($state) => $state.' '.str('service')->plural((int) $state)),
+                    ])->space(1)->grow(false)->visibleFrom('lg'),
+                ])->from('md'),
             ])
             ->defaultSort('name')
+            ->striped()
+            ->searchPlaceholder('Search branches')
+            ->paginated([10, 25, 50, 100])
+            ->emptyStateIcon(Heroicon::OutlinedBuildingOffice2)
+            ->emptyStateHeading('No branches yet')
+            ->emptyStateDescription('Add a branch and it can start receiving members and applications.')
+            ->filtersTriggerAction(fn (Action $action) => $action->button()->label('Filters'))
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->iconButton()->tooltip('Edit'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

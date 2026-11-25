@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Faq;
 use App\Models\TeamMember;
 
 beforeEach(fn () => $this->withoutVite());
@@ -48,15 +47,6 @@ it('falls back to #contact when the join form URL is not set', function () {
     $html = $this->get('/')->assertOk()->getContent();
 
     expect($html)->toMatch('/<section id="join".*?<a href="#contact"[^>]*>\s*Message us to join\s*<\/a>.*?<\/section>/s');
-});
-
-it('does not show the FAQ on the homepage even when published FAQs exist', function () {
-    Faq::factory()->create(['question' => 'Can I serve?', 'answer' => 'Yes.', 'is_published' => true]);
-
-    $this->get('/')->assertOk()
-        ->assertDontSee('id="faq"', false)
-        ->assertDontSee('Can I serve?')
-        ->assertDontSee('#faq', false);
 });
 
 it('shows the map only when an address is set', function () {

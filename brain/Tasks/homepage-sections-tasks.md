@@ -4,10 +4,10 @@ Related: [[homepage-sections]] (spec), [[Roadmap]], [[00-Index]]
 
 | Slice | Scope | Status | Commits |
 |-------|-------|--------|---------|
-| 1 | Data: `branches`, `services`, `gallery_images`, `faqs`, `team_members` tables, models, seeders, `App\Actions\UpcomingServices` | done | 1837909, d417b83, 6b93b94; fixes f13339c |
+| 1 | Data: `branches`, `services`, `gallery_images`, ~~`faqs`~~ (obsolete: FAQ removed, see [[faq-removed]]), `team_members` tables, models, seeders, `App\Actions\UpcomingServices` | done | 1837909, d417b83, 6b93b94; fixes f13339c |
 | 2 | Hero, about us, what we do | done | 43f4b05, c113b54; fixes 377c0f1 |
 | 3 | Upcoming services, gallery with Alpine lightbox, `HomeController` | done | 6908e55, faaf084, 85dbf4e, 30a156b, 078d77e, b4f064b; images: bd29ac3 (logo and cover), f726f09 (tighter logo crop) |
-| 4 | Join us CTA, FAQ accordion, contact (map only when address is set), meet the team behind config flag | done | 1c8d658 (review fixes included in the same commit) |
+| 4 | Join us CTA, ~~FAQ accordion~~ (obsolete: FAQ removed, see [[faq-removed]]), contact (map only when address is set), meet the team behind config flag | done | 1c8d658 (review fixes included in the same commit) |
 | 5 | Polish pass, stage backdrops, hero theme verse | done, browser check pending | 0e95da6, 6abf5bb (CLAUDE.md accent-text rule), 93afab1, ce75b8a, 7cd3941, 21e7723 (review follow-ups) |
 
 Notes:

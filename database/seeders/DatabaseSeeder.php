@@ -25,7 +25,6 @@ class DatabaseSeeder extends Seeder
             ...$seeders,
             ServiceSeeder::class,
             GallerySeeder::class,
-            FaqSeeder::class,
             TeamMemberSeeder::class,
         ]);
     }
