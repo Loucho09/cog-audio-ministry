@@ -22,7 +22,28 @@ class NewPasswordController extends Controller
      */
     public function create(Request $request): View
     {
-        return view('auth.reset-password', ['request' => $request]);
+        // Same check as store(): only a validly signed marker makes this a welcome invite.
+        $rawInviteToken = InviteToken::unwrap((string) $request->route('token'));
+        $isInvite = $rawInviteToken !== null;
+
+        // Greet by name only when the invite token really belongs to this email. The signed marker covers the
+        // token, not the email, so without this check anyone holding one invite link could swap in another
+        // email and read that person's name. The normal reset page never looks anyone up.
+        $firstName = null;
+
+        if ($isInvite && filled($request->query('email'))) {
+            $user = User::query()->where('email', (string) $request->query('email'))->first();
+
+            if ($user && Password::broker('invites')->tokenExists($user, $rawInviteToken)) {
+                $firstName = Str::before(trim($user->name), ' ') ?: null;
+            }
+        }
+
+        return view('auth.reset-password', [
+            'request' => $request,
+            'isInvite' => $isInvite,
+            'firstName' => $firstName,
+        ]);
     }
 
     /**
@@ -67,7 +88,9 @@ class NewPasswordController extends Controller
         // the application's home authenticated view. If there is an error we can
         // redirect them back to where they came from with their error message.
         if ($status == Password::PASSWORD_RESET) {
-            return redirect()->route('login')->with('status', __($status));
+            return redirect()->route('login')->with('status', $rawToken !== null
+                ? __('Your password is set. Log in with your email and new password.')
+                : __('Your password has been reset. Log in with your new password.'));
         }
 
         $message = $status == Password::INVALID_TOKEN
