@@ -161,6 +161,18 @@ test('moving an event onto the same guest name at another event is blocked', fun
         ->toThrow(RosterRuleViolation::class, 'already serving');
 });
 
+test('moving an event onto the same guest name in a different branch is allowed', function () {
+    [$e1, $r1] = rosterEvent('09:00', '11:00');
+    [$e2, $r2] = rosterEvent('12:00', '14:00');
+    expect($e2->branch_id)->not->toBe($e1->branch_id);
+    svc()->assignGuest($e1, $r1, 'Maria Santos');
+    svc()->assignGuest($e2, $r2, 'Maria Santos');
+
+    svc()->assertTimeChangeAllowed($e2, $e2->starts_at->copy()->setTime(10, 0), $e2->ends_at->copy()->setTime(12, 30));
+
+    expect(true)->toBeTrue();
+});
+
 test('slot cannot be reduced below the guests serving', function () {
     [$event, $role] = rosterEvent(quantity: 2);
     svc()->assignGuest($event, $role, 'Guest One');

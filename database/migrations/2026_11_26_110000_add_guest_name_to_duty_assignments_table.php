@@ -17,6 +17,8 @@ return new class extends Migration
 
     public function down(): void
     {
+        // WARNING: rolling back DELETES ALL guest assignments (rows with no user_id),
+        // because user_id must go back to NOT NULL.
         DB::table('duty_assignments')->whereNull('user_id')->delete();
 
         Schema::table('duty_assignments', function (Blueprint $table) {

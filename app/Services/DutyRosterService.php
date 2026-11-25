@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\DutyStatus;
 use App\Exceptions\RosterRuleViolation;
+use App\Models\Branch;
 use App\Models\DutyAssignment;
 use App\Models\DutyRole;
 use App\Models\Event;
@@ -95,6 +96,10 @@ class DutyRosterService
         }
 
         return DB::transaction(function () use ($event, $role, $name, $by) {
+            // Branch lock is taken first (before event/slot locks) so two admins adding the same guest
+            // name to overlapping events of one branch are serialized. An event never changes branch.
+            Branch::query()->whereKey($event->branch_id)->lockForUpdate()->first();
+
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
 
             $slot = EventDutySlot::query()
@@ -111,6 +116,8 @@ class DutyRosterService
                 throw new RosterRuleViolation('This event has no slot for that duty.');
             }
 
+            // Name match is case-insensitive, and on MySQL also accent-insensitive via collation
+            // (José = Jose). That is intended: treat them as the same person.
             $overlaps = DutyAssignment::query()
                 ->active()
                 ->whereNull('user_id')

@@ -112,6 +112,7 @@ class AssignmentsRelationManager extends RelationManager
                             ->label('Assign to')
                             ->options(['member' => 'Member', 'guest' => 'Guest (type a name)'])
                             ->default('member')
+                            ->in(['member', 'guest'])
                             ->inline()
                             ->required()
                             ->live(),

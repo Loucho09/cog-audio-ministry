@@ -175,6 +175,32 @@ it('cannot mount the assignments manager for another branch event', function () 
     manager($foreign)->assertForbidden();
 });
 
+it('cannot assign or remove a guest on another branch event', function () {
+    $foreign = Event::factory()->create(['branch_id' => $this->branchB->id]);
+    $foreign->dutySlots()->create(['duty_role_id' => $this->role->id, 'quantity' => 1]);
+    $g = DutyAssignment::factory()->guest()->create([
+        'event_id' => $foreign->id, 'branch_id' => $this->branchB->id, 'duty_role_id' => $this->role->id,
+    ]);
+
+    foreach ([User::factory()->branchAdmin($this->branchA)->create(), User::factory()->branchHead($this->branchA)->create()] as $admin) {
+        $this->actingAs($admin);
+
+        manager($foreign)->assertForbidden();
+    }
+
+    expect(DutyAssignment::count())->toBe(1)->and(DutyAssignment::find($g->id))->not->toBeNull();
+});
+
+it('rejects a tampered assignee type', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    manager($this->event)
+        ->callTableAction('assign', data: ['assignee_type' => 'robot', 'duty_role_id' => $this->role->id, 'guest_name' => 'Pedro'])
+        ->assertHasFormErrors(['assignee_type']);
+
+    expect(DutyAssignment::count())->toBe(0);
+});
+
 it('assigns a typed guest name', function () {
     $admin = User::factory()->branchAdmin($this->branchA)->create();
     $this->actingAs($admin);
