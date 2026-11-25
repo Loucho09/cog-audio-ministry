@@ -59,7 +59,7 @@ it('shows a friendly empty state', function () {
     JoinApplication::query()->delete();
     $this->actingAs(User::factory()->branchHead($this->a)->create());
 
-    Livewire::test(PendingApplicationsWidget::class)->assertSee('No pending applications');
+    Livewire::test(PendingApplicationsWidget::class)->assertSee('All caught up');
 });
 
 it('is not viewable by a member and they cannot reach the admin panel', function () {
@@ -74,7 +74,7 @@ it('is registered on the dashboard for a branch head and heads show the count', 
 
     $this->get('/admin')->assertOk();
     expect(collect(Filament::getWidgets())->contains(PendingApplicationsWidget::class))->toBeTrue();
-    Livewire::test(PendingApplicationsWidget::class)->assertSee('Pending applications (1)');
+    Livewire::test(PendingApplicationsWidget::class)->assertSee('Waiting for review (1)');
     Livewire::test(Dashboard::class)->assertSeeLivewire(PendingApplicationsWidget::class);
 });
 
@@ -109,5 +109,5 @@ it('counts only own-branch pending rows in the heading', function () {
     JoinApplication::factory()->create(['branch_id' => $this->b->id]);
     $this->actingAs(User::factory()->branchHead($this->a)->create());
 
-    Livewire::test(PendingApplicationsWidget::class)->assertSee('Pending applications (2)');
+    Livewire::test(PendingApplicationsWidget::class)->assertSee('Waiting for review (2)');
 });
