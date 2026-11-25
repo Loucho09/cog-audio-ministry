@@ -198,3 +198,91 @@ test('profile update and delete are throttled', function () {
     $this->actingAs($user)->patch('/profile', ['name' => 'N', 'email' => $user->email, 'current_password' => 'password'])->assertStatus(429);
     $this->actingAs($user)->delete('/profile', ['password' => 'password'])->assertStatus(429);
 });
+
+test('an invite link shows the set-password page with the first name', function () {
+    $user = User::factory()->create(['name' => 'Maria Santos']);
+    $token = InviteToken::wrap(Password::broker('invites')->createToken($user));
+
+    $this->get(route('password.reset', ['token' => $token, 'email' => $user->email]))
+        ->assertOk()
+        ->assertSee('Set your password')
+        ->assertSee('Hi Maria, your application was approved.')
+        ->assertSee('Save password and continue')
+        ->assertDontSee('Reset password')
+        ->assertDontSee('Choose a new password');
+});
+
+test('an invite link with another person\'s email does not reveal their name', function () {
+    $holder = User::factory()->create(['name' => 'Maria Santos']);
+    $victim = User::factory()->create(['name' => 'Pedro Cruz']);
+    $token = InviteToken::wrap(Password::broker('invites')->createToken($holder));
+
+    $this->get(route('password.reset', ['token' => $token, 'email' => $victim->email]))
+        ->assertOk()
+        ->assertSee('Set your password')
+        ->assertDontSee('Pedro')
+        ->assertDontSee('Maria');
+});
+
+test('a normal reset link shows the choose-new-password page and no name', function () {
+    $user = User::factory()->create(['name' => 'Maria Santos']);
+    $token = Password::broker()->createToken($user);
+
+    $this->get(route('password.reset', ['token' => $token, 'email' => $user->email]))
+        ->assertOk()
+        ->assertSee('Choose a new password')
+        ->assertSee('Enter a new password for your account.')
+        ->assertSee('Save new password')
+        ->assertDontSee('Maria')
+        ->assertDontSee('Set your password');
+});
+
+test('an expired invite token shows the friendly expired message', function () {
+    $user = User::factory()->create();
+    $token = Password::broker('invites')->createToken($user);
+    DB::table('password_reset_tokens')->where('email', $user->email)->update(['created_at' => now()->subDays(4)]);
+
+    $this->from(route('password.reset', ['token' => InviteToken::wrap($token), 'email' => $user->email]))
+        ->post('/reset-password', [
+            'token' => InviteToken::wrap($token),
+            'email' => $user->email,
+            'password' => 'new-Password-123',
+            'password_confirmation' => 'new-Password-123',
+        ])->assertSessionHasErrors('email');
+
+    $this->get(route('password.reset', ['token' => InviteToken::wrap($token), 'email' => $user->email]))
+        ->assertOk();
+
+    $this->followingRedirects()
+        ->from(route('password.reset', ['token' => InviteToken::wrap($token), 'email' => $user->email]))
+        ->post('/reset-password', [
+            'token' => InviteToken::wrap($token),
+            'email' => $user->email,
+            'password' => 'new-Password-123',
+            'password_confirmation' => 'new-Password-123',
+        ])
+        ->assertSee('This link has expired or was already used. Ask your branch head or the super-admin to send a new one, or use Forgot password.');
+});
+
+test('a successful invite reset redirects to login with the success status', function () {
+    $user = User::factory()->create();
+    $token = Password::broker('invites')->createToken($user);
+
+    $this->post('/reset-password', [
+        'token' => InviteToken::wrap($token),
+        'email' => $user->email,
+        'password' => 'new-Password-123',
+        'password_confirmation' => 'new-Password-123',
+    ])->assertRedirect(route('login'))
+        ->assertSessionHas('status', 'Your password is set. Log in with your email and new password.');
+});
+
+test('the email field on the reset page is read-only', function () {
+    $user = User::factory()->create();
+    $token = Password::broker()->createToken($user);
+
+    $this->get(route('password.reset', ['token' => $token, 'email' => $user->email]))
+        ->assertOk()
+        ->assertSeeHtml('name="email"')
+        ->assertSeeHtml('readonly');
+});
