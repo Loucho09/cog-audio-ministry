@@ -42,5 +42,15 @@ Slice 1 notes (2026-11-25, commit 1d84d6a):
 - Model overrides `BelongsToBranch` visibleTo so plain members see nothing.
 - `Gate::before` gives super-admin every ability, so the pending-only rule must be enforced inside the approve and reject actions (Slices 4 and 5).
 
+Slice 2 notes (2026-11-25, commit 9103609):
+- Routes: `join.create` (GET /join), `join.store` (POST, throttle `join-form` 5/min per IP, 429 when exceeded), `join.thanks`.
+- Honeypot field `website` is checked first in `prepareForValidation`: filled means redirect to thanks, no save, no validation.
+- Email trimmed and lowercased.
+- Duplicate block (existing user or pending application) uses one generic message, `StoreJoinApplicationRequest::DUPLICATE_MESSAGE`. Rejected and approved applicants may reapply.
+- `Cache::lock` per email wraps the re-check and create to stop races.
+- `consented_at` is set server-side.
+- Validation limits (spec silent): age 1-120; contact 7-30 chars, digits, `+-()` and spaces; `facebook_url` https only; experience and availability required, max 2000; interests required, array, min 1, distinct.
+- Not yet browser-checked at 360px or in dark mode.
+
 Tasks: [[join-applications-tasks]]
 Notes / decisions: [[join-application-rules]], [[join-form-link]], [[homepage-sections]], [[member-accounts-roles]], [[temp-password-and-demo-emails]]

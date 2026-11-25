@@ -4,7 +4,7 @@ Branch: feature/join-applications (in progress)
 
 - [x] Slice 1 (Done 2026-11-25, commit 1d84d6a): data layer (migration, `JoinApplication` model with `$fillable`, casts, branch relation, status constants, factory, policy, branch query scope, seeder with fake applications; tests for branch scoping and mass assignment)
   - Done when: `migrate:fresh --seed` shows fake applications; tests prove a branch-head cannot see another branch's rows and `status`/`user_id` cannot be mass-assigned.
-- [ ] Slice 2: public form (routes `join.create` / `join.store` / `join.thanks`, controller, `StoreJoinApplicationRequest` with the duplicate-block rule, honeypot, rate limit, Blade form and thank-you page, light/dark, 360px, meta title and description)
+- [x] Slice 2 (Done 2026-11-25, commit 9103609): public form (routes `join.create` / `join.store` / `join.thanks`, controller, `StoreJoinApplicationRequest` with the duplicate-block rule, honeypot, rate limit, Blade form and thank-you page, light/dark, 360px, meta title and description)
   - Done when: tests pass for happy path (saved), honeypot blocks, duplicate email blocked (account or pending), rate limit returns 429; form works at 360px in both themes.
 - [ ] Slice 3: queued notification to branch-head(s), branch-admin(s), and super-admin(s) on new application
   - Done when: test shows the mail is queued to exactly those users, and no one from another branch.

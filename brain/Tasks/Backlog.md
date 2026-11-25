@@ -17,6 +17,7 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Contact section shows only heading and intro if email, Facebook, Messenger and address are all empty; consider a "coming soon" fallback (added 2026-11-24; see [[homepage-sections]]) — **Done 2026-11-24:** contact section now shows "Contact details are coming soon."
 - ~~FAQ panels use `role="region"`; drop it if FAQs grow beyond about 6 (WAI-ARIA guidance)~~ (obsolete: FAQ removed, see [[faq-removed]]) (added 2026-11-24; see [[homepage-sections]])
 - List tabs (Services/Team/Gallery) run one count() per tab per request; combine into one grouped query if admin feels slow (added 2026-11-25; see [[admin-resources-polish]])
+- Thanks page `noindex`: public-layout has no head slot or `@stack`; add one (Phase 7 SEO pass) (added 2026-11-25; see [[join-applications]])
 - Phase 7: consider a `sandbox` attribute on the map iframe as part of the CSP and privacy review (added 2026-11-24; see [[homepage-sections]])
 - The Join Us button focus ring is overridden with `!ring-surface`; a cleaner fix is an "on-dark" variant in the button component (added 2026-11-24; see [[homepage-sections]])
 - Owner browser check of homepage at 360px and desktop, light and dark, once MySQL runs: lightbox above navbar (open, close, Esc, arrows, Tab), backdrop strength, verse readability on mobile over the photo (added 2026-11-24; see [[homepage-sections]], [[hero-theme-verse]], [[section-backdrops]])
