@@ -50,6 +50,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[faq-removed]]: owner removed FAQ fully (resource, model, policy, seeder, factory, component, tests); drop migration (2026-11-25)
 - [[what-we-do-removed]]: owner removed the What We Do homepage section, component kept unused (2026-11-25)
 - [[gallery-upload-fix]]: gallery upload limits, storage symlink, return to list after save/delete; branch `fix/gallery-upload`, not merged (2026-11-25)
+- [[gallery-thumbnails-gd]]: gallery WebP thumbnails with PHP GD, no new package, width in filename (no schema change); backfill on deploy (2026-11-25)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)

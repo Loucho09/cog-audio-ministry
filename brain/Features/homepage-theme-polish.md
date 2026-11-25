@@ -64,6 +64,11 @@ Slices:
   - Checked with Playwright at 360, 768, 1024, 1440, 1920 and 2760px, light and dark. Tests: 434 (433 pass, 1 skipped).
   - Owner browser check on a wide screen still pending.
 
+- H. Homepage audit fixes (2026-11-25): impeccable audit at 360-2760px, light and dark, score 14/20. Items 1-6 fixed. Items 7-9 parked in [[Backlog]] (eyebrow + h2 pattern and gradient text; cover photo softness above about 2300px; global reduced-motion kill). Report in `.impeccable/audit/` (not committed; owner to decide commit vs `.gitignore`).
+- I. Gallery thumbnails (branch `fix/gallery-image-performance`, commits eaa4fdf, fdb12f1, b0881a1), 2026-11-25: WebP thumbnails at 800 and 1600px (capped at photo width) via PHP GD. Grid uses srcset and lazy loading; lightbox image renders only while open. Backfill once on production with `php artisan gallery:thumbnails`. See [[gallery-thumbnails-gd]].
+- J. Mobile polish (branch `fix/mobile-polish`, commit 07d7f29), 2026-11-25: 44px tap targets on church Facebook links, Add to calendar, Get directions and the Join-the-team link; `text-wrap: pretty` on p, blockquote, figcaption and li; light-mode church-logo watermark removed from Our Churches (dark mode keeps the photo band); hero pill on one line at 320-360px; Sunday time chips in an equal-width grid.
+- Merged to main (merge 1bc4ff0), 2026-11-25. Tests: 447 total (446 pass, 1 skipped). Reviewer run; must-fix items addressed.
+
 Skipped: audit item to re-add FAQ. Owner removed FAQ (see [[homepage-hooks]]). (obsolete: FAQ removed fully 2026-11-25, see [[faq-removed]])
 
 Data changes: none.

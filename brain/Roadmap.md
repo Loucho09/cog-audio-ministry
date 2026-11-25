@@ -28,6 +28,10 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 - [x] Done 2026-11-24 (branch `feature/what-we-do-cards`, commits 8d2e5e5, 81ab9a8, 287a5c9): What We Do is now an interactive role picker (4 tabs: FOH, Monitors, Livestream, Stage Tech; one panel with summary and detail; WAI-ARIA tabs, keyboard support). Replaces the earlier 2x2 card grid (8d2e5e5, now superseded). Checked with Playwright at 1280px light, 360px dark, and keyboard; reviewer clean; 146 tests (145 pass, 1 skipped). Owner to check the wording. See [[homepage-theme-polish]] slice E.
 - [x] Done 2026-11-24 (owner request): light-mode polish (softer background #EEF2F7, darker muted text and borders, Our Churches and Join Us now light in light mode; hero ends on a crisp edge in light mode instead of a dark-to-light fade; cards white in light mode; light-mode glows, beams and vignettes cut to about a third; footer glow dark-only; Impact stats in white cards with gradient numbers; Join Us is a deep-blue band (light) with crisp white sound-wave rings and a white button; service day cards centred; dark mode otherwise unchanged). Branch `feature/light-mode-polish`. See [[stage-palette]].
 - Done 2026-11-24: Playwright check at 360px, light + dark: no horizontal overflow, no console errors, all 10 sections render, theme follows device and toggle persists, gallery images load, mobile menu works. Owner-pending (non-blocking): What We Do wording, gallery photo consent before live, ~~Marilag FB link~~ (resolved 2026-11-25: Marilag is not a branch, see [[marilag-is-dasma-subdivision]]), COG Dasma own FB page?
+- [x] Done 2026-11-25 (merged to main, merge 1bc4ff0): homepage audit (impeccable, 360-2760px, light and dark) scored 14/20. Items 1-6 fixed. Items 7-9 parked in [[Backlog]]. Report saved in `.impeccable/audit/` (not committed; owner to decide commit vs `.gitignore`). See [[homepage-theme-polish]] slice H.
+- [x] Done 2026-11-25 (branch `fix/gallery-image-performance`, commits eaa4fdf, fdb12f1, b0881a1, merged to main 1bc4ff0): gallery WebP thumbnails made with PHP GD (800 and 1600px tiers), srcset in the grid, lazy grid. Backfill needed on production (see Phase 7). See [[gallery-thumbnails-gd]] and [[homepage-theme-polish]] slice I.
+- [x] Done 2026-11-25 (branch `fix/mobile-polish`, commit 07d7f29, merged to main 1bc4ff0): mobile polish: 44px tap targets on church and calendar/directions links, `text-wrap: pretty`, light-mode church-logo watermark removed, hero pill on one line at 320-360px, equal-width Sunday time chips. See [[homepage-theme-polish]] slice J.
+- Tests after these three fixes: 447 total (446 pass, 1 skipped). Reviewer run; must-fix items addressed. Browser check at 360px and wide screens still owner-pending.
 
 ### Tasks
 1. [x] Scaffold Laravel (latest stable) + Tailwind, Alpine, Filament, Spatie Permission, Breeze Blade, Pest; commit
@@ -161,7 +165,8 @@ Status: in progress (spec written 2026-11-25). Spec: [[join-applications]]. Task
 - Check `text-primary` contrast for small text (e.g., the "DASMARIÑAS" eyebrow on the placeholder page); see [[primary-dark-contrast-token]]
 - ~~Self-host the Inter font (see [[Backlog]])~~ superseded 2026-11-24
 - Self-host Montserrat and Mrs Saint Delafield (see [[Backlog]], [[typography-matches-logo]])
-- Write `DEPLOY.md`: server reqs PHP 8.2+, MySQL 8, Composer, Node, extensions; `composer install --no-dev --optimize-autoloader`; `npm ci && npm run build`; production `.env` values; `key:generate`; `migrate --force`; seed only branches and roles; `storage:link`; config/route/view/event cache; HTTPS; queue worker; scheduler cron; backups of DB and uploads; first-login checklist (create super-admin, assign branch-heads, set logo, check schedule, check team flag)
+- **Gallery thumbnails deploy step (2026-11-25):** run `php artisan gallery:thumbnails` once on production after deploy to backfill thumbnails. Confirm the PHP GD extension is enabled on the server (`php -m`). Add to `DEPLOY.md`. See [[gallery-thumbnails-gd]].
+- Write `DEPLOY.md`: server reqs PHP 8.2+, MySQL 8, Composer, Node, extensions (including GD); `composer install --no-dev --optimize-autoloader`; `npm ci && npm run build`; production `.env` values; `key:generate`; `migrate --force`; seed only branches and roles; `storage:link`; `gallery:thumbnails`; config/route/view/event cache; HTTPS; queue worker; scheduler cron; backups of DB and uploads; first-login checklist (create super-admin, assign branch-heads, set logo, check schedule, check team flag)
 - Write `PRODUCTION-CHECKLIST.md`: pages load on phone and desktop; join form sends email; admin login works; non-admin cannot reach /admin; schedule correct; images load
 - Full review items (2026-11-25, see [[full-review-2026-11-25]]):
   - HTTPS and proxies: `trustProxies`, `URL::forceHttps` in production, security-headers middleware (HSTS, X-Frame-Options, Referrer-Policy, CSP), `SESSION_SECURE_COOKIE=true`
@@ -179,6 +184,7 @@ Status: in progress (spec written 2026-11-25). Spec: [[join-applications]]. Task
 - [ ] Cron job: `* * * * * php artisan schedule:run`
 - [ ] Fake seeded data removed; only manually created super-admin remains
 - [ ] `php artisan optimize` run; storage/cache permissions correct
+- [ ] `php artisan gallery:thumbnails` run once after deploy
 - [ ] Security review by owner: roles, branch scoping, file uploads, login rate limiting
 - [ ] Phone smoke test: homepage, apply form, login, member dashboard on 360px
   - ~~on 375px~~ (superseded 2026-11-24 by [[second-brief-merged]])

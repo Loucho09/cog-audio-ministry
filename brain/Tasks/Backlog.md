@@ -27,7 +27,7 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Sticky join CTA on mobile (owner idea 2026-11-24; see [[homepage-hooks]])
 - "No experience needed" steps on the join section (owner declined for now, 2026-11-24; see [[homepage-hooks]])
 - Gallery: with exactly 4 non-featured photos the md grid shows a lone tile; check the layout (added 2026-11-24; see [[homepage-sections]])
-- Gallery: responsive `srcset` or thumbnails for gallery images (added 2026-11-24; see [[homepage-sections]])
+- ~~Gallery: responsive `srcset` or thumbnails for gallery images (added 2026-11-24; see [[homepage-sections]])~~ — **Done 2026-11-25:** GD thumbnails at 800 and 1600px, srcset in the grid (see [[gallery-thumbnails-gd]]). Backfill on production: `php artisan gallery:thumbnails`.
 - Replace the temporary local `cog_audio` MySQL password before any shared/production use; production gets its own credentials (added 2026-11-24)
 - Single cancelled service dates (one-off exceptions) for the homepage services list; v2 uses only a date window (added 2026-11-24; see [[services-section-v2]], [[service-date-window]])
 - Validate `ends_on >= starts_on` in the Phase 2 Filament Service resource (added 2026-11-24; see [[services-section-v2]])
@@ -35,13 +35,13 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Windows dev note: "rename(): Access is denied" on compiled views; run `php artisan view:clear` (added 2026-11-24)
 - Consider gitignoring `.playwright-mcp/` (added 2026-11-24)
 - TODO: confirm service duration for calendar (90 min default) (added 2026-11-24; see [[services-section-v2]])
-- Supply a larger cover photo (about 2560px wide): the 1600px source looks soft on 1920px+ screens (added 2026-11-24; see [[desktop-container-and-splits]])
+- Supply a larger cover photo (about 2560px wide): the 1600px source looks soft on 1920px+ screens (added 2026-11-24; see [[desktop-container-and-splits]]). Same issue as audit item 8 below.
 - ~~Services spotlight and upcoming list column heights are not matched on `lg` (added 2026-11-24; see [[desktop-container-and-splits]])~~ — **Done 2026-11-24:** cards stretch to equal height on `lg` (polish pass)
 - Contact with address filled: map may be narrow (about 330px) on `lg`; check when the address is added (added 2026-11-24; see [[desktop-container-and-splits]])
 - Cosmetic re-indent in `resources/views/components/home/contact.blade.php` (added 2026-11-24; see [[desktop-container-and-splits]])
 - Refactor: shared ServiceIcs helper for "last service date" so `ServiceSchedule::note()` and `ServiceIcs::firstStart` do not drift (reviewer suggestion, 2026-11-24; see [[services-section-v2]])
 - Windows dev: "rename(): Access is denied" and 30s timeouts come from compiled view cache locking (first load after `view:clear` takes about 21s). Consider excluding `storage/framework/views` from Windows Defender (added 2026-11-24; see [[services-section-v2]])
-- Tap targets under 24px (church Facebook links 92x20, Add to calendar 115x20). Fix in Phase 7 accessibility pass. Found 2026-11-24 Playwright check (see [[Roadmap]]).
+- ~~Tap targets under 24px (church Facebook links 92x20, Add to calendar 115x20). Fix in Phase 7 accessibility pass. Found 2026-11-24 Playwright check (see [[Roadmap]]).~~ — **Done 2026-11-25** (branch `fix/mobile-polish`): 44px tap targets on church Facebook links, Add to calendar, Get directions and the Join-the-team link (see [[homepage-theme-polish]] slice J).
 - The set-password link expires in 60 minutes, which is short for new members. Consider a longer lifetime for new accounts (added 2026-11-25; see [[admin-user-management]], [[member-accounts-roles-tasks]]).
 - The branch-head user list shows other admins in the branch with no Edit button, which may confuse them (added 2026-11-25; see [[admin-user-management]]).
 - Deleting a user leaves sessions and password_reset_tokens rows behind. Phase 4 must decide cascade or restrict for duty_assignments → users before deleting users is safe (added 2026-11-25; see [[admin-user-management]], [[Roadmap]]).
@@ -61,3 +61,7 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Owner to review the loading wording: "Confirming…" (new) and "Signing in…" (was "Logging in…") (added 2026-11-25; see [[loading-states]])
 - Nav "Log out" text is still hardcoded English, not translated with `__()` (added 2026-11-25; see [[loading-states]])
 - PRODUCTION (Phase 7 checklist): PHP `upload_max_filesize` at least 8M, `post_max_size` at least 10M; run `php artisan storage:link` (added 2026-11-25; see [[gallery-upload-fix]])
+- Homepage audit 2026-11-25 (impeccable, 360-2760px, light and dark; score 14/20). Items 1-6 fixed. Items 7-9 parked below. Report in `.impeccable/audit/` (not committed; owner to decide commit vs `.gitignore`). See [[homepage-theme-polish]] slice H.
+  - 7. Same eyebrow + h2 pattern on every section, gradient text, and glows make the page feel templated. Vary section headers; cut gradient text. (added 2026-11-25; see [[homepage-theme-polish]])
+  - 8. Cover photo looks soft above about 2300px wide; max source is 1600w. Supply a 2560px+ source (see the cover photo item above). (added 2026-11-25; see [[homepage-theme-polish]])
+  - 9. Global reduced-motion rule sets animation durations to 0.01ms. Replace with a targeted `motion-reduce` pass. (added 2026-11-25; see [[homepage-theme-polish]], [[loading-states]])
