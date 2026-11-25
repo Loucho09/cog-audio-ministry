@@ -37,6 +37,9 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(30)->by('ip:'.$request->ip()),
         ]);
 
+        // Public join form: a few submits per minute per IP.
+        RateLimiter::for('join-form', fn (Request $request) => Limit::perMinute(5)->by('join:'.$request->ip()));
+
         // Gate::before runs ahead of every Policy: super-admin is allowed everything.
         // Returning null for everyone else lets their Policy decide.
         Gate::before(fn (User $user) => $user->hasRole('super-admin') ? true : null);
