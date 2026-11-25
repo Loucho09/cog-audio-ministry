@@ -35,6 +35,8 @@ use UnitEnum;
 
 class EventResource extends Resource
 {
+    public const DUPLICATE_MESSAGE = 'An event for this service already starts at this time.';
+
     protected static ?string $model = Event::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
@@ -171,6 +173,21 @@ class EventResource extends Resource
                     if ($operation === 'create' && filled($value) && Carbon::parse($value, config('app.timezone'))->lessThanOrEqualTo(now())) {
                         $fail('Pick a start time in the future.');
                     }
+                }])
+                ->rules([fn (Get $get, ?Event $record) => function (string $attribute, mixed $value, Closure $fail) use ($get, $record): void {
+                    if (blank($value) || blank($get('service_id'))) {
+                        return;
+                    }
+
+                    $taken = Event::query()
+                        ->where('service_id', $get('service_id'))
+                        ->where('starts_at', Carbon::parse($value, config('app.timezone')))
+                        ->when($record?->exists, fn (Builder $q) => $q->whereKeyNot($record->getKey()))
+                        ->exists();
+
+                    if ($taken) {
+                        $fail(self::DUPLICATE_MESSAGE);
+                    }
                 }]),
             DateTimePicker::make('ends_at')->label('Ends at')->timezone(config('app.timezone'))->seconds(false)->required()->after('starts_at'),
             Textarea::make('notes')->rows(3)->maxLength(2000),
@@ -211,7 +228,8 @@ class EventResource extends Resource
                     ->label('Filled / needed')
                     ->state(fn (Event $record) => ((int) $record->filled_count).' / '.((int) $record->needed_sum)),
             ])
-            ->defaultSort('starts_at')
+            // Newest first for past events; upcoming stays ascending.
+            ->defaultSort('starts_at', fn ($livewire) => ($livewire->tableFilters['timing']['value'] ?? 'upcoming') === 'past' ? 'desc' : 'asc')
             ->filters([
                 SelectFilter::make('branch_id')
                     ->label('Branch')

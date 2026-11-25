@@ -10,6 +10,7 @@ use App\Filament\Resources\JoinApplications\Pages\ViewJoinApplication;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Branch;
 use App\Models\JoinApplication;
+use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -307,6 +308,12 @@ class JoinApplicationResource extends Resource
             ]);
     }
 
+    /** True when a user already uses the applicant's email (admins should reject, not approve). */
+    public static function emailHasAccount(JoinApplication $record): bool
+    {
+        return $record->isPending() && User::query()->where('email', $record->email)->exists();
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -323,6 +330,12 @@ class JoinApplicationResource extends Resource
                             ->color('gray')
                             ->size(TextSize::Small)
                             ->wrap(),
+                        TextColumn::make('account_exists')
+                            ->label('Account')
+                            ->badge()
+                            ->color('danger')
+                            ->state(fn (JoinApplication $record) => self::emailHasAccount($record) ? 'Account exists' : null)
+                            ->tooltip('This email already belongs to a user. Reject instead of approving.'),
                     ]),
                     Stack::make([
                         TextColumn::make('branch.name')

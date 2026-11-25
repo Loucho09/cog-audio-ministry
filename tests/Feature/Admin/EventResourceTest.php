@@ -325,3 +325,45 @@ it('refuses to create an event that starts in the past', function () {
 
     expect(Event::where('name', 'Special Night')->exists())->toBeFalse();
 });
+
+it('rejects a duplicate service and start time on create', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+    $service = Service::factory()->create(['branch_id' => $this->branchA->id]);
+    $form = eventForm(['service_id' => $service->id]);
+    Event::factory()->create(['branch_id' => $this->branchA->id, 'service_id' => $service->id, 'starts_at' => $form['starts_at'], 'ends_at' => now()->addWeeks(2)->setTime(11, 0)]);
+
+    Livewire::test(CreateEvent::class)
+        ->fillForm($form)
+        ->call('create')
+        ->assertHasFormErrors(['starts_at']);
+
+    expect(Event::where('name', 'Special Night')->exists())->toBeFalse();
+});
+
+it('rejects a duplicate service and start time on edit but allows saving itself', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+    $service = Service::factory()->create(['branch_id' => $this->branchA->id]);
+    $start = now()->addWeeks(3)->setTime(9, 0);
+    $own = Event::factory()->create(['branch_id' => $this->branchA->id, 'service_id' => $service->id, 'starts_at' => $start, 'ends_at' => $start->copy()->addHours(2)]);
+    $other = Event::factory()->create(['branch_id' => $this->branchA->id, 'service_id' => $service->id, 'starts_at' => $start->copy()->addDay(), 'ends_at' => $start->copy()->addDay()->addHours(2)]);
+
+    Livewire::test(EditEvent::class, ['record' => $own->id])
+        ->fillForm(['name' => 'Renamed'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    Livewire::test(EditEvent::class, ['record' => $other->id])
+        ->fillForm(['starts_at' => $start->format('Y-m-d H:i:s'), 'ends_at' => $start->copy()->addHours(2)->format('Y-m-d H:i:s')])
+        ->call('save')
+        ->assertHasFormErrors(['starts_at']);
+});
+
+it('sorts past events newest first', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+    $old = Event::factory()->create(['branch_id' => $this->branchA->id, 'starts_at' => now()->subDays(10), 'ends_at' => now()->subDays(10)->addHours(2)]);
+    $newer = Event::factory()->create(['branch_id' => $this->branchA->id, 'starts_at' => now()->subDays(2), 'ends_at' => now()->subDays(2)->addHours(2)]);
+
+    Livewire::test(ListEvents::class)
+        ->filterTable('timing', 'past')
+        ->assertCanSeeTableRecords([$newer, $old], inOrder: true);
+});

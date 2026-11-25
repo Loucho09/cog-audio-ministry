@@ -10,7 +10,9 @@ use App\Models\DutyAssignment;
 use App\Models\DutyRole;
 use App\Models\Event;
 use App\Models\User;
+use App\Policies\EventPolicy;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -266,4 +268,24 @@ it('removes a guest assignment', function () {
     manager($this->event)->callTableAction('remove', $g)->assertNotified();
 
     expect(DutyAssignment::count())->toBe(0);
+});
+
+class DenyEventUpdatePolicy extends EventPolicy
+{
+    public function update(User $user, Event $event): bool
+    {
+        return false;
+    }
+}
+
+it('hides assign and remove when the policy denies updating the event', function () {
+    $assignment = makeAssignment($this);
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    // Same branch, so the manager opens, but update is denied.
+    Gate::policy(Event::class, DenyEventUpdatePolicy::class);
+
+    manager($this->event)
+        ->assertTableActionHidden('assign')
+        ->assertTableActionHidden('remove', $assignment);
 });

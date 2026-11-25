@@ -29,9 +29,17 @@ class ListJoinApplications extends ListRecords
     {
         $status = fn (string $status) => fn (Builder $query) => $query->where('status', $status);
 
-        $count = fn (?string $s = null): int => JoinApplicationResource::getEloquentQuery()
-            ->when($s, fn (Builder $q) => $q->where('status', $s))
-            ->count();
+        // One grouped query instead of four counts; still starts from the scoped resource query.
+        $counts = JoinApplicationResource::getEloquentQuery()
+            ->reorder()
+            ->toBase()
+            ->selectRaw('status, count(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
+        $count = fn (?string $s = null): int => $s === null
+            ? (int) $counts->sum()
+            : (int) ($counts[$s] ?? 0);
 
         $pending = $count(JoinApplication::STATUS_PENDING);
 

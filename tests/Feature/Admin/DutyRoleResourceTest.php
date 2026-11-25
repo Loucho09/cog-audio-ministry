@@ -8,6 +8,7 @@ use App\Filament\Resources\Services\Pages\CreateService;
 use App\Filament\Resources\Services\Pages\EditService;
 use App\Models\Branch;
 use App\Models\DutyRole;
+use App\Models\Event;
 use App\Models\Service;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
@@ -270,4 +271,39 @@ it('rejects an oversized sort order', function () {
         ->fillForm(['name' => 'Big', 'sort_order' => 99999999999])
         ->call('create')
         ->assertHasFormErrors(['sort_order']);
+});
+
+it('explains which roles were kept on bulk delete', function () {
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $event = Event::factory()->create(['branch_id' => $this->branchA->id]);
+    $event->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]);
+
+    Livewire::test(ListDutyRoles::class)
+        ->selectTableRecords([$this->roleA->id])
+        ->callAction(TestAction::make('delete')->table()->bulk())
+        ->assertNotified('1 role was kept because it is used on events.');
+
+    expect(DutyRole::find($this->roleA->id))->not->toBeNull();
+});
+
+it('shows how many events use a role', function () {
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    Event::factory()->count(2)->create(['branch_id' => $this->branchA->id])
+        ->each(fn ($e) => $e->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]));
+
+    Livewire::test(ListDutyRoles::class)->assertTableColumnStateSet('used_on_count', 2, $this->roleA);
+});
+
+it('warns when deactivating a role used on upcoming events', function () {
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $event = Event::factory()->create(['branch_id' => $this->branchA->id, 'starts_at' => now()->addWeek(), 'ends_at' => now()->addWeek()->addHours(2)]);
+    $event->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]);
+
+    Livewire::test(EditDutyRole::class, ['record' => $this->roleA->id])
+        ->fillForm(['is_active' => false])
+        ->call('save')
+        ->assertHasNoFormErrors()
+        ->assertNotified('This role is still on 1 upcoming event.');
+
+    expect($this->roleA->fresh()->is_active)->toBeFalse();
 });
