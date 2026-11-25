@@ -53,7 +53,7 @@ it('counts members and branch admins per branch', function () {
     $record = $component->instance()->getTable()->getQuery()->find($this->a->id);
 
     expect($record->users_count)->toBe(3)
-        ->and($record->admins_count)->toBe(2);
+        ->and($record->users->filter->hasRole('branch-admin'))->toHaveCount(2);
 });
 
 it('reports address missing or done from config', function () {

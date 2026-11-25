@@ -50,6 +50,9 @@ class EditUser extends EditRecord
 
         try {
             DB::transaction(function () use ($record, $data, $actor): void {
+                $wasAdmin = $record->hasRole('branch-admin');
+                $oldBranch = $record->branch_id;
+
                 $record->fill(Arr::only($data, ['name', 'email']));
 
                 if (array_key_exists('branch_id', $data)) {
@@ -72,8 +75,11 @@ class EditUser extends EditRecord
                         ]);
                     }
 
-                    // Moving an admin into a branch that is already full is blocked.
-                    app(AssignRole::class)->assertAdminSlotFree($record, 'branch_id');
+                    // Only check when becoming an admin or moving an admin to another branch;
+                    // a plain rename in an already over-limit branch must still save.
+                    if (! $wasAdmin || $record->branch_id != $oldBranch) {
+                        app(AssignRole::class)->assertAdminSlotFree($record, 'branch_id');
+                    }
                 }
             });
         } catch (ValidationException $e) {

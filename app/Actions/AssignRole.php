@@ -28,7 +28,7 @@ class AssignRole
             throw new AuthorizationException('Unknown role.');
         }
 
-        if (in_array($role, ['branch-admin'], true) && $target->branch_id === null) {
+        if ($role === 'branch-admin' && $target->branch_id === null) {
             throw ValidationException::withMessages([
                 'role' => 'Assign the user to a branch before giving this role.',
             ]);
@@ -80,6 +80,8 @@ class AssignRole
         $current = User::role('branch-admin')
             ->where('branch_id', $branch->id)
             ->whereKeyNot($target->id)
+            ->lockForUpdate()
+            ->get(['users.id'])
             ->count();
 
         if ($current >= $limit) {

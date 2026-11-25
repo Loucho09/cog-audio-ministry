@@ -8,9 +8,8 @@ use App\Models\Branch;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
-use Illuminate\Database\Eloquent\Builder;
 
-/** Super-admin only: one row per branch with member, head and admin counts. Read-only. */
+/** Super-admin only: one row per branch with member and branch-admin counts. Read-only. */
 class BranchOverviewWidget extends TableWidget
 {
     use HasSkeletonPlaceholder;
@@ -38,10 +37,7 @@ class BranchOverviewWidget extends TableWidget
         return $table
             ->query(
                 Branch::query()
-                    ->withCount([
-                        'users',
-                        'users as admins_count' => fn (Builder $q) => $q->role('branch-admin'),
-                    ])
+                    ->withCount('users')
                     ->with(['users' => fn ($q) => $q->role('branch-admin')])
                     ->orderByDesc('is_main')
                     ->orderBy('name')
@@ -52,7 +48,7 @@ class BranchOverviewWidget extends TableWidget
                     ->url(fn (Branch $record) => BranchResource::getUrl('edit', ['record' => $record]))
                     ->description(fn (Branch $record) => $record->is_main ? 'Main branch' : null),
                 TextColumn::make('users_count')->label('Accounts'),
-                TextColumn::make('heads')
+                TextColumn::make('admins')
                     ->label('Branch admins')
                     ->state(fn (Branch $record) => $record->users->isEmpty() ? 'No admin' : $record->users->pluck('name')->implode(', '))
                     ->badge()

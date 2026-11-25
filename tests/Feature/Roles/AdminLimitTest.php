@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\AssignRole;
+use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\Branch;
 use App\Models\User;
@@ -82,6 +83,51 @@ it('reads the limit from config so it can change without code', function () {
     app(AssignRole::class)->handle($this->owner, $member, 'branch-admin');
 
     expect($member->fresh()->hasRole('branch-admin'))->toBeTrue();
+});
+
+it('refuses to create a branch-admin in a full branch and creates no user', function () {
+    Filament::setCurrentPanel('admin');
+    User::factory()->branchAdmin($this->trece)->create();
+    $this->actingAs($this->owner);
+
+    Livewire::test(CreateUser::class)
+        ->fillForm([
+            'name' => 'Extra Admin',
+            'email' => 'extra@example.test',
+            'branch_id' => $this->trece->id,
+            'role' => 'branch-admin',
+            'password_mode' => 'email',
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['role']);
+
+    expect(User::where('email', 'extra@example.test')->exists())->toBeFalse();
+});
+
+it('lets a super-admin rename an admin in an over-limit branch', function () {
+    Filament::setCurrentPanel('admin');
+    User::factory()->branchAdmin($this->trece)->create();
+    $admin = User::factory()->branchAdmin($this->trece)->create(['name' => 'Old Name']);
+    $this->actingAs($this->owner);
+
+    Livewire::test(EditUser::class, ['record' => $admin->id])
+        ->fillForm(['name' => 'New Name'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($admin->fresh()->name)->toBe('New Name')
+        ->and($admin->fresh()->hasRole('branch-admin'))->toBeTrue();
+});
+
+it('frees the slot when an admin is demoted so another member can be promoted', function () {
+    $admin = User::factory()->branchAdmin($this->trece)->create();
+    $member = User::factory()->member($this->trece)->create();
+
+    app(AssignRole::class)->handle($this->owner, $admin, 'member');
+    app(AssignRole::class)->handle($this->owner, $member, 'branch-admin');
+
+    expect($admin->fresh()->hasRole('member'))->toBeTrue()
+        ->and($member->fresh()->hasRole('branch-admin'))->toBeTrue();
 });
 
 it('has no branch-head role any more', function () {

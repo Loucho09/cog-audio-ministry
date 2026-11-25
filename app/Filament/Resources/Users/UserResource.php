@@ -77,8 +77,8 @@ class UserResource extends Resource
     }
 
     /**
-     * Super-admin only (the policy would also let a branch-admin delete members; the
-     * approved rule is super-admin only). Refuses self and the last super-admin.
+     * Super-admin only (UserPolicy::delete already returns false for everyone else;
+     * this is a second guard). Refuses self and the last super-admin.
      */
     public static function deleteUser(User $record): bool
     {

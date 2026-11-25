@@ -35,6 +35,7 @@ return new class extends Migration
 
     public function down(): void
     {
+        // Only recreates the empty role; it cannot restore which users were heads.
         Role::findOrCreate('branch-head', 'web');
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
