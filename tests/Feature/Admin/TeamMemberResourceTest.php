@@ -104,3 +104,37 @@ it('forbids members from the team page', function () {
 
     $this->get('/admin/team-members')->assertForbidden();
 });
+
+it('shows tab counts scoped to the branch-head', function () {
+    $this->memberA->update(['is_featured' => true]);
+    $this->memberB->update(['is_featured' => true, 'is_published' => false]);
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+
+    $tabs = Livewire::test(ListTeamMembers::class)->assertSuccessful()->instance()->getTabs();
+
+    // own + global rows only; the other branch's featured and pending rows are not counted.
+    expect($tabs['all']->getBadge())->toEqual(2)
+        ->and($tabs['featured']->getBadge())->toEqual(1)
+        ->and($tabs['pending']->getBadge())->toBeNull();
+});
+
+it('counts pending approval rows for the super-admin and filters by tab', function () {
+    $this->memberB->update(['is_published' => false]);
+    $this->actingAs(User::factory()->superAdmin()->create());
+
+    $test = Livewire::test(ListTeamMembers::class);
+    expect($test->instance()->getTabs()['pending']->getBadge())->toEqual(1);
+
+    $test->set('activeTab', 'pending')
+        ->assertCanSeeTableRecords([$this->memberB])
+        ->assertCanNotSeeTableRecords([$this->memberA]);
+});
+
+it('renders the edit page summary card', function () {
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+
+    Livewire::test(EditTeamMember::class, ['record' => $this->memberA->id])
+        ->assertSuccessful()
+        ->assertSee('Summary')
+        ->assertSee('Alpha Person');
+});
