@@ -31,6 +31,7 @@ class HomeController extends Controller
             ->filter(fn (GalleryImage $image) => $image->url !== null)
             ->map(fn (GalleryImage $image) => [
                 'url' => $image->url,
+                'thumb' => $image->thumb_url,
                 'alt' => $image->alt_text,
                 'title' => $image->title,
                 'placeholder' => $image->isPlaceholder(),

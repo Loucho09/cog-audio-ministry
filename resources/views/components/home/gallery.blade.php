@@ -115,6 +115,13 @@
                                 default => '',
                             };
                             $cell = $isFeatured ? 'col-span-2 aspect-[4/3] md:row-span-2 md:aspect-auto' : trim($mobileCell.' '.$mdCell);
+                            // Rendered tile width, so the browser picks the small thumbnail unless the tile is big on a sharp screen.
+                            $mdSize = match (true) {
+                                $loop->last && $wideRemainder === 1 => '100vw',
+                                $isFeatured || ($loop->last && $wideRemainder === 2) => '66vw',
+                                default => '33vw',
+                            };
+                            $sizes = '(min-width: 768px) '.$mdSize.', '.($isFeatured || $isOrphan ? '100vw' : '50vw');
                         @endphp
                         <li class="{{ $cell }}">
                             @if ($image['placeholder'])
@@ -127,7 +134,13 @@
                                     class="group relative block h-full w-full overflow-hidden rounded-3xl bg-text/5 shadow-sm ring-1 ring-text/10 transition-shadow duration-300 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2"
                                 >
                                     {{-- The hover zoom sits on the wrapper (not the img) so it does not clash with the img's own fade transition. --}}
-                                    <x-skeleton-image src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" :loading="$isFeatured ? 'eager' : 'lazy'" class="h-full w-full transition duration-700 ease-out motion-safe:group-hover:scale-105"/>
+                                    {{-- Grid shows the 800px thumbnail; the full photo is only a srcset option for big tiles on
+                                         sharp screens (its "1600w" is a hint, tiles crop with object-cover). Lazy: the gallery is far below the fold. --}}
+                                    @if ($image['thumb'])
+                                        <x-skeleton-image src="{{ $image['thumb'] }}" srcset="{{ $image['thumb'] }} 800w, {{ $image['url'] }} 1600w" sizes="{{ $sizes }}" alt="{{ $image['alt'] }}" class="h-full w-full transition duration-700 ease-out motion-safe:group-hover:scale-105"/>
+                                    @else
+                                        <x-skeleton-image src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" class="h-full w-full transition duration-700 ease-out motion-safe:group-hover:scale-105"/>
+                                    @endif
                                     {{-- Caption shade. Decorative copy: the button's aria-label already names the photo.
                                          Captions always show on touch-size screens; on md+ only the featured one does, others reveal on hover/focus. --}}
                                     <span aria-hidden="true" @class([
@@ -164,7 +177,10 @@
                     >
                         <div class="m-auto flex w-full max-w-4xl flex-col items-center" x-on:click.self="close()">
                             <figure class="flex flex-col items-center">
-                                <img x-bind:src="images[current]?.url" x-bind:alt="images[current]?.alt ?? ''" class="max-h-[70dvh] w-auto max-w-full rounded-lg object-contain">
+                                {{-- Only rendered while open, so the full-size photo is not downloaded before anyone opens the viewer. --}}
+                                <template x-if="open">
+                                    <img x-bind:src="images[current]?.url" x-bind:alt="images[current]?.alt ?? ''" class="max-h-[70dvh] w-auto max-w-full rounded-lg object-contain">
+                                </template>
                                 <figcaption id="gallery-caption" aria-live="polite" class="mt-3 text-center text-sm text-surface dark:text-text" x-text="images[current]?.title || images[current]?.alt"></figcaption>
                             </figure>
 
