@@ -76,6 +76,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[duty-roster]]: events, duty roles, slots, assignments, accept/decline (Phase 4 v1, merged to main 2026-11-26; tasks in [[duty-roster-tasks]])
 - [[duty-guest-assign]]: assign a typed guest name to a duty, auto-confirmed (Phase 4, done, merged; tasks in [[duty-guest-assign-tasks]])
 - [[duty-availability]]: members mark unavailable dates and AM/PM blocks; assign respects it (Phase 4 v2a, done, merged 2026-11-26; tasks in [[duty-availability-tasks]])
+- [[duty-swaps]]: open offer, claim, admin approve or reject; Roster → Swaps (Phase 4 v2b, done, merged 2026-11-26; tasks in [[duty-swaps-tasks]])
 - [[remove-branch-head]]: remove branch-head role, admin limit per branch (Phase 4, done, merged; tasks in [[remove-branch-head-tasks]])
 - [[loading-states]]: progress bar, view transitions, image skeletons, submit guard, admin skeletons, scroll reveal (UI polish add-on before Phase 3, done and merged 2026-11-25; tasks in [[loading-states-tasks]])
 

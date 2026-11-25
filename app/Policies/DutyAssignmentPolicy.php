@@ -34,6 +34,11 @@ class DutyAssignmentPolicy
 
     public function respond(User $user, DutyAssignment $dutyAssignment): bool
     {
-        return $dutyAssignment->user_id === $user->id;
+        return $dutyAssignment->user_id !== null && (int) $dutyAssignment->user_id === (int) $user->id;
+    }
+
+    public function offerSwap(User $user, DutyAssignment $dutyAssignment): bool
+    {
+        return $dutyAssignment->user_id !== null && (int) $dutyAssignment->user_id === (int) $user->id;
     }
 }

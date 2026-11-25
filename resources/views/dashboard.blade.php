@@ -132,6 +132,33 @@
                                         </form>
                                     </div>
                                 @endif
+
+                                @if ($duty->status === \App\Enums\DutyStatus::Accepted && ! $duty->event->hasStarted())
+                                    <form method="POST" action="{{ route('swaps.store', $duty) }}" data-submit-guard class="mt-3" onsubmit="return confirm(@js(__('Offer this duty to another member? Your admin will confirm the swap.')))">
+                                        @csrf
+                                        <x-secondary-button type="submit" aria-label="{{ __('Offer swap for :event', ['event' => $duty->event->name]) }}">{{ __('Offer swap') }}</x-secondary-button>
+                                    </form>
+                                @endif
+
+                                @if ($duty->status === \App\Enums\DutyStatus::SwapRequested && ($swap = $duty->swaps->sortByDesc('id')->first()))
+                                    <p class="mt-2 text-sm text-text/70">
+                                        @if ($swap->claimedBy)
+                                            {{ __('Claimed by :name, waiting for admin.', ['name' => $swap->claimedBy->name]) }}
+                                        @else
+                                            {{ __('Waiting for someone to take this duty.') }}
+                                        @endif
+                                    </p>
+                                    @if ((int) $swap->offered_by === (int) auth()->id())
+                                        <form method="POST" action="{{ route('swaps.cancel', $swap) }}" data-submit-guard class="mt-3" onsubmit="return confirm(@js(__('Cancel this swap and keep the duty?')))">
+                                            @csrf
+                                            <x-secondary-button type="submit" aria-label="{{ __('Cancel swap for :event', ['event' => $duty->event->name]) }}">{{ __('Cancel swap') }}</x-secondary-button>
+                                        </form>
+                                    @endif
+                                @endif
+
+                                @if ($duty->status === \App\Enums\DutyStatus::SwapRequested && $duty->swaps->isEmpty())
+                                    <p class="mt-2 text-sm text-text/70">{{ __("Swap expired. You're still on this duty.") }}</p>
+                                @endif
                             </li>
                         @endforeach
                     </ul>
@@ -144,6 +171,51 @@
                 <p class="mt-3 text-sm text-text/70">{{ __('News from your branch will appear here.') }}</p>
             </section>
         </div>
+
+        <section data-reveal aria-labelledby="swaps-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+            <h2 id="swaps-heading" class="text-lg font-semibold text-text">{{ __('Open swaps in your branch') }}</h2>
+            <p class="mt-1 text-sm text-text/70">{{ __('A teammate cannot serve and is looking for someone to take their duty.') }}</p>
+
+            @if ($claimedSwaps->isNotEmpty())
+                <ul class="mt-4 space-y-2">
+                    @foreach ($claimedSwaps as $claimedSwap)
+                        <li class="rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-sm text-text">
+                            {{ __('You offered to take :role at :event, :when. Waiting for your admin.', [
+                                'role' => $claimedSwap->assignment->dutyRole->name,
+                                'event' => $claimedSwap->assignment->event->name,
+                                'when' => $claimedSwap->assignment->event->starts_at->timezone(config('app.timezone'))->format('D, M j · g:i A'),
+                            ]) }}
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+
+            @if ($openSwaps->isEmpty())
+                <p class="mt-3 text-sm text-text/70">{{ __('No open swaps right now.') }}</p>
+            @else
+                <ul class="mt-4 divide-y divide-text/10">
+                    @foreach ($openSwaps as $openSwap)
+                        @php($swapEvent = $openSwap->assignment->event)
+                        <li class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-4 first:pt-0 last:pb-0">
+                            <div class="min-w-0">
+                                <p class="break-words font-medium text-text">
+                                    {{ $swapEvent->name }}
+                                    <span class="ms-2 rounded-full bg-text/10 px-2 py-0.5 text-xs font-medium text-text">{{ __($swapEvent->block()->label()) }}</span>
+                                </p>
+                                <p class="mt-1 text-sm text-text/70">
+                                    <time datetime="{{ $swapEvent->starts_at->toIso8601String() }}">{{ $swapEvent->starts_at->timezone(config('app.timezone'))->format('D, M j · g:i A') }}</time>
+                                </p>
+                                <p class="mt-0.5 break-words text-sm text-text/70">{{ $openSwap->assignment->dutyRole->name }} &middot; {{ __('offered by :name', ['name' => $openSwap->offeredBy->name]) }}</p>
+                            </div>
+                            <form method="POST" action="{{ route('swaps.claim', $openSwap) }}" data-submit-guard>
+                                @csrf
+                                <x-primary-button aria-label="{{ __('Claim swap for :event', ['event' => $swapEvent->name]) }}">{{ __('Claim') }}</x-primary-button>
+                            </form>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </section>
 
         @can('create', \App\Models\MemberUnavailability::class)
             <section data-reveal aria-labelledby="availability-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">

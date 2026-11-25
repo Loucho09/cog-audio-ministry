@@ -9,10 +9,12 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 | 1 | Setup and homepage | done (2026-11-24) |
 | 2 | Member accounts and roles | done (2a and 2b merged to main 2026-11-25) |
 | 3 | Join applications | done (2026-11-25; slices 1-7 and final review, last commit cc05d36; merged into main; browser check at 360px and dark mode still owner-pending) |
-| 4 | Duty roster | v1 merged; guest assign merged; v2a availability done (merged 2026-11-26, see [[duty-availability]]); v2b swaps next, spec [[duty-swaps]]. See [[duty-roster]] |
-| 5 | Notifications and reminders | planned |
+| 4 | Duty roster | done (2026-11-26): v1, guest assign, v2a availability ([[duty-availability]]), v2b swaps ([[duty-swaps]]) all merged. See [[duty-roster]] |
+| 5 | Notifications and reminders | next |
 | 6 | Equipment, training, reports | planned |
 | 7 | Production launch | planned |
+
+Current: Phase 5 (Notifications and reminders) is next. Phase 4 is complete.
 
 ## Phase 1: Setup and Homepage
 **Goal:** scaffold Laravel with required packages, build a mobile-first homepage.
@@ -120,7 +122,9 @@ Status: done (2026-11-25). Slices 1-7 and final review done; tests 552 total, 55
 ## Phase 4: Duty Roster
 **Goal:** event and duty management with swaps, availability, and member acceptance workflow.
 
-- Duty roster v1 merged to main 2026-11-26; guest assign (typed guest name) merged 2026-11-26; v2a availability done and merged 2026-11-26 (see [[duty-availability]]); v2b swaps next, spec [[duty-swaps]]. See [[duty-guest-assign]].
+Status: done (2026-11-26).
+
+- Duty roster v1 merged to main 2026-11-26; guest assign (typed guest name) merged 2026-11-26; v2a availability done and merged 2026-11-26 (see [[duty-availability]]); v2b swaps done and merged 2026-11-26, spec [[duty-swaps]], tasks [[duty-swaps-tasks]]. See [[duty-guest-assign]].
 
 ### Tasks
 - `events` model, migration: date, time, branch, type (Sunday Service, Revival Night, etc.)

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[UseFactory(DutyAssignmentFactory::class)]
 class DutyAssignment extends Model
@@ -59,8 +60,19 @@ class DutyAssignment extends Model
         return $this->belongsTo(User::class, 'assigned_by');
     }
 
+    public function swaps(): HasMany
+    {
+        return $this->hasMany(DutySwap::class);
+    }
+
+    public function liveSwap(): ?DutySwap
+    {
+        return $this->swaps()->live()->latest('id')->first();
+    }
+
+    /** Still serving: not declined, and not replaced by an approved swap. SwapRequested stays active. */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('status', '!=', DutyStatus::Declined->value);
+        return $query->whereNotIn('status', [DutyStatus::Declined->value, DutyStatus::Swapped->value]);
     }
 }

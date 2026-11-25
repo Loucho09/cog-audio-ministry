@@ -7,6 +7,7 @@ use App\Exceptions\RosterRuleViolation;
 use App\Models\Branch;
 use App\Models\DutyAssignment;
 use App\Models\DutyRole;
+use App\Models\DutySwap;
 use App\Models\Event;
 use App\Models\EventDutySlot;
 use App\Models\MemberUnavailability;
@@ -62,15 +63,7 @@ class DutyRosterService
                 throw new RosterRuleViolation('This member declined this duty, so it cannot be assigned again.');
             }
 
-            $overlaps = DutyAssignment::query()
-                ->active()
-                ->where('user_id', $member->id)
-                ->whereHas('event', fn ($q) => $q
-                    ->where('starts_at', '<', $event->ends_at)
-                    ->where('ends_at', '>', $event->starts_at))
-                ->exists();
-
-            if ($overlaps) {
+            if ($this->isServingDuring($member, $event)) {
                 throw new RosterRuleViolation('This member is already serving at that time.');
             }
 
@@ -97,6 +90,18 @@ class DutyRosterService
                 'status' => DutyStatus::Assigned,
             ]);
         });
+    }
+
+    /** True when the member has an active duty on an event overlapping this one. */
+    public function isServingDuring(User $member, Event $event): bool
+    {
+        return DutyAssignment::query()
+            ->active()
+            ->where('user_id', $member->id)
+            ->whereHas('event', fn ($q) => $q
+                ->where('starts_at', '<', $event->ends_at)
+                ->where('ends_at', '>', $event->starts_at))
+            ->exists();
     }
 
     public function assignGuest(Event $event, DutyRole $role, string $name, ?User $by = null): DutyAssignment
@@ -171,6 +176,8 @@ class DutyRosterService
     public function remove(DutyAssignment $assignment): void
     {
         DB::transaction(function () use ($assignment) {
+            // Lock order: swaps, then assignment (same as DutySwapService::cancel).
+            DutySwap::query()->where('duty_assignment_id', $assignment->id)->lockForUpdate()->get();
             $current = DutyAssignment::query()->whereKey($assignment->id)->lockForUpdate()->firstOrFail();
 
             if ($current->event->hasStarted()) {
@@ -181,6 +188,12 @@ class DutyRosterService
                 throw new RosterRuleViolation('A declined duty is kept as a record and cannot be removed.');
             }
 
+            if ($current->status === DutyStatus::Swapped) {
+                throw new RosterRuleViolation("This duty was swapped and can't be removed.");
+            }
+
+            // The duty_swaps FK cascades on delete, so open/claimed swap rows vanish with the assignment;
+            // marking them Cancelled first would only write rows that are deleted right after.
             $current->delete();
         });
     }

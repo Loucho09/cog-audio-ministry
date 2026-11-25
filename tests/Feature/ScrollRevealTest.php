@@ -36,7 +36,7 @@ it('marks the member dashboard cards for scroll reveal', function () {
         ->assertOk()
         ->getContent();
 
-    expect(substr_count($html, '<section data-reveal'))->toBe(7)
+    expect(substr_count($html, '<section data-reveal'))->toBe(8)
         ->and($html)->toContain('data-reveal-delay="80"');
 });
 
