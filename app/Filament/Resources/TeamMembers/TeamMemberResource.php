@@ -5,6 +5,7 @@ namespace App\Filament\Resources\TeamMembers;
 use App\Filament\Resources\TeamMembers\Pages\CreateTeamMember;
 use App\Filament\Resources\TeamMembers\Pages\EditTeamMember;
 use App\Filament\Resources\TeamMembers\Pages\ListTeamMembers;
+use App\Filament\Support\ApprovalNotice;
 use App\Filament\Support\PublishStatus;
 use App\Models\Branch;
 use App\Models\TeamMember;
@@ -88,6 +89,7 @@ class TeamMemberResource extends Resource
         return $schema
             ->columns(3)
             ->components([
+                ApprovalNotice::note(),
                 Group::make([
                     Section::make('Profile')
                         ->description('Who they are and how they look on the site.')
@@ -109,6 +111,9 @@ class TeamMemberResource extends Resource
                                 ->directory('team')
                                 ->image()
                                 ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->imageResizeMode('cover')
+                                ->imageResizeTargetWidth('400')
+                                ->imageResizeTargetHeight('400')
                                 ->maxSize(4096)
                                 ->helperText('JPG, PNG or WebP, up to 4 MB. On edit, leave empty to keep the current photo.'),
                         ]),
@@ -117,8 +122,12 @@ class TeamMemberResource extends Resource
                         ->icon(Heroicon::OutlinedSparkles)
                         ->columns(2)
                         ->schema([
-                            Toggle::make('is_full_time')->label('Full-time'),
-                            Toggle::make('is_featured')->label('Featured on homepage'),
+                            Toggle::make('is_full_time')
+                                ->label('Full-time')
+                                ->helperText('Full-time members are listed first.'),
+                            Toggle::make('is_featured')
+                                ->label('Featured on homepage')
+                                ->helperText('Shown in Meet the Team when that section is switched on.'),
                             TextInput::make('sort_order')
                                 ->numeric()
                                 ->minValue(0)
@@ -212,6 +221,12 @@ class TeamMemberResource extends Resource
                             ->size(TextSize::Small)
                             ->searchable()
                             ->placeholder('No role title yet'),
+                        TextColumn::make('global_note')
+                            ->label('Access')
+                            ->badge()
+                            ->color('gray')
+                            ->size(TextSize::ExtraSmall)
+                            ->state(fn (TeamMember $record) => ApprovalNotice::globalBadgeState($record->branch_id)),
                     ]),
                     TextColumn::make('branch.name')
                         ->label('Branch')

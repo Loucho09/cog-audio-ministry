@@ -5,6 +5,7 @@ namespace App\Filament\Resources\GalleryImages;
 use App\Filament\Resources\GalleryImages\Pages\CreateGalleryImage;
 use App\Filament\Resources\GalleryImages\Pages\EditGalleryImage;
 use App\Filament\Resources\GalleryImages\Pages\ListGalleryImages;
+use App\Filament\Support\ApprovalNotice;
 use App\Filament\Support\PublishStatus;
 use App\Models\Branch;
 use App\Models\GalleryImage;
@@ -88,6 +89,7 @@ class GalleryImageResource extends Resource
         return $schema
             ->columns(3)
             ->components([
+                ApprovalNotice::note(),
                 Group::make([
                     Section::make('Image')
                         ->description('Pick a clear, well-lit photo.')
@@ -110,6 +112,7 @@ class GalleryImageResource extends Resource
                         ->columns(2)
                         ->schema([
                             TextInput::make('title')
+                                ->helperText('Optional caption shown under the photo.')
                                 ->maxLength(255)
                                 ->prefixIcon(Heroicon::OutlinedTag),
                             TextInput::make('alt_text')
@@ -127,7 +130,7 @@ class GalleryImageResource extends Resource
                             Select::make('branch_id')
                                 ->label('Branch')
                                 ->placeholder('All churches')
-                                ->helperText('Leave empty to show this image for all churches.')
+                                ->helperText('All photos show on the shared homepage. Branch only controls who can manage it. Leave empty for a photo any branch can see.')
                                 ->options(fn () => Branch::query()->orderBy('name')->pluck('name', 'id'))
                                 ->searchable()
                                 ->prefixIcon(Heroicon::OutlinedBuildingLibrary)
@@ -211,6 +214,12 @@ class GalleryImageResource extends Resource
                             ->size(TextSize::Small)
                             ->searchable()
                             ->limit(70),
+                        TextColumn::make('global_note')
+                            ->label('Access')
+                            ->badge()
+                            ->color('gray')
+                            ->size(TextSize::ExtraSmall)
+                            ->state(fn (GalleryImage $record) => ApprovalNotice::globalBadgeState($record->branch_id)),
                     ]),
                     TextColumn::make('branch.name')
                         ->label('Branch')

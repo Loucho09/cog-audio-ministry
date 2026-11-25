@@ -21,6 +21,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Group;
@@ -64,11 +65,21 @@ class ServiceResource extends Resource
     /** Non-super-admins always save into their own branch, whatever the request says. */
     public static function forceBranch(array $data): array
     {
+        // An emptied sort order field submits null; keep the column at 0 instead.
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+
         if (! self::isSuperAdmin()) {
             $data['branch_id'] = auth()->user()->branch_id;
         }
 
         return $data;
+    }
+
+    public const DELETE_NOTE = 'Events made from this service are kept but no longer linked to it. Their duty slots stay. The default duty slots set on this service are removed.';
+
+    public static function duplicateSlotNotification(): Notification
+    {
+        return Notification::make()->danger()->title('A service already runs at this day and time.');
     }
 
     private static function isSuperAdmin(): bool
@@ -285,6 +296,7 @@ class ServiceResource extends Resource
                             TextInput::make('sort_order')
                                 ->numeric()
                                 ->minValue(0)
+                                ->default(0)
                                 ->prefixIcon(Heroicon::OutlinedArrowsUpDown),
                         ]),
                 ])->columnSpan(fn (string $operation) => $operation === 'edit' ? ['default' => 3, 'lg' => 2] : 'full'),
@@ -399,7 +411,9 @@ class ServiceResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->authorizeIndividualRecords('delete'),
+                    DeleteBulkAction::make()
+                        ->modalDescription(self::DELETE_NOTE)
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }
