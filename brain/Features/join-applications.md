@@ -52,5 +52,13 @@ Slice 2 notes (2026-11-25, commit 9103609):
 - Validation limits (spec silent): age 1-120; contact 7-30 chars, digits, `+-()` and spaces; `facebook_url` https only; experience and availability required, max 2000; interests required, array, min 1, distinct.
 - Not yet browser-checked at 360px or in dark mode.
 
+Slice 3 notes (2026-11-25, commit 5156e62):
+- `NewJoinApplication` notification: `ShouldQueue`, mail channel, `afterCommit`, `deleteWhenMissingModels`. Stores the branch name as a string.
+- Recipients via `App\Actions\NotifyStaffOfJoinApplication::recipients()`: super-admins plus branch-head and branch-admin with matching `branch_id`, deduped. Staff with null branch get nothing.
+- No applicant email. Mail has only name, branch, interests, submitted time (no contact, age or Facebook; data minimisation).
+- Name and branch are Markdown-escaped to stop link injection.
+- Dispatch failure is `report()`ed; applicant is still redirected to thanks.
+- Local dev: `QUEUE_CONNECTION=database`, `MAIL_MAILER=log`. Run `php artisan queue:work`; mail appears in `storage/logs`.
+
 Tasks: [[join-applications-tasks]]
 Notes / decisions: [[join-application-rules]], [[join-form-link]], [[homepage-sections]], [[member-accounts-roles]], [[temp-password-and-demo-emails]]
