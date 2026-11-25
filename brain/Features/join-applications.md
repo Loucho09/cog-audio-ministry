@@ -60,5 +60,17 @@ Slice 3 notes (2026-11-25, commit 5156e62):
 - Dispatch failure is `report()`ed; applicant is still redirected to thanks.
 - Local dev: `QUEUE_CONNECTION=database`, `MAIL_MAILER=log`. Run `php artisan queue:work`; mail appears in `storage/logs`.
 
+Slice 4 notes (2026-11-25, commit 3b52520, not browser-checked yet):
+- `App\Filament\Resources\JoinApplications\JoinApplicationResource` has List and View pages only. Approve and reject come in Slice 5.
+- `getEloquentQuery()` uses `visibleTo`. Another branch's view page returns 404. Members get 403. Staff with a null `branch_id` get 403 and see 0 rows.
+- Status filter defaults to pending (builder's call: the list acts as a review queue).
+- Branch filter is shown to super-admin only.
+- Name and email are searchable. Newest first.
+- Infolist has Applicant, Application and Review sections. The Facebook link shows only when it starts with https, and opens in a new tab with `rel="noopener"`.
+- Nav badge shows the live, scoped pending count.
+- `canCreate`, `canEdit`, `canDelete` and `canDeleteAny` are explicitly false, because super-admin bypasses policies through `Gate::before`.
+- Global search is disabled.
+- Staff email links to `JoinApplicationResource::getUrl('view', ..., panel: 'admin')`. The queue worker relies on APP_URL being set, which matters in production.
+
 Tasks: [[join-applications-tasks]]
 Notes / decisions: [[join-application-rules]], [[join-form-link]], [[homepage-sections]], [[member-accounts-roles]], [[temp-password-and-demo-emails]]
