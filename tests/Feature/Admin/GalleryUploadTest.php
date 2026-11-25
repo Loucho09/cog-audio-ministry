@@ -29,9 +29,9 @@ it('uploads jpg, png and webp images', function (string $name) {
     Storage::disk('public')->assertExists($image->path);
 })->with(['a.jpg', 'a.png', 'a.webp']);
 
-it('uploads as a branch-head into their own branch, unpublished', function () {
+it('uploads as a branch-admin into their own branch, unpublished', function () {
     $branch = Branch::factory()->create();
-    $this->actingAs(User::factory()->branchHead($branch)->create());
+    $this->actingAs(User::factory()->branchAdmin($branch)->create());
 
     Livewire::test(CreateGalleryImage::class)
         ->fillForm(['path' => UploadedFile::fake()->image('a.jpg', 1200, 800)->size(3000), 'alt_text' => 'Head upload'])

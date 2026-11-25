@@ -45,16 +45,16 @@ it('lets a super-admin create a global member with a photo', function () {
     Storage::disk('public')->assertExists($member->photo_path);
 });
 
-it('shows a branch-head own and global records but not other branches', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+it('shows a branch-admin own and global records but not other branches', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(ListTeamMembers::class)
         ->assertCanSeeTableRecords([$this->memberA, $this->memberGlobal])
         ->assertCanNotSeeTableRecords([$this->memberB]);
 });
 
-it('forces a branch-head new member into their own branch', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+it('forces a branch-admin new member into their own branch', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(CreateTeamMember::class)
         ->fillForm(['name' => 'Forced', 'branch_id' => $this->branchB->id])
@@ -64,15 +64,15 @@ it('forces a branch-head new member into their own branch', function () {
     expect(TeamMember::where('name', 'Forced')->firstOrFail()->branch_id)->toBe($this->branchA->id);
 });
 
-it('returns 403 for a branch-head editing a global record and 404 for another branch', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+it('returns 403 for a branch-admin editing a global record and 404 for another branch', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     $this->get("/admin/team-members/{$this->memberGlobal->id}/edit")->assertForbidden();
     $this->get("/admin/team-members/{$this->memberB->id}/edit")->assertNotFound();
 });
 
 it('keeps the existing photo path when editing without re-uploading', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
     $this->memberA->update(['photo_path' => 'images/placeholders/team-1.svg']);
 
     Livewire::test(EditTeamMember::class, ['record' => $this->memberA->id])
@@ -86,7 +86,7 @@ it('keeps the existing photo path when editing without re-uploading', function (
 });
 
 it('rejects a non-image upload', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(CreateTeamMember::class)
         ->fillForm([
@@ -105,10 +105,10 @@ it('forbids members from the team page', function () {
     $this->get('/admin/team-members')->assertForbidden();
 });
 
-it('shows tab counts scoped to the branch-head', function () {
+it('shows tab counts scoped to the branch-admin', function () {
     $this->memberA->update(['is_featured' => true]);
     $this->memberB->update(['is_featured' => true, 'is_published' => false]);
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     $tabs = Livewire::test(ListTeamMembers::class)->assertSuccessful()->instance()->getTabs();
 
@@ -131,7 +131,7 @@ it('counts pending approval rows for the super-admin and filters by tab', functi
 });
 
 it('renders the edit page summary card', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(EditTeamMember::class, ['record' => $this->memberA->id])
         ->assertSuccessful()

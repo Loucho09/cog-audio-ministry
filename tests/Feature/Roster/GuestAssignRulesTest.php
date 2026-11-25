@@ -7,7 +7,7 @@ use App\Models\User;
 
 test('guest is created auto-confirmed in the event branch', function () {
     [$event, $role] = rosterEvent();
-    $by = User::factory()->branchHead($event->branch)->create();
+    $by = User::factory()->branchAdmin($event->branch)->create();
 
     $a = svc()->assignGuest($event, $role, '  Juan   dela  Cruz ', $by);
 

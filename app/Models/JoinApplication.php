@@ -57,7 +57,7 @@ class JoinApplication extends Model
      */
     public function scopeVisibleTo(Builder $query, ?User $user): Builder
     {
-        if ($user === null || ! $user->hasAnyRole(['super-admin', 'branch-head', 'branch-admin'])) {
+        if ($user === null || ! $user->hasAnyRole(['super-admin', 'branch-admin'])) {
             return $query->whereKey([]);
         }
 

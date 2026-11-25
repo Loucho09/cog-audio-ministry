@@ -77,8 +77,8 @@ class UserResource extends Resource
     }
 
     /**
-     * Super-admin only (the policy would also let a branch-head delete members; the
-     * approved rule is super-admin only). Refuses self and the last super-admin.
+     * Super-admin only (UserPolicy::delete already returns false for everyone else;
+     * this is a second guard). Refuses self and the last super-admin.
      */
     public static function deleteUser(User $record): bool
     {
@@ -254,7 +254,7 @@ class UserResource extends Resource
                                 ->searchable()
                                 ->placeholder('No branch')
                                 ->prefixIcon(Heroicon::OutlinedBuildingLibrary)
-                                ->helperText('Required for branch-head and branch-admin.')
+                                ->helperText('Required for branch-admin.')
                                 ->rules(['nullable', 'exists:branches,id'])
                                 ->disabled(fn (?User $record) => $record !== null && $record->is(auth()->user()))
                                 ->visible(fn () => self::isSuperAdmin()),
@@ -371,7 +371,6 @@ class UserResource extends Resource
 
     public const ROLE_COLORS = [
         'super-admin' => 'danger',
-        'branch-head' => 'primary',
         'branch-admin' => 'info',
         'member' => 'gray',
     ];

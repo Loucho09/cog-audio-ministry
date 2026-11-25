@@ -29,7 +29,7 @@ it('shows the admin link only to admin roles', function () {
     $this->actingAs(User::factory()->member($branch)->create())
         ->get('/dashboard')->assertOk()->assertDontSee($link, false);
 
-    foreach (['branchHead', 'branchAdmin'] as $state) {
+    foreach (['branchAdmin'] as $state) {
         $this->actingAs(User::factory()->{$state}($branch)->create())
             ->get('/dashboard')->assertOk()->assertSee($link, false);
     }

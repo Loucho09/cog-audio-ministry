@@ -14,8 +14,8 @@ it('forbids members', function () {
     $this->actingAs($user)->get('/admin')->assertForbidden();
 });
 
-it('forbids a branch-head without a branch', function () {
-    $user = User::factory()->branchHead(Branch::factory()->create())->create(['branch_id' => null]);
+it('forbids a branch-admin without a branch', function () {
+    $user = User::factory()->branchAdmin(Branch::factory()->create())->create(['branch_id' => null]);
 
     $this->actingAs($user)->get('/admin')->assertForbidden();
 });
@@ -25,7 +25,7 @@ it('allows admin roles', function (string $state) {
     $user = User::factory()->{$state}($branch)->create();
 
     $this->actingAs($user)->get('/admin')->assertOk();
-})->with(['branchHead', 'branchAdmin']);
+})->with(['branchAdmin']);
 
 it('allows a super-admin', function () {
     $this->actingAs(User::factory()->superAdmin()->create())->get('/admin')->assertOk();

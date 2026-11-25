@@ -45,7 +45,7 @@ it('casts attributes', function () {
 });
 
 it('scopes the query by user', function () {
-    $head = User::factory()->branchHead($this->branchA)->create();
+    $head = User::factory()->branchAdmin($this->branchA)->create();
     $admin = User::factory()->branchAdmin($this->branchA)->create();
     $super = User::factory()->superAdmin()->create();
 
@@ -63,7 +63,7 @@ it('lets branch staff view only their own branch', function (string $state) {
         ->and($user->can('view', $this->appB))->toBeFalse()
         ->and($user->can('approve', $this->appB))->toBeFalse()
         ->and($user->can('reject', $this->appB))->toBeFalse();
-})->with(['branchHead', 'branchAdmin']);
+})->with(['branchAdmin']);
 
 it('lets super-admin view any branch', function () {
     $super = User::factory()->superAdmin()->create();
@@ -82,7 +82,7 @@ it('denies members everything', function () {
 });
 
 it('denies approve and reject on non-pending applications', function (string $state) {
-    $head = User::factory()->branchHead($this->branchA)->create();
+    $head = User::factory()->branchAdmin($this->branchA)->create();
     $app = JoinApplication::factory()->{$state}()->create(['branch_id' => $this->branchA->id]);
 
     expect($head->can('view', $app))->toBeTrue()
@@ -98,18 +98,18 @@ it('gives branch staff without a branch nothing', function (string $state) {
     expect(JoinApplication::visibleTo($user)->count())->toBe(0)
         ->and($user->can('viewAny', JoinApplication::class))->toBeFalse()
         ->and($user->can('view', $this->appA))->toBeFalse();
-})->with(['branchHead', 'branchAdmin']);
+})->with(['branchAdmin']);
 
 it('blocks the reverse cross-branch case', function () {
-    $head = User::factory()->branchHead($this->branchB)->create();
+    $head = User::factory()->branchAdmin($this->branchB)->create();
 
     expect($head->can('view', $this->appB))->toBeTrue()
         ->and($head->can('view', $this->appA))->toBeFalse()
         ->and(JoinApplication::visibleTo($head)->pluck('id')->all())->toBe([$this->appB->id]);
 });
 
-it('never lets branch-head create or update', function () {
-    $head = User::factory()->branchHead($this->branchA)->create();
+it('never lets branch-admin create or update', function () {
+    $head = User::factory()->branchAdmin($this->branchA)->create();
 
     expect($head->can('create', JoinApplication::class))->toBeFalse()
         ->and($head->can('update', $this->appA))->toBeFalse();
@@ -135,7 +135,7 @@ it('currently lets super-admin approve non-pending via Gate::before', function (
 });
 
 it('allows approve and reject on own-branch pending but never delete', function () {
-    $head = User::factory()->branchHead($this->branchA)->create();
+    $head = User::factory()->branchAdmin($this->branchA)->create();
 
     expect($head->can('approve', $this->appA))->toBeTrue()
         ->and($head->can('reject', $this->appA))->toBeTrue()

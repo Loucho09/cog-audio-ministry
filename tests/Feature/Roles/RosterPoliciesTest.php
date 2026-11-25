@@ -24,7 +24,7 @@ it('allows own-branch head and admin on all roster records', function (string $s
             ->and($user->can('update', $record))->toBeTrue()
             ->and($user->can('delete', $record))->toBeTrue();
     }
-})->with(['branchHead', 'branchAdmin']);
+})->with(['branchAdmin']);
 
 it('denies other-branch admins on all roster records', function (string $state) {
     $user = User::factory()->{$state}($this->trece)->create();
@@ -34,7 +34,7 @@ it('denies other-branch admins on all roster records', function (string $state) 
             ->and($user->can('update', $record))->toBeFalse()
             ->and($user->can('delete', $record))->toBeFalse();
     }
-})->with(['branchHead', 'branchAdmin']);
+})->with(['branchAdmin']);
 
 it('denies members viewAny and create', function () {
     $member = User::factory()->member($this->dasma)->create();
@@ -48,7 +48,7 @@ it('denies members viewAny and create', function () {
 it('lets only the owner respond to an assignment', function () {
     $owner = User::factory()->member($this->dasma)->create();
     $other = User::factory()->member($this->dasma)->create();
-    $head = User::factory()->branchHead($this->dasma)->create();
+    $head = User::factory()->branchAdmin($this->dasma)->create();
     $this->assignment->user_id = $owner->id;
 
     expect($owner->can('respond', $this->assignment))->toBeTrue()
@@ -57,14 +57,14 @@ it('lets only the owner respond to an assignment', function () {
 });
 
 it('update is false for a started event', function () {
-    $head = User::factory()->branchHead($this->dasma)->create();
+    $head = User::factory()->branchAdmin($this->dasma)->create();
     $this->event->starts_at = now()->subHour();
 
     expect($head->can('update', $this->event))->toBeFalse();
 });
 
 it('delete is false for a started event', function () {
-    $head = User::factory()->branchHead($this->dasma)->create();
+    $head = User::factory()->branchAdmin($this->dasma)->create();
     $this->event->starts_at = now()->subHour();
 
     expect($head->can('delete', $this->event))->toBeFalse();

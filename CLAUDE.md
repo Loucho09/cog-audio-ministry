@@ -11,16 +11,15 @@ Goal: take this project from first commit to a live, maintained production site.
 ## Who it serves
 - **Visitors:** public pages only: homepage, learn about the ministry, submit a join application.
 - **Members:** every Audio Ministry member has an account; they see their own duties, schedules, events, and announcements.
-- **Branch heads:** manage their own branch's members, services, team, duties, announcements, and approve join applications.
-- **Branch admins:** help one branch with join applications and the duty roster; cannot assign roles.
-- **Super-admin:** the project owner; creates branches and assigns branch heads.
+- **Branch admins:** manage their own branch's members, services, gallery, team, duties, announcements, and approve join applications; cannot assign roles. 1 per branch, 2 for COG Dasma (limit in `config/ministry.php`).
+- **Super-admin:** the project owner; creates branches and assigns branch admins.
 
 ## Branches and roles (multi-branch from the start)
 - Main branch: COG Dasma (Marilag Subdivision, Dasmariñas, `is_main = true`). Other branches: Trece, Silang, Jabez. Marilag is Dasma's subdivision, not a branch. Store them in a `branches` table (name, slug, address and contact fields nullable, is_main) so more can be added without code changes.
-- Roles (Spatie): `super-admin` (all branches; only role that can assign roles), `branch-head` (admin for ONE branch), `branch-admin` (applications + roster for ONE branch, no role assignment), `member` (default for approved accounts). Not logged in = visitor.
+- Roles (Spatie): `super-admin` (all branches; only role that can assign roles), `branch-admin` (admin for ONE branch, no role assignment; the old `branch-head` role was removed 2026-11-26, see `brain/Decisions/remove-branch-head-decision.md`), `member` (default for approved accounts). Not logged in = visitor.
 - Roles are assigned to accounts, never hardcoded to a person. Members can never change their own role.
 - Every branch-scoped record (members, events, services, join applications, duty assignments) has a `branch_id`. Enforce scoping in Policies and query scopes (and Filament resources), never only in the UI. Write tests for it. (Spatie "teams" is not used for now; see `brain/Decisions/`.)
-- Join applications: the applicant picks a branch; that branch's branch-head and branch-admins, plus the super-admin, get a queued email.
+- Join applications: the applicant picks a branch; that branch's branch-admins, plus the super-admin, get a queued email.
 - Member accounts are created by approval only (no open signup). Approving an application creates the account and sends a set-password email.
 - `/admin` (Filament) is only for users with an admin role.
 
@@ -46,8 +45,8 @@ Goal: take this project from first commit to a live, maintained production site.
 Work one phase at a time. Do not start a phase until the previous one is marked done in `brain/Roadmap.md`.
 
 1. **Setup and homepage:** scaffold Laravel + packages, layout and theme tokens, homepage sections (hero, about, what we do, meet the team behind flag, upcoming services, gallery, join us, contact, footer), services, gallery and team models + seeders (FAQ was later removed; see `brain/Decisions/faq-removed.md`), mobile check at 360px.
-2. **Member accounts and roles:** Breeze login, approval-only accounts, Spatie roles (incl. `branch-admin`), branches, seeders, rate-limited login and password reset, tests for role escalation, cross-branch access, mass assignment, and "branch-head cannot assign roles".
-3. **Join applications:** public form with honeypot and rate limiting, pending/approved/rejected status, queued email to branch-head + branch-admins + super-admin, Filament approve/reject with branch and status filters, approval creates account + set-password email, tests.
+2. **Member accounts and roles:** Breeze login, approval-only accounts, Spatie roles (incl. `branch-admin`), branches, seeders, rate-limited login and password reset, tests for role escalation, cross-branch access, mass assignment, and "branch admins cannot assign roles".
+3. **Join applications:** public form with honeypot and rate limiting, pending/approved/rejected status, queued email to branch-admins + super-admin, Filament approve/reject with branch and status filters, approval creates account + set-password email, tests.
 4. **Duty roster:** events, duty assignments and swaps with rules in service classes (rule tests written first), Filament roster, member dashboard with accept/decline/swap, tests.
 5. **Notifications and reminders:** in-app + email for assignments, swaps, announcements; reminders the day before and 2 hours before each duty; tests.
 6. **Equipment, training, reports:** plan in detail only when reached. Do not build earlier.
@@ -126,7 +125,7 @@ Rules that prevent overload:
 Status: planned | in progress | done
 Phase: <number>
 Goal:
-Users: visitor | member | branch-head | super-admin
+Users: visitor | member | branch-admin | super-admin
 Screens / routes:
 Data changes (tables, columns):
 Permissions:

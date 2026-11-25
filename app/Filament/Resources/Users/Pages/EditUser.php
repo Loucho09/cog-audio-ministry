@@ -50,6 +50,9 @@ class EditUser extends EditRecord
 
         try {
             DB::transaction(function () use ($record, $data, $actor): void {
+                $wasAdmin = $record->hasRole('branch-admin');
+                $oldBranch = $record->branch_id;
+
                 $record->fill(Arr::only($data, ['name', 'email']));
 
                 if (array_key_exists('branch_id', $data)) {
@@ -64,11 +67,19 @@ class EditUser extends EditRecord
                     app(AssignRole::class)->handle($actor, $record, $role);
                 }
 
-                // Branch roles need a branch (AssignRole only checks when the role changes).
-                if ($record->branch_id === null && $record->hasAnyRole(['branch-head', 'branch-admin'])) {
-                    throw ValidationException::withMessages([
-                        'branch_id' => 'A branch-head or branch-admin needs a branch.',
-                    ]);
+                if ($record->hasRole('branch-admin')) {
+                    // Branch roles need a branch (AssignRole only checks when the role changes).
+                    if ($record->branch_id === null) {
+                        throw ValidationException::withMessages([
+                            'branch_id' => 'A branch-admin needs a branch.',
+                        ]);
+                    }
+
+                    // Only check when becoming an admin or moving an admin to another branch;
+                    // a plain rename in an already over-limit branch must still save.
+                    if (! $wasAdmin || $record->branch_id != $oldBranch) {
+                        app(AssignRole::class)->assertAdminSlotFree($record, 'branch_id');
+                    }
                 }
             });
         } catch (ValidationException $e) {

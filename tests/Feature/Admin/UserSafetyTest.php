@@ -18,7 +18,7 @@ use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     Filament::setCurrentPanel('admin');
-    foreach (['super-admin', 'branch-head', 'branch-admin', 'member'] as $role) {
+    foreach (['super-admin', 'branch-admin', 'branch-admin', 'member'] as $role) {
         Role::findOrCreate($role, 'web');
     }
     $this->a = Branch::factory()->create();

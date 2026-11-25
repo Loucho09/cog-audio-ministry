@@ -96,7 +96,7 @@ it('rejects saving a path that another record uses or that is outside the direct
 it('does not let a crafted Filament payload point a record at another record file', function () {
     Filament::setCurrentPanel('admin');
     $branch = Branch::factory()->create();
-    $head = User::factory()->branchHead($branch)->create();
+    $head = User::factory()->branchAdmin($branch)->create();
     Storage::disk('public')->put('gallery/theirs.jpg', 'x');
     GalleryImage::factory()->create(['path' => 'gallery/theirs.jpg']);
     $mine = GalleryImage::factory()->create(['branch_id' => $branch->id]);

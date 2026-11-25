@@ -49,6 +49,13 @@ return [
     // TODO: owner to provide the church address (the map shows only when filled in).
     'address' => env('MINISTRY_ADDRESS') ?: null,
 
+    // Max branch-admin accounts per branch. 'default' applies unless the branch slug
+    // is listed under 'branches'. Change here; no code change needed.
+    'branch_admin_limit' => [
+        'default' => 1,
+        'branches' => ['dasma' => 2],
+    ],
+
     // "Meet the Team" section and nav link. Default OFF.
     'show_team' => filter_var(env('MINISTRY_SHOW_TEAM', false), FILTER_VALIDATE_BOOLEAN),
 

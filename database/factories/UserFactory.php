@@ -50,11 +50,6 @@ class UserFactory extends Factory
         return $this->withRole('super-admin');
     }
 
-    public function branchHead(Branch $branch): static
-    {
-        return $this->withRole('branch-head', $branch);
-    }
-
     public function branchAdmin(Branch $branch): static
     {
         return $this->withRole('branch-admin', $branch);

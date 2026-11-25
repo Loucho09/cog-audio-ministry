@@ -13,7 +13,7 @@ use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     Filament::setCurrentPanel('admin');
-    foreach (['super-admin', 'branch-head', 'branch-admin', 'member'] as $role) {
+    foreach (['super-admin', 'branch-admin', 'branch-admin', 'member'] as $role) {
         Role::findOrCreate($role, 'web');
     }
     $this->branchA = Branch::factory()->create();
@@ -28,14 +28,6 @@ it('shows every branch to a super-admin', function () {
     Livewire::test(ListJoinApplications::class)->assertCanSeeTableRecords([$this->appA, $this->appB]);
 });
 
-it('limits a branch-head to their own branch', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
-
-    Livewire::test(ListJoinApplications::class)
-        ->assertCanSeeTableRecords([$this->appA])
-        ->assertCanNotSeeTableRecords([$this->appB]);
-});
-
 it('limits a branch-admin to their own branch', function () {
     $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
@@ -45,13 +37,13 @@ it('limits a branch-admin to their own branch', function () {
 });
 
 it('lets staff open their own branch application', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(ViewJoinApplication::class, ['record' => $this->appA->id])->assertSuccessful();
 });
 
 it('refuses another branch view page', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     $this->get(JoinApplicationResource::getUrl('view', ['record' => $this->appB]))
         ->assertNotFound();
@@ -103,7 +95,7 @@ it('scopes tab badge counts to the branch', function () {
     JoinApplication::factory()->approved()->count(2)->create(['branch_id' => $this->branchB->id]);
     JoinApplication::factory()->rejected()->create(['branch_id' => $this->branchB->id]);
 
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
     $tabs = Livewire::test(ListJoinApplications::class)->instance()->getTabs();
 
     expect($tabs['pending']->getBadge())->toBe('1')
@@ -121,7 +113,7 @@ it('scopes tab badge counts to the branch', function () {
 
 it('hides the pending badge at zero', function () {
     $this->appA->delete();
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     $tabs = Livewire::test(ListJoinApplications::class)->instance()->getTabs();
 
@@ -130,7 +122,7 @@ it('hides the pending badge at zero', function () {
 
 it('titles the view page with the applicant name', function () {
     $this->appA->update(['full_name' => 'Maria Santos']);
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     $component = Livewire::test(ViewJoinApplication::class, ['record' => $this->appA->id]);
 
@@ -149,7 +141,7 @@ it('filters by branch for super-admin and hides that filter from branch staff', 
         ->assertCanSeeTableRecords([$this->appB])
         ->assertCanNotSeeTableRecords([$this->appA]);
 
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
     Livewire::test(ListJoinApplications::class)->assertTableFilterHidden('branch_id');
 });
 
@@ -182,7 +174,7 @@ it('has no create, edit or delete pages or actions', function () {
 it('counts only own-branch pending applications in the nav badge', function () {
     JoinApplication::factory()->approved()->create(['branch_id' => $this->branchA->id]);
 
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
     expect(JoinApplicationResource::getNavigationBadge())->toBe('1');
 
     $this->actingAs(User::factory()->superAdmin()->create());
@@ -233,7 +225,7 @@ it('gives a branch-admin 404 on another branch view page', function () {
 });
 
 it('shows nothing to staff without a branch', function () {
-    foreach (['branchHead', 'branchAdmin'] as $state) {
+    foreach (['branchAdmin'] as $state) {
         $user = User::factory()->$state($this->branchA)->create(['branch_id' => null]);
         $this->actingAs($user);
 
@@ -287,7 +279,7 @@ it('has no bulk actions', function () {
 });
 
 it('flags a pending application whose email already has an account', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
     User::factory()->create(['email' => $this->appA->email]);
 
     expect(JoinApplicationResource::emailHasAccount($this->appA->fresh()))->toBeTrue()
@@ -298,7 +290,7 @@ it('flags a pending application whose email already has an account', function ()
 });
 
 it('shows tab counts from the scoped query', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     $tabs = Livewire::test(ListJoinApplications::class)->instance()->getTabs();
 

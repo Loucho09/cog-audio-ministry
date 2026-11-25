@@ -45,10 +45,10 @@ beforeEach(function () {
 });
 
 it('queues the notification to own-branch staff and super-admins only', function () {
-    $head = staff('branch-head', $this->branch);
+    $head = staff('branch-admin', $this->branch);
     $admin = staff('branch-admin', $this->branch);
     $super = staff('super-admin', null);
-    $otherHead = staff('branch-head', $this->other);
+    $otherHead = staff('branch-admin', $this->other);
     $otherAdmin = staff('branch-admin', $this->other);
     $member = staff('member', $this->branch);
 
@@ -60,7 +60,7 @@ it('queues the notification to own-branch staff and super-admins only', function
 });
 
 it('sends one notification to a user with several roles', function () {
-    $both = staff('branch-head', $this->branch);
+    $both = staff('branch-admin', $this->branch);
     Role::findOrCreate('branch-admin', 'web');
     $both->assignRole('branch-admin');
     $both->assignRole(Role::findOrCreate('super-admin', 'web'));
@@ -78,7 +78,7 @@ it('does nothing quietly when there are no recipients, and the applicant is not 
 });
 
 it('does not notify the applicant', function () {
-    staff('branch-head', $this->branch);
+    staff('branch-admin', $this->branch);
     $applicant = User::factory()->create(['email' => 'juan@example.com']);
 
     // Existing account blocks the submit; use another email to prove the applicant address is not a recipient.
@@ -89,7 +89,7 @@ it('does not notify the applicant', function () {
 });
 
 it('sends nothing for honeypot hits or invalid submissions', function () {
-    staff('branch-head', $this->branch);
+    staff('branch-admin', $this->branch);
 
     $this->post(route('join.store'), submission($this->branch, ['website' => 'http://spam.test']))
         ->assertRedirect(route('join.thanks'));
@@ -101,7 +101,7 @@ it('sends nothing for honeypot hits or invalid submissions', function () {
 });
 
 it('still redirects when queueing fails', function () {
-    staff('branch-head', $this->branch);
+    staff('branch-admin', $this->branch);
     Exceptions::fake();
     Notification::shouldReceive('send')->andThrow(new RuntimeException('queue down'));
 
@@ -138,8 +138,8 @@ it('renders the mail with escaped applicant details', function () {
 });
 
 it('exposes recipients through the action', function () {
-    $head = staff('branch-head', $this->branch);
-    staff('branch-head', $this->other);
+    $head = staff('branch-admin', $this->branch);
+    staff('branch-admin', $this->other);
     $app = JoinApplication::factory()->create(['branch_id' => $this->branch->id]);
 
     expect(app(NotifyStaffOfJoinApplication::class)->recipients($app)->pluck('id')->all())->toBe([$head->id]);
@@ -158,8 +158,8 @@ it('escapes markdown in names so they cannot form links or bold text', function 
         ->and($html)->toContain('click');
 });
 
-it('does not notify a branch-head without a branch', function () {
-    $orphan = staff('branch-head', null);
+it('does not notify a branch-admin without a branch', function () {
+    $orphan = staff('branch-admin', null);
 
     $this->post(route('join.store'), submission($this->branch));
 
@@ -170,7 +170,7 @@ it('does not notify a branch-head without a branch', function () {
 it('queues a real job end to end and renders with the persisted model', function () {
     Notification::swap(new ChannelManager(app()));
     Queue::fake();
-    $head = staff('branch-head', $this->branch);
+    $head = staff('branch-admin', $this->branch);
     $app = JoinApplication::factory()->create(['branch_id' => $this->branch->id, 'full_name' => 'Ana Reyes']);
 
     app(NotifyStaffOfJoinApplication::class)->handle($app);

@@ -26,3 +26,5 @@ Related: [[member-accounts-roles]], [[super-admin-via-artisan-command]], [[phase
 - Branch-heads can edit only plain members of their own branch, not other heads or admins.
 
 Related: [[member-accounts-roles-tasks]], [[Backlog]]
+
+> **Update 2026-11-26:** the `branch-head` role was removed. Branch-admins now have the full branch powers described here (including editing own-branch members). See [[remove-branch-head-decision]].

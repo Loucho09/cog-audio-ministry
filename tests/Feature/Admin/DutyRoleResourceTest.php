@@ -49,7 +49,7 @@ it('hides another branch role edit page', function () {
 });
 
 it('edits an own-branch role', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
 
     Livewire::test(EditDutyRole::class, ['record' => $this->roleA->id])
         ->fillForm(['name' => 'Renamed'])
@@ -227,7 +227,7 @@ it('refuses a deactivated role as a new service slot', function () {
 });
 
 it('refuses to delete a role in use and says why', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
     $service = Service::factory()->create(['branch_id' => $this->branchA->id]);
     $service->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]);
 
@@ -239,7 +239,7 @@ it('refuses to delete a role in use and says why', function () {
 });
 
 it('bulk delete keeps roles in use and removes unused ones', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
     $service = Service::factory()->create(['branch_id' => $this->branchA->id]);
     $service->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]);
     $unused = DutyRole::factory()->create(['branch_id' => $this->branchA->id]);
@@ -274,7 +274,7 @@ it('rejects an oversized sort order', function () {
 });
 
 it('explains which roles were kept on bulk delete', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
     $event = Event::factory()->create(['branch_id' => $this->branchA->id]);
     $event->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]);
 
@@ -287,7 +287,7 @@ it('explains which roles were kept on bulk delete', function () {
 });
 
 it('shows how many events use a role', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
     Event::factory()->count(2)->create(['branch_id' => $this->branchA->id])
         ->each(fn ($e) => $e->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]));
 
@@ -295,7 +295,7 @@ it('shows how many events use a role', function () {
 });
 
 it('warns when deactivating a role used on upcoming events', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
     $event = Event::factory()->create(['branch_id' => $this->branchA->id, 'starts_at' => now()->addWeek(), 'ends_at' => now()->addWeek()->addHours(2)]);
     $event->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]);
 

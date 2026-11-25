@@ -10,7 +10,7 @@ use App\Models\User;
 test('assign creates an assigned duty in the event branch', function () {
     [$event, $role] = rosterEvent();
     $member = rosterMember($event);
-    $by = User::factory()->branchHead($event->branch)->create();
+    $by = User::factory()->branchAdmin($event->branch)->create();
 
     $a = svc()->assign($event, $role, $member, $by);
 

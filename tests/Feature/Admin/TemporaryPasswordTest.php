@@ -17,7 +17,7 @@ use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     Filament::setCurrentPanel('admin');
-    foreach (['super-admin', 'branch-head', 'branch-admin', 'member'] as $role) {
+    foreach (['super-admin', 'branch-admin', 'branch-admin', 'member'] as $role) {
         Role::findOrCreate($role, 'web');
     }
     $this->branchA = Branch::factory()->create();
@@ -106,8 +106,8 @@ it('lets a super-admin set a temporary password on a user and clears their sessi
     Notification::assertNothingSent();
 });
 
-it('lets a branch-head set a temporary password on an own-branch member', function () {
-    $head = User::factory()->branchHead($this->branchA)->create();
+it('lets a branch-admin set a temporary password on an own-branch member', function () {
+    $head = User::factory()->branchAdmin($this->branchA)->create();
     $member = User::factory()->member($this->branchA)->create();
     $this->actingAs($head);
 
@@ -119,8 +119,8 @@ it('lets a branch-head set a temporary password on an own-branch member', functi
     expect($member->refresh()->must_change_password)->toBeTrue();
 });
 
-it('denies a branch-head on other branches, branch-admins and themselves', function () {
-    $head = User::factory()->branchHead($this->branchA)->create();
+it('denies a branch-admin on other branches, branch-admins and themselves', function () {
+    $head = User::factory()->branchAdmin($this->branchA)->create();
     $foreign = User::factory()->member($this->branchB)->create();
     $admin = User::factory()->branchAdmin($this->branchA)->create();
     $this->actingAs($head);
@@ -145,10 +145,10 @@ it('does not let a super-admin use it on themselves', function () {
         ->assertActionHidden('setTemporaryPassword');
 });
 
-it('denies a branch-admin and a member', function () {
+it('denies a member', function () {
     $member = User::factory()->member($this->branchA)->create();
 
-    foreach ([User::factory()->branchAdmin($this->branchA)->create(), User::factory()->member($this->branchA)->create()] as $actor) {
+    foreach ([User::factory()->member($this->branchA)->create()] as $actor) {
         expect($actor->can('setTemporaryPassword', $member))->toBeFalse();
     }
 });
@@ -204,7 +204,7 @@ it('rejects a weak temporary password', function () {
 it('refuses the table action when called directly on forbidden targets', function (string $actorType, string $targetType) {
     $actor = $actorType === 'super'
         ? User::factory()->superAdmin()->create()
-        : User::factory()->branchHead($this->branchA)->create();
+        : User::factory()->branchAdmin($this->branchA)->create();
     $target = match ($targetType) {
         'foreign' => User::factory()->member($this->branchB)->create(),
         'admin' => User::factory()->branchAdmin($this->branchA)->create(),
@@ -235,7 +235,7 @@ function directTemporaryPasswordCall(User $target)
 }
 
 it('runs the action through the direct-call path for an allowed target (positive control)', function () {
-    $head = User::factory()->branchHead($this->branchA)->create();
+    $head = User::factory()->branchAdmin($this->branchA)->create();
     $target = User::factory()->member($this->branchA)->create();
     $before = $target->password;
     $this->actingAs($head);

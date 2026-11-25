@@ -23,11 +23,11 @@ beforeEach(function () {
     $this->withoutVite();
     config(['ministry.show_team' => true]);
     $this->branch = Branch::factory()->create(['is_main' => true]);
-    $this->head = User::factory()->branchHead($this->branch)->create();
+    $this->head = User::factory()->branchAdmin($this->branch)->create();
     $this->admin = User::factory()->superAdmin()->create();
 });
 
-it('keeps a branch-head new team member unpublished and off the homepage until a super-admin publishes', function () {
+it('keeps a branch-admin new team member unpublished and off the homepage until a super-admin publishes', function () {
     $this->actingAs($this->head);
 
     Livewire::test(CreateTeamMember::class)
@@ -57,7 +57,7 @@ it('publishes by default when a super-admin creates a team member', function () 
     expect(TeamMember::where('name', 'Direct Person')->firstOrFail()->is_published)->toBeTrue();
 });
 
-it('hides the toggle and ignores a crafted publish payload from a branch-head', function () {
+it('hides the toggle and ignores a crafted publish payload from a branch-admin', function () {
     $this->actingAs($this->head);
 
     Livewire::test(CreateTeamMember::class)
@@ -84,7 +84,7 @@ it('hides the toggle and ignores a crafted publish payload from a branch-head', 
     expect($existing->fresh()->is_published)->toBeFalse();
 });
 
-it('puts a published item back to pending when a branch-head changes its content', function () {
+it('puts a published item back to pending when a branch-admin changes its content', function () {
     $member = TeamMember::factory()->create(['branch_id' => $this->branch->id, 'name' => 'Live Person']);
     $this->actingAs($this->head);
 
@@ -96,7 +96,7 @@ it('puts a published item back to pending when a branch-head changes its content
     $this->get('/')->assertDontSee('Renamed Person');
 });
 
-it('keeps a published item live when a branch-head changes only the sort order', function () {
+it('keeps a published item live when a branch-admin changes only the sort order', function () {
     $member = TeamMember::factory()->create(['branch_id' => $this->branch->id, 'name' => 'Live Person']);
     $this->actingAs($this->head);
 
@@ -107,7 +107,7 @@ it('keeps a published item live when a branch-head changes only the sort order',
     expect($member->fresh()->is_published)->toBeTrue();
 });
 
-it('unpublishes a gallery image when a branch-head edits its alt text', function () {
+it('unpublishes a gallery image when a branch-admin edits its alt text', function () {
     $image = GalleryImage::factory()->create(['branch_id' => $this->branch->id, 'is_published' => true, 'alt_text' => 'Old alt']);
     $this->actingAs($this->head);
 
@@ -132,7 +132,7 @@ it('shows the pending approval filter only to a super-admin', function () {
     Livewire::test(ListTeamMembers::class)->assertTableFilterHidden('pending_approval');
 });
 
-it('keeps items unpublished when a branch-head fills is_published through the create and edit forms', function () {
+it('keeps items unpublished when a branch-admin fills is_published through the create and edit forms', function () {
     $this->actingAs($this->head);
 
     Livewire::test(CreateTeamMember::class)

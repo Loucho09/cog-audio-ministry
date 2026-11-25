@@ -9,3 +9,5 @@ Owner rule.
 Consequence: branch-admins can now create, edit and delete services (own branch).
 
 Related: [[duty-roster]], [[member-accounts-roles]], [[admin-user-management]]
+
+> **Update 2026-11-26:** the `branch-head` role was removed. Branch-admins now have the full branch powers described here (including editing own-branch members). See [[remove-branch-head-decision]].

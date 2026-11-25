@@ -39,7 +39,7 @@ test('visibleTo scopes duty roles to the user branch', function () {
     $mine = DutyRole::factory()->create(['branch_id' => $a->id]);
     DutyRole::factory()->create(['branch_id' => $b->id]);
 
-    $head = User::factory()->branchHead($a)->create();
+    $head = User::factory()->branchAdmin($a)->create();
     $super = User::factory()->superAdmin()->create();
 
     expect(DutyRole::visibleTo($head)->pluck('id')->all())->toBe([$mine->id])

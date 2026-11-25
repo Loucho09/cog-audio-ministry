@@ -21,14 +21,14 @@ use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     Filament::setCurrentPanel('admin');
-    foreach (['super-admin', 'branch-head', 'branch-admin', 'member'] as $role) {
+    foreach (['super-admin', 'branch-admin', 'branch-admin', 'member'] as $role) {
         Role::findOrCreate($role, 'web');
     }
     $this->branchA = Branch::factory()->create();
     $this->branchB = Branch::factory()->create();
     $this->appA = JoinApplication::factory()->pending()->create(['branch_id' => $this->branchA->id, 'email' => 'new.member@example.test']);
     $this->appB = JoinApplication::factory()->pending()->create(['branch_id' => $this->branchB->id]);
-    $this->headA = User::factory()->branchHead($this->branchA)->create();
+    $this->headA = User::factory()->branchAdmin($this->branchA)->create();
 });
 
 it('approves: creates a member in the right branch, links and stamps the application, sends set-password mail', function () {
@@ -123,8 +123,8 @@ it('refuses an existing user email and leaves the application pending', function
     Notification::assertNothingSent();
 });
 
-it('blocks a branch-head from another branch at service level', function () {
-    $otherHead = User::factory()->branchHead($this->branchB)->create();
+it('blocks a branch-admin from another branch at service level', function () {
+    $otherHead = User::factory()->branchAdmin($this->branchB)->create();
     $count = User::count();
 
     expect(fn () => app(ApproveJoinApplication::class)->handle($this->appA, $otherHead))->toThrow(AuthorizationException::class)
@@ -174,7 +174,7 @@ it('filament: actions are hidden once reviewed, even for super-admin', function 
 });
 
 it('filament: other-branch head cannot see or call the actions', function () {
-    $this->actingAs(User::factory()->branchHead($this->branchB)->create());
+    $this->actingAs(User::factory()->branchAdmin($this->branchB)->create());
 
     Livewire::test(ListJoinApplications::class)
         ->assertCanNotSeeTableRecords([$this->appA]);
@@ -216,7 +216,7 @@ it('turns a unique-email race into a friendly failure and rolls back', function 
 it('gives cross-branch staff the authorization failure even for reviewed applications', function () {
     $this->appA->forceFill(['status' => 'approved'])->save();
     $heads = [
-        User::factory()->branchHead($this->branchB)->create(),
+        User::factory()->branchAdmin($this->branchB)->create(),
         User::factory()->branchAdmin($this->branchB)->create(),
     ];
 
