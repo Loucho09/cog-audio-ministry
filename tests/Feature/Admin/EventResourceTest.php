@@ -310,3 +310,18 @@ it('refuses a deactivated role as a new slot on an event', function () {
         ->call('save')
         ->assertHasFormErrors(['dutySlots.0.duty_role_id']);
 });
+
+it('refuses to create an event that starts in the past', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+    $start = now()->subDay()->setTime(9, 0);
+
+    Livewire::test(CreateEvent::class)
+        ->fillForm(eventForm([
+            'starts_at' => $start->format('Y-m-d H:i:s'),
+            'ends_at' => $start->copy()->addHours(2)->format('Y-m-d H:i:s'),
+        ]))
+        ->call('create')
+        ->assertHasFormErrors(['starts_at']);
+
+    expect(Event::where('name', 'Special Night')->exists())->toBeFalse();
+});

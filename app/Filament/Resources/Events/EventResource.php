@@ -11,6 +11,7 @@ use App\Models\DutyRole;
 use App\Models\Event;
 use App\Models\Service;
 use BackedEnum;
+use Carbon\Carbon;
 use Closure;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -162,7 +163,13 @@ class EventResource extends Resource
                 ->searchable()
                 ->rules([fn (Get $get) => self::serviceRule($get('branch_id'))]),
             TextInput::make('name')->required()->maxLength(255),
-            DateTimePicker::make('starts_at')->label('Starts at')->timezone(config('app.timezone'))->seconds(false)->required()->live(),
+            DateTimePicker::make('starts_at')->label('Starts at')->timezone(config('app.timezone'))->seconds(false)->required()->live()
+                ->rules([fn (string $operation) => function (string $attribute, mixed $value, Closure $fail) use ($operation): void {
+                    // New events must be in the future; edits are guarded by the roster service.
+                    if ($operation === 'create' && filled($value) && Carbon::parse($value, config('app.timezone'))->lessThanOrEqualTo(now())) {
+                        $fail('Pick a start time in the future.');
+                    }
+                }]),
             DateTimePicker::make('ends_at')->label('Ends at')->timezone(config('app.timezone'))->seconds(false)->required()->after('starts_at'),
             Textarea::make('notes')->rows(3)->maxLength(2000),
             Repeater::make('dutySlots')

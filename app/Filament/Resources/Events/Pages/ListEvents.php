@@ -33,8 +33,8 @@ class ListEvents extends ListRecords
                         ->required()
                         ->searchable()
                         ->visible(fn () => EventResource::isSuperAdmin()),
-                    DatePicker::make('from')->required()->native(false),
-                    DatePicker::make('to')->required()->native(false)->afterOrEqual('from'),
+                    DatePicker::make('from')->required()->native(false)->minDate(fn () => today(config('app.timezone'))),
+                    DatePicker::make('to')->required()->native(false)->minDate(fn () => today(config('app.timezone')))->afterOrEqual('from'),
                 ])
                 ->action(function (array $data): void {
                     $branchId = EventResource::isSuperAdmin() ? $data['branch_id'] : auth()->user()->branch_id;

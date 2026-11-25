@@ -22,7 +22,7 @@ class EventGenerator
             throw new RosterRuleViolation('The end date must be on or after the start date.');
         }
 
-        if ($to->greaterThan($from->addMonths(3))) {
+        if ($to->greaterThan($from->addMonthsNoOverflow(3))) {
             throw new RosterRuleViolation('Please pick a range of 3 months or less.');
         }
 
@@ -57,6 +57,11 @@ class EventGenerator
                 }
 
                 $startsAt = CarbonImmutable::parse($date.' '.$service->start_time, $tz);
+
+                // Never create an event that has already started (it could not be edited or deleted).
+                if ($startsAt->lessThanOrEqualTo(now())) {
+                    continue;
+                }
 
                 DB::transaction(function () use ($service, $branch, $startsAt) {
                     $event = Event::create([

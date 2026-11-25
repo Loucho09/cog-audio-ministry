@@ -17,6 +17,10 @@ function sundayService(Branch $branch, array $attrs = []): Service
     ], $attrs));
 }
 
+beforeEach(function () {
+    $this->travelTo(CarbonImmutable::parse('2026-12-01 08:00', 'Asia/Manila'));
+});
+
 function genFrom(): CarbonImmutable
 {
     return CarbonImmutable::parse('2026-12-06', 'Asia/Manila'); // Sunday
@@ -94,4 +98,16 @@ it('rejects ranges over 3 months and backwards ranges', function () {
         ->toThrow(RosterRuleViolation::class);
     expect(fn () => $gen->generate($branch, genFrom(), genFrom()->addMonths(3)))
         ->not->toThrow(RosterRuleViolation::class);
+});
+
+it('skips an occurrence that has already started today', function () {
+    $branch = Branch::factory()->create();
+    sundayService($branch, ['start_time' => '09:00:00']);
+    $this->travelTo(CarbonImmutable::parse('2026-12-06 10:00', 'Asia/Manila'));
+
+    expect(app(EventGenerator::class)->generate($branch, genFrom(), genFrom()))->toBe(0);
+
+    $this->travelTo(CarbonImmutable::parse('2026-12-06 08:00', 'Asia/Manila'));
+
+    expect(app(EventGenerator::class)->generate($branch, genFrom(), genFrom()))->toBe(1);
 });
