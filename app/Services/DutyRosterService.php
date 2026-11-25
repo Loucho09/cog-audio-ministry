@@ -62,15 +62,7 @@ class DutyRosterService
                 throw new RosterRuleViolation('This member declined this duty, so it cannot be assigned again.');
             }
 
-            $overlaps = DutyAssignment::query()
-                ->active()
-                ->where('user_id', $member->id)
-                ->whereHas('event', fn ($q) => $q
-                    ->where('starts_at', '<', $event->ends_at)
-                    ->where('ends_at', '>', $event->starts_at))
-                ->exists();
-
-            if ($overlaps) {
+            if ($this->isServingDuring($member, $event)) {
                 throw new RosterRuleViolation('This member is already serving at that time.');
             }
 
@@ -97,6 +89,18 @@ class DutyRosterService
                 'status' => DutyStatus::Assigned,
             ]);
         });
+    }
+
+    /** True when the member has an active duty on an event overlapping this one. */
+    public function isServingDuring(User $member, Event $event): bool
+    {
+        return DutyAssignment::query()
+            ->active()
+            ->where('user_id', $member->id)
+            ->whereHas('event', fn ($q) => $q
+                ->where('starts_at', '<', $event->ends_at)
+                ->where('ends_at', '>', $event->starts_at))
+            ->exists();
     }
 
     public function assignGuest(Event $event, DutyRole $role, string $name, ?User $by = null): DutyAssignment

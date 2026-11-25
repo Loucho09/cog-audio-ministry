@@ -16,9 +16,9 @@ Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./ve
 - [x] Tests first
 
 ## Slice S3: claim (backend-builder)
-- [ ] `DutySwapService::claim(swap, user)` with row lock (first claim wins)
-- [ ] Rules: member/branch-admin role, same branch, not the offerer, not started, no overlapping active duty, not unavailable (reuse A3 helper), swap must be `open`
-- [ ] Tests first (incl. second claimer rejected, cross-branch rejected)
+- [x] `DutySwapService::claim(swap, user)` with row lock (first claim wins)
+- [x] Rules: member/branch-admin role, same branch, not the offerer, not started, no overlapping active duty, not unavailable (reuse A3 helper), swap must be `open`
+- [x] Tests first (incl. second claimer rejected, cross-branch rejected)
 
 ## Slice S4: approve / reject (backend-builder)
 - [ ] `DutySwapService::approve(swap, admin)`: re-check claim rules, original → `swapped`, new `accepted` assignment for claimer, one transaction

@@ -46,6 +46,15 @@ class DutySwap extends Model
         return $this->belongsTo(User::class, 'decided_by');
     }
 
+    /** Live open swaps in the user's branch that they did not offer. Overlap/availability are checked on claim. */
+    public function scopeClaimableBy(Builder $query, User $user): Builder
+    {
+        return $query->live()
+            ->where('status', SwapStatus::Open->value)
+            ->where('branch_id', $user->branch_id)
+            ->where('offered_by', '!=', $user->id);
+    }
+
     /** Open or claimed swaps whose event has not started yet. */
     public function scopeLive(Builder $query): Builder
     {
