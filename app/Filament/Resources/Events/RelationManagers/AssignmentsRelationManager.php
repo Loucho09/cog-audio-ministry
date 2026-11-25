@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Events\RelationManagers;
 
+use App\Enums\AvailabilityPart;
 use App\Enums\DutyStatus;
 use App\Exceptions\RosterRuleViolation;
 use App\Models\DutyAssignment;
 use App\Models\DutyRole;
 use App\Models\Event;
+use App\Models\MemberUnavailability;
 use App\Models\User;
 use App\Services\DutyRosterService;
 use Closure;
@@ -71,6 +73,26 @@ class AssignmentsRelationManager extends RelationManager
             ->whereHas('roles', fn (Builder $q) => $q->whereIn('name', ['member', 'branch-admin']));
     }
 
+    /**
+     * Branch members who marked this event's date (whole day or its AM/PM block), keyed by user id.
+     * One query; same rule as MemberUnavailability::blocks().
+     *
+     * @return array<int, true>
+     */
+    private function unavailableUserIds(): array
+    {
+        $event = $this->event();
+        $date = $event->starts_at->copy()->setTimezone(config('app.timezone'))->toDateString();
+
+        return MemberUnavailability::query()
+            ->where('branch_id', $event->branch_id)
+            ->whereDate('date', $date)
+            ->whereIn('part', [AvailabilityPart::WholeDay, $event->block()])
+            ->pluck('user_id')
+            ->mapWithKeys(fn ($id) => [(int) $id => true])
+            ->all();
+    }
+
     /** Assigning and removing duties is an event update, so the Event policy decides. */
     private function canManage(): bool
     {
@@ -125,7 +147,14 @@ class AssignmentsRelationManager extends RelationManager
                             ->live(),
                         Select::make('user_id')
                             ->label('Member')
-                            ->options(fn () => $this->memberQuery()->orderBy('name')->pluck('name', 'users.id')->all())
+                            ->options(function () {
+                                $blocked = $this->unavailableUserIds();
+
+                                return $this->memberQuery()->orderBy('name')->pluck('name', 'users.id')
+                                    ->map(fn ($name, $id) => isset($blocked[$id]) ? "{$name} (unavailable)" : $name)
+                                    ->all();
+                            })
+                            ->disableOptionWhen(fn (string $value) => isset($this->unavailableUserIds()[(int) $value]))
                             ->searchable()
                             ->visible(fn (Get $get) => $get('assignee_type') !== 'guest')
                             ->required(fn (Get $get) => $get('assignee_type') !== 'guest')

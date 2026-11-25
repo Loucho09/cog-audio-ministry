@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AvailabilityPart;
 use App\Enums\DutyStatus;
 use App\Filament\Resources\Events\EventResource;
 use App\Filament\Resources\Events\Pages\EditEvent;
@@ -9,6 +10,7 @@ use App\Models\Branch;
 use App\Models\DutyAssignment;
 use App\Models\DutyRole;
 use App\Models\Event;
+use App\Models\MemberUnavailability;
 use App\Models\User;
 use App\Policies\EventPolicy;
 use Filament\Facades\Filament;
@@ -288,4 +290,35 @@ it('hides assign and remove when the policy denies updating the event', function
     manager($this->event)
         ->assertTableActionHidden('assign')
         ->assertTableActionHidden('remove', $assignment);
+});
+
+it('refuses to assign a member who marked the event date unavailable', function () {
+    MemberUnavailability::create([
+        'user_id' => $this->member->id,
+        'branch_id' => $this->branchA->id,
+        'date' => $this->event->starts_at->copy()->setTimezone(config('app.timezone'))->toDateString(),
+        'part' => AvailabilityPart::WholeDay,
+    ]);
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    manager($this->event)
+        ->callTableAction('assign', data: ['duty_role_id' => $this->role->id, 'user_id' => $this->member->id]);
+
+    expect(DutyAssignment::count())->toBe(0);
+});
+
+it('flags only blocked members as unavailable for the dropdown', function () {
+    $free = User::factory()->member($this->branchA)->create();
+    MemberUnavailability::create([
+        'user_id' => $this->member->id,
+        'branch_id' => $this->branchA->id,
+        'date' => $this->event->starts_at->copy()->setTimezone(config('app.timezone'))->toDateString(),
+        'part' => AvailabilityPart::WholeDay,
+    ]);
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    $component = manager($this->event)->instance();
+    $ids = (new ReflectionMethod($component, 'unavailableUserIds'))->invoke($component);
+
+    expect($ids)->toHaveKey($this->member->id)->not->toHaveKey($free->id);
 });

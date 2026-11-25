@@ -30,9 +30,9 @@ Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./ve
 - [x] Feature tests: happy path, can't delete another member's entry, validation errors shown
 
 ## Slice A5: Filament + demo (backend-builder)
-- [ ] `AssignmentsRelationManager`: unavailable members labelled "(unavailable)" and disabled in the dropdown
-- [ ] `DutyRosterSeeder`: a few demo entries (AM, PM, whole day)
-- [ ] Test: Assign action refuses an unavailable member
+- [x] `AssignmentsRelationManager`: unavailable members labelled "(unavailable)" and disabled in the dropdown
+- [x] `DutyRosterSeeder`: a few demo entries (AM, PM, whole day)
+- [x] Test: Assign action refuses an unavailable member
 
 ## Wrap-up
 - [ ] `reviewer` on the branch, fix issues
