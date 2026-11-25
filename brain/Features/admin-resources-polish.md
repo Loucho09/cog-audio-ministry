@@ -1,10 +1,10 @@
 # Admin resources polish
-Status: done (merge pending owner OK)
+Status: done (merged to main 2026-11-25)
 Phase: add-on before Phase 3 (see [[Roadmap]])
 
 Goal: restyle the Filament Team, Services, Gallery and Branches resources to match the Users table redesign (commit f20bccd, which was never recorded in the brain before this note). Easier to scan on a phone, clearer counts, safer edits.
 
-Branch: `feature/admin-resources-polish` (not merged).
+Branch: `feature/admin-resources-polish` (merged to main 2026-11-25, e628b46).
 Commits: f0312eb (FAQ removed, see [[faq-removed]]), c518822 (Team), bf50282 (Services), 75add68 (Gallery), 609fd74 (Branches), plus a follow-up test commit. 406 tests pass.
 
 Users: super-admin, branch-head, branch-admin (staff).

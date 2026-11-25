@@ -60,7 +60,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[temp-password]]: temporary passwords and forced password change, add-on to Phase 2 (done 2026-11-25, merge pending owner OK; tasks in [[temp-password-tasks]])
 - [[login-dashboard-polish]]: split-photo login and member dashboard with all-branch services (Phase 2 add-on, in progress, branch `feature/login-dashboard-polish`; tasks in [[login-dashboard-polish-tasks]])
 - [[dashboards]]: member dashboard and admin widgets (Phase 2 add-on, done, merged to main 2026-11-25; slice 5 built in Phase 3; replaces the missing slice 2 of [[login-dashboard-polish]]; tasks in [[dashboards-tasks]])
-- [[admin-resources-polish]]: Team, Services, Gallery, Branches Filament resources restyled like Users; add-on before Phase 3 (done, merge pending owner OK, branch `feature/admin-resources-polish`)
+- [[admin-resources-polish]]: Team, Services, Gallery, Branches Filament resources restyled like Users; add-on before Phase 3 (done, merged to main 2026-11-25)
 - [[join-applications]]: public join form, branch review, approval creates member account (Phase 3, planned, spec written 2026-11-25; tasks in [[join-applications-tasks]])
 - [[loading-states]]: progress bar, view transitions, image skeletons, submit guard, admin skeletons, scroll reveal (UI polish add-on before Phase 3, done and merged 2026-11-25; tasks in [[loading-states-tasks]])
 
