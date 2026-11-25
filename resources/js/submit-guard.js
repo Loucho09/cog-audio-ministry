@@ -21,9 +21,20 @@ const BUSY_ATTRIBUTE = 'data-submitting';
 // form.elements includes buttons that point at this form with a form="" attribute.
 const submitButtons = (form) => Array.from(form.elements).filter((element) => element.type === 'submit');
 
-const lock = (form) => {
-    form.setAttribute(BUSY_ATTRIBUTE, 'true');
+// Forms that stay on this page (new tab, dialog, opted out) never fire pageshow, so they are not locked.
+const staysOnPage = (form, submitter) => {
+    const target = (submitter?.getAttribute('formtarget') || form.getAttribute('target') || '').toLowerCase();
 
+    return (
+        (target !== '' && target !== '_self')
+        || (form.getAttribute('method') || '').toLowerCase() === 'dialog'
+        || form.hasAttribute('data-no-progress')
+    );
+};
+
+const STUCK_TIMEOUT_MS = 30000; // same safety net as page-progress.js (e.g. a download response)
+
+const lock = (form) => {
     const buttons = submitButtons(form);
 
     buttons.forEach((button) => {
@@ -65,7 +76,16 @@ export function initSubmitGuard() {
             return;
         }
 
-        lock(form);
+        if (staysOnPage(form, event.submitter)) {
+            return;
+        }
+
+        // Mark busy now so a second submit is blocked, but disable the buttons on the next tick:
+        // the browser builds the form data after this event, and disabled buttons (including the one
+        // clicked) would drop their name/value from the request.
+        form.setAttribute(BUSY_ATTRIBUTE, 'true');
+        setTimeout(() => lock(form), 0);
+        setTimeout(() => unlock(form), STUCK_TIMEOUT_MS);
     });
 
     // A restored or reloaded page must never keep disabled buttons.

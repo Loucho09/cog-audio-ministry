@@ -12,8 +12,17 @@ const region = () => document.querySelector(REGION_SELECTOR);
 export function announce(message) {
     const element = region();
 
-    if (element) {
-        element.textContent = message;
+    if (!element) {
+        return;
+    }
+
+    // Clear first, then set on the next frame, so the same text twice in a row is read again.
+    element.textContent = '';
+
+    if (message !== '') {
+        requestAnimationFrame(() => {
+            element.textContent = message;
+        });
     }
 }
 

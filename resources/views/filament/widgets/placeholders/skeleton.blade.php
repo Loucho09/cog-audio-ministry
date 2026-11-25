@@ -14,8 +14,8 @@
 <div
     role="status"
     aria-busy="true"
-    {{ (new \Filament\Support\View\ComponentAttributeBag)->gridColumn($columnSpan, $columnStart)->class(['fi-section']) }}
-    style="padding: 1.5rem;"
+    {{-- One merged style attribute: gridColumn() emits its own style, and a second style="" would be ignored. --}}
+    {{ (new \Filament\Support\View\ComponentAttributeBag)->gridColumn($columnSpan, $columnStart)->class(['fi-section'])->style(['padding: 1.5rem']) }}
 >
     <span class="fi-sr-only">Loading…</span>
 

@@ -16,7 +16,16 @@ export function initReveal() {
         return;
     }
 
-    const reveal = (element) => element.setAttribute('data-revealed', '');
+    const reveal = (element) => {
+        if (element.hasAttribute('data-revealed')) {
+            return;
+        }
+
+        // Animate only this once, then hand transitions back to the element's own classes.
+        element.classList.add('reveal-animating');
+        element.setAttribute('data-revealed', '');
+        setTimeout(() => element.classList.remove('reveal-animating'), 600 + (Number(element.dataset.revealDelay) || 0));
+    };
 
     items.forEach((element) => {
         const delay = Number(element.dataset.revealDelay);
@@ -42,9 +51,28 @@ export function initReveal() {
                 }
             });
         },
-        // A small bottom margin means cards reveal a moment after they enter, not on the first pixel.
-        { threshold: 0.12, rootMargin: '0px 0px -8% 0px' },
+        // threshold 0 (not a ratio): a section taller than the screen could never reach a ratio on a phone.
+        // The bottom margin means cards reveal a moment after they enter, not on the first pixel.
+        { threshold: 0, rootMargin: '0px 0px -8% 0px' },
     );
 
+    // Only now start hiding: content is never hidden unless this script is running.
+    // Anything already on screen is revealed in the same task (below), so it never flickers.
+    document.documentElement.classList.add('reveal-ready');
     items.forEach((element) => observer.observe(element));
+
+    // Safety net: anything already scrolled past (fast scroll, jump to #contact) or never observed is shown.
+    const revealPassed = () => {
+        items.forEach((element) => {
+            if (!element.hasAttribute('data-revealed') && element.getBoundingClientRect().top < window.innerHeight) {
+                reveal(element);
+                observer.unobserve(element);
+            }
+        });
+    };
+
+    window.addEventListener('scroll', revealPassed, { passive: true });
+    window.addEventListener('hashchange', revealPassed);
+    window.addEventListener('beforeprint', () => items.forEach(reveal));
+    revealPassed();
 }

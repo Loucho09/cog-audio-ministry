@@ -5,6 +5,8 @@
 
     <form method="POST" action="{{ route('password.change.store') }}" class="space-y-5" data-submit-guard>
         @csrf
+        {{-- Hidden username so password managers know which account this password is for (no name: not submitted). --}}
+        <input type="text" autocomplete="username" value="{{ auth()->user()->email }}" hidden readonly>
 
         <div>
             <x-input-label for="current_password" :value="__('Temporary password')" />

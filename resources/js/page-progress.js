@@ -161,7 +161,8 @@ export function initPageProgress() {
 
         const link = event.target.closest('a[href]');
 
-        if (link && isTrackableLink(link)) {
+        // HTMLAnchorElement only: an SVG <a> has an SVGAnimatedString href that new URL() cannot parse.
+        if (link instanceof HTMLAnchorElement && isTrackableLink(link)) {
             start();
         }
     });

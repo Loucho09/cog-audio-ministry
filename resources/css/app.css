@@ -339,15 +339,18 @@
    before first paint) AND the user has no reduced-motion preference, so content is never hidden without
    JS and never hidden for reduced-motion users. The reveal script sets data-revealed. The stagger delay
    comes from data-reveal-delay (ms), applied through --reveal-delay. */
-@media (prefers-reduced-motion: no-preference) {
-    [data-reveal] {
-        transition: opacity 400ms ease-out, transform 400ms ease-out;
-        transition-delay: var(--reveal-delay, 0ms);
-    }
-
-    .js [data-reveal]:not([data-revealed]) {
+/* The "reveal-ready" class is added by reveal.js once it runs, so if app.js never loads or throws,
+   nothing is hidden. The transition lives on its own class, removed after the reveal, so a card's own
+   hover transitions (shadow, colour) are not overridden for good. */
+@media screen and (prefers-reduced-motion: no-preference) {
+    .reveal-ready [data-reveal]:not([data-revealed]) {
         opacity: 0;
         transform: translateY(8px);
+    }
+
+    .reveal-ready [data-reveal].reveal-animating {
+        transition: opacity 400ms ease-out, transform 400ms ease-out;
+        transition-delay: var(--reveal-delay, 0ms);
     }
 }
 

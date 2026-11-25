@@ -18,6 +18,8 @@
         <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-5" data-submit-guard>
             @csrf
             @method('put')
+            {{-- Hidden username so password managers know which account this password is for (no name: not submitted). --}}
+            <input type="text" autocomplete="username" value="{{ auth()->user()->email }}" hidden readonly>
 
             <div>
                 <x-input-label for="update_password_current_password" :value="__('Current Password')" />

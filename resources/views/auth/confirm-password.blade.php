@@ -5,6 +5,8 @@
 
     <form method="POST" action="{{ route('password.confirm') }}" class="mt-6 space-y-5" data-submit-guard>
         @csrf
+        {{-- Hidden username so password managers know which account this password is for (no name: not submitted). --}}
+        <input type="text" autocomplete="username" value="{{ auth()->user()->email }}" hidden readonly>
 
         <!-- Password -->
         <div>
