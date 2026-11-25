@@ -174,3 +174,70 @@ it('cannot mount the assignments manager for another branch event', function () 
 
     manager($foreign)->assertForbidden();
 });
+
+it('assigns a typed guest name', function () {
+    $admin = User::factory()->branchAdmin($this->branchA)->create();
+    $this->actingAs($admin);
+
+    manager($this->event)
+        ->callTableAction('assign', data: ['assignee_type' => 'guest', 'duty_role_id' => $this->role->id, 'guest_name' => 'Juan Dela Cruz'])
+        ->assertHasNoFormErrors()
+        ->assertNotified('Guest assigned');
+
+    $a = DutyAssignment::firstOrFail();
+    expect($a->user_id)->toBeNull()
+        ->and($a->guest_name)->toBe('Juan Dela Cruz')
+        ->and($a->status)->toBe(DutyStatus::Accepted)
+        ->and($a->assigned_by)->toBe($admin->id);
+
+    manager($this->event)->assertSeeText('Juan Dela Cruz (Guest)')->assertSeeText('Confirmed');
+});
+
+it('ignores user_id in guest mode and guest_name in member mode', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    manager($this->event)->callTableAction('assign', data: [
+        'assignee_type' => 'guest', 'duty_role_id' => $this->role->id, 'guest_name' => 'Maria', 'user_id' => $this->member->id,
+    ]);
+    expect(DutyAssignment::firstOrFail()->user_id)->toBeNull();
+
+    DutyAssignment::query()->delete();
+
+    manager($this->event)->callTableAction('assign', data: [
+        'assignee_type' => 'member', 'duty_role_id' => $this->role->id, 'user_id' => $this->member->id, 'guest_name' => 'Ignored',
+    ]);
+    $a = DutyAssignment::firstOrFail();
+    expect($a->user_id)->toBe($this->member->id)->and($a->guest_name)->toBeNull();
+});
+
+it('requires a guest name in guest mode', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    manager($this->event)
+        ->callTableAction('assign', data: ['assignee_type' => 'guest', 'duty_role_id' => $this->role->id, 'guest_name' => ''])
+        ->assertHasFormErrors(['guest_name']);
+
+    expect(DutyAssignment::count())->toBe(0);
+});
+
+it('shows a danger notification and creates no guest row when the slot is full', function () {
+    makeAssignment($this);
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    manager($this->event)
+        ->callTableAction('assign', data: ['assignee_type' => 'guest', 'duty_role_id' => $this->role->id, 'guest_name' => 'Pedro'])
+        ->assertNotified('That duty is already full for this event.');
+
+    expect(DutyAssignment::count())->toBe(1);
+});
+
+it('removes a guest assignment', function () {
+    $g = DutyAssignment::factory()->guest()->create([
+        'event_id' => $this->event->id, 'branch_id' => $this->branchA->id, 'duty_role_id' => $this->role->id,
+    ]);
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    manager($this->event)->callTableAction('remove', $g)->assertNotified();
+
+    expect(DutyAssignment::count())->toBe(0);
+});
