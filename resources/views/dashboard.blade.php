@@ -98,10 +98,44 @@
         </section>
 
         <div class="grid gap-6 sm:grid-cols-2 sm:gap-8">
-            <section data-reveal aria-labelledby="duties-heading" class="rounded-2xl border border-dashed border-text/30 bg-background p-6 sm:p-8">
-                <h2 id="duties-heading" class="text-lg font-semibold text-text">{{ __('Duties') }}</h2>
-                <p class="mt-1 text-xs font-medium uppercase tracking-wide text-accent-text">{{ __('Coming soon') }}</p>
-                <p class="mt-3 text-sm text-text/70">{{ __('Your duties and schedule will appear here.') }}</p>
+            <section data-reveal aria-labelledby="duties-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+                <h2 id="duties-heading" class="text-lg font-semibold text-text">{{ __('My upcoming duties') }}</h2>
+
+                @if (session('error'))
+                    <p role="alert" class="mt-3 rounded-xl border border-accent-text/40 bg-accent/10 px-3 py-2 text-sm text-accent-text">{{ session('error') }}</p>
+                @endif
+
+                @if ($duties->isEmpty())
+                    <p class="mt-3 text-sm text-text/70">{{ __('No duties yet. Your branch leaders will assign you.') }}</p>
+                @else
+                    <ul class="mt-4 divide-y divide-text/10">
+                        @foreach ($duties as $duty)
+                            <li class="py-4 first:pt-0 last:pb-0">
+                                <div class="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+                                    <p class="min-w-0 break-words font-medium text-text">{{ $duty->event->name }}</p>
+                                    <span class="shrink-0 rounded-full bg-text/10 px-2 py-0.5 text-xs font-medium text-text">{{ __($duty->status->label()) }}</span>
+                                </div>
+                                <p class="mt-1 text-sm text-text/70">
+                                    <time datetime="{{ $duty->event->starts_at->toIso8601String() }}">{{ $duty->event->starts_at->timezone(config('app.timezone'))->format('D, M j · g:i A') }}</time>
+                                </p>
+                                <p class="mt-0.5 text-sm text-text/70">{{ $duty->event->branch->name }} &middot; {{ $duty->dutyRole->name }}</p>
+
+                                @if ($duty->status === \App\Enums\DutyStatus::Assigned)
+                                    <div class="mt-3 flex flex-wrap gap-3">
+                                        <form method="POST" action="{{ route('duties.accept', $duty) }}" data-submit-guard>
+                                            @csrf
+                                            <x-primary-button aria-label="{{ __('Accept :event duty', ['event' => $duty->event->name]) }}">{{ __('Accept') }}</x-primary-button>
+                                        </form>
+                                        <form method="POST" action="{{ route('duties.decline', $duty) }}" data-submit-guard>
+                                            @csrf
+                                            <x-secondary-button type="submit" aria-label="{{ __('Decline :event duty', ['event' => $duty->event->name]) }}">{{ __('Decline') }}</x-secondary-button>
+                                        </form>
+                                    </div>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </section>
 
             <section data-reveal data-reveal-delay="80" aria-labelledby="announcements-heading" class="rounded-2xl border border-dashed border-text/30 bg-background p-6 sm:p-8">
