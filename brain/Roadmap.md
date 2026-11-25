@@ -8,7 +8,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 |---|-------|--------|
 | 1 | Setup and homepage | done (2026-11-24) |
 | 2 | Member accounts and roles | done (2a and 2b merged to main 2026-11-25) |
-| 3 | Join applications | planned (next, not started) |
+| 3 | Join applications | in progress (spec written 2026-11-25) |
 | 4 | Duty roster | planned |
 | 5 | Notifications and reminders | planned |
 | 6 | Equipment, training, reports | planned |
@@ -62,6 +62,7 @@ Status: done. 2a and 2b merged to main 2026-11-25. Split into two parts (owner d
 - **2a Security core:** `branch_id` on users, Spatie roles, demo seed, `ministry:create-super-admin` command, register route removed, route throttles, `canAccessPanel`, `Gate::before`, `BelongsToBranch` scope, `AssignRole` action, Service and User policies, tests, themed auth screens. Decision: [[super-admin-via-artisan-command]].
 - **2b Filament screens:** Service, GalleryImage, TeamMember, Faq, Branch, and User resources. The "Our churches" list moves from config to the `branches` table (nullable `facebook_url`).
 - [x] **Add-on done 2026-11-25** (built and reviewed on `feature/temp-password`; merge pending owner OK): temporary passwords and forced password change, plus branch-style demo emails. See [[temp-password]], [[temp-password-tasks]].
+- [ ] **Add-on before Phase 3 (owner decision 2026-11-25): member and admin dashboards** (`feature/dashboards`, not yet merged). Slices 1-4 built, reviewed, fixed (369 tests, 368 pass, 1 pre-existing skip); browser check at 360px and dark mode and merge still open. Slice 5 (pending applications widget) is built during Phase 3. See [[dashboards]], [[dashboards-tasks]], [[filament-widget-styling]].
 
 ### Tasks
 - Breeze Blade login/register; accounts created by approval only (no open signup)
@@ -87,6 +88,8 @@ Status: done. 2a and 2b merged to main 2026-11-25. Split into two parts (owner d
 
 ## Phase 3: Join Applications
 **Goal:** public application form, branch approval, email notifications.
+
+Status: in progress (spec written 2026-11-25). Spec: [[join-applications]]. Tasks: [[join-applications-tasks]]. Owner decisions: [[join-application-rules]].
 
 ### Tasks
 - Public application form fields:
