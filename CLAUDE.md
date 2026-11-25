@@ -3,7 +3,7 @@
 Web app for the Audio department of Church Of God Audio Ministry.
 Goal: take this project from first commit to a live, maintained production site.
 
-**Current phase:** 4 (Duty roster): v1, guest assign and availability (v2a) merged; swaps (v2b) next. Phase 3 (Join applications) done.
+**Current phase:** 5 (Notifications and reminders): not started. Phase 4 (Duty roster: v1, guest assign, availability, swaps) done 2026-11-26.
 
 **Stack:** PHP 8.2+, Laravel (latest stable), MySQL 8, Blade, Tailwind CSS, Alpine.js, Filament (admin panel), Spatie Laravel Permission (roles), Laravel Breeze Blade (auth), Pest (tests), Pint, Laravel Mail + queue (notifications), scheduler (reminders). No Livewire/Inertia/React/Vue (outside Filament's internals), no Postgres/Supabase or extra services.
 **Dev environment:** VS Code + Claude Code. Notes live in `brain/` (Obsidian vault).

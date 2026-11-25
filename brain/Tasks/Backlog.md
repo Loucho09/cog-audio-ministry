@@ -89,3 +89,7 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Notify admins when a member marks unavailable (Phase 5) (added 2026-11-26; see [[duty-availability]])
 - Cross-branch swaps (super-admin approval) (added 2026-11-26; see [[duty-swaps]])
 - Swap history page (added 2026-11-26; see [[duty-swaps]])
+- Withdraw a claim (claimed → open) (added 2026-11-26; see [[duty-swaps]])
+- Keep swap history when an assignment/event is deleted (nullable FK or soft delete) (added 2026-11-26; see [[duty-swaps]])
+- Clean up expired swap_requested duties (scheduler); Phase 5 could do this with reminders (added 2026-11-26; see [[duty-swaps]])
+- Notify on swap offered/claimed/approved/rejected (Phase 5) (added 2026-11-26; see [[duty-swaps]])

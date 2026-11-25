@@ -41,5 +41,5 @@ Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./ve
 ## Slice S7: demo + wrap-up
 - [x] `DutyRosterSeeder`: one open and one claimed swap per branch
 - [x] `reviewer` on the branch, fix issues
-- [ ] `brain-keeper`: spec status, Roadmap (phase 4 done? fix "branch-head" rule text), Backlog (cross-branch swaps, swap history)
-- [ ] Merge to main
+- [x] `brain-keeper`: spec status, Roadmap (phase 4 done, "branch-head" rule text fixed), Backlog (cross-branch swaps, swap history)
+- [x] Merge to main (2026-11-26)

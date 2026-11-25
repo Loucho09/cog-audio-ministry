@@ -1,5 +1,5 @@
 # Duty swaps
-Status: planned
+Status: done (merged 2026-11-26)
 Phase: 4 (v2b of the duty roster; after [[duty-availability]])
 Goal: a member who accepted a duty but can't make it offers it to their branch; another eligible member claims it; a branch-admin approves. Replaces "drop a message in Messenger and hope someone covers".
 Users: member, branch-admin (own branch), super-admin (any branch)
@@ -51,5 +51,16 @@ Rejected: "ask one person" (stalls when that person doesn't answer; no notificat
 ## Decisions
 - Self-approval: the other admin approves; a branch with a single admin may self-approve (owner, 2026-11-26).
 
-Tasks: [[duty-swaps-tasks]] (to be written after spec approval)
+Tasks: [[duty-swaps-tasks]]
 Notes / decisions: [[duty-roster]], [[duty-availability]]. Roadmap rule text still says "branch-head or branch-admin approves"; update to branch-admin only (branch-head removed 2026-11-26).
+
+## Notes
+- Open-offer flow: offer → claim → admin approve or reject. The offerer can cancel while the swap is `open` or `claimed`.
+- Approve marks the old row `swapped` and creates a new `accepted` row for the claimer, with `assigned_by` = approver and `responded_at` = approval time. The slot is never empty.
+- Expired swaps (event started) are not cleaned up. The assignment stays `swap_requested`, still counts as on duty, and the dashboard shows "Swap expired. You're still on this duty." No scheduler job yet (see [[Backlog]]).
+- The claimer sees "Waiting for your admin" on their pending claims.
+- Self-approval rule as decided (see Decisions above).
+- Removing an assignment or deleting an event deletes its swap rows (FK cascade, no history kept). Admin removal cancels a live swap first.
+- Lock order: approve = swap → event → user → assignment; claim = swap → user; cancel and reject = swap → assignment.
+- Filament: Roster → Swaps, with a nav badge showing claimed swaps waiting for an admin.
+- Demo: `DutyRosterSeeder` creates one open and one claimed swap where a branch has enough members.
