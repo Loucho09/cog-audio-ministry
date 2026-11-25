@@ -28,10 +28,10 @@ Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./ve
 - [x] Tests first (incl. expired swap can't be approved, slot never empty)
 
 ## Slice S5: member dashboard (fullstack)
-- [ ] `DutySwapPolicy` (offer/cancel/claim)
-- [ ] Routes `swaps.store`, `swaps.claim`, `swaps.cancel` + thin `DutySwapController`
-- [ ] `DashboardController` + `dashboard.blade.php`: Offer/Cancel buttons and badges on my duties; "Open swaps in your branch" with Claim (show AM/PM)
-- [ ] Feature tests: happy path, another member can't cancel, other branch can't claim
+- [x] `DutySwapPolicy` (offer/cancel/claim)
+- [x] Routes `swaps.store`, `swaps.claim`, `swaps.cancel` + thin `DutySwapController`
+- [x] `DashboardController` + `dashboard.blade.php`: Offer/Cancel buttons and badges on my duties; "Open swaps in your branch" with Claim (show AM/PM)
+- [x] Feature tests: happy path, another member can't cancel, other branch can't claim
 
 ## Slice S6: Filament Swaps (backend-builder)
 - [ ] `app/Filament/Resources/DutySwaps/DutySwapResource.php` (+ List page): branch-scoped query, status filter, nav badge = claimed count

@@ -6,12 +6,16 @@ use App\Actions\UpcomingServices;
 use App\Enums\DutyStatus;
 use App\Models\Branch;
 use App\Models\DutyAssignment;
+use App\Models\DutySwap;
 use App\Models\MemberUnavailability;
+use App\Services\DutyRosterService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    public function __construct(private DutyRosterService $roster) {}
+
     public function __invoke(Request $request): View
     {
         $user = $request->user();
@@ -48,9 +52,19 @@ class DashboardController extends Controller
             ->where('duty_assignments.user_id', $user->id)
             ->whereIn('duty_assignments.status', [DutyStatus::Assigned, DutyStatus::Accepted, DutyStatus::Declined, DutyStatus::SwapRequested])
             ->where('events.ends_at', '>=', now())
-            ->with(['event.branch', 'dutyRole'])
+            ->with(['event.branch', 'dutyRole', 'swaps' => fn ($q) => $q->live()->with('claimedBy')])
             ->orderBy('events.starts_at')
             ->get();
+
+        // Per-item overlap/availability checks are small queries; the list is short (one branch, future events only).
+        $openSwaps = DutySwap::query()
+            ->claimableBy($user)
+            ->with(['assignment.event', 'assignment.dutyRole', 'offeredBy'])
+            ->get()
+            ->filter(fn (DutySwap $swap) => ! $this->roster->isServingDuring($user, $swap->assignment->event)
+                && ! MemberUnavailability::blocks($user, $swap->assignment->event))
+            ->sortBy(fn (DutySwap $swap) => $swap->assignment->event->starts_at)
+            ->values();
 
         $availability = $user->can('create', MemberUnavailability::class)
             ? MemberUnavailability::query()->where('user_id', $user->id)->upcoming()->orderBy('date')->get()
@@ -59,6 +73,7 @@ class DashboardController extends Controller
         return view('dashboard', [
             'availability' => $availability,
             'duties' => $duties,
+            'openSwaps' => $openSwaps,
             'greeting' => $greeting,
             'branch' => $branch,
             'serviceGroups' => $serviceGroups,

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DutyResponseController;
+use App\Http\Controllers\DutySwapController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JoinApplicationController;
 use App\Http\Controllers\ProfileController;
@@ -25,6 +26,9 @@ Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verif
 Route::middleware(['auth', 'verified', 'throttle:30,1'])->group(function () {
     Route::post('/duties/{assignment}/accept', [DutyResponseController::class, 'accept'])->whereNumber('assignment')->name('duties.accept');
     Route::post('/duties/{assignment}/decline', [DutyResponseController::class, 'decline'])->whereNumber('assignment')->name('duties.decline');
+    Route::post('/duties/{assignment}/swap', [DutySwapController::class, 'store'])->whereNumber('assignment')->name('swaps.store');
+    Route::post('/swaps/{swap}/claim', [DutySwapController::class, 'claim'])->whereNumber('swap')->name('swaps.claim');
+    Route::post('/swaps/{swap}/cancel', [DutySwapController::class, 'cancel'])->whereNumber('swap')->name('swaps.cancel');
     Route::post('/availability', [AvailabilityController::class, 'store'])->name('availability.store');
     Route::delete('/availability/{unavailability}', [AvailabilityController::class, 'destroy'])->whereNumber('unavailability')->name('availability.destroy');
 });
