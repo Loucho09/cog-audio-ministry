@@ -21,6 +21,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
@@ -107,29 +108,38 @@ class ServiceResource extends Resource
         return blank($id) ? null : (int) $id;
     }
 
-    /** Active roles of the service's branch. */
-    private static function roleOptions(mixed $formBranchId): array
+    /** The service being edited (inside the repeater, a plain ?Model would be the slot row). */
+    private static function pageRecord(mixed $livewire): ?Model
+    {
+        return $livewire instanceof EditRecord ? $livewire->getRecord() : null;
+    }
+
+    /** Active roles of the branch, plus roles already on this service's slots (even if now inactive). */
+    private static function roleQuery(mixed $formBranchId, ?Model $record): ?Builder
     {
         $branchId = self::slotBranchId($formBranchId);
 
         if ($branchId === null) {
-            return [];
+            return null;
         }
 
-        return DutyRole::query()->active()->where('branch_id', $branchId)->ordered()->pluck('name', 'id')->all();
+        $existing = $record?->exists ? $record->dutySlots()->pluck('duty_role_id')->all() : [];
+
+        return DutyRole::query()
+            ->where('branch_id', $branchId)
+            ->where(fn (Builder $q) => $q->where('is_active', true)->orWhereIn('id', $existing));
+    }
+
+    private static function roleOptions(mixed $formBranchId, ?Model $record): array
+    {
+        return self::roleQuery($formBranchId, $record)?->ordered()->pluck('name', 'id')->all() ?? [];
     }
 
     /** Server-side check that a chosen role is active and in the service's branch. */
-    private static function roleRule(mixed $formBranchId): Closure
+    private static function roleRule(mixed $formBranchId, ?Model $record): Closure
     {
-        return function (string $attribute, mixed $value, Closure $fail) use ($formBranchId): void {
-            $branchId = self::slotBranchId($formBranchId);
-
-            $ok = $branchId !== null && DutyRole::query()
-                ->active()
-                ->where('branch_id', $branchId)
-                ->whereKey($value)
-                ->exists();
+        return function (string $attribute, mixed $value, Closure $fail) use ($formBranchId, $record): void {
+            $ok = self::roleQuery($formBranchId, $record)?->whereKey($value)->exists() ?? false;
 
             if (! $ok) {
                 $fail('Pick an active role from this branch.');
@@ -253,11 +263,11 @@ class ServiceResource extends Resource
                                 ->schema([
                                     Select::make('duty_role_id')
                                         ->label('Role')
-                                        ->options(fn (Get $get) => self::roleOptions($get('../../branch_id')))
+                                        ->options(fn (Get $get, $livewire) => self::roleOptions($get('../../branch_id'), self::pageRecord($livewire)))
                                         ->required()
                                         ->distinct()
                                         ->searchable()
-                                        ->rules([fn (Get $get) => self::roleRule($get('../../branch_id'))]),
+                                        ->rules([fn (Get $get, $livewire) => self::roleRule($get('../../branch_id'), self::pageRecord($livewire))]),
                                     TextInput::make('quantity')
                                         ->required()
                                         ->integer()

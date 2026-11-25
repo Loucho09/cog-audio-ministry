@@ -85,27 +85,31 @@ class EventResource extends Resource
         return blank($id) ? null : (int) $id;
     }
 
-    private static function roleOptions(mixed $formBranchId): array
+    /** Active roles of the branch, plus roles already on this event's slots (even if now inactive). */
+    private static function roleQuery(mixed $formBranchId, ?Event $record): ?Builder
     {
         $branchId = self::formBranchId($formBranchId);
 
         if ($branchId === null) {
-            return [];
+            return null;
         }
 
-        return DutyRole::query()->active()->where('branch_id', $branchId)->ordered()->pluck('name', 'id')->all();
+        $existing = $record?->exists ? $record->dutySlots()->pluck('duty_role_id')->all() : [];
+
+        return DutyRole::query()
+            ->where('branch_id', $branchId)
+            ->where(fn (Builder $q) => $q->where('is_active', true)->orWhereIn('id', $existing));
     }
 
-    private static function roleRule(mixed $formBranchId): Closure
+    private static function roleOptions(mixed $formBranchId, ?Event $record): array
     {
-        return function (string $attribute, mixed $value, Closure $fail) use ($formBranchId): void {
-            $branchId = self::formBranchId($formBranchId);
+        return self::roleQuery($formBranchId, $record)?->ordered()->pluck('name', 'id')->all() ?? [];
+    }
 
-            $ok = $branchId !== null && DutyRole::query()
-                ->active()
-                ->where('branch_id', $branchId)
-                ->whereKey($value)
-                ->exists();
+    private static function roleRule(mixed $formBranchId, ?Event $record): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail) use ($formBranchId, $record): void {
+            $ok = self::roleQuery($formBranchId, $record)?->whereKey($value)->exists() ?? false;
 
             if (! $ok) {
                 $fail('Pick an active role from this branch.');
@@ -157,8 +161,8 @@ class EventResource extends Resource
                 ->searchable()
                 ->rules([fn (Get $get) => self::serviceRule($get('branch_id'))]),
             TextInput::make('name')->required()->maxLength(255),
-            DateTimePicker::make('starts_at')->label('Starts at')->seconds(false)->required()->live(),
-            DateTimePicker::make('ends_at')->label('Ends at')->seconds(false)->required()->after('starts_at'),
+            DateTimePicker::make('starts_at')->label('Starts at')->timezone(config('app.timezone'))->seconds(false)->required()->live(),
+            DateTimePicker::make('ends_at')->label('Ends at')->timezone(config('app.timezone'))->seconds(false)->required()->after('starts_at'),
             Textarea::make('notes')->rows(3)->maxLength(2000),
             Repeater::make('dutySlots')
                 ->label('Duty slots')
@@ -168,11 +172,11 @@ class EventResource extends Resource
                 ->schema([
                     Select::make('duty_role_id')
                         ->label('Role')
-                        ->options(fn (Get $get) => self::roleOptions($get('../../branch_id')))
+                        ->options(fn (Get $get, ?Event $record) => self::roleOptions($get('../../branch_id'), $record))
                         ->required()
                         ->distinct()
                         ->searchable()
-                        ->rules([fn (Get $get) => self::roleRule($get('../../branch_id'))]),
+                        ->rules([fn (Get $get, ?Event $record) => self::roleRule($get('../../branch_id'), $record)]),
                     TextInput::make('quantity')
                         ->required()
                         ->integer()
@@ -216,7 +220,7 @@ class EventResource extends Resource
             ])
             ->recordActions([
                 EditAction::make()->iconButton()->tooltip('Edit')->hidden(fn (Event $record) => self::isLocked($record)),
-                DeleteAction::make()->iconButton()->hidden(fn (Event $record) => self::isLocked($record)),
+                DeleteAction::make()->iconButton()->modalDescription('This also removes every duty assigned for this event.')->hidden(fn (Event $record) => self::isLocked($record)),
             ]);
     }
 

@@ -197,3 +197,29 @@ it('denies a branch-admin with no branch on services', function () {
     $this->get('/admin/services')->assertForbidden();
     $this->get('/admin/services/create')->assertForbidden();
 });
+
+it('keeps a service slot with a deactivated role editable', function () {
+    $service = Service::factory()->create(['branch_id' => $this->branchA->id]);
+    $service->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]);
+    $this->roleA->update(['is_active' => false]);
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    Livewire::test(EditService::class, ['record' => $service->id])
+        ->fillForm(['name' => 'Renamed service'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($service->fresh()->name)->toBe('Renamed service')
+        ->and($service->dutySlots()->count())->toBe(1);
+});
+
+it('refuses a deactivated role as a new service slot', function () {
+    $service = Service::factory()->create(['branch_id' => $this->branchA->id]);
+    $this->roleA->update(['is_active' => false]);
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    Livewire::test(EditService::class, ['record' => $service->id])
+        ->fillForm(['dutySlots' => [['duty_role_id' => $this->roleA->id, 'quantity' => 1]]])
+        ->call('save')
+        ->assertHasFormErrors(['dutySlots.0.duty_role_id']);
+});

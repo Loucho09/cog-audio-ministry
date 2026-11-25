@@ -141,7 +141,7 @@ it('shows an error and saves nothing when lowering a filled slot', function () {
             'dutySlots' => [['duty_role_id' => $this->roleA->id, 'quantity' => 1]],
         ])
         ->call('save')
-        ->assertNotified();
+        ->assertNotified('A duty already filled by members cannot be reduced below the number of people serving. Remove them first.');
 
     expect($this->eventA->fresh()->name)->not->toBe('Should not save')
         ->and($this->eventA->dutySlots()->first()->quantity)->toBe(2);
@@ -227,7 +227,86 @@ it('shows a danger notification for a range over 3 months', function () {
 
     Livewire::test(ListEvents::class)
         ->callAction('generate', ['from' => $from->format('Y-m-d'), 'to' => $from->copy()->addMonths(5)->format('Y-m-d')])
-        ->assertNotified();
+        ->assertNotified('Please pick a range of 3 months or less.');
 
     expect(Event::where('branch_id', $this->branchA->id)->count())->toBe(1);
+});
+
+it('refuses removing a filled slot through the edit form and changes nothing', function () {
+    $this->eventA->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]);
+    DutyAssignment::factory()->create([
+        'event_id' => $this->eventA->id,
+        'branch_id' => $this->branchA->id,
+        'duty_role_id' => $this->roleA->id,
+        'user_id' => User::factory()->member($this->branchA)->create()->id,
+    ]);
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    Livewire::test(EditEvent::class, ['record' => $this->eventA->id])
+        ->fillForm(['name' => 'Nope', 'dutySlots' => []])
+        ->call('save')
+        ->assertNotified('A duty already filled by members cannot be reduced below the number of people serving. Remove them first.');
+
+    expect($this->eventA->fresh()->name)->not->toBe('Nope')
+        ->and($this->eventA->dutySlots()->count())->toBe(1);
+});
+
+it('refuses a time change that clashes with a member other duty and changes nothing', function () {
+    $member = User::factory()->member($this->branchA)->create();
+    $this->eventA->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]);
+    DutyAssignment::factory()->create([
+        'event_id' => $this->eventA->id,
+        'branch_id' => $this->branchA->id,
+        'duty_role_id' => $this->roleA->id,
+        'user_id' => $member->id,
+    ]);
+    $other = Event::factory()->create([
+        'branch_id' => $this->branchA->id,
+        'starts_at' => now()->addWeeks(3)->setTime(9, 0),
+        'ends_at' => now()->addWeeks(3)->setTime(11, 0),
+    ]);
+    DutyAssignment::factory()->create([
+        'event_id' => $other->id,
+        'branch_id' => $this->branchA->id,
+        'duty_role_id' => $this->roleA->id,
+        'user_id' => $member->id,
+    ]);
+    $originalStart = $this->eventA->starts_at->copy();
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    Livewire::test(EditEvent::class, ['record' => $this->eventA->id])
+        ->fillForm([
+            'name' => 'Moved',
+            'starts_at' => $other->starts_at->format('Y-m-d H:i:s'),
+            'ends_at' => $other->ends_at->format('Y-m-d H:i:s'),
+        ])
+        ->call('save')
+        ->assertNotified('A member on this event is already serving at the new time.');
+
+    expect($this->eventA->fresh()->name)->not->toBe('Moved')
+        ->and($this->eventA->fresh()->starts_at->equalTo($originalStart))->toBeTrue();
+});
+
+it('keeps a slot with a deactivated role editable on an event', function () {
+    $this->eventA->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]);
+    $this->roleA->update(['is_active' => false]);
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    Livewire::test(EditEvent::class, ['record' => $this->eventA->id])
+        ->fillForm(['name' => 'Still saves'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($this->eventA->fresh()->name)->toBe('Still saves')
+        ->and($this->eventA->dutySlots()->count())->toBe(1);
+});
+
+it('refuses a deactivated role as a new slot on an event', function () {
+    $this->roleA->update(['is_active' => false]);
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    Livewire::test(EditEvent::class, ['record' => $this->eventA->id])
+        ->fillForm(['dutySlots' => [['duty_role_id' => $this->roleA->id, 'quantity' => 1]]])
+        ->call('save')
+        ->assertHasFormErrors(['dutySlots.0.duty_role_id']);
 });

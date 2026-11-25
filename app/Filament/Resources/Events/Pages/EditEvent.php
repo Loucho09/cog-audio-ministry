@@ -58,7 +58,7 @@ class EditEvent extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make()->hidden(fn () => EventResource::isLocked($this->getRecord())),
+            DeleteAction::make()->modalDescription('This also removes every duty assigned for this event.')->hidden(fn () => EventResource::isLocked($this->getRecord())),
         ];
     }
 }
