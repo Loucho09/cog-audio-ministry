@@ -1,5 +1,5 @@
 # Remove branch-head role
-Status: done (awaiting merge)
+Status: done (merged 2026-11-26)
 Phase: 4 (roles cleanup, owner request 2026-11-26)
 Goal: one admin level per branch. The `branch-head` role is removed; every branch is run by its `branch-admin` account(s) with the full powers branch-heads had. Max 1 branch-admin per branch, 2 for COG Dasma (main), enforced.
 Users: super-admin (assigns roles), branch-admin, member
