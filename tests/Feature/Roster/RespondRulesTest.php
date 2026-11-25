@@ -64,3 +64,14 @@ test('respond answer must be accepted or declined', function () {
     expect(fn () => svc()->respond($a, $member, DutyStatus::Assigned))
         ->toThrow(RosterRuleViolation::class, 'accept or decline');
 });
+
+test('decline then accept is refused and status stays declined', function () {
+    [$event, $role] = rosterEvent();
+    $member = rosterMember($event);
+    $a = svc()->assign($event, $role, $member);
+    svc()->respond($a, $member, DutyStatus::Declined);
+
+    expect(fn () => svc()->respond($a, $member, DutyStatus::Accepted))
+        ->toThrow(RosterRuleViolation::class, 'already responded');
+    expect($a->fresh()->status)->toBe(DutyStatus::Declined);
+});

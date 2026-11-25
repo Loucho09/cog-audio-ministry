@@ -10,6 +10,8 @@ use App\Models\Event;
 use App\Models\EventDutySlot;
 use App\Models\User;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DutyRosterService
@@ -17,9 +19,9 @@ class DutyRosterService
     public function assign(Event $event, DutyRole $role, User $member, ?User $by = null): DutyAssignment
     {
         return DB::transaction(function () use ($event, $role, $member, $by) {
-            // Lock the member and re-read fresh values so concurrent assigns cannot slip past the rules.
+            // Lock order everywhere: event, then users, then slots. Re-read fresh values inside the locks.
+            $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
             $member = User::query()->whereKey($member->id)->lockForUpdate()->firstOrFail();
-            $event = Event::query()->findOrFail($event->id);
 
             $slot = EventDutySlot::query()
                 ->where('event_id', $event->id)
@@ -85,15 +87,19 @@ class DutyRosterService
 
     public function remove(DutyAssignment $assignment): void
     {
-        if ($assignment->event->hasStarted()) {
-            throw new RosterRuleViolation('This event has already started, so its duties are kept as a record.');
-        }
+        DB::transaction(function () use ($assignment) {
+            $current = DutyAssignment::query()->whereKey($assignment->id)->lockForUpdate()->firstOrFail();
 
-        if ($assignment->status === DutyStatus::Declined) {
-            throw new RosterRuleViolation('A declined duty is kept as a record and cannot be removed.');
-        }
+            if ($current->event->hasStarted()) {
+                throw new RosterRuleViolation('This event has already started, so its duties are kept as a record.');
+            }
 
-        $assignment->delete();
+            if ($current->status === DutyStatus::Declined) {
+                throw new RosterRuleViolation('A declined duty is kept as a record and cannot be removed.');
+            }
+
+            $current->delete();
+        });
     }
 
     public function respond(DutyAssignment $assignment, User $member, DutyStatus $answer): DutyAssignment
@@ -124,6 +130,51 @@ class DutyRosterService
     }
 
     /**
+     * Saves event details, times and the full desired slot set atomically.
+     * Locks the event row, then the active members' user rows (by id), then checks the rules.
+     * Use this instead of calling the assert methods yourself.
+     *
+     * @param  array<string, mixed>  $attributes  name, starts_at, ends_at, notes, service_id
+     * @param  array<int, int>  $quantitiesByRoleId  [dutyRoleId => quantity]; roles left out are removed.
+     */
+    public function updateEvent(Event $event, array $attributes, array $quantitiesByRoleId): Event
+    {
+        $attributes = Arr::only($attributes, ['name', 'starts_at', 'ends_at', 'notes', 'service_id']);
+
+        return DB::transaction(function () use ($event, $attributes, $quantitiesByRoleId) {
+            $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
+
+            $memberIds = DutyAssignment::query()->active()->where('event_id', $event->id)
+                ->pluck('user_id')->unique()->sort()->values();
+            User::query()->whereIn('id', $memberIds)->orderBy('id')->lockForUpdate()->get();
+
+            $startsAt = Carbon::parse($attributes['starts_at'] ?? $event->starts_at);
+            $endsAt = Carbon::parse($attributes['ends_at'] ?? $event->ends_at);
+
+            $this->assertTimeChangeAllowed($event, $startsAt, $endsAt);
+            $this->assertSlotChangesAllowed($event, $quantitiesByRoleId);
+
+            $event->update($attributes);
+
+            foreach ($quantitiesByRoleId as $roleId => $quantity) {
+                EventDutySlot::query()->updateOrCreate(
+                    ['event_id' => $event->id, 'duty_role_id' => $roleId],
+                    ['quantity' => $quantity],
+                );
+            }
+
+            EventDutySlot::query()
+                ->where('event_id', $event->id)
+                ->whereNotIn('duty_role_id', array_keys($quantitiesByRoleId))
+                ->delete();
+
+            return $event->fresh();
+        });
+    }
+
+    /**
+     * Does not lock on its own; call it through updateEvent() so the check and save are atomic.
+     *
      * @param  array<int, int>  $quantitiesByRoleId  [dutyRoleId => quantity]; a missing role id means the slot is removed.
      */
     public function assertSlotChangesAllowed(Event $event, array $quantitiesByRoleId): void
@@ -144,6 +195,7 @@ class DutyRosterService
         }
     }
 
+    /** Does not lock on its own; call it through updateEvent() so the check and save are atomic. */
     public function assertTimeChangeAllowed(Event $event, CarbonInterface $startsAt, CarbonInterface $endsAt): void
     {
         if (! $endsAt->greaterThan($startsAt)) {
