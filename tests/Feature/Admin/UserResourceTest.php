@@ -4,6 +4,7 @@ use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Branch;
+use App\Models\DutyAssignment;
 use App\Models\User;
 use App\Notifications\WelcomeSetPassword;
 use Filament\Actions\Testing\TestAction;
@@ -347,4 +348,23 @@ it('renders every list tab with the right rows', function () {
         ->set('activeTab', 'admins')->assertCanSeeTableRecords([$head])->assertCanNotSeeTableRecords([$member])
         ->set('activeTab', 'members')->assertCanSeeTableRecords([$member, $pending])->assertCanNotSeeTableRecords([$head])
         ->set('activeTab', 'attention')->assertCanSeeTableRecords([$pending])->assertCanNotSeeTableRecords([$member]);
+});
+
+it('refuses to delete a user with duty history, single and bulk', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    $serving = User::factory()->member($this->branchA)->create();
+    DutyAssignment::factory()->create(['user_id' => $serving->id]);
+    $free = User::factory()->member($this->branchA)->create();
+
+    Livewire::test(EditUser::class, ['record' => $serving->id])
+        ->callAction('delete')
+        ->assertNotified('Cannot delete');
+    expect(User::find($serving->id))->not->toBeNull();
+
+    Livewire::test(ListUsers::class)
+        ->selectTableRecords([$serving->id, $free->id])
+        ->callAction(TestAction::make('delete')->table()->bulk());
+
+    expect(User::find($serving->id))->not->toBeNull()
+        ->and(User::find($free->id))->toBeNull();
 });

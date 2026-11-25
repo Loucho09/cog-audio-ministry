@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Actions\UpcomingServices;
+use App\Enums\DutyStatus;
 use App\Models\Branch;
+use App\Models\DutyAssignment;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -39,7 +41,18 @@ class DashboardController extends Controller
             ->filter(fn (array $group) => $group['occurrences']->isNotEmpty())
             ->values();
 
+        $duties = DutyAssignment::query()
+            ->select('duty_assignments.*')
+            ->join('events', 'events.id', '=', 'duty_assignments.event_id')
+            ->where('duty_assignments.user_id', $user->id)
+            ->whereIn('duty_assignments.status', [DutyStatus::Assigned, DutyStatus::Accepted, DutyStatus::Declined])
+            ->where('events.ends_at', '>=', now())
+            ->with(['event.branch', 'dutyRole'])
+            ->orderBy('events.starts_at')
+            ->get();
+
         return view('dashboard', [
+            'duties' => $duties,
             'greeting' => $greeting,
             'branch' => $branch,
             'serviceGroups' => $serviceGroups,

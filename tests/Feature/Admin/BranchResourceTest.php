@@ -4,6 +4,7 @@ use App\Filament\Resources\Branches\Pages\CreateBranch;
 use App\Filament\Resources\Branches\Pages\EditBranch;
 use App\Filament\Resources\Branches\Pages\ListBranches;
 use App\Models\Branch;
+use App\Models\Event;
 use App\Models\GalleryImage;
 use App\Models\Service;
 use App\Models\TeamMember;
@@ -157,4 +158,15 @@ it('does not delete the main branch from the edit page', function () {
     Livewire::test(EditBranch::class, ['record' => $this->main->id])->callAction('delete');
 
     expect(Branch::find($this->main->id))->not->toBeNull();
+});
+
+it('does not delete a branch that has events and says why', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    Event::factory()->create(['branch_id' => $this->other->id]);
+
+    Livewire::test(EditBranch::class, ['record' => $this->other->id])
+        ->callAction('delete')
+        ->assertNotified('Cannot delete');
+
+    expect(Branch::find($this->other->id))->not->toBeNull();
 });

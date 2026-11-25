@@ -22,9 +22,15 @@ class DatabaseSeeder extends Seeder
             $seeders[] = JoinApplicationSeeder::class; // after DemoUserSeeder: needs real reviewers
         }
 
+        $afterServices = [];
+        if (app()->environment(['local', 'testing'])) {
+            $afterServices[] = DutyRosterSeeder::class; // needs demo users and services
+        }
+
         $this->call([
             ...$seeders,
             ServiceSeeder::class,
+            ...$afterServices,
             GallerySeeder::class,
             TeamMemberSeeder::class,
         ]);

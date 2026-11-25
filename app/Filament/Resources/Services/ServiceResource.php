@@ -6,6 +6,7 @@ use App\Filament\Resources\Services\Pages\CreateService;
 use App\Filament\Resources\Services\Pages\EditService;
 use App\Filament\Resources\Services\Pages\ListServices;
 use App\Models\Branch;
+use App\Models\DutyRole;
 use App\Models\Service;
 use BackedEnum;
 use Closure;
@@ -14,11 +15,13 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
@@ -93,6 +96,53 @@ class ServiceResource extends Resource
 
             if ($exists) {
                 $fail('This branch already has a service on that day and time.');
+            }
+        };
+    }
+
+    /** The branch slot roles must belong to: the form branch for super-admins, else the user's own. */
+    private static function slotBranchId(mixed $formBranchId): ?int
+    {
+        $id = self::isSuperAdmin() ? $formBranchId : auth()->user()?->branch_id;
+
+        return blank($id) ? null : (int) $id;
+    }
+
+    /** The service being edited (inside the repeater, a plain ?Model would be the slot row). */
+    private static function pageRecord(mixed $livewire): ?Model
+    {
+        return $livewire instanceof EditRecord ? $livewire->getRecord() : null;
+    }
+
+    /** Active roles of the branch, plus roles already on this service's slots (even if now inactive). */
+    private static function roleQuery(mixed $formBranchId, ?Model $record): ?Builder
+    {
+        $branchId = self::slotBranchId($formBranchId);
+
+        if ($branchId === null) {
+            return null;
+        }
+
+        $existing = $record?->exists ? $record->dutySlots()->pluck('duty_role_id')->all() : [];
+
+        return DutyRole::query()
+            ->where('branch_id', $branchId)
+            ->where(fn (Builder $q) => $q->where('is_active', true)->orWhereIn('id', $existing));
+    }
+
+    private static function roleOptions(mixed $formBranchId, ?Model $record): array
+    {
+        return self::roleQuery($formBranchId, $record)?->ordered()->pluck('name', 'id')->all() ?? [];
+    }
+
+    /** Server-side check that a chosen role is active and in the service's branch. */
+    private static function roleRule(mixed $formBranchId, ?Model $record): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail) use ($formBranchId, $record): void {
+            $ok = self::roleQuery($formBranchId, $record)?->whereKey($value)->exists() ?? false;
+
+            if (! $ok) {
+                $fail('Pick an active role from this branch.');
             }
         };
     }
@@ -199,6 +249,32 @@ class ServiceResource extends Resource
                                 ->native(false)
                                 ->prefixIcon(Heroicon::OutlinedStop)
                                 ->afterOrEqual('starts_on'),
+                        ]),
+                    Section::make('Default duty slots')
+                        ->description('How many people each role needs when events are made from this service.')
+                        ->icon(Heroicon::OutlinedUserGroup)
+                        ->schema([
+                            Repeater::make('dutySlots')
+                                ->hiddenLabel()
+                                ->relationship('dutySlots')
+                                ->addActionLabel('Add role')
+                                ->defaultItems(0)
+                                ->columns(2)
+                                ->schema([
+                                    Select::make('duty_role_id')
+                                        ->label('Role')
+                                        ->options(fn (Get $get, $livewire) => self::roleOptions($get('../../branch_id'), self::pageRecord($livewire)))
+                                        ->required()
+                                        ->distinct()
+                                        ->searchable()
+                                        ->rules([fn (Get $get, $livewire) => self::roleRule($get('../../branch_id'), self::pageRecord($livewire))]),
+                                    TextInput::make('quantity')
+                                        ->required()
+                                        ->integer()
+                                        ->minValue(1)
+                                        ->maxValue(20)
+                                        ->default(1),
+                                ]),
                         ]),
                     Section::make('Settings')
                         ->description('Inactive services are hidden from the public schedule.')

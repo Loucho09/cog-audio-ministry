@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Branch;
+use App\Models\DutyAssignment;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -140,3 +141,17 @@ test('admins cannot delete their own account and do not see the section', functi
 
     $this->actingAs($user)->get('/profile')->assertOk()->assertDontSee('confirm-user-deletion');
 })->with(['super-admin', 'branch-head', 'branch-admin']);
+
+test('a member with duty history gets a friendly refusal instead of an error', function () {
+    $user = User::factory()->create();
+    DutyAssignment::factory()->create(['user_id' => $user->id]);
+
+    $this->actingAs($user)
+        ->from('/profile')
+        ->delete('/profile', ['password' => 'password'])
+        ->assertRedirect('/profile')
+        ->assertSessionHasErrorsIn('userDeletion', ['password']);
+
+    $this->assertAuthenticatedAs($user);
+    expect($user->fresh())->not->toBeNull();
+});

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use InvalidArgumentException;
 
 #[UseFactory(ServiceFactory::class)]
@@ -34,6 +35,11 @@ class Service extends Model
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    public function dutySlots(): HasMany
+    {
+        return $this->hasMany(ServiceDutySlot::class);
     }
 
     public function scopeActive(Builder $query): Builder

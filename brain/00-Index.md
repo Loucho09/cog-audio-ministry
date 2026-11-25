@@ -8,6 +8,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[Roadmap]]: phases and status (7 phases + production launch)
 - [[Subagents]]: workflow and agent roles
 - [[Backlog]]: parked ideas (in `Tasks/`)
+- [[Demo-Accounts]]: demo login emails and password (fixed, do not change)
 
 ## Decisions
 - [[new-project-brief-adopted]]: new brief replaces old 9-phase plan; branches/roles/Filament/packages approved
@@ -52,6 +53,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[what-we-do-removed]]: owner removed the What We Do homepage section, component kept unused (2026-11-25)
 - [[gallery-upload-fix]]: gallery upload limits, storage symlink, return to list after save/delete; branch `fix/gallery-upload`, not merged (2026-11-25)
 - [[gallery-thumbnails-gd]]: gallery WebP thumbnails with PHP GD, no new package, width in filename (no schema change); backfill on deploy (2026-11-25)
+- [[admins-equal-per-branch]]: branch-head and branch-admin equal powers, own branch only; branch-admins manage services (2026-11-25)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
@@ -66,6 +68,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[dashboards]]: member dashboard and admin widgets (Phase 2 add-on, done, merged to main 2026-11-25; slice 5 built in Phase 3; replaces the missing slice 2 of [[login-dashboard-polish]]; tasks in [[dashboards-tasks]])
 - [[admin-resources-polish]]: Team, Services, Gallery, Branches Filament resources restyled like Users; add-on before Phase 3 (done, merged to main 2026-11-25)
 - [[join-applications]]: public join form, branch review, approval creates member account (Phase 3, planned, spec written 2026-11-25; tasks in [[join-applications-tasks]])
+- [[duty-roster]]: events, duty roles, slots, assignments, accept/decline (Phase 4 v1, built on `feature/duty-roster`, awaiting merge; tasks in [[duty-roster-tasks]])
 - [[loading-states]]: progress bar, view transitions, image skeletons, submit guard, admin skeletons, scroll reveal (UI polish add-on before Phase 3, done and merged 2026-11-25; tasks in [[loading-states-tasks]])
 
 ## Folders

@@ -89,6 +89,11 @@ class UserResource extends Resource
             return false;
         }
 
+        // duty_assignments.user_id is restrict: duty history keeps the account.
+        if ($record->dutyAssignments()->exists()) {
+            return false;
+        }
+
         return DB::transaction(function () use ($record): bool {
             $superAdmins = User::role('super-admin')->lockForUpdate()->get();
 

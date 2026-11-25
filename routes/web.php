@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DutyResponseController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JoinApplicationController;
 use App\Http\Controllers\ProfileController;
@@ -19,6 +20,11 @@ Route::post('/join', [JoinApplicationController::class, 'store'])->middleware('t
 Route::get('/join/thanks', [JoinApplicationController::class, 'thanks'])->name('join.thanks');
 
 Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth', 'verified', 'throttle:30,1'])->group(function () {
+    Route::post('/duties/{assignment}/accept', [DutyResponseController::class, 'accept'])->whereNumber('assignment')->name('duties.accept');
+    Route::post('/duties/{assignment}/decline', [DutyResponseController::class, 'decline'])->whereNumber('assignment')->name('duties.decline');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

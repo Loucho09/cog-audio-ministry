@@ -93,6 +93,19 @@ it('rejects ends_on before starts_on', function () {
         ->assertHasFormErrors(['ends_on']);
 });
 
+it('branch-admin can create and update services in own branch', function () {
+    $admin = User::factory()->branchAdmin($this->branchA)->create();
+
+    expect($admin->can('create', Service::class))->toBeTrue()
+        ->and($admin->can('update', $this->serviceA))->toBeTrue();
+});
+
+it("branch-admin cannot update another branch's service", function () {
+    $admin = User::factory()->branchAdmin($this->branchA)->create();
+
+    expect($admin->can('update', $this->serviceB))->toBeFalse();
+});
+
 it('forbids members from the services page', function () {
     $this->actingAs(User::factory()->member($this->branchA)->create());
 

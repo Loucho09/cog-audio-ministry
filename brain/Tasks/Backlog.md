@@ -45,7 +45,17 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - ~~Tap targets under 24px (church Facebook links 92x20, Add to calendar 115x20). Fix in Phase 7 accessibility pass. Found 2026-11-24 Playwright check (see [[Roadmap]]).~~ — **Done 2026-11-25** (branch `fix/mobile-polish`): 44px tap targets on church Facebook links, Add to calendar, Get directions and the Join-the-team link (see [[homepage-theme-polish]] slice J).
 - The set-password link expires in 60 minutes, which is short for new members. Consider a longer lifetime for new accounts (added 2026-11-25; see [[admin-user-management]], [[member-accounts-roles-tasks]]).
 - The branch-head user list shows other admins in the branch with no Edit button, which may confuse them (added 2026-11-25; see [[admin-user-management]]).
-- Deleting a user leaves sessions and password_reset_tokens rows behind. Phase 4 must decide cascade or restrict for duty_assignments → users before deleting users is safe (added 2026-11-25; see [[admin-user-management]], [[Roadmap]]).
+- ~~Deleting a user leaves sessions and password_reset_tokens rows behind. Phase 4 must decide cascade or restrict for duty_assignments → users before deleting users is safe (added 2026-11-25; see [[admin-user-management]], [[Roadmap]]).~~ **Settled 2026-11-25:** restrict, with a friendly delete refusal (see [[duty-roster]]).
+- Duty roster parked items (added 2026-11-25; see [[duty-roster]]):
+  - Duty history page
+  - Calendar view
+  - Auto-fill / rotation suggestions
+  - TODO owner: real duty role names and counts
+  - Future-start rule on event edit (editing an upcoming event's start into the past locks it)
+  - Strengthen the DutyRole bulk-delete test (FK enforcement)
+  - Extract shared `roleQuery` / `isSuperAdmin` helpers in Filament resources
+  - Generator duplicate-check inside the transaction
+  - Hide declined rows or style them on the dashboard
 - Test gaps (added 2026-11-25; see [[member-accounts-roles-tasks]]): no direct-call test for the resend action's 403 by a non-super-admin; the bulk-delete test does not exercise the last-super-admin guard on its own.
 - Super-admin can set a temporary password on another super-admin (Gate::before); acceptable, documented. (added 2026-11-25; see [[temp-password]])
 - Decide on the verify-email routes: the app does not implement `MustVerifyEmail`, so the routes and the `verified` middleware are dead code. Implement the interface or remove them. (added 2026-11-25; see [[full-review-2026-11-25]])
