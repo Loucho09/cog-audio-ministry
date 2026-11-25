@@ -32,6 +32,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 - [x] Done 2026-11-25 (branch `fix/gallery-image-performance`, commits eaa4fdf, fdb12f1, b0881a1, merged to main 1bc4ff0): gallery WebP thumbnails made with PHP GD (800 and 1600px tiers), srcset in the grid, lazy grid. Backfill needed on production (see Phase 7). See [[gallery-thumbnails-gd]] and [[homepage-theme-polish]] slice I.
 - [x] Done 2026-11-25 (branch `fix/mobile-polish`, commit 07d7f29, merged to main 1bc4ff0): mobile polish: 44px tap targets on church and calendar/directions links, `text-wrap: pretty`, light-mode church-logo watermark removed, hero pill on one line at 320-360px, equal-width Sunday time chips. See [[homepage-theme-polish]] slice J.
 - Tests after these three fixes: 447 total (446 pass, 1 skipped). Reviewer run; must-fix items addressed. Browser check at 360px and wide screens still owner-pending.
+- [x] Done 2026-11-25 (branch `fix/audit-backlog`, commits 4354f9f and f307974, merging to main): homepage audit backlog items 7-9 (fewer eyebrows, solid impact numbers, neutral dark hover glows, hero frame cap, targeted reduced motion). Reviewer clean; 447 tests (446 pass, 1 skipped). Owner browser check at 360px and dark mode still pending. See [[homepage-theme-polish]] slice K.
 
 ### Tasks
 1. [x] Scaffold Laravel (latest stable) + Tailwind, Alpine, Filament, Spatie Permission, Breeze Blade, Pest; commit
