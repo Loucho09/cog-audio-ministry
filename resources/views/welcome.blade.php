@@ -5,7 +5,6 @@
     <x-home.hero />
     <x-home.impact :services-per-week="$servicesPerWeek" :churches-count="$churches->count()" />
     <x-home.about />
-    <x-home.what-we-do />
     <x-home.churches :churches="$churches" />
     <x-home.team :members="$teamMembers" />
     <x-home.services :branch="$branch" :schedule="$schedule" />

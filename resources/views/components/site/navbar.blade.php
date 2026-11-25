@@ -5,7 +5,6 @@
 
     $links = collect([
         ['label' => 'About', 'href' => route('home').'#about'],
-        ['label' => 'What We Do', 'href' => route('home').'#what-we-do'],
         config('ministry.show_team') ? ['label' => 'Meet the Team', 'href' => route('home').'#team'] : null,
         ['label' => 'Services', 'href' => route('home').'#services'],
         ['label' => 'Gallery', 'href' => route('home').'#gallery'],
