@@ -39,7 +39,7 @@ Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./ve
 - [x] Tests: other-branch admin can't see/approve, self-approval rule, member can't reach it
 
 ## Slice S7: demo + wrap-up
-- [ ] `DutyRosterSeeder`: one open and one claimed swap per branch
+- [x] `DutyRosterSeeder`: one open and one claimed swap per branch
 - [ ] `reviewer` on the branch, fix issues
 - [ ] `brain-keeper`: spec status, Roadmap (phase 4 done? fix "branch-head" rule text), Backlog (cross-branch swaps, swap history)
 - [ ] Merge to main

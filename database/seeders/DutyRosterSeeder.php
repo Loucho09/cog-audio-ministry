@@ -6,12 +6,14 @@ use App\Enums\AvailabilityPart;
 use App\Enums\DutyStatus;
 use App\Exceptions\RosterRuleViolation;
 use App\Models\Branch;
+use App\Models\DutyAssignment;
 use App\Models\DutyRole;
 use App\Models\Event;
 use App\Models\Service;
 use App\Models\User;
 use App\Services\AvailabilityService;
 use App\Services\DutyRosterService;
+use App\Services\DutySwapService;
 use App\Services\EventGenerator;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
@@ -22,7 +24,7 @@ use Illuminate\Database\Seeder;
  */
 class DutyRosterSeeder extends Seeder
 {
-    public function run(EventGenerator $generator, DutyRosterService $roster, AvailabilityService $availability): void
+    public function run(EventGenerator $generator, DutyRosterService $roster, AvailabilityService $availability, DutySwapService $swaps): void
     {
         if (! app()->environment(['local', 'testing'])) {
             $this->command?->warn('Skipping demo duty roster outside local/testing.');
@@ -130,6 +132,60 @@ class DutyRosterSeeder extends Seeder
                     }
                 }
             }
+
+            $this->seedSwaps($branch, $members, $roster, $swaps);
+        }
+    }
+
+    /** One open and one claimed demo swap on future duties; skipped quietly when the branch lacks members or duties. */
+    private function seedSwaps($branch, $members, DutyRosterService $roster, DutySwapService $swaps): void
+    {
+        $assignments = DutyAssignment::query()
+            ->where('branch_id', $branch->id)
+            ->whereNotNull('user_id')
+            ->whereIn('status', [DutyStatus::Assigned, DutyStatus::Accepted])
+            ->whereHas('event', fn ($q) => $q->where('starts_at', '>', now()))
+            ->with('event')
+            ->get()
+            ->sortBy(fn ($a) => $a->event->starts_at)
+            ->values();
+
+        $made = 0;
+        foreach ($assignments as $assignment) {
+            if ($made >= 2) {
+                return;
+            }
+
+            try {
+                if ($assignment->status === DutyStatus::Assigned) {
+                    $roster->respond($assignment, $assignment->user, DutyStatus::Accepted);
+                }
+
+                $swap = $swaps->offer($assignment->fresh(), $assignment->user);
+
+                if ($made === 1) {
+                    $claimed = false;
+                    foreach ($members->where('id', '!=', $assignment->user_id) as $candidate) {
+                        try {
+                            $swaps->claim($swap, $candidate);
+                            $claimed = true;
+                            break;
+                        } catch (RosterRuleViolation) {
+                            // busy or unavailable, try the next member
+                        }
+                    }
+
+                    if (! $claimed) {
+                        $swaps->cancel($swap, $assignment->user);
+
+                        continue;
+                    }
+                }
+            } catch (RosterRuleViolation) {
+                continue;
+            }
+
+            $made++;
         }
     }
 }
