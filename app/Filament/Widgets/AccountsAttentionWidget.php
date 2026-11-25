@@ -33,7 +33,8 @@ class AccountsAttentionWidget extends TableWidget
                     $q->where('must_change_password', true);
 
                     if ($isSuper) {
-                        $q->orWhereNull('branch_id');
+                        // Super-admins have no branch by design, so they are not "missing" one.
+                        $q->orWhere(fn (Builder $q) => $q->whereNull('branch_id')->withoutRole('super-admin'));
                     }
                 })->latest()
             )

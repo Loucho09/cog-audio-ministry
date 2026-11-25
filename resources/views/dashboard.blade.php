@@ -71,7 +71,7 @@
                         </h3>
                         <ul class="mt-2 divide-y divide-text/10 text-sm">
                             @foreach ($group['occurrences'] as $item)
-                                <li class="flex flex-wrap items-baseline justify-between gap-x-4 py-2">
+                                <li class="flex flex-col py-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-4">
                                     <span class="text-text">{{ $item['service']->name }}</span>
                                     <time datetime="{{ $item['starts_at']->toIso8601String() }}" class="text-text/70">
                                         {{ $item['starts_at']->format('D, M j') }} &middot; {{ $item['starts_at']->format('g:i A') }}

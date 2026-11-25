@@ -47,6 +47,13 @@ it('shows no-branch accounts only to super-admin', function () {
         ->assertSee('No branch');
 });
 
+it('does not flag a super-admin for having no branch', function () {
+    $super = User::factory()->superAdmin()->create(['branch_id' => null, 'must_change_password' => false]);
+
+    $this->actingAs($super);
+    Livewire::test(AccountsAttentionWidget::class)->assertCanNotSeeTableRecords([$super]);
+});
+
 it('shows a friendly empty state', function () {
     $this->actingAs(User::factory()->branchHead($this->a)->create(['must_change_password' => false]));
 
