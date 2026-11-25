@@ -12,7 +12,7 @@ class DashboardController extends Controller
     public function __invoke(Request $request): View
     {
         $user = $request->user();
-        $now = now()->toImmutable()->setTimezone('Asia/Manila');
+        $now = now()->toImmutable()->setTimezone(config('app.timezone'));
         $hour = $now->hour;
 
         $greeting = match (true) {
@@ -24,7 +24,9 @@ class DashboardController extends Controller
         $branch = $user->branch;
 
         // Own branch first, then the rest by name; one occurrence per service (next week).
-        $branches = Branch::query()->orderBy('name')->get()
+        $branches = Branch::query()
+            ->with(['services' => fn ($q) => $q->active()->ordered()])
+            ->orderBy('name')->get()
             ->sortBy(fn (Branch $b) => $b->id === $user->branch_id ? 0 : 1)
             ->values();
 
@@ -32,7 +34,7 @@ class DashboardController extends Controller
             ->map(fn (Branch $b) => [
                 'branch' => $b,
                 'is_own' => $b->id === $user->branch_id,
-                'occurrences' => UpcomingServices::forBranch($b, 1, $now),
+                'occurrences' => UpcomingServices::fromServices($b->services, 1, $now),
             ])
             ->filter(fn (array $group) => $group['occurrences']->isNotEmpty())
             ->values();

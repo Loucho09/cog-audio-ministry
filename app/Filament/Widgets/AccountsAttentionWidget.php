@@ -51,8 +51,7 @@ class AccountsAttentionWidget extends TableWidget
             ->recordUrl(fn (User $record) => auth()->user()?->can('update', $record)
                 ? UserResource::getUrl('edit', ['record' => $record])
                 : null)
-            ->emptyStateHeading('All accounts are set up')
-            ->emptyStateDescription('No one is on a temporary password.')
+            ->emptyStateHeading('No accounts need attention.')
             ->paginated(false);
     }
 }

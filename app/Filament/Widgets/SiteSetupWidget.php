@@ -19,6 +19,11 @@ class SiteSetupWidget extends Widget
         return (bool) auth()->user()?->hasRole('super-admin');
     }
 
+    public function mount(): void
+    {
+        abort_unless(static::canView(), 403);
+    }
+
     protected function getViewData(): array
     {
         $items = SiteSetupChecklist::items();

@@ -24,18 +24,32 @@ it('lists the own branch services before other branches', function () {
 
 it('shows the admin link only to admin roles', function () {
     $branch = Branch::factory()->create();
+    $link = 'href="'.filament()->getPanel('admin')->getUrl().'"';
 
     $this->actingAs(User::factory()->member($branch)->create())
-        ->get('/dashboard')->assertOk()->assertDontSee('href="/admin"', false);
+        ->get('/dashboard')->assertOk()->assertDontSee($link, false);
 
     foreach (['branchHead', 'branchAdmin'] as $state) {
         $this->actingAs(User::factory()->{$state}($branch)->create())
-            ->get('/dashboard')->assertOk()->assertSee('href="/admin"', false);
+            ->get('/dashboard')->assertOk()->assertSee($link, false);
     }
 
     $this->actingAs(User::factory()->superAdmin()->create())
-        ->get('/dashboard')->assertOk()->assertSee('href="/admin"', false);
+        ->get('/dashboard')->assertOk()->assertSee($link, false);
 });
+
+it('renders no Facebook link for unsafe urls and escapes the address', function (string $url) {
+    $branch = Branch::factory()->create([
+        'facebook_url' => $url,
+        'address' => '<script>alert(1)</script>',
+    ]);
+
+    $this->actingAs(User::factory()->member($branch)->create())
+        ->get('/dashboard')->assertOk()
+        ->assertDontSee('Visit our Facebook page')
+        ->assertDontSee('<script>alert(1)</script>', false)
+        ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false);
+})->with(['javascript:alert(1)', 'http://x']);
 
 it('hides empty branch fields and shows filled ones', function () {
     $empty = Branch::factory()->create();

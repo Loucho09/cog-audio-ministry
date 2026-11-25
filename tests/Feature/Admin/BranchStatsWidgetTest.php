@@ -1,5 +1,9 @@
 <?php
 
+use App\Filament\Resources\GalleryImages\GalleryImageResource;
+use App\Filament\Resources\Services\ServiceResource;
+use App\Filament\Resources\TeamMembers\TeamMemberResource;
+use App\Filament\Resources\Users\UserResource;
 use App\Filament\Widgets\BranchStatsWidget;
 use App\Models\Branch;
 use App\Models\GalleryImage;
@@ -8,6 +12,7 @@ use App\Models\TeamMember;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     Filament::setCurrentPanel('admin');
@@ -40,6 +45,19 @@ it('limits a branch-head to their own branch counts', function () {
         ->and($values['Members'])->toBe(1)
         ->and($values['Gallery photos'])->toBe(0)
         ->and($values['Team members'])->toBe(0);
+});
+
+it('shows zero counts to a branch-head without a branch', function () {
+    $user = User::factory()->create(['branch_id' => null]);
+    Role::findOrCreate('branch-head', 'web');
+    $user->assignRole('branch-head');
+    $this->actingAs($user);
+
+    expect(BranchStatsWidget::canView())->toBeFalse()
+        ->and(UserResource::getEloquentQuery()->count())->toBe(0)
+        ->and(ServiceResource::getEloquentQuery()->count())->toBe(0)
+        ->and(GalleryImageResource::getEloquentQuery()->count())->toBe(0)
+        ->and(TeamMemberResource::getEloquentQuery()->count())->toBe(0);
 });
 
 it('shows super-admin totals across branches', function () {

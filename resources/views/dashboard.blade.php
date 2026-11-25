@@ -92,7 +92,7 @@
                 <li><a href="{{ route('profile.edit') }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">{{ __('Edit profile') }}</a></li>
                 <li><a href="{{ route('password.change') }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">{{ __('Change password') }}</a></li>
                 @if ($isAdmin)
-                    <li><a href="/admin" class="font-medium text-primary underline underline-offset-2 hover:no-underline">{{ __('Admin panel') }}</a></li>
+                    <li><a href="{{ filament()->getPanel('admin')->getUrl() }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">{{ __('Admin panel') }}</a></li>
                 @endif
             </ul>
         </section>

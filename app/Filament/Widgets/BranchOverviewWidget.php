@@ -23,6 +23,11 @@ class BranchOverviewWidget extends TableWidget
         return (bool) auth()->user()?->hasRole('super-admin');
     }
 
+    public function mount(): void
+    {
+        abort_unless(static::canView(), 403);
+    }
+
     public function table(Table $table): Table
     {
         return $table
