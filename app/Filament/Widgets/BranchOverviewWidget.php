@@ -51,7 +51,7 @@ class BranchOverviewWidget extends TableWidget
                     ->label('Branch')
                     ->url(fn (Branch $record) => BranchResource::getUrl('edit', ['record' => $record]))
                     ->description(fn (Branch $record) => $record->is_main ? 'Main branch' : null),
-                TextColumn::make('users_count')->label('Members'),
+                TextColumn::make('users_count')->label('Accounts'),
                 TextColumn::make('heads')
                     ->label('Branch head')
                     ->state(fn (Branch $record) => $record->users->isEmpty() ? 'No head' : $record->users->pluck('name')->implode(', '))

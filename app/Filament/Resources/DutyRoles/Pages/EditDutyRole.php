@@ -20,6 +20,25 @@ class EditDutyRole extends EditRecord
         return DutyRoleResource::forceBranch($data);
     }
 
+    /** Non-blocking: tell the admin when a role they just turned off is still on upcoming events. */
+    protected function afterSave(): void
+    {
+        $role = $this->getRecord();
+
+        if (! $role->wasChanged('is_active') || $role->is_active) {
+            return;
+        }
+
+        $upcoming = $role->eventSlots()->whereHas('event', fn ($q) => $q->where('starts_at', '>', now()))->count();
+
+        if ($upcoming > 0) {
+            Notification::make()->warning()
+                ->title("This role is still on {$upcoming} upcoming ".($upcoming === 1 ? 'event' : 'events').'.')
+                ->body('Existing slots stay, but it will not appear for new events.')
+                ->send();
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         return [

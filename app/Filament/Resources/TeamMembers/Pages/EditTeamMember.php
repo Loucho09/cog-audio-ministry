@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TeamMembers\Pages;
 
 use App\Filament\Concerns\ReturnsToResourceList;
 use App\Filament\Resources\TeamMembers\TeamMemberResource;
+use App\Filament\Support\ApprovalNotice;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
@@ -12,6 +13,11 @@ class EditTeamMember extends EditRecord
     use ReturnsToResourceList;
 
     protected static string $resource = TeamMemberResource::class;
+
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return ApprovalNotice::savedTitle() ?? parent::getSavedNotificationTitle();
+    }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {

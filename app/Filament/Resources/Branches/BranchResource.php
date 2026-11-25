@@ -6,7 +6,10 @@ use App\Filament\Resources\Branches\Pages\CreateBranch;
 use App\Filament\Resources\Branches\Pages\EditBranch;
 use App\Filament\Resources\Branches\Pages\ListBranches;
 use App\Models\Branch;
+use App\Models\DutyAssignment;
+use App\Models\DutyRole;
 use App\Models\GalleryImage;
+use App\Models\JoinApplication;
 use App\Models\TeamMember;
 use BackedEnum;
 use Closure;
@@ -27,8 +30,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\Layout\Split;
-use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -45,6 +46,11 @@ class BranchResource extends Resource
     protected static ?string $navigationLabel = 'Branches';
 
     protected static ?string $modelLabel = 'branch';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (bool) auth()->user()?->hasRole('super-admin');
+    }
 
     /** Staff only ever see their own branch; super-admin sees all. */
     public static function getEloquentQuery(): Builder
@@ -69,6 +75,16 @@ class BranchResource extends Resource
         }
         if ($branch->events()->exists()) {
             return "{$branch->name} still has events. Remove them first.";
+        }
+        if (JoinApplication::where('branch_id', $branch->id)->exists()) {
+            return "This branch still has join applications. Review or move them before deleting {$branch->name}.";
+        }
+        // duty_roles cascade on delete, which would silently wipe the roster setup.
+        if (DutyRole::where('branch_id', $branch->id)->exists()) {
+            return "This branch still has duty roles. Remove them first so the roster setup isn't lost with {$branch->name}.";
+        }
+        if (DutyAssignment::where('branch_id', $branch->id)->exists()) {
+            return "This branch still has duty assignments. Remove them first so the duty history isn't lost with {$branch->name}.";
         }
         // nullOnDelete would turn these into "all churches" records, so block instead.
         if (GalleryImage::where('branch_id', $branch->id)->exists()
@@ -113,6 +129,7 @@ class BranchResource extends Resource
                             TextInput::make('name')
                                 ->required()
                                 ->maxLength(255)
+                                ->unique(ignoreRecord: true)
                                 ->prefixIcon(Heroicon::OutlinedBuildingLibrary)
                                 ->live(onBlur: true)
                                 ->afterStateUpdated(function (Get $get, Set $set, ?Model $record, ?string $state) {
@@ -125,6 +142,9 @@ class BranchResource extends Resource
                                 ->maxLength(255)
                                 ->alphaDash()
                                 ->unique(ignoreRecord: true)
+                                ->disabled(fn (string $operation) => $operation === 'edit')
+                                ->dehydrated(fn (string $operation) => $operation !== 'edit')
+                                ->helperText(fn (string $operation) => $operation === 'edit' ? 'The web address name is fixed once the branch is created.' : null)
                                 ->prefixIcon(Heroicon::OutlinedLink),
                             Toggle::make('is_main')
                                 ->label('Main branch')
@@ -191,7 +211,7 @@ class BranchResource extends Resource
                     ->icon(Heroicon::OutlinedStar)
                     ->state(fn (Branch $record) => $record->is_main ? 'Main branch' : null),
                 TextEntry::make('summary_members')
-                    ->label('Members')
+                    ->label('Accounts')
                     ->icon(Heroicon::OutlinedUsers)
                     ->state(fn (Branch $record) => $record->users()->count()),
                 TextEntry::make('summary_services')
@@ -213,60 +233,56 @@ class BranchResource extends Resource
     {
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->withCount(['users', 'services']))
+            // A real table (not Split/Stack) so every column lines up under its header,
+            // whatever actions a row has. Less important columns hide on small screens.
             ->columns([
-                // Split/Stack reflow each row to the screen width, so the table never scrolls sideways.
-                Split::make([
-                    Stack::make([
-                        TextColumn::make('name')
-                            ->weight(FontWeight::SemiBold)
-                            ->searchable()
-                            ->sortable(),
-                        TextColumn::make('main_badge')
-                            ->label('Main')
-                            ->badge()
-                            ->color('primary')
-                            ->icon(Heroicon::OutlinedStar)
-                            ->state(fn (Branch $record) => $record->is_main ? 'Main' : null),
-                        TextColumn::make('slug')
-                            ->color('gray')
-                            ->size(TextSize::Small),
-                    ])->space(1),
-                    Stack::make([
-                        TextColumn::make('address')
-                            ->icon(Heroicon::OutlinedMapPin)
-                            ->iconColor('gray')
-                            ->size(TextSize::Small)
-                            ->placeholder('No address yet')
-                            ->wrap(),
-                        TextColumn::make('contact_number')
-                            ->label('Contact')
-                            ->icon(Heroicon::OutlinedPhone)
-                            ->iconColor('gray')
-                            ->size(TextSize::Small)
-                            ->copyable()
-                            ->copyMessage('Number copied'),
-                        TextColumn::make('email')
-                            ->icon(Heroicon::OutlinedEnvelope)
-                            ->iconColor('gray')
-                            ->size(TextSize::Small)
-                            ->copyable()
-                            ->copyMessage('Email copied'),
-                    ])->space(1),
-                    Stack::make([
-                        TextColumn::make('users_count')
-                            ->counts('users')
-                            ->badge()
-                            ->color('gray')
-                            ->icon(Heroicon::OutlinedUsers)
-                            ->formatStateUsing(fn ($state) => $state.' '.str('member')->plural((int) $state)),
-                        TextColumn::make('services_count')
-                            ->counts('services')
-                            ->badge()
-                            ->color('gray')
-                            ->icon(Heroicon::OutlinedRectangleStack)
-                            ->formatStateUsing(fn ($state) => $state.' '.str('service')->plural((int) $state)),
-                    ])->space(1)->grow(false)->visibleFrom('lg'),
-                ])->from('md'),
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->weight(FontWeight::SemiBold)
+                    ->description(fn (Branch $record) => $record->slug)
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('main_badge')
+                    ->label('Main')
+                    ->badge()
+                    ->color('primary')
+                    ->icon(Heroicon::OutlinedStar)
+                    ->state(fn (Branch $record) => $record->is_main ? 'Main' : null),
+                TextColumn::make('address')
+                    ->label('Address')
+                    ->icon(Heroicon::OutlinedMapPin)
+                    ->iconColor('gray')
+                    ->placeholder('No address yet')
+                    ->wrap()
+                    ->visibleFrom('md'),
+                TextColumn::make('contact_number')
+                    ->label('Contact')
+                    ->icon(Heroicon::OutlinedPhone)
+                    ->iconColor('gray')
+                    ->copyable()
+                    ->copyMessage('Number copied')
+                    ->visibleFrom('lg'),
+                TextColumn::make('email')
+                    ->label('Email')
+                    ->icon(Heroicon::OutlinedEnvelope)
+                    ->iconColor('gray')
+                    ->copyable()
+                    ->copyMessage('Email copied')
+                    ->visibleFrom('lg'),
+                TextColumn::make('users_count')
+                    ->label('Accounts')
+                    ->badge()
+                    ->color('gray')
+                    ->icon(Heroicon::OutlinedUsers)
+                    ->formatStateUsing(fn ($state) => $state.' '.str('account')->plural((int) $state))
+                    ->visibleFrom('lg'),
+                TextColumn::make('services_count')
+                    ->label('Services')
+                    ->badge()
+                    ->color('gray')
+                    ->icon(Heroicon::OutlinedRectangleStack)
+                    ->formatStateUsing(fn ($state) => $state.' '.str('service')->plural((int) $state))
+                    ->visibleFrom('lg'),
             ])
             ->defaultSort('name')
             ->striped()

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\TeamMembers;
 use App\Filament\Resources\TeamMembers\Pages\CreateTeamMember;
 use App\Filament\Resources\TeamMembers\Pages\EditTeamMember;
 use App\Filament\Resources\TeamMembers\Pages\ListTeamMembers;
+use App\Filament\Support\ApprovalNotice;
 use App\Filament\Support\PublishStatus;
 use App\Models\Branch;
 use App\Models\TeamMember;
@@ -27,9 +28,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\Layout\Split;
-use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -88,6 +88,7 @@ class TeamMemberResource extends Resource
         return $schema
             ->columns(3)
             ->components([
+                ApprovalNotice::note(),
                 Group::make([
                     Section::make('Profile')
                         ->description('Who they are and how they look on the site.')
@@ -109,6 +110,9 @@ class TeamMemberResource extends Resource
                                 ->directory('team')
                                 ->image()
                                 ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->imageResizeMode('cover')
+                                ->imageResizeTargetWidth('400')
+                                ->imageResizeTargetHeight('400')
                                 ->maxSize(4096)
                                 ->helperText('JPG, PNG or WebP, up to 4 MB. On edit, leave empty to keep the current photo.'),
                         ]),
@@ -117,8 +121,12 @@ class TeamMemberResource extends Resource
                         ->icon(Heroicon::OutlinedSparkles)
                         ->columns(2)
                         ->schema([
-                            Toggle::make('is_full_time')->label('Full-time'),
-                            Toggle::make('is_featured')->label('Featured on homepage'),
+                            Toggle::make('is_full_time')
+                                ->label('Full-time')
+                                ->helperText('Full-time members are listed first.'),
+                            Toggle::make('is_featured')
+                                ->label('Featured on homepage')
+                                ->helperText('Shown in Meet the Team when that section is switched on.'),
                             TextInput::make('sort_order')
                                 ->numeric()
                                 ->minValue(0)
@@ -192,50 +200,45 @@ class TeamMemberResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            // A real table (not Split/Stack) so every column lines up under its header,
+            // whatever actions a row has. Less important columns hide on small screens.
             ->columns([
-                // Split/Stack reflow each row to the screen width, so the table never scrolls sideways.
-                Split::make([
-                    ImageColumn::make('photo_path')
-                        ->label('Photo')
-                        ->state(fn (TeamMember $record) => $record->photo_url ? url($record->photo_url) : null)
-                        ->circular()
-                        ->imageSize(44)
-                        ->grow(false),
-                    Stack::make([
-                        TextColumn::make('name')
-                            ->weight(FontWeight::SemiBold)
-                            ->searchable()
-                            ->sortable(),
-                        TextColumn::make('role_title')
-                            ->label('Role')
-                            ->color('gray')
-                            ->size(TextSize::Small)
-                            ->searchable()
-                            ->placeholder('No role title yet'),
-                    ]),
-                    TextColumn::make('branch.name')
-                        ->label('Branch')
-                        ->icon(Heroicon::OutlinedBuildingLibrary)
-                        ->iconColor('gray')
-                        ->size(TextSize::Small)
-                        ->placeholder('All churches')
-                        ->visibleFrom('lg'),
-                    Stack::make([
-                        TextColumn::make('work_type')
-                            ->label('Type')
-                            ->badge()
-                            ->state(fn (TeamMember $record) => $record->is_full_time ? 'Full-time' : 'Part-time')
-                            ->color(fn (string $state) => $state === 'Full-time' ? 'primary' : 'gray')
-                            ->icon(fn (string $state) => $state === 'Full-time' ? Heroicon::OutlinedClock : Heroicon::OutlinedCalendar),
-                        TextColumn::make('featured_badge')
-                            ->label('Featured')
-                            ->badge()
-                            ->state(fn (TeamMember $record) => $record->is_featured ? 'Featured' : null)
-                            ->color('info')
-                            ->icon(Heroicon::OutlinedStar),
-                        PublishStatus::column(),
-                    ])->space(1)->grow(false),
-                ])->from('md'),
+                ImageColumn::make('photo_path')
+                    ->label('Photo')
+                    ->state(fn (TeamMember $record) => $record->photo_url ? url($record->photo_url) : null)
+                    ->circular()
+                    ->imageSize(44),
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->weight(FontWeight::SemiBold)
+                    ->description(fn (TeamMember $record) => $record->role_title ?: 'No role title yet')
+                    ->searchable(['name', 'role_title'])
+                    ->sortable(),
+                TextColumn::make('branch.name')
+                    ->label('Branch')
+                    ->icon(Heroicon::OutlinedBuildingLibrary)
+                    ->iconColor('gray')
+                    ->placeholder('All churches')
+                    ->visibleFrom('md'),
+                IconColumn::make('is_full_time')
+                    ->label('Full-time')
+                    ->boolean()
+                    ->trueIcon(Heroicon::OutlinedClock)
+                    ->falseIcon(Heroicon::OutlinedMinus)
+                    ->trueColor('primary')
+                    ->falseColor('gray')
+                    ->alignCenter()
+                    ->visibleFrom('md'),
+                IconColumn::make('is_featured')
+                    ->label('Featured')
+                    ->boolean()
+                    ->trueIcon(Heroicon::OutlinedStar)
+                    ->falseIcon(Heroicon::OutlinedMinus)
+                    ->trueColor('info')
+                    ->falseColor('gray')
+                    ->alignCenter()
+                    ->visibleFrom('md'),
+                PublishStatus::column()->visibleFrom('sm'),
             ])
             ->defaultSort('sort_order')
             // Reordering writes to every listed row, including global ones, so it is super-admin only.
@@ -259,7 +262,8 @@ class TeamMemberResource extends Resource
             ])
             ->filtersTriggerAction(fn (Action $action) => $action->button()->label('Filters'))
             ->recordActions([
-                EditAction::make()->iconButton()->tooltip('Edit'),
+                // Greyed out (not hidden) on view-only rows so columns stay aligned.
+                EditAction::make()->iconButton()->tooltip('Edit')->authorizationTooltip(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

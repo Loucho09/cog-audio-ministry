@@ -93,3 +93,18 @@ test('updateEvent refuses a clashing time and changes nothing', function () {
     expect($e2->fresh()->starts_at->equalTo($start))->toBeTrue()
         ->and($e2->fresh()->name)->not->toBe('Moved');
 });
+
+test('updateEvent refuses an event that has started', function () {
+    [$event, $role] = rosterEvent();
+    $event->forceFill(['starts_at' => now()->subHour(), 'ends_at' => now()->addHour()])->save();
+
+    expect(fn () => svc()->updateEvent($event, ['name' => 'Late edit'], [$role->id => 1]))
+        ->toThrow(RosterRuleViolation::class, 'already started');
+});
+
+test('updateEvent refuses a new start time in the past', function () {
+    [$event, $role] = rosterEvent();
+
+    expect(fn () => svc()->updateEvent($event, ['starts_at' => now()->subDay(), 'ends_at' => now()->addHour()], [$role->id => 1]))
+        ->toThrow(RosterRuleViolation::class, 'future');
+});

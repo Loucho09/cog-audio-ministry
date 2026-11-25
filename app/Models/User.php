@@ -9,6 +9,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -58,6 +59,31 @@ class User extends Authenticatable implements FilamentUser
     public function dutyAssignments(): HasMany
     {
         return $this->hasMany(DutyAssignment::class);
+    }
+
+    /**
+     * Accounts that need an admin's eye: temporary password, invite not accepted yet,
+     * and (super-admin view only) no branch. Super-admins have no branch by design.
+     */
+    public function scopeNeedsAttention(Builder $query, bool $includeNoBranch = false): Builder
+    {
+        return $query->where(function (Builder $q) use ($includeNoBranch) {
+            $q->where('must_change_password', true)->orWhereNull('email_verified_at');
+
+            if ($includeNoBranch) {
+                $q->orWhere(fn (Builder $q) => $q->whereNull('branch_id')->withoutRole('super-admin'));
+            }
+        });
+    }
+
+    /** First matching attention reason, for display. */
+    public function attentionReason(): string
+    {
+        return match (true) {
+            (bool) $this->must_change_password => 'Still on temporary password',
+            $this->email_verified_at === null => 'Invite not accepted yet',
+            default => 'No branch',
+        };
     }
 
     /**

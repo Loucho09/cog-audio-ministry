@@ -55,6 +55,8 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[gallery-thumbnails-gd]]: gallery WebP thumbnails with PHP GD, no new package, width in filename (no schema change); backfill on deploy (2026-11-25)
 - [[admins-equal-per-branch]]: branch-head and branch-admin equal powers, own branch only; branch-admins manage services (2026-11-25)
 - [[admin-return-to-list]]: admin Save returns to the list; Create Event opens the event page (2026-11-26)
+- [[admin-review-2026-11-26]]: full admin review fixes (2026-11-26)
+- [[remove-branch-head-decision]]: branch-head role removed; 1 branch-admin per branch, 2 for Dasma (2026-11-26)
 - [[duty-guest-assign-decision]]: typed guest names on duty assignments, auto-confirmed (2026-11-26)
 
 ## Features
@@ -72,6 +74,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[join-applications]]: public join form, branch review, approval creates member account (Phase 3, planned, spec written 2026-11-25; tasks in [[join-applications-tasks]])
 - [[duty-roster]]: events, duty roles, slots, assignments, accept/decline (Phase 4 v1, merged to main 2026-11-26; tasks in [[duty-roster-tasks]])
 - [[duty-guest-assign]]: assign a typed guest name to a duty, auto-confirmed (Phase 4, done, merged; tasks in [[duty-guest-assign-tasks]])
+- [[remove-branch-head]]: remove branch-head role, admin limit per branch (Phase 4, planned; tasks in [[remove-branch-head-tasks]])
 - [[loading-states]]: progress bar, view transitions, image skeletons, submit guard, admin skeletons, scroll reveal (UI polish add-on before Phase 3, done and merged 2026-11-25; tasks in [[loading-states-tasks]])
 
 ## Folders

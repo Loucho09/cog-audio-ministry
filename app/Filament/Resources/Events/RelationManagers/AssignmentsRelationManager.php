@@ -71,6 +71,12 @@ class AssignmentsRelationManager extends RelationManager
             ->whereHas('roles', fn (Builder $q) => $q->whereIn('name', ['member', 'branch-admin', 'branch-head']));
     }
 
+    /** Assigning and removing duties is an event update, so the Event policy decides. */
+    private function canManage(): bool
+    {
+        return auth()->user()?->can('update', $this->event()) ?? false;
+    }
+
     private function started(): bool
     {
         return $this->event()->hasStarted();
@@ -101,7 +107,8 @@ class AssignmentsRelationManager extends RelationManager
                 Action::make('assign')
                     ->label('Assign')
                     ->icon('heroicon-o-user-plus')
-                    ->hidden(fn () => $this->started())
+                    ->hidden(fn () => $this->started() || ! $this->canManage())
+                    ->authorize(fn () => $this->canManage())
                     ->schema([
                         Select::make('duty_role_id')
                             ->label('Role')
@@ -162,7 +169,8 @@ class AssignmentsRelationManager extends RelationManager
                     ->icon('heroicon-o-trash')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->hidden(fn (DutyAssignment $record) => $this->started() || $record->status === DutyStatus::Declined)
+                    ->hidden(fn (DutyAssignment $record) => $this->started() || $record->status === DutyStatus::Declined || ! $this->canManage())
+                    ->authorize(fn () => $this->canManage())
                     ->action(function (DutyAssignment $record): void {
                         try {
                             app(DutyRosterService::class)->remove($record);

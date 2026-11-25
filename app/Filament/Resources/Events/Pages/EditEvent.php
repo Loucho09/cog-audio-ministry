@@ -13,6 +13,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 class EditEvent extends EditRecord
 {
@@ -46,6 +47,10 @@ class EditEvent extends EditRecord
                 EventResource::attributesFrom($data),
                 EventResource::quantitiesFrom($data['dutySlots'] ?? []),
             );
+        } catch (UniqueConstraintViolationException) {
+            Notification::make()->danger()->title(EventResource::DUPLICATE_MESSAGE)->send();
+
+            throw new Halt;
         } catch (RosterRuleViolation $e) {
             Notification::make()->danger()->title($e->getMessage())->send();
 

@@ -7,10 +7,7 @@ use App\Filament\Widgets\Concerns\HasSkeletonPlaceholder;
 use App\Models\JoinApplication;
 use Filament\Actions\Action;
 use Filament\Support\Enums\FontWeight;
-use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\Layout\Split;
-use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
@@ -47,32 +44,21 @@ class PendingApplicationsWidget extends TableWidget
             ->heading($count > 0 ? "Waiting for review ({$count})" : 'Waiting for review')
             ->query($this->scoped()->latest()->orderByDesc('id')->limit(5))
             ->columns([
-                Split::make([
-                    Stack::make([
-                        TextColumn::make('full_name')
-                            ->label('Name')
-                            ->weight(FontWeight::SemiBold),
-                        TextColumn::make('email')
-                            ->label('Email')
-                            ->color('gray')
-                            ->size(TextSize::Small)
-                            ->wrap(),
-                    ]),
-                    Stack::make([
-                        TextColumn::make('branch.name')
-                            ->label('Branch')
-                            ->icon(Heroicon::OutlinedBuildingLibrary)
-                            ->iconColor('gray')
-                            ->size(TextSize::Small),
-                        TextColumn::make('created_at')
-                            ->label('Submitted')
-                            ->since()
-                            ->prefix('Submitted ')
-                            ->dateTimeTooltip('M j, Y g:i A')
-                            ->color('gray')
-                            ->size(TextSize::Small),
-                    ])->space(1),
-                ])->from('md'),
+                TextColumn::make('full_name')
+                    ->label('Name')
+                    ->weight(FontWeight::SemiBold)
+                    ->description(fn (JoinApplication $record) => $record->email),
+                TextColumn::make('branch.name')
+                    ->label('Branch')
+                    ->icon(Heroicon::OutlinedBuildingLibrary)
+                    ->iconColor('gray')
+                    ->visibleFrom('md'),
+                TextColumn::make('created_at')
+                    ->label('Submitted')
+                    ->since()
+                    ->dateTimeTooltip('M j, Y g:i A')
+                    ->color('gray')
+                    ->visibleFrom('md'),
             ])
             ->recordUrl(fn (JoinApplication $record) => JoinApplicationResource::getUrl('view', ['record' => $record], panel: 'admin'))
             ->headerActions([

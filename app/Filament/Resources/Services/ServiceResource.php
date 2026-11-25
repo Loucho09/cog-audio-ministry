@@ -21,6 +21,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Group;
@@ -30,8 +31,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\Layout\Split;
-use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -64,11 +63,21 @@ class ServiceResource extends Resource
     /** Non-super-admins always save into their own branch, whatever the request says. */
     public static function forceBranch(array $data): array
     {
+        // An emptied sort order field submits null; keep the column at 0 instead.
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+
         if (! self::isSuperAdmin()) {
             $data['branch_id'] = auth()->user()->branch_id;
         }
 
         return $data;
+    }
+
+    public const DELETE_NOTE = 'Events made from this service are kept but no longer linked to it. Their duty slots stay. The default duty slots set on this service are removed.';
+
+    public static function duplicateSlotNotification(): Notification
+    {
+        return Notification::make()->danger()->title('A service already runs at this day and time.');
     }
 
     private static function isSuperAdmin(): bool
@@ -285,6 +294,7 @@ class ServiceResource extends Resource
                             TextInput::make('sort_order')
                                 ->numeric()
                                 ->minValue(0)
+                                ->default(0)
                                 ->prefixIcon(Heroicon::OutlinedArrowsUpDown),
                         ]),
                 ])->columnSpan(fn (string $operation) => $operation === 'edit' ? ['default' => 3, 'lg' => 2] : 'full'),
@@ -339,42 +349,37 @@ class ServiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            // A real table (not Split/Stack) so every column lines up under its header,
+            // whatever actions a row has. Less important columns hide on small screens.
             ->columns([
-                // Split/Stack reflow each row to the screen width, so the table never scrolls sideways.
-                Split::make([
-                    Stack::make([
-                        TextColumn::make('name')
-                            ->weight(FontWeight::SemiBold)
-                            ->searchable()
-                            ->sortable(),
-                        TextColumn::make('schedule')
-                            ->label('When')
-                            ->color('gray')
-                            ->size(TextSize::Small)
-                            ->state(fn (Service $record) => self::scheduleLabel($record))
-                            ->sortable(['day_of_week', 'start_time']),
-                    ]),
-                    TextColumn::make('branch.name')
-                        ->label('Branch')
-                        ->icon(Heroicon::OutlinedBuildingLibrary)
-                        ->iconColor('gray')
-                        ->size(TextSize::Small)
-                        ->sortable(),
-                    Stack::make([
-                        TextColumn::make('status')
-                            ->label('Status')
-                            ->badge()
-                            ->state(fn (Service $record) => self::statusOf($record))
-                            ->color(fn (string $state) => self::statusColor($state))
-                            ->icon(fn (string $state) => self::statusIcon($state)),
-                        TextColumn::make('date_range')
-                            ->label('Runs')
-                            ->color('gray')
-                            ->size(TextSize::Small)
-                            ->state(fn (Service $record) => self::dateRangeLabel($record))
-                            ->visibleFrom('lg'),
-                    ])->space(1)->grow(false),
-                ])->from('md'),
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->weight(FontWeight::SemiBold)
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('schedule')
+                    ->label('When')
+                    ->color('gray')
+                    ->state(fn (Service $record) => self::scheduleLabel($record))
+                    ->sortable(['day_of_week', 'start_time']),
+                TextColumn::make('branch.name')
+                    ->label('Branch')
+                    ->icon(Heroicon::OutlinedBuildingLibrary)
+                    ->iconColor('gray')
+                    ->sortable()
+                    ->visibleFrom('md'),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->state(fn (Service $record) => self::statusOf($record))
+                    ->color(fn (string $state) => self::statusColor($state))
+                    ->icon(fn (string $state) => self::statusIcon($state))
+                    ->visibleFrom('sm'),
+                TextColumn::make('date_range')
+                    ->label('Runs')
+                    ->color('gray')
+                    ->state(fn (Service $record) => self::dateRangeLabel($record))
+                    ->visibleFrom('lg'),
             ])
             ->defaultSort('sort_order')
             ->striped()
@@ -399,7 +404,9 @@ class ServiceResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->authorizeIndividualRecords('delete'),
+                    DeleteBulkAction::make()
+                        ->modalDescription(self::DELETE_NOTE)
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }

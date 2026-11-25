@@ -8,7 +8,6 @@ use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
-use Illuminate\Database\Eloquent\Builder;
 
 /** Accounts still on a temporary password, plus (super-admin only) accounts with no branch. */
 class AccountsAttentionWidget extends TableWidget
@@ -28,28 +27,24 @@ class AccountsAttentionWidget extends TableWidget
         return (bool) auth()->user()?->hasAdminAccess();
     }
 
+    public function mount(): void
+    {
+        abort_unless(static::canView(), 403);
+    }
+
     public function table(Table $table): Table
     {
         $isSuper = (bool) auth()->user()?->hasRole('super-admin');
 
         return $table
-            ->query(
-                UserResource::getEloquentQuery()->where(function (Builder $q) use ($isSuper) {
-                    $q->where('must_change_password', true);
-
-                    if ($isSuper) {
-                        // Super-admins have no branch by design, so they are not "missing" one.
-                        $q->orWhere(fn (Builder $q) => $q->whereNull('branch_id')->withoutRole('super-admin'));
-                    }
-                })->latest()
-            )
+            ->query(UserResource::getEloquentQuery()->needsAttention($isSuper)->latest())
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('email'),
                 TextColumn::make('branch.name')->label('Branch')->placeholder('No branch'),
                 TextColumn::make('reason')
                     ->label('Reason')
-                    ->state(fn (User $record) => $record->must_change_password ? 'Still on temporary password' : 'No branch')
+                    ->state(fn (User $record) => $record->attentionReason())
                     ->badge()
                     ->color(fn (string $state) => $state === 'No branch' ? 'danger' : 'warning'),
                 TextColumn::make('created_at')->label('Created')->since(),

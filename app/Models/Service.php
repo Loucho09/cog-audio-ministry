@@ -19,6 +19,9 @@ class Service extends Model
 {
     use BelongsToBranch, HasFactory;
 
+    /** New rows never get a NULL sort order. */
+    protected $attributes = ['sort_order' => 0];
+
     protected $fillable = ['branch_id', 'name', 'day_of_week', 'start_time', 'is_active', 'starts_on', 'ends_on', 'sort_order'];
 
     protected function casts(): array

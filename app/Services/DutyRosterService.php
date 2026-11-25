@@ -38,6 +38,14 @@ class DutyRosterService
                 throw new RosterRuleViolation('This member belongs to a different branch.');
             }
 
+            if (! $member->hasAnyRole(['member', 'branch-admin', 'branch-head'])) {
+                throw new RosterRuleViolation('This person cannot be given duties.');
+            }
+
+            if ((int) $role->branch_id !== (int) $event->branch_id) {
+                throw new RosterRuleViolation('That duty belongs to a different branch.');
+            }
+
             if (! $slot) {
                 throw new RosterRuleViolation('This event has no slot for that duty.');
             }
@@ -214,12 +222,20 @@ class DutyRosterService
         return DB::transaction(function () use ($event, $attributes, $quantitiesByRoleId) {
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
 
+            if ($event->hasStarted()) {
+                throw new RosterRuleViolation('This event has already started and can no longer be changed.');
+            }
+
             $memberIds = DutyAssignment::query()->active()->where('event_id', $event->id)
                 ->whereNotNull('user_id')->pluck('user_id')->unique()->sort()->values();
             User::query()->whereIn('id', $memberIds)->orderBy('id')->lockForUpdate()->get();
 
             $startsAt = Carbon::parse($attributes['starts_at'] ?? $event->starts_at);
             $endsAt = Carbon::parse($attributes['ends_at'] ?? $event->ends_at);
+
+            if ($startsAt->notEqualTo($event->starts_at) && $startsAt->lessThanOrEqualTo(now())) {
+                throw new RosterRuleViolation('Pick a start time in the future.');
+            }
 
             $this->assertTimeChangeAllowed($event, $startsAt, $endsAt);
             $this->assertSlotChangesAllowed($event, $quantitiesByRoleId);

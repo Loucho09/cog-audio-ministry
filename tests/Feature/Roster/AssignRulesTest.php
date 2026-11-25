@@ -140,3 +140,20 @@ test('remove refuses a duty on an event that has started', function () {
 
     expect(fn () => svc()->remove($a))->toThrow(RosterRuleViolation::class, 'already started');
 });
+
+test('cannot assign a user without a roster-eligible role', function () {
+    [$event, $role] = rosterEvent();
+    $norole = User::factory()->create(['branch_id' => $event->branch_id]);
+    $norole->syncRoles([]);
+
+    expect(fn () => svc()->assign($event, $role, $norole))->toThrow(RosterRuleViolation::class, 'cannot be given duties');
+});
+
+test('cannot assign a duty role from another branch', function () {
+    [$event] = rosterEvent();
+    $foreign = DutyRole::factory()->create();
+    $event->dutySlots()->create(['duty_role_id' => $foreign->id, 'quantity' => 1]);
+    $member = rosterMember($event);
+
+    expect(fn () => svc()->assign($event, $foreign, $member))->toThrow(RosterRuleViolation::class, 'different branch');
+});

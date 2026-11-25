@@ -25,7 +25,7 @@ class ListUsers extends ListRecords
     {
         $admins = fn (Builder $query) => $query->whereHas('roles', fn (Builder $r) => $r->whereIn('name', ['super-admin', 'branch-head', 'branch-admin']));
         $members = fn (Builder $query) => $query->whereHas('roles', fn (Builder $r) => $r->where('name', 'member'));
-        $attention = fn (Builder $query) => $query->where(fn (Builder $w) => $w->where('must_change_password', true)->orWhereNull('email_verified_at'));
+        $attention = fn (Builder $query) => $query->needsAttention(UserResource::isSuperAdmin());
 
         $count = function (?callable $scope = null): int {
             $query = UserResource::getEloquentQuery();

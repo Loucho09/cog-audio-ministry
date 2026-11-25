@@ -42,7 +42,7 @@ it('limits a branch-head to their own branch counts', function () {
     $values = statValues();
 
     expect($values['Services'])->toBe(2)
-        ->and($values['Members'])->toBe(1)
+        ->and($values['Accounts'])->toBe(1)
         ->and($values['Gallery photos'])->toBe(0)
         ->and($values['Team members'])->toBe(0);
 });
@@ -66,7 +66,7 @@ it('shows super-admin totals across branches', function () {
     $values = statValues();
 
     expect($values['Services'])->toBe(5)
-        ->and($values['Members'])->toBe(2 + 1)
+        ->and($values['Accounts'])->toBe(2 + 1)
         ->and($values['Gallery photos'])->toBe(2)
         ->and($values['Team members'])->toBe(2);
 });

@@ -99,3 +99,16 @@ it('limits recent accounts to 5 in scope', function () {
 
     expect($component->instance()->getTableRecords())->toHaveCount(5);
 });
+
+it('shows a branch-admin the widgets scoped to their branch', function () {
+    $mine = User::factory()->member($this->a)->create(['must_change_password' => true]);
+    $other = User::factory()->member($this->b)->create(['must_change_password' => true]);
+    $this->actingAs(User::factory()->branchAdmin($this->a)->create());
+
+    expect(AccountsAttentionWidget::canView())->toBeTrue()
+        ->and(RecentAccountsWidget::canView())->toBeTrue();
+
+    Livewire::test(AccountsAttentionWidget::class)
+        ->assertCanSeeTableRecords([$mine])
+        ->assertCanNotSeeTableRecords([$other]);
+});

@@ -14,6 +14,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -101,10 +102,12 @@ class DutyRoleResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->withCount('eventSlots as used_on_count'))
             ->columns([
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('branch.name')->label('Branch')->sortable()->visible(fn () => self::isSuperAdmin()),
                 TextColumn::make('sort_order')->label('Order')->sortable(),
+                TextColumn::make('used_on_count')->label('Used on')->suffix(' events')->sortable(),
                 IconColumn::make('is_active')->label('Active')->boolean(),
             ])
             ->defaultSort('sort_order')
@@ -123,13 +126,23 @@ class DutyRoleResource extends Resource
                         ->authorizeIndividualRecords('delete')
                         ->using(function (Collection $records, DeleteBulkAction $action): void {
                             // Roles still in use are kept and reported as failures.
+                            $kept = 0;
+
                             foreach ($records as $record) {
                                 if (self::deleteBlocker($record) !== null) {
                                     $action->reportBulkProcessingFailure();
+                                    $kept++;
 
                                     continue;
                                 }
                                 $record->delete();
+                            }
+
+                            if ($kept > 0) {
+                                Notification::make()->warning()
+                                    ->title($kept.($kept === 1 ? ' role was' : ' roles were').' kept because '.($kept === 1 ? 'it is' : 'they are').' used on events.')
+                                    ->body('Turn off Active instead.')
+                                    ->send();
                             }
                         }),
                 ]),

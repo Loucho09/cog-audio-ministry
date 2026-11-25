@@ -27,6 +27,11 @@ class BranchStatsWidget extends StatsOverviewWidget
         return (bool) auth()->user()?->hasAdminAccess();
     }
 
+    public function mount(): void
+    {
+        abort_unless(static::canView(), 403);
+    }
+
     protected function getHeading(): ?string
     {
         return auth()->user()?->hasRole('super-admin') ? 'All branches' : 'Your branch';
@@ -43,7 +48,7 @@ class BranchStatsWidget extends StatsOverviewWidget
         $teamTotal = (clone $team)->count();
 
         return [
-            Stat::make('Members', UserResource::getEloquentQuery()->count()),
+            Stat::make('Accounts', UserResource::getEloquentQuery()->count()),
             Stat::make('Services', ServiceResource::getEloquentQuery()->count()),
             Stat::make('Gallery photos', $galleryTotal)
                 ->description($galleryPublished.' published, '.($galleryTotal - $galleryPublished).' draft (incl. all-churches photos)'),

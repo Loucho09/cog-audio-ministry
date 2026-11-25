@@ -285,3 +285,22 @@ it('has no bulk actions', function () {
 
     expect($component->instance()->getTable()->getBulkActions())->toBeEmpty();
 });
+
+it('flags a pending application whose email already has an account', function () {
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    User::factory()->create(['email' => $this->appA->email]);
+
+    expect(JoinApplicationResource::emailHasAccount($this->appA->fresh()))->toBeTrue()
+        ->and(JoinApplicationResource::emailHasAccount($this->appB->fresh()))->toBeFalse();
+
+    Livewire::test(ListJoinApplications::class)
+        ->assertTableColumnStateSet('account_exists', 'Account exists', $this->appA);
+});
+
+it('shows tab counts from the scoped query', function () {
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+
+    $tabs = Livewire::test(ListJoinApplications::class)->instance()->getTabs();
+
+    expect($tabs['all']->getBadge())->toEqual(1)->and($tabs['pending']->getBadge())->toEqual(1);
+});
