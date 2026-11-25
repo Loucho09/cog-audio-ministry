@@ -69,6 +69,7 @@ Test run at merge: 403 total, 402 pass, 1 pre-existing skip.
   - Live region re-announces repeated text.
   - Admin skeleton had two `style` attributes (padding ignored); merged via `->style()`.
   - Hidden `autocomplete="username"` field on update-password, change-password and confirm-password forms.
+- **Hotfix (46ba75a, 2026-11-25): admin widgets stuck on skeleton forever.** Livewire puts its lazy-load trigger on the placeholder's first root element; the `<style>` block was a root sibling, took the trigger, and no load request was ever sent. The `<style>` now sits inside the single wrapper `<div>`; `WidgetSkeletonTest` asserts exactly one root `<div>`. Lesson: a Livewire placeholder view must have one root element. The earlier browser check missed it because skeletons were read as "still loading".
 - **Browser check (Playwright):** homepage at 360px light; reveal after fast scroll; profile form lock ("Saving…", live region, progress bar); `/admin` skeletons in dark mode; console clean.
 
 Decision: [[loading-states-approach]]
