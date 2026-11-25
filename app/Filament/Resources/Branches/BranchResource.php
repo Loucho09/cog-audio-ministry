@@ -30,8 +30,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\Layout\Split;
-use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -235,58 +233,56 @@ class BranchResource extends Resource
     {
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->withCount(['users', 'services']))
+            // A real table (not Split/Stack) so every column lines up under its header,
+            // whatever actions a row has. Less important columns hide on small screens.
             ->columns([
-                // Split/Stack reflow each row to the screen width, so the table never scrolls sideways.
-                Split::make([
-                    Stack::make([
-                        TextColumn::make('name')
-                            ->weight(FontWeight::SemiBold)
-                            ->searchable()
-                            ->sortable(),
-                        TextColumn::make('main_badge')
-                            ->label('Main')
-                            ->badge()
-                            ->color('primary')
-                            ->icon(Heroicon::OutlinedStar)
-                            ->state(fn (Branch $record) => $record->is_main ? 'Main' : null),
-                        TextColumn::make('slug')
-                            ->color('gray')
-                            ->size(TextSize::Small),
-                    ])->space(1),
-                    Stack::make([
-                        TextColumn::make('address')
-                            ->icon(Heroicon::OutlinedMapPin)
-                            ->iconColor('gray')
-                            ->size(TextSize::Small)
-                            ->placeholder('No address yet')
-                            ->wrap(),
-                        TextColumn::make('contact_number')
-                            ->label('Contact')
-                            ->icon(Heroicon::OutlinedPhone)
-                            ->iconColor('gray')
-                            ->size(TextSize::Small)
-                            ->copyable()
-                            ->copyMessage('Number copied'),
-                        TextColumn::make('email')
-                            ->icon(Heroicon::OutlinedEnvelope)
-                            ->iconColor('gray')
-                            ->size(TextSize::Small)
-                            ->copyable()
-                            ->copyMessage('Email copied'),
-                    ])->space(1),
-                    Stack::make([
-                        TextColumn::make('users_count')
-                            ->badge()
-                            ->color('gray')
-                            ->icon(Heroicon::OutlinedUsers)
-                            ->formatStateUsing(fn ($state) => $state.' '.str('account')->plural((int) $state)),
-                        TextColumn::make('services_count')
-                            ->badge()
-                            ->color('gray')
-                            ->icon(Heroicon::OutlinedRectangleStack)
-                            ->formatStateUsing(fn ($state) => $state.' '.str('service')->plural((int) $state)),
-                    ])->space(1)->grow(false)->visibleFrom('lg'),
-                ])->from('md'),
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->weight(FontWeight::SemiBold)
+                    ->description(fn (Branch $record) => $record->slug)
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('main_badge')
+                    ->label('Main')
+                    ->badge()
+                    ->color('primary')
+                    ->icon(Heroicon::OutlinedStar)
+                    ->state(fn (Branch $record) => $record->is_main ? 'Main' : null),
+                TextColumn::make('address')
+                    ->label('Address')
+                    ->icon(Heroicon::OutlinedMapPin)
+                    ->iconColor('gray')
+                    ->placeholder('No address yet')
+                    ->wrap()
+                    ->visibleFrom('md'),
+                TextColumn::make('contact_number')
+                    ->label('Contact')
+                    ->icon(Heroicon::OutlinedPhone)
+                    ->iconColor('gray')
+                    ->copyable()
+                    ->copyMessage('Number copied')
+                    ->visibleFrom('lg'),
+                TextColumn::make('email')
+                    ->label('Email')
+                    ->icon(Heroicon::OutlinedEnvelope)
+                    ->iconColor('gray')
+                    ->copyable()
+                    ->copyMessage('Email copied')
+                    ->visibleFrom('lg'),
+                TextColumn::make('users_count')
+                    ->label('Accounts')
+                    ->badge()
+                    ->color('gray')
+                    ->icon(Heroicon::OutlinedUsers)
+                    ->formatStateUsing(fn ($state) => $state.' '.str('account')->plural((int) $state))
+                    ->visibleFrom('lg'),
+                TextColumn::make('services_count')
+                    ->label('Services')
+                    ->badge()
+                    ->color('gray')
+                    ->icon(Heroicon::OutlinedRectangleStack)
+                    ->formatStateUsing(fn ($state) => $state.' '.str('service')->plural((int) $state))
+                    ->visibleFrom('lg'),
             ])
             ->defaultSort('name')
             ->striped()

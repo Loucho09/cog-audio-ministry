@@ -24,8 +24,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\Layout\Split;
-use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -317,49 +315,40 @@ class JoinApplicationResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            // A real table (not Split/Stack) so every column lines up under its header,
+            // whatever actions a row has. Less important columns hide on small screens.
             ->columns([
-                // Split/Stack reflow each row to the screen width, so the table never scrolls sideways.
-                Split::make([
-                    Stack::make([
-                        TextColumn::make('full_name')
-                            ->label('Name')
-                            ->weight(FontWeight::SemiBold)
-                            ->searchable(['full_name', 'email']),
-                        TextColumn::make('email')
-                            ->label('Email')
-                            ->color('gray')
-                            ->size(TextSize::Small)
-                            ->wrap(),
-                        TextColumn::make('account_exists')
-                            ->label('Account')
-                            ->badge()
-                            ->color('danger')
-                            ->state(fn (JoinApplication $record) => self::emailHasAccount($record) ? 'Account exists' : null)
-                            ->tooltip('This email already belongs to a user. Reject instead of approving.'),
-                    ]),
-                    Stack::make([
-                        TextColumn::make('branch.name')
-                            ->label('Branch')
-                            ->icon(Heroicon::OutlinedBuildingLibrary)
-                            ->iconColor('gray')
-                            ->size(TextSize::Small),
-                    ]),
-                    Stack::make([
-                        TextColumn::make('status')
-                            ->badge()
-                            ->formatStateUsing(fn (string $state) => Str::headline($state))
-                            ->color(fn (string $state) => self::statusColor($state))
-                            ->icon(fn (string $state) => self::statusIcon($state)),
-                        TextColumn::make('created_at')
-                            ->label('Submitted')
-                            ->since()
-                            ->prefix('Submitted ')
-                            ->dateTimeTooltip('M j, Y g:i A')
-                            ->color('gray')
-                            ->size(TextSize::Small)
-                            ->sortable(),
-                    ])->space(1),
-                ])->from('md'),
+                TextColumn::make('full_name')
+                    ->label('Name')
+                    ->weight(FontWeight::SemiBold)
+                    ->description(fn (JoinApplication $record) => $record->email)
+                    ->searchable(['full_name', 'email'])
+                    ->sortable(),
+                TextColumn::make('account_exists')
+                    ->label('Account')
+                    ->badge()
+                    ->color('danger')
+                    ->state(fn (JoinApplication $record) => self::emailHasAccount($record) ? 'Account exists' : null)
+                    ->tooltip('This email already belongs to a user. Reject instead of approving.')
+                    ->visibleFrom('sm'),
+                TextColumn::make('branch.name')
+                    ->label('Branch')
+                    ->icon(Heroicon::OutlinedBuildingLibrary)
+                    ->iconColor('gray')
+                    ->visibleFrom('md'),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state) => Str::headline($state))
+                    ->color(fn (string $state) => self::statusColor($state))
+                    ->icon(fn (string $state) => self::statusIcon($state)),
+                TextColumn::make('created_at')
+                    ->label('Submitted')
+                    ->since()
+                    ->dateTimeTooltip('M j, Y g:i A')
+                    ->color('gray')
+                    ->sortable()
+                    ->visibleFrom('md'),
             ])
             ->defaultSort('created_at', 'desc')
             ->striped()

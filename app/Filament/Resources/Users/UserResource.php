@@ -30,8 +30,6 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\Layout\Split;
-use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -390,68 +388,59 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            // A real table (not Split/Stack) so every column lines up under its header,
+            // whatever actions a row has. Less important columns hide on small screens.
             ->columns([
-                // Split/Stack reflow each row to the screen width, so the table never scrolls sideways.
-                Split::make([
-                    ImageColumn::make('avatar')
-                        ->label('')
-                        ->circular()
-                        ->imageSize(40)
-                        ->grow(false)
-                        ->state(fn (User $record) => filament()->getUserAvatarUrl($record)),
-                    Stack::make([
-                        TextColumn::make('name')
-                            ->label('Name')
-                            ->weight(FontWeight::SemiBold)
-                            ->searchable(['name', 'email'])
-                            ->sortable(),
-                        TextColumn::make('email')
-                            ->label('Email')
-                            ->color('gray')
-                            ->size(TextSize::Small)
-                            ->copyable()
-                            ->copyMessage('Email copied')
-                            ->wrap(),
-                    ]),
-                    Stack::make([
-                        TextColumn::make('roles.name')
-                            ->label('Role')
-                            ->badge()
-                            ->formatStateUsing(fn (string $state) => Str::headline($state))
-                            ->color(fn (string $state) => self::ROLE_COLORS[$state] ?? 'gray')
-                            ->placeholder('No role'),
-                        TextColumn::make('branch.name')
-                            ->label('Branch')
-                            ->icon(Heroicon::OutlinedBuildingLibrary)
-                            ->iconColor('gray')
-                            ->size(TextSize::Small)
-                            ->placeholder('No branch'),
-                    ])->space(1),
-                    Stack::make([
-                        TextColumn::make('status')
-                            ->label('Status')
-                            ->badge()
-                            ->state(fn (User $record) => self::statusOf($record))
-                            ->color(fn (string $state) => match ($state) {
-                                'Active' => 'success',
-                                'Must change password' => 'warning',
-                                default => 'gray',
-                            })
-                            ->icon(fn (string $state) => match ($state) {
-                                'Active' => Heroicon::OutlinedCheckCircle,
-                                'Must change password' => Heroicon::OutlinedExclamationTriangle,
-                                default => Heroicon::OutlinedClock,
-                            }),
-                        TextColumn::make('created_at')
-                            ->label('Joined')
-                            ->since()
-                            ->prefix('Joined ')
-                            ->dateTimeTooltip('M j, Y g:i A')
-                            ->color('gray')
-                            ->size(TextSize::Small)
-                            ->sortable(),
-                    ])->space(1)->visibleFrom('lg'),
-                ])->from('md'),
+                ImageColumn::make('avatar')
+                    ->label('')
+                    ->circular()
+                    ->imageSize(36)
+                    ->state(fn (User $record) => filament()->getUserAvatarUrl($record))
+                    // Phones: drop the avatar so name and role fit without sideways scrolling.
+                    ->visibleFrom('sm'),
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->weight(FontWeight::SemiBold)
+                    ->description(fn (User $record) => $record->email)
+                    ->searchable(['name', 'email'])
+                    ->sortable(),
+                TextColumn::make('roles.name')
+                    ->label('Role')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state) => Str::headline($state))
+                    ->color(fn (string $state) => self::ROLE_COLORS[$state] ?? 'gray')
+                    ->placeholder('No role'),
+                TextColumn::make('branch.name')
+                    ->label('Branch')
+                    ->icon(Heroicon::OutlinedBuildingLibrary)
+                    ->iconColor('gray')
+                    ->placeholder('No branch')
+                    ->sortable()
+                    // Branch staff only ever see their own branch, so the column says nothing new.
+                    ->visible(fn () => self::isSuperAdmin())
+                    ->visibleFrom('md'),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->state(fn (User $record) => self::statusOf($record))
+                    ->color(fn (string $state) => match ($state) {
+                        'Active' => 'success',
+                        'Must change password' => 'warning',
+                        default => 'gray',
+                    })
+                    ->icon(fn (string $state) => match ($state) {
+                        'Active' => Heroicon::OutlinedCheckCircle,
+                        'Must change password' => Heroicon::OutlinedExclamationTriangle,
+                        default => Heroicon::OutlinedClock,
+                    })
+                    ->visibleFrom('sm'),
+                TextColumn::make('created_at')
+                    ->label('Joined')
+                    ->since()
+                    ->dateTimeTooltip('M j, Y g:i A')
+                    ->color('gray')
+                    ->sortable()
+                    ->visibleFrom('lg'),
             ])
             ->defaultSort('name')
             ->striped()
@@ -473,18 +462,10 @@ class UserResource extends Resource
                         : $query),
             ])
             ->filtersTriggerAction(fn (Action $action) => $action->button()->label('Filters'))
-            // Actions always render (greyed out when not allowed) so every row keeps the
-            // same width and the columns line up; hiding them shifted admin rows sideways.
             ->recordActions([
-                EditAction::make()->iconButton()->tooltip('Edit')
-                    ->authorizationTooltip(),
+                EditAction::make()->iconButton()->tooltip('Edit'),
                 ActionGroup::make([
-                    self::temporaryPasswordAction()
-                        ->visible(true)
-                        ->disabled(fn (?User $record) => ! self::canSetTemporaryPassword($record))
-                        ->tooltip(fn (?User $record) => self::canSetTemporaryPassword($record)
-                            ? null
-                            : 'Not available for this account'),
+                    self::temporaryPasswordAction(),
                     self::resendAction(),
                 ])->tooltip('More actions'),
             ])

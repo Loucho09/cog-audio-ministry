@@ -29,14 +29,13 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\Layout\Split;
-use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class GalleryImageResource extends Resource
 {
@@ -193,43 +192,30 @@ class GalleryImageResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            // A real table (not Split/Stack) so every column lines up under its header,
+            // whatever actions a row has. Less important columns hide on small screens.
             ->columns([
-                // Split/Stack reflow each row to the screen width, so the table never scrolls sideways.
-                Split::make([
-                    ImageColumn::make('path')
-                        ->label('Image')
-                        ->state(fn (GalleryImage $record) => $record->url ? url($record->url) : null)
-                        ->imageSize(72)
-                        ->extraImgAttributes(['class' => 'rounded-lg object-cover'])
-                        ->grow(false),
-                    Stack::make([
-                        TextColumn::make('title')
-                            ->weight(FontWeight::SemiBold)
-                            ->searchable()
-                            ->sortable()
-                            ->placeholder('Untitled'),
-                        TextColumn::make('alt_text')
-                            ->label('Alt text')
-                            ->color('gray')
-                            ->size(TextSize::Small)
-                            ->searchable()
-                            ->limit(70),
-                        TextColumn::make('global_note')
-                            ->label('Access')
-                            ->badge()
-                            ->color('gray')
-                            ->size(TextSize::ExtraSmall)
-                            ->state(fn (GalleryImage $record) => ApprovalNotice::globalBadgeState($record->branch_id)),
-                    ]),
-                    TextColumn::make('branch.name')
-                        ->label('Branch')
-                        ->icon(Heroicon::OutlinedBuildingLibrary)
-                        ->iconColor('gray')
-                        ->size(TextSize::Small)
-                        ->placeholder('All churches')
-                        ->visibleFrom('lg'),
-                    PublishStatus::column()->grow(false),
-                ])->from('md'),
+                ImageColumn::make('path')
+                    ->label('Photo')
+                    ->state(fn (GalleryImage $record) => $record->url ? url($record->url) : null)
+                    ->square()
+                    ->imageSize(56)
+                    ->extraImgAttributes(['class' => 'rounded-lg object-cover']),
+                TextColumn::make('title')
+                    ->label('Title')
+                    ->weight(FontWeight::SemiBold)
+                    ->description(fn (GalleryImage $record) => filled($record->alt_text) ? Str::limit($record->alt_text, 60) : null)
+                    ->searchable(['title', 'alt_text'])
+                    ->sortable()
+                    ->placeholder('Untitled')
+                    ->wrap(),
+                TextColumn::make('branch.name')
+                    ->label('Branch')
+                    ->icon(Heroicon::OutlinedBuildingLibrary)
+                    ->iconColor('gray')
+                    ->placeholder('All churches')
+                    ->visibleFrom('md'),
+                PublishStatus::column()->visibleFrom('sm'),
             ])
             ->defaultSort('sort_order')
             // Reordering writes to every listed row, including global ones, so it is super-admin only.

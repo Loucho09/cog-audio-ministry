@@ -78,17 +78,17 @@ it('keeps the default notification and hides the note for a super-admin', functi
         ->assertNotified('Created');
 });
 
-it('marks global rows as view only for branch staff but not the super-admin', function () {
+it('shows global rows as all churches in the branch column', function () {
     TeamMember::factory()->create(['branch_id' => null]);
     GalleryImage::factory()->create(['branch_id' => null]);
 
     $this->actingAs(User::factory()->branchHead($this->branchA)->create());
-    Livewire::test(ListTeamMembers::class)->assertSee(ApprovalNotice::GLOBAL_BADGE);
-    Livewire::test(ListGalleryImages::class)->assertSee(ApprovalNotice::GLOBAL_BADGE);
+    Livewire::test(ListTeamMembers::class)->assertSee('All churches');
+    Livewire::test(ListGalleryImages::class)->assertSee('All churches');
 
     $this->actingAs(User::factory()->superAdmin()->create());
-    Livewire::test(ListTeamMembers::class)->assertDontSee(ApprovalNotice::GLOBAL_BADGE);
-    Livewire::test(ListGalleryImages::class)->assertDontSee(ApprovalNotice::GLOBAL_BADGE);
+    Livewire::test(ListTeamMembers::class)->assertSee('All churches');
+    Livewire::test(ListGalleryImages::class)->assertSee('All churches');
 });
 
 it('defaults service sort order to 0 in the form and never saves NULL', function () {

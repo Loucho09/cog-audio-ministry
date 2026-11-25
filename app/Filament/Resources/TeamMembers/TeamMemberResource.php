@@ -28,9 +28,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\Layout\Split;
-use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -201,56 +200,45 @@ class TeamMemberResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            // A real table (not Split/Stack) so every column lines up under its header,
+            // whatever actions a row has. Less important columns hide on small screens.
             ->columns([
-                // Split/Stack reflow each row to the screen width, so the table never scrolls sideways.
-                Split::make([
-                    ImageColumn::make('photo_path')
-                        ->label('Photo')
-                        ->state(fn (TeamMember $record) => $record->photo_url ? url($record->photo_url) : null)
-                        ->circular()
-                        ->imageSize(44)
-                        ->grow(false),
-                    Stack::make([
-                        TextColumn::make('name')
-                            ->weight(FontWeight::SemiBold)
-                            ->searchable()
-                            ->sortable(),
-                        TextColumn::make('role_title')
-                            ->label('Role')
-                            ->color('gray')
-                            ->size(TextSize::Small)
-                            ->searchable()
-                            ->placeholder('No role title yet'),
-                        TextColumn::make('global_note')
-                            ->label('Access')
-                            ->badge()
-                            ->color('gray')
-                            ->size(TextSize::ExtraSmall)
-                            ->state(fn (TeamMember $record) => ApprovalNotice::globalBadgeState($record->branch_id)),
-                    ]),
-                    TextColumn::make('branch.name')
-                        ->label('Branch')
-                        ->icon(Heroicon::OutlinedBuildingLibrary)
-                        ->iconColor('gray')
-                        ->size(TextSize::Small)
-                        ->placeholder('All churches')
-                        ->visibleFrom('lg'),
-                    Stack::make([
-                        TextColumn::make('work_type')
-                            ->label('Type')
-                            ->badge()
-                            ->state(fn (TeamMember $record) => $record->is_full_time ? 'Full-time' : 'Part-time')
-                            ->color(fn (string $state) => $state === 'Full-time' ? 'primary' : 'gray')
-                            ->icon(fn (string $state) => $state === 'Full-time' ? Heroicon::OutlinedClock : Heroicon::OutlinedCalendar),
-                        TextColumn::make('featured_badge')
-                            ->label('Featured')
-                            ->badge()
-                            ->state(fn (TeamMember $record) => $record->is_featured ? 'Featured' : null)
-                            ->color('info')
-                            ->icon(Heroicon::OutlinedStar),
-                        PublishStatus::column(),
-                    ])->space(1)->grow(false),
-                ])->from('md'),
+                ImageColumn::make('photo_path')
+                    ->label('Photo')
+                    ->state(fn (TeamMember $record) => $record->photo_url ? url($record->photo_url) : null)
+                    ->circular()
+                    ->imageSize(44),
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->weight(FontWeight::SemiBold)
+                    ->description(fn (TeamMember $record) => $record->role_title ?: 'No role title yet')
+                    ->searchable(['name', 'role_title'])
+                    ->sortable(),
+                TextColumn::make('branch.name')
+                    ->label('Branch')
+                    ->icon(Heroicon::OutlinedBuildingLibrary)
+                    ->iconColor('gray')
+                    ->placeholder('All churches')
+                    ->visibleFrom('md'),
+                IconColumn::make('is_full_time')
+                    ->label('Full-time')
+                    ->boolean()
+                    ->trueIcon(Heroicon::OutlinedClock)
+                    ->falseIcon(Heroicon::OutlinedMinus)
+                    ->trueColor('primary')
+                    ->falseColor('gray')
+                    ->alignCenter()
+                    ->visibleFrom('md'),
+                IconColumn::make('is_featured')
+                    ->label('Featured')
+                    ->boolean()
+                    ->trueIcon(Heroicon::OutlinedStar)
+                    ->falseIcon(Heroicon::OutlinedMinus)
+                    ->trueColor('info')
+                    ->falseColor('gray')
+                    ->alignCenter()
+                    ->visibleFrom('md'),
+                PublishStatus::column()->visibleFrom('sm'),
             ])
             ->defaultSort('sort_order')
             // Reordering writes to every listed row, including global ones, so it is super-admin only.

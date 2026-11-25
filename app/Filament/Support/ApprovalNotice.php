@@ -11,8 +11,6 @@ class ApprovalNotice
 
     public const SAVED_TITLE = 'Saved. Waiting for approval.';
 
-    public const GLOBAL_BADGE = 'All churches (view only)';
-
     public static function isSuperAdmin(): bool
     {
         return (bool) auth()->user()?->hasRole('super-admin');
@@ -31,11 +29,5 @@ class ApprovalNotice
     public static function savedTitle(): ?string
     {
         return self::isSuperAdmin() ? null : self::SAVED_TITLE;
-    }
-
-    /** Badge state for global rows (no branch) that branch staff can only view. */
-    public static function globalBadgeState(?int $branchId): ?string
-    {
-        return $branchId === null && ! self::isSuperAdmin() ? self::GLOBAL_BADGE : null;
     }
 }
