@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Actions\AssignRole;
+use App\Filament\Concerns\ReturnsToResourceList;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use Filament\Notifications\Notification;
@@ -16,6 +17,8 @@ use Illuminate\Validation\ValidationException;
 
 class CreateUser extends CreateRecord
 {
+    use ReturnsToResourceList;
+
     protected static string $resource = UserResource::class;
 
     private bool $temporary = false;

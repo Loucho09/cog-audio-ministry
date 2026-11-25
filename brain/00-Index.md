@@ -54,6 +54,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[gallery-upload-fix]]: gallery upload limits, storage symlink, return to list after save/delete; branch `fix/gallery-upload`, not merged (2026-11-25)
 - [[gallery-thumbnails-gd]]: gallery WebP thumbnails with PHP GD, no new package, width in filename (no schema change); backfill on deploy (2026-11-25)
 - [[admins-equal-per-branch]]: branch-head and branch-admin equal powers, own branch only; branch-admins manage services (2026-11-25)
+- [[admin-return-to-list]]: admin Save returns to the list; Create Event opens the event page (2026-11-26)
 - [[duty-guest-assign-decision]]: typed guest names on duty assignments, auto-confirmed (2026-11-26)
 
 ## Features
