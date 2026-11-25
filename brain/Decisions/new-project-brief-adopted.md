@@ -8,7 +8,7 @@ Adopted a new project brief that replaces the original 9-phase plan. The brief i
 ## Main Changes
 
 ### Terminology
-- **"Satellites" → "Branches"** throughout: each ministry location (Marilag, Trece, Silang, Jabez) is now a branch of the main organization. The main ministry (COG Dasmariñas) is also a branch. All branch-scoped records have `branch_id`.
+- **"Satellites" → "Branches"** throughout: each ministry location (Trece, Silang, Jabez) is now a branch of the main organization. (Update 2026-11-25: Marilag is not a branch; it is the subdivision where COG Dasmariñas is. See [[marilag-is-dasma-subdivision]].) The main ministry (COG Dasmariñas) is also a branch. All branch-scoped records have `branch_id`.
 
 ### Roles and Ownership
 - **"super-admin" is the project owner** (one person, the Audio Head). This role creates branches, assigns branch-heads, and assigns all roles. No other super-admin can be created without deliberate manual action.

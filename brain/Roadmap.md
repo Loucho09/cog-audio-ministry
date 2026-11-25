@@ -25,7 +25,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 - [x] Done 2026-11-24 (owner request): gallery with real photos, captions and bento layout (merged to main, b3415eb). Still open: owner consent for everyone pictured before going live; re-run `GallerySeeder` on MySQL. See [[homepage-sections]]. Phase 1 stays open.
 - [x] Done 2026-11-24 (branch `feature/what-we-do-cards`, commits 8d2e5e5, 81ab9a8, 287a5c9): What We Do is now an interactive role picker (4 tabs: FOH, Monitors, Livestream, Stage Tech; one panel with summary and detail; WAI-ARIA tabs, keyboard support). Replaces the earlier 2x2 card grid (8d2e5e5, now superseded). Checked with Playwright at 1280px light, 360px dark, and keyboard; reviewer clean; 146 tests (145 pass, 1 skipped). Owner to check the wording. See [[homepage-theme-polish]] slice E.
 - [x] Done 2026-11-24 (owner request): light-mode polish (softer background #EEF2F7, darker muted text and borders, Our Churches and Join Us now light in light mode; hero ends on a crisp edge in light mode instead of a dark-to-light fade; cards white in light mode; light-mode glows, beams and vignettes cut to about a third; footer glow dark-only; Impact stats in white cards with gradient numbers; Join Us is a deep-blue band (light) with crisp white sound-wave rings and a white button; service day cards centred; dark mode otherwise unchanged). Branch `feature/light-mode-polish`. See [[stage-palette]].
-- Done 2026-11-24: Playwright check at 360px, light + dark: no horizontal overflow, no console errors, all 10 sections render, theme follows device and toggle persists, gallery images load, mobile menu works. Owner-pending (non-blocking): What We Do wording, gallery photo consent before live, Marilag FB link, COG Dasma own FB page?
+- Done 2026-11-24: Playwright check at 360px, light + dark: no horizontal overflow, no console errors, all 10 sections render, theme follows device and toggle persists, gallery images load, mobile menu works. Owner-pending (non-blocking): What We Do wording, gallery photo consent before live, ~~Marilag FB link~~ (resolved 2026-11-25: Marilag is not a branch, see [[marilag-is-dasma-subdivision]]), COG Dasma own FB page?
 
 ### Tasks
 1. [x] Scaffold Laravel (latest stable) + Tailwind, Alpine, Filament, Spatie Permission, Breeze Blade, Pest; commit
@@ -156,6 +156,12 @@ Status: done. 2a and 2b merged to main 2026-11-25. Split into two parts (owner d
 - Self-host Montserrat and Mrs Saint Delafield (see [[Backlog]], [[typography-matches-logo]])
 - Write `DEPLOY.md`: server reqs PHP 8.2+, MySQL 8, Composer, Node, extensions; `composer install --no-dev --optimize-autoloader`; `npm ci && npm run build`; production `.env` values; `key:generate`; `migrate --force`; seed only branches and roles; `storage:link`; config/route/view/event cache; HTTPS; queue worker; scheduler cron; backups of DB and uploads; first-login checklist (create super-admin, assign branch-heads, set logo, check schedule, check team flag)
 - Write `PRODUCTION-CHECKLIST.md`: pages load on phone and desktop; join form sends email; admin login works; non-admin cannot reach /admin; schedule correct; images load
+- Full review items (2026-11-25, see [[full-review-2026-11-25]]):
+  - HTTPS and proxies: `trustProxies`, `URL::forceHttps` in production, security-headers middleware (HSTS, X-Frame-Options, Referrer-Policy, CSP), `SESSION_SECURE_COOKIE=true`
+  - `SESSION_DRIVER=database` creates a row per visitor: use file or redis, or schedule `session:prune`
+  - **WARNING:** copying `.env.example` (APP_ENV=local) to production would run the demo seeder with a known super-admin password. Consider requiring an explicit `--demo` flag on the seeder path.
+  - Run the tests and `php artisan migrate:fresh --seed` once on MySQL 8 (tests use SQLite)
+  - PHP `upload_max_filesize` must be at least 4M for 4MB uploads
 
 ### Checklist (11 items)
 - [ ] APP_ENV=production, APP_DEBUG=false, strong APP_KEY generated

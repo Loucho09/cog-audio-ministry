@@ -18,7 +18,7 @@ class EditGalleryImage extends EditRecord
             unset($data['path']);
         }
 
-        return GalleryImageResource::forceBranch($data);
+        return GalleryImageResource::guardPublishing(GalleryImageResource::forceBranch($data), $this->record);
     }
 
     protected function getHeaderActions(): array

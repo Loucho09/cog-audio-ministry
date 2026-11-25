@@ -16,7 +16,7 @@ Goal: take this project from first commit to a live, maintained production site.
 - **Super-admin:** the project owner; creates branches and assigns branch heads.
 
 ## Branches and roles (multi-branch from the start)
-- Main branch: COG Dasma (Dasmariñas, `is_main = true`). Other branches: Marilag, Trece, Silang, Jabez. Store them in a `branches` table (name, slug, address and contact fields nullable, is_main) so more can be added without code changes.
+- Main branch: COG Dasma (Marilag Subdivision, Dasmariñas, `is_main = true`). Other branches: Trece, Silang, Jabez. Marilag is Dasma's subdivision, not a branch. Store them in a `branches` table (name, slug, address and contact fields nullable, is_main) so more can be added without code changes.
 - Roles (Spatie): `super-admin` (all branches; only role that can assign roles), `branch-head` (admin for ONE branch), `branch-admin` (applications + roster for ONE branch, no role assignment), `member` (default for approved accounts). Not logged in = visitor.
 - Roles are assigned to accounts, never hardcoded to a person. Members can never change their own role.
 - Every branch-scoped record (members, events, services, join applications, duty assignments) has a `branch_id`. Enforce scoping in Policies and query scopes (and Filament resources), never only in the UI. Write tests for it. (Spatie "teams" is not used for now; see `brain/Decisions/`.)

@@ -6,9 +6,9 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Branch;
 use App\Models\User;
+use App\Notifications\WelcomeSetPassword;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -44,7 +44,7 @@ it('creates a user with a temporary password, no email, and the user can log in'
     expect($user->must_change_password)->toBeTrue()
         ->and(Hash::check('Temp-Pass-12345', $user->password))->toBeTrue();
 
-    Notification::assertNotSentTo($user, ResetPassword::class);
+    Notification::assertNotSentTo($user, WelcomeSetPassword::class);
 
     auth()->logout();
     $this->post('/login', ['email' => 'temp@example.test', 'password' => 'Temp-Pass-12345']);
@@ -77,7 +77,7 @@ it('keeps sending the set-password email for the email option', function () {
 
     $user = User::where('email', 'mail@example.test')->firstOrFail();
     expect($user->must_change_password)->toBeFalse();
-    Notification::assertSentTo($user, ResetPassword::class);
+    Notification::assertSentTo($user, WelcomeSetPassword::class);
 });
 
 it('lets a super-admin set a temporary password on a user and clears their sessions', function () {
@@ -171,7 +171,7 @@ it('verifies the email of a user created with a temporary password so the full f
     $this->post('/login', ['email' => 'flow@example.test', 'password' => 'Temp-Pass-12345']);
     $this->assertAuthenticatedAs($user);
 
-    $this->get('/dashboard')->assertRedirect(route('password.change'));
+    $this->get('/dashboard')->assertOk()->assertSee('temporary password');
     $this->post(route('password.change.store'), [
         'current_password' => 'Temp-Pass-12345',
         'password' => 'Brand-new-Pass-9',

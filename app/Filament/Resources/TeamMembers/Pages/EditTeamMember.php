@@ -18,7 +18,7 @@ class EditTeamMember extends EditRecord
             unset($data['photo_path']);
         }
 
-        return TeamMemberResource::forceBranch($data);
+        return TeamMemberResource::guardPublishing(TeamMemberResource::forceBranch($data), $this->record);
     }
 
     protected function getHeaderActions(): array

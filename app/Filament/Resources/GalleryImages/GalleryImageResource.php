@@ -7,6 +7,7 @@ use App\Filament\Resources\GalleryImages\Pages\EditGalleryImage;
 use App\Filament\Resources\GalleryImages\Pages\ListGalleryImages;
 use App\Models\Branch;
 use App\Models\GalleryImage;
+use App\Support\PublishGuard;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -21,7 +22,9 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -60,6 +63,12 @@ class GalleryImageResource extends Resource
         return $data;
     }
 
+    /** Server-side publish rule (see PublishGuard). */
+    public static function guardPublishing(array $data, ?GalleryImage $record = null): array
+    {
+        return PublishGuard::apply($data, $record, ['path', 'alt_text', 'title']);
+    }
+
     private static function isSuperAdmin(): bool
     {
         return (bool) auth()->user()?->hasRole('super-admin');
@@ -92,7 +101,11 @@ class GalleryImageResource extends Resource
                     ->maxLength(255),
                 TextInput::make('title')->maxLength(255),
                 TextInput::make('sort_order')->numeric()->minValue(0)->default(0),
-                Toggle::make('is_published')->label('Published')->default(true),
+                Toggle::make('is_published')
+                    ->label('Published')
+                    ->helperText('Visible on the public homepage. Only a super-admin can publish.')
+                    ->default(true)
+                    ->visible(fn () => self::isSuperAdmin()),
             ]);
     }
 
@@ -117,6 +130,11 @@ class GalleryImageResource extends Resource
                 SelectFilter::make('branch_id')
                     ->label('Branch')
                     ->options(fn () => Branch::query()->orderBy('name')->pluck('name', 'id'))
+                    ->visible(fn () => self::isSuperAdmin()),
+                TernaryFilter::make('is_published')->label('Published'),
+                Filter::make('pending_approval')
+                    ->label('Pending approval')
+                    ->query(fn (Builder $query) => $query->where('gallery_images.is_published', false))
                     ->visible(fn () => self::isSuperAdmin()),
             ])
             ->recordActions([

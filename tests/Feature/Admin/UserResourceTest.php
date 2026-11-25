@@ -5,9 +5,9 @@ use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Branch;
 use App\Models\User;
+use App\Notifications\WelcomeSetPassword;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
@@ -42,7 +42,7 @@ it('lets a super-admin create a user with role, branch and a set-password email'
         ->and($user->hasRole('branch-admin'))->toBeTrue()
         ->and(Hash::check('password', $user->password))->toBeFalse();
 
-    Notification::assertSentTo($user, ResetPassword::class);
+    Notification::assertSentTo($user, WelcomeSetPassword::class);
 });
 
 it('defaults the new user role to member', function () {
@@ -297,7 +297,7 @@ it('lets a super-admin resend the set-password email', function () {
     $target = User::factory()->member($this->branchA)->create();
 
     Livewire::test(EditUser::class, ['record' => $target->id])->callAction('resendSetPassword');
-    Notification::assertSentTo($target, ResetPassword::class);
+    Notification::assertSentTo($target, WelcomeSetPassword::class);
 });
 
 it('hides and rejects resend for a branch-head', function () {
@@ -331,4 +331,20 @@ it('rejects branch-head and branch-admin calling CreateUser directly', function 
         $this->actingAs($actor);
         Livewire::test(CreateUser::class)->assertForbidden();
     }
+});
+
+it('renders every list tab with the right rows', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+    $head = User::factory()->create(['branch_id' => $this->branchA->id]);
+    $head->assignRole('branch-head');
+    $member = User::factory()->create(['branch_id' => $this->branchA->id]);
+    $member->assignRole('member');
+    $pending = User::factory()->create(['branch_id' => $this->branchA->id, 'must_change_password' => true]);
+    $pending->assignRole('member');
+
+    Livewire::test(ListUsers::class)
+        ->set('activeTab', 'all')->assertCanSeeTableRecords([$head, $member, $pending])
+        ->set('activeTab', 'admins')->assertCanSeeTableRecords([$head])->assertCanNotSeeTableRecords([$member])
+        ->set('activeTab', 'members')->assertCanSeeTableRecords([$member, $pending])->assertCanNotSeeTableRecords([$head])
+        ->set('activeTab', 'attention')->assertCanSeeTableRecords([$pending])->assertCanNotSeeTableRecords([$member]);
 });

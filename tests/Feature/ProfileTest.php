@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Branch;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -20,6 +22,7 @@ test('profile information can be updated', function () {
         ->patch('/profile', [
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'current_password' => 'password',
         ]);
 
     $response
@@ -84,25 +87,56 @@ test('correct password must be provided to delete account', function () {
     $this->assertNotNull($user->fresh());
 });
 
-test('last super-admin cannot delete their own account', function () {
-    $user = User::factory()->superAdmin()->create();
+test('changing the email requires the current password', function () {
+    $user = User::factory()->create();
 
-    $this
-        ->actingAs($user)
-        ->delete('/profile', ['password' => 'password'])
-        ->assertSessionHasErrorsIn('userDeletion', 'password');
+    $this->actingAs($user)->from('/profile')
+        ->patch('/profile', ['name' => 'X', 'email' => 'new@example.com'])
+        ->assertSessionHasErrors('current_password');
 
-    expect($user->fresh())->not->toBeNull();
+    $this->actingAs($user)->from('/profile')
+        ->patch('/profile', ['name' => 'X', 'email' => 'new@example.com', 'current_password' => 'wrong'])
+        ->assertSessionHasErrors('current_password');
+
+    expect($user->fresh()->email)->not->toBe('new@example.com');
 });
 
-test('a super-admin can delete their account when another exists', function () {
-    $user = User::factory()->superAdmin()->create();
-    User::factory()->superAdmin()->create();
+test('a name-only change needs no password', function () {
+    $user = User::factory()->create();
 
-    $this
-        ->actingAs($user)
+    $this->actingAs($user)
+        ->patch('/profile', ['name' => 'Only Name', 'email' => $user->email])
+        ->assertSessionHasNoErrors();
+
+    expect($user->fresh()->name)->toBe('Only Name');
+});
+
+test('a member can delete their account and their role rows go too', function () {
+    $branch = Branch::factory()->create();
+    $user = User::factory()->member($branch)->create();
+    $id = $user->id;
+
+    $this->actingAs($user)
         ->delete('/profile', ['password' => 'password'])
         ->assertRedirect('/');
 
-    expect($user->fresh())->toBeNull();
+    expect(User::find($id))->toBeNull()
+        ->and(DB::table('model_has_roles')->where('model_id', $id)->count())->toBe(0);
 });
+
+test('admins cannot delete their own account and do not see the section', function (string $role) {
+    $branch = Branch::factory()->create();
+    $user = match ($role) {
+        'super-admin' => User::factory()->superAdmin()->create(),
+        'branch-head' => User::factory()->branchHead($branch)->create(),
+        'branch-admin' => User::factory()->branchAdmin($branch)->create(),
+    };
+
+    $this->actingAs($user)
+        ->delete('/profile', ['password' => 'password'])
+        ->assertForbidden();
+
+    expect($user->fresh())->not->toBeNull();
+
+    $this->actingAs($user)->get('/profile')->assertOk()->assertDontSee('confirm-user-deletion');
+})->with(['super-admin', 'branch-head', 'branch-admin']);

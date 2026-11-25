@@ -11,6 +11,6 @@ class CreateTeamMember extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        return TeamMemberResource::forceBranch($data);
+        return TeamMemberResource::guardPublishing(TeamMemberResource::forceBranch($data));
     }
 }

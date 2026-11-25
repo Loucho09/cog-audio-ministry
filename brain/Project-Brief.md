@@ -47,8 +47,9 @@ These tokens are set in the Tailwind config and can be customized per branch if 
 
 ## Branches
 - Main: COG Dasmariñas
-- Branches: Marilag, Trece, Silang, Jabez
-- Branch names use the "COG" prefix: COG Dasmariñas, COG Marilag, COG Trece, COG Silang, COG Jabez. See [[branches-table-in-phase-1]]
+- Branches: Trece, Silang, Jabez. (Marilag is the subdivision where COG Dasmariñas is, not a branch. See [[marilag-is-dasma-subdivision]].)
+- Dasma address: "Marilag Subdivision, Dasmariñas" (rest TODO).
+- Branch names use the "COG" prefix: COG Dasmariñas, COG Trece, COG Silang, COG Jabez. See [[branches-table-in-phase-1]]
 - Services are seeded for the main branch (COG Dasmariñas) only. Other branches' service times are still open (see the open question below).
 - Each branch has its own branch-head. The super-admin (project owner) creates branches and assigns branch-heads.
 - Every branch-scoped record (members, events, applications, duties) has `branch_id`.

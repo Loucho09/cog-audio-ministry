@@ -11,6 +11,6 @@ class CreateGalleryImage extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        return GalleryImageResource::forceBranch($data);
+        return GalleryImageResource::guardPublishing(GalleryImageResource::forceBranch($data));
     }
 }

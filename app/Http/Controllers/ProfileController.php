@@ -3,13 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
-use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -29,7 +26,7 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $request->user()->fill($request->safe()->only(['name', 'email']));
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
@@ -45,29 +42,20 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = $request->user();
+
+        // Only plain members (or role-less accounts) may delete themselves.
+        abort_unless($user->canSelfDelete(), 403);
+
         $request->validateWithBag('userDeletion', [
             'password' => ['required', 'current_password'],
         ]);
 
-        $user = $request->user();
-
-        // Never let the last super-admin delete themselves (nobody could assign roles afterwards).
-        DB::transaction(function () use ($user) {
-            if ($user->hasRole('super-admin')) {
-                $superAdmins = User::role('super-admin')->lockForUpdate()->get();
-
-                if ($superAdmins->count() <= 1) {
-                    throw ValidationException::withMessages([
-                        'password' => 'You are the last super-admin and cannot delete this account.',
-                    ])->errorBag('userDeletion');
-                }
-            }
-
-            // Query delete keeps the model "existing" so logout() cannot re-insert it.
-            User::whereKey($user->id)->delete();
-        });
-
+        // Log out first: logout() saves the user, which would re-insert a deleted model.
         Auth::logout();
+
+        // Model delete (not a query) so Spatie detaches the role rows.
+        $user->delete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
