@@ -51,6 +51,13 @@ class ProfileController extends Controller
             'password' => ['required', 'current_password'],
         ]);
 
+        // Duty history is kept (restrict foreign key), so the account stays.
+        if ($user->dutyAssignments()->exists()) {
+            return back()->withErrors([
+                'password' => "You have duty history, so your account can't be deleted here. Please contact your branch leader.",
+            ], 'userDeletion');
+        }
+
         // Log out first: logout() saves the user, which would re-insert a deleted model.
         Auth::logout();
 

@@ -76,6 +76,13 @@ class EditUser extends EditRecord
             UserResource::resendAction(),
             DeleteAction::make()
                 ->visible(fn () => UserResource::isSuperAdmin())
+                ->before(function (DeleteAction $action, User $record) {
+                    if ($record->dutyAssignments()->exists()) {
+                        Notification::make()->danger()->title('Cannot delete')
+                            ->body("{$record->name} has duty history, so the account can't be deleted.")->send();
+                        $action->cancel();
+                    }
+                })
                 ->using(fn (User $record) => UserResource::deleteUser($record))
                 ->failureNotificationTitle('Cannot delete yourself or the last super-admin'),
         ];

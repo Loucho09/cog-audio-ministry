@@ -23,6 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rules\Unique;
 use UnitEnum;
 
@@ -54,6 +55,12 @@ class DutyRoleResource extends Resource
         return $data;
     }
 
+    /** Returns a reason why the role cannot be deleted, or null when it can. */
+    public static function deleteBlocker(DutyRole $role): ?string
+    {
+        return $role->isInUse() ? 'This role is in use. Deactivate it instead.' : null;
+    }
+
     private static function isSuperAdmin(): bool
     {
         return (bool) auth()->user()?->hasRole('super-admin');
@@ -78,11 +85,14 @@ class DutyRoleResource extends Resource
                 ->required()
                 ->searchable()
                 ->live()
+                ->disabled(fn (string $operation) => $operation === 'edit')
+                ->dehydrated(fn (string $operation) => $operation !== 'edit')
                 ->visible(fn () => self::isSuperAdmin()),
             TextInput::make('sort_order')
                 ->numeric()
                 ->integer()
                 ->minValue(0)
+                ->maxValue(65535)
                 ->default(0),
             Toggle::make('is_active')->label('Active')->default(true),
         ]);
@@ -109,7 +119,19 @@ class DutyRoleResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->authorizeIndividualRecords('delete'),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete')
+                        ->using(function (Collection $records, DeleteBulkAction $action): void {
+                            // Roles still in use are kept and reported as failures.
+                            foreach ($records as $record) {
+                                if (self::deleteBlocker($record) !== null) {
+                                    $action->reportBulkProcessingFailure();
+
+                                    continue;
+                                }
+                                $record->delete();
+                            }
+                        }),
                 ]),
             ]);
     }

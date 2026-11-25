@@ -40,6 +40,11 @@ class Branch extends Model
         return $this->hasMany(Service::class);
     }
 
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
+
     public function galleryImages(): HasMany
     {
         return $this->hasMany(GalleryImage::class);

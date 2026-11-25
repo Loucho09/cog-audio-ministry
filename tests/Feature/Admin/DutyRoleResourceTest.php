@@ -10,6 +10,7 @@ use App\Models\Branch;
 use App\Models\DutyRole;
 use App\Models\Service;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
 
@@ -222,4 +223,51 @@ it('refuses a deactivated role as a new service slot', function () {
         ->fillForm(['dutySlots' => [['duty_role_id' => $this->roleA->id, 'quantity' => 1]]])
         ->call('save')
         ->assertHasFormErrors(['dutySlots.0.duty_role_id']);
+});
+
+it('refuses to delete a role in use and says why', function () {
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $service = Service::factory()->create(['branch_id' => $this->branchA->id]);
+    $service->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]);
+
+    Livewire::test(EditDutyRole::class, ['record' => $this->roleA->id])
+        ->callAction('delete')
+        ->assertNotified('Cannot delete');
+
+    expect(DutyRole::find($this->roleA->id))->not->toBeNull();
+});
+
+it('bulk delete keeps roles in use and removes unused ones', function () {
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $service = Service::factory()->create(['branch_id' => $this->branchA->id]);
+    $service->dutySlots()->create(['duty_role_id' => $this->roleA->id, 'quantity' => 1]);
+    $unused = DutyRole::factory()->create(['branch_id' => $this->branchA->id]);
+
+    Livewire::test(ListDutyRoles::class)
+        ->selectTableRecords([$this->roleA->id, $unused->id])
+        ->callAction(TestAction::make('delete')->table()->bulk());
+
+    expect(DutyRole::find($this->roleA->id))->not->toBeNull()
+        ->and(DutyRole::find($unused->id))->toBeNull();
+});
+
+it('does not let a super-admin move a role to another branch on edit', function () {
+    $this->actingAs(User::factory()->superAdmin()->create());
+
+    Livewire::test(EditDutyRole::class, ['record' => $this->roleA->id])
+        ->assertFormFieldDisabled('branch_id')
+        ->fillForm(['name' => 'Renamed', 'branch_id' => $this->branchB->id])
+        ->call('save');
+
+    expect($this->roleA->fresh()->branch_id)->toBe($this->branchA->id)
+        ->and($this->roleA->fresh()->name)->toBe('Renamed');
+});
+
+it('rejects an oversized sort order', function () {
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    Livewire::test(CreateDutyRole::class)
+        ->fillForm(['name' => 'Big', 'sort_order' => 99999999999])
+        ->call('create')
+        ->assertHasFormErrors(['sort_order']);
 });

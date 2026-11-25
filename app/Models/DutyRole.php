@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[UseFactory(DutyRoleFactory::class)]
 class DutyRole extends Model
@@ -28,6 +29,29 @@ class DutyRole extends Model
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    public function serviceSlots(): HasMany
+    {
+        return $this->hasMany(ServiceDutySlot::class);
+    }
+
+    public function eventSlots(): HasMany
+    {
+        return $this->hasMany(EventDutySlot::class);
+    }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(DutyAssignment::class);
+    }
+
+    /** True when any service slot, event slot or assignment still points at this role. */
+    public function isInUse(): bool
+    {
+        return $this->serviceSlots()->exists()
+            || $this->eventSlots()->exists()
+            || $this->assignments()->exists();
     }
 
     public function scopeActive(Builder $query): Builder

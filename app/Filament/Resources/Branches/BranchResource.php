@@ -67,6 +67,9 @@ class BranchResource extends Resource
         if ($branch->services()->exists()) {
             return "{$branch->name} still has services. Remove them first.";
         }
+        if ($branch->events()->exists()) {
+            return "{$branch->name} still has events. Remove them first.";
+        }
         // nullOnDelete would turn these into "all churches" records, so block instead.
         if (GalleryImage::where('branch_id', $branch->id)->exists()
             || TeamMember::where('branch_id', $branch->id)->exists()) {
