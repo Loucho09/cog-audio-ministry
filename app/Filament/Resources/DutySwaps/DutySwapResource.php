@@ -108,7 +108,7 @@ class DutySwapResource extends Resource
                 TextColumn::make('branch.name')->label('Branch')->visible(fn () => self::isSuperAdmin()),
             ])
             ->defaultSort(fn (Builder $query) => $query
-                ->orderByRaw('status = ? desc', [SwapStatus::Claimed->value])
+                ->orderByRaw('duty_swaps.status = ? desc', [SwapStatus::Claimed->value])
                 ->orderByDesc('duty_swaps.id'))
             ->filters([
                 SelectFilter::make('status')

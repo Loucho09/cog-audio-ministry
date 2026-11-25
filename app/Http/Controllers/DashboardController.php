@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\UpcomingServices;
+use App\Enums\AvailabilityPart;
 use App\Enums\DutyStatus;
 use App\Models\Branch;
 use App\Models\DutyAssignment;
@@ -56,24 +57,56 @@ class DashboardController extends Controller
             ->orderBy('events.starts_at')
             ->get();
 
-        // Per-item overlap/availability checks are small queries; the list is short (one branch, future events only).
+        // Load the user's active duties and upcoming unavailability once, then filter in PHP.
+        // Rules mirror DutyRosterService::isServingDuring (time overlap on active duties) and
+        // MemberUnavailability::blocks (event date + whole day or the event's AM/PM block).
+        $activeDuties = DutyAssignment::query()
+            ->active()
+            ->where('user_id', $user->id)
+            ->whereHas('event', fn ($q) => $q->where('ends_at', '>', now()))
+            ->with('event')
+            ->get();
+
+        $unavailability = MemberUnavailability::query()->where('user_id', $user->id)->upcoming()->orderBy('date')->get();
+
         $openSwaps = DutySwap::query()
             ->claimableBy($user)
             ->with(['assignment.event', 'assignment.dutyRole', 'offeredBy'])
             ->get()
-            ->filter(fn (DutySwap $swap) => ! $this->roster->isServingDuring($user, $swap->assignment->event)
-                && ! MemberUnavailability::blocks($user, $swap->assignment->event))
+            ->filter(function (DutySwap $swap) use ($activeDuties, $unavailability) {
+                $event = $swap->assignment->event;
+
+                $serving = $activeDuties->contains(fn (DutyAssignment $duty) => $duty->event->starts_at->lt($event->ends_at)
+                    && $duty->event->ends_at->gt($event->starts_at));
+
+                if ($serving) {
+                    return false;
+                }
+
+                $date = $event->starts_at->copy()->setTimezone(config('app.timezone'))->toDateString();
+                $block = $event->block();
+
+                return ! $unavailability->contains(fn (MemberUnavailability $entry) => $entry->date->toDateString() === $date
+                    && in_array($entry->part, [AvailabilityPart::WholeDay, $block], true));
+            })
             ->sortBy(fn (DutySwap $swap) => $swap->assignment->event->starts_at)
             ->values();
 
-        $availability = $user->can('create', MemberUnavailability::class)
-            ? MemberUnavailability::query()->where('user_id', $user->id)->upcoming()->orderBy('date')->get()
-            : collect();
+        $claimedSwaps = DutySwap::query()
+            ->live()
+            ->where('claimed_by', $user->id)
+            ->with(['assignment.event', 'assignment.dutyRole', 'offeredBy'])
+            ->get()
+            ->sortBy(fn (DutySwap $swap) => $swap->assignment->event->starts_at)
+            ->values();
+
+        $availability = $user->can('create', MemberUnavailability::class) ? $unavailability : collect();
 
         return view('dashboard', [
             'availability' => $availability,
             'duties' => $duties,
             'openSwaps' => $openSwaps,
+            'claimedSwaps' => $claimedSwaps,
             'greeting' => $greeting,
             'branch' => $branch,
             'serviceGroups' => $serviceGroups,

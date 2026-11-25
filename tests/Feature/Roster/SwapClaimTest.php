@@ -9,20 +9,6 @@ use App\Models\DutySwap;
 use App\Models\MemberUnavailability;
 use App\Models\User;
 
-/** @return array{0: DutySwap, 1: DutyAssignment} */
-function openSwap(string $start = '09:30', string $end = '11:00'): array
-{
-    [$event, $role] = rosterEvent($start, $end);
-    $duty = DutyAssignment::factory()->create([
-        'event_id' => $event->id,
-        'duty_role_id' => $role->id,
-        'user_id' => rosterMember($event)->id,
-        'status' => DutyStatus::Accepted,
-    ]);
-
-    return [swapSvc()->offer($duty, $duty->user), $duty];
-}
-
 test('same-branch member claims an open swap', function () {
     [$swap, $duty] = openSwap();
     $claimer = rosterMember($duty->event);

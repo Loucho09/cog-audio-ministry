@@ -9,29 +9,6 @@ use App\Models\DutySwap;
 use App\Models\MemberUnavailability;
 use App\Models\User;
 
-/** @return array{0: DutySwap, 1: DutyAssignment, 2: User} claimed swap, original duty, claimer */
-function claimedSwap(string $start = '09:30', string $end = '11:00'): array
-{
-    [$swap, $duty] = openSwap($start, $end);
-    $claimer = rosterMember($duty->event);
-    swapSvc()->claim($swap, $claimer);
-
-    return [$swap->fresh(), $duty, $claimer];
-}
-
-function branchAdminFor(DutyAssignment $duty): User
-{
-    return User::factory()->branchAdmin($duty->event->branch)->create();
-}
-
-function activeCount(DutyAssignment $duty): int
-{
-    return DutyAssignment::query()->active()
-        ->where('event_id', $duty->event_id)
-        ->where('duty_role_id', $duty->duty_role_id)
-        ->count();
-}
-
 test('approve swaps the duty to the claimer', function () {
     [$swap, $duty, $claimer] = claimedSwap();
     $admin = branchAdminFor($duty);
@@ -180,12 +157,12 @@ test('sole branch admin who is the claimer may approve', function () {
     expect($new->user_id)->toBe($solo->id);
 });
 
-test('remove cancels a live swap', function () {
+test('remove deletes the assignment and cascades its live swap', function () {
     [$swap, $duty] = claimedSwap();
 
     svc()->remove($duty);
 
-    // The FK cascade deletes the cancelled swap with its assignment, so no live swap survives.
+    // The FK cascade deletes the swap rows with their assignment.
     expect(DutySwap::find($swap->id))->toBeNull()
         ->and(DutyAssignment::find($duty->id))->toBeNull();
 });

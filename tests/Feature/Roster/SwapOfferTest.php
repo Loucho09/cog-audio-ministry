@@ -5,12 +5,6 @@ use App\Enums\SwapStatus;
 use App\Exceptions\RosterRuleViolation;
 use App\Models\DutyAssignment;
 use App\Models\DutySwap;
-use App\Services\DutySwapService;
-
-function swapSvc(): DutySwapService
-{
-    return app(DutySwapService::class);
-}
 
 function offerDuty(DutyStatus $status = DutyStatus::Accepted, string $start = '09:00'): DutyAssignment
 {

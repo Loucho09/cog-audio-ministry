@@ -1,9 +1,13 @@
 <?php
 
+use App\Enums\DutyStatus;
+use App\Models\DutyAssignment;
 use App\Models\DutyRole;
+use App\Models\DutySwap;
 use App\Models\Event;
 use App\Models\User;
 use App\Services\DutyRosterService;
+use App\Services\DutySwapService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -39,6 +43,48 @@ function rosterMember(Event $event): User
 function svc(): DutyRosterService
 {
     return app(DutyRosterService::class);
+}
+
+function swapSvc(): DutySwapService
+{
+    return app(DutySwapService::class);
+}
+
+/** @return array{0: DutySwap, 1: DutyAssignment} */
+function openSwap(string $start = '09:30', string $end = '11:00'): array
+{
+    [$event, $role] = rosterEvent($start, $end);
+    $duty = DutyAssignment::factory()->create([
+        'event_id' => $event->id,
+        'duty_role_id' => $role->id,
+        'user_id' => rosterMember($event)->id,
+        'status' => DutyStatus::Accepted,
+    ]);
+
+    return [swapSvc()->offer($duty, $duty->user), $duty];
+}
+
+/** @return array{0: DutySwap, 1: DutyAssignment, 2: User} claimed swap, original duty, claimer */
+function claimedSwap(string $start = '09:30', string $end = '11:00'): array
+{
+    [$swap, $duty] = openSwap($start, $end);
+    $claimer = rosterMember($duty->event);
+    swapSvc()->claim($swap, $claimer);
+
+    return [$swap->fresh(), $duty, $claimer];
+}
+
+function branchAdminFor(DutyAssignment $duty): User
+{
+    return User::factory()->branchAdmin($duty->event->branch)->create();
+}
+
+function activeCount(DutyAssignment $duty): int
+{
+    return DutyAssignment::query()->active()
+        ->where('event_id', $duty->event_id)
+        ->where('duty_role_id', $duty->duty_role_id)
+        ->count();
 }
 
 /*

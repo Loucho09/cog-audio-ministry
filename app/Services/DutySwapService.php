@@ -33,6 +33,7 @@ class DutySwapService
                 throw new RosterRuleViolation('This event has already started, so the duty can no longer be swapped.');
             }
 
+            // The assignment row lock above serialises this check: a concurrent offer waits for our commit.
             if ($current->liveSwap()) {
                 throw new RosterRuleViolation('This duty already has a swap offer.');
             }
@@ -133,7 +134,7 @@ class DutySwapService
     {
         return DB::transaction(function () use ($swap, $admin) {
             $swap = DutySwap::query()->whereKey($swap->id)->lockForUpdate()->firstOrFail();
-            $event = Event::query()->whereKey($swap->assignment->event_id)->lockForUpdate()->firstOrFail();
+            $event = Event::query()->whereKey(DutyAssignment::query()->whereKey($swap->duty_assignment_id)->value('event_id'))->lockForUpdate()->firstOrFail();
             $claimer = $swap->claimed_by
                 ? User::query()->whereKey($swap->claimed_by)->lockForUpdate()->first()
                 : null;
