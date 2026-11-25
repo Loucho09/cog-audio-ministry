@@ -31,6 +31,16 @@
     color-scheme: dark;
 }
 
+/* No one-word last lines on paragraphs and quotes (browsers without support just ignore it). */
+@layer base {
+    p,
+    blockquote,
+    figcaption,
+    li {
+        text-wrap: pretty;
+    }
+}
+
 /* Big screens: grow the root size a little so the whole layout (rem-based spacing, type, max-w-7xl)
    scales up instead of a small column floating in empty space. Percentages respect the user's
    browser font-size setting. Phones, tablets and laptops (< 1920px) keep the default 16px. */
