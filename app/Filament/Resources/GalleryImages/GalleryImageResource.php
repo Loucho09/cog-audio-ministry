@@ -253,7 +253,8 @@ class GalleryImageResource extends Resource
             ])
             ->filtersTriggerAction(fn (Action $action) => $action->button()->label('Filters'))
             ->recordActions([
-                EditAction::make()->iconButton()->tooltip('Edit'),
+                // Greyed out (not hidden) on view-only rows so columns stay aligned.
+                EditAction::make()->iconButton()->tooltip('Edit')->authorizationTooltip(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

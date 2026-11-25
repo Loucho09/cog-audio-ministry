@@ -131,8 +131,10 @@ it('denies a branch-head on other branches, branch-admins and themselves', funct
 
     expect(UserResource::canSetTemporaryPassword($head))->toBeFalse();
 
+    // Shown greyed out (keeps rows aligned) but cannot be used.
     Livewire::test(ListUsers::class)
-        ->assertActionHidden(TestAction::make('setTemporaryPassword')->table($admin));
+        ->assertActionDisabled(TestAction::make('setTemporaryPassword')->table($admin))
+        ->callAction(TestAction::make('setTemporaryPassword')->table($admin), ['password' => 'Temporary-Pass-123']);
 
     expect($admin->refresh()->must_change_password)->toBeFalse();
 });

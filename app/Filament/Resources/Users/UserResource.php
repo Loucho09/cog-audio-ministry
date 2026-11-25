@@ -473,10 +473,18 @@ class UserResource extends Resource
                         : $query),
             ])
             ->filtersTriggerAction(fn (Action $action) => $action->button()->label('Filters'))
+            // Actions always render (greyed out when not allowed) so every row keeps the
+            // same width and the columns line up; hiding them shifted admin rows sideways.
             ->recordActions([
-                EditAction::make()->iconButton()->tooltip('Edit'),
+                EditAction::make()->iconButton()->tooltip('Edit')
+                    ->authorizationTooltip(),
                 ActionGroup::make([
-                    self::temporaryPasswordAction(),
+                    self::temporaryPasswordAction()
+                        ->visible(true)
+                        ->disabled(fn (?User $record) => ! self::canSetTemporaryPassword($record))
+                        ->tooltip(fn (?User $record) => self::canSetTemporaryPassword($record)
+                            ? null
+                            : 'Not available for this account'),
                     self::resendAction(),
                 ])->tooltip('More actions'),
             ])
