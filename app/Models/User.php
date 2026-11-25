@@ -61,6 +61,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(DutyAssignment::class);
     }
 
+    public function unavailabilities(): HasMany
+    {
+        return $this->hasMany(MemberUnavailability::class);
+    }
+
     /**
      * Accounts that need an admin's eye: temporary password, invite not accepted yet,
      * and (super-admin view only) no branch. Super-admins have no branch by design.

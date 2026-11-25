@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\AvailabilityPart;
 use App\Enums\DutyStatus;
 use App\Exceptions\RosterRuleViolation;
 use App\Models\Branch;
@@ -9,6 +10,7 @@ use App\Models\DutyRole;
 use App\Models\Event;
 use App\Models\Service;
 use App\Models\User;
+use App\Services\AvailabilityService;
 use App\Services\DutyRosterService;
 use App\Services\EventGenerator;
 use Carbon\CarbonImmutable;
@@ -20,7 +22,7 @@ use Illuminate\Database\Seeder;
  */
 class DutyRosterSeeder extends Seeder
 {
-    public function run(EventGenerator $generator, DutyRosterService $roster): void
+    public function run(EventGenerator $generator, DutyRosterService $roster, AvailabilityService $availability): void
     {
         if (! app()->environment(['local', 'testing'])) {
             $this->command?->warn('Skipping demo duty roster outside local/testing.');
@@ -107,6 +109,24 @@ class DutyRosterSeeder extends Seeder
                         $roster->assignGuest($event, $roles['Duty role C'], 'Guest Volunteer', $head);
                     } catch (RosterRuleViolation) {
                         // no room, skip
+                    }
+                }
+            }
+
+            // Demo availability: AM, PM and whole day on different upcoming dates.
+            // mark() refuses members who are on duty then, so try the next member.
+            $demo = [
+                [AvailabilityPart::Am, 9, 'Morning commitment'],
+                [AvailabilityPart::Pm, 10, 'Family event'],
+                [AvailabilityPart::WholeDay, 11, 'Out of town'],
+            ];
+            foreach ($demo as $k => [$part, $days, $note]) {
+                foreach ($members->slice($k)->concat($members->take($k)) as $candidate) {
+                    try {
+                        $availability->mark($candidate, $from->addDays($days), $part, $note);
+                        break;
+                    } catch (RosterRuleViolation) {
+                        // on duty or already marked, try the next member
                     }
                 }
             }

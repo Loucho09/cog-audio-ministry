@@ -56,6 +56,10 @@ return [
         'branches' => ['dasma' => 2],
     ],
 
+    // Sunday AM services run 7:30 AM-1:30 PM, PM services 3:30-7:30 PM.
+    // Events starting at or after this time (24h, app timezone) count as PM for availability.
+    'duty_pm_starts_at' => '15:00',
+
     // "Meet the Team" section and nav link. Default OFF.
     'show_team' => filter_var(env('MINISTRY_SHOW_TEAM', false), FILTER_VALIDATE_BOOLEAN),
 

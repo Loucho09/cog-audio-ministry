@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DutyResponseController;
 use App\Http\Controllers\HomeController;
@@ -24,6 +25,8 @@ Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verif
 Route::middleware(['auth', 'verified', 'throttle:30,1'])->group(function () {
     Route::post('/duties/{assignment}/accept', [DutyResponseController::class, 'accept'])->whereNumber('assignment')->name('duties.accept');
     Route::post('/duties/{assignment}/decline', [DutyResponseController::class, 'decline'])->whereNumber('assignment')->name('duties.decline');
+    Route::post('/availability', [AvailabilityController::class, 'store'])->name('availability.store');
+    Route::delete('/availability/{unavailability}', [AvailabilityController::class, 'destroy'])->whereNumber('unavailability')->name('availability.destroy');
 });
 
 Route::middleware('auth')->group(function () {
