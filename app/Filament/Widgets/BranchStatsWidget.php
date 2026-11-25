@@ -15,6 +15,8 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
  */
 class BranchStatsWidget extends StatsOverviewWidget
 {
+    protected static ?int $sort = 1;
+
     public static function canView(): bool
     {
         return (bool) auth()->user()?->hasAdminAccess();
