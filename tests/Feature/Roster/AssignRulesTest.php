@@ -56,7 +56,7 @@ test('cannot assign the same member twice to one event', function () {
     $member = rosterMember($event);
     svc()->assign($event, $role, $member);
 
-    expect(fn () => svc()->assign($event, $role, $member))->toThrow(RosterRuleViolation::class);
+    expect(fn () => svc()->assign($event, $role, $member))->toThrow(RosterRuleViolation::class, 'already serving');
 });
 
 test('cannot assign a member to overlapping events', function () {
@@ -65,7 +65,7 @@ test('cannot assign a member to overlapping events', function () {
     $member = rosterMember($e1);
     svc()->assign($e1, $r1, $member);
 
-    expect(fn () => svc()->assign($e2, $r2, $member))->toThrow(RosterRuleViolation::class);
+    expect(fn () => svc()->assign($e2, $r2, $member))->toThrow(RosterRuleViolation::class, 'already serving');
 });
 
 test('back-to-back events are allowed', function () {
@@ -95,7 +95,7 @@ test('cannot re-assign a duty the member declined', function () {
         'event_id' => $event->id, 'duty_role_id' => $role->id, 'user_id' => $member->id, 'status' => DutyStatus::Declined,
     ]);
 
-    expect(fn () => svc()->assign($event, $role, $member))->toThrow(RosterRuleViolation::class);
+    expect(fn () => svc()->assign($event, $role, $member))->toThrow(RosterRuleViolation::class, 'declined this duty');
 });
 
 test('a different member can fill a declined slot', function () {
@@ -112,21 +112,29 @@ test('cannot over-fill a slot', function () {
     [$event, $role] = rosterEvent(quantity: 1);
     svc()->assign($event, $role, rosterMember($event));
 
-    expect(fn () => svc()->assign($event, $role, rosterMember($event)))->toThrow(RosterRuleViolation::class);
+    expect(fn () => svc()->assign($event, $role, rosterMember($event)))->toThrow(RosterRuleViolation::class, 'already full');
 });
 
 test('cannot assign a role the event has no slot for', function () {
     [$event] = rosterEvent();
     $other = DutyRole::factory()->create(['branch_id' => $event->branch_id]);
 
-    expect(fn () => svc()->assign($event, $other, rosterMember($event)))->toThrow(RosterRuleViolation::class);
+    expect(fn () => svc()->assign($event, $other, rosterMember($event)))->toThrow(RosterRuleViolation::class, 'no slot');
 });
 
 test('cannot assign a member from another branch', function () {
     [$event, $role] = rosterEvent();
     $outsider = User::factory()->member(Branch::factory()->create())->create();
 
-    expect(fn () => svc()->assign($event, $role, $outsider))->toThrow(RosterRuleViolation::class);
+    expect(fn () => svc()->assign($event, $role, $outsider))->toThrow(RosterRuleViolation::class, 'different branch');
+});
+
+test('rule 4 uses the members current branch', function () {
+    [$event, $role] = rosterEvent();
+    $member = rosterMember($event);
+    $member->forceFill(['branch_id' => Branch::factory()->create()->id])->save();
+
+    expect(fn () => svc()->assign($event, $role, $member))->toThrow(RosterRuleViolation::class, 'different branch');
 });
 
 test('cannot assign to an event that has started', function () {
@@ -134,7 +142,7 @@ test('cannot assign to an event that has started', function () {
     $member = rosterMember($event);
     $this->travelTo($event->starts_at->copy()->addMinutes(5));
 
-    expect(fn () => svc()->assign($event, $role, $member))->toThrow(RosterRuleViolation::class);
+    expect(fn () => svc()->assign($event, $role, $member))->toThrow(RosterRuleViolation::class, 'already started');
 });
 
 test('remove deletes an accepted assignment and frees the slot', function () {
@@ -154,5 +162,13 @@ test('remove refuses a declined assignment', function () {
         'event_id' => $event->id, 'duty_role_id' => $role->id, 'status' => DutyStatus::Declined,
     ]);
 
-    expect(fn () => svc()->remove($a))->toThrow(RosterRuleViolation::class);
+    expect(fn () => svc()->remove($a))->toThrow(RosterRuleViolation::class, 'declined duty');
+});
+
+test('remove refuses a duty on an event that has started', function () {
+    [$event, $role] = rosterEvent();
+    $a = svc()->assign($event, $role, rosterMember($event));
+    $this->travelTo($event->starts_at->copy()->addMinutes(5));
+
+    expect(fn () => svc()->remove($a))->toThrow(RosterRuleViolation::class, 'already started');
 });

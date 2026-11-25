@@ -9,6 +9,7 @@ use App\Models\DutyRole;
 use App\Models\Event;
 use App\Models\EventDutySlot;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 
 class DutyRosterService
@@ -16,6 +17,10 @@ class DutyRosterService
     public function assign(Event $event, DutyRole $role, User $member, ?User $by = null): DutyAssignment
     {
         return DB::transaction(function () use ($event, $role, $member, $by) {
+            // Lock the member and re-read fresh values so concurrent assigns cannot slip past the rules.
+            $member = User::query()->whereKey($member->id)->lockForUpdate()->firstOrFail();
+            $event = Event::query()->findOrFail($event->id);
+
             $slot = EventDutySlot::query()
                 ->where('event_id', $event->id)
                 ->where('duty_role_id', $role->id)
@@ -26,7 +31,7 @@ class DutyRosterService
                 throw new RosterRuleViolation('This event has already started, so duties can no longer be assigned.');
             }
 
-            if ($member->branch_id !== $event->branch_id) {
+            if ((int) $member->branch_id !== (int) $event->branch_id) {
                 throw new RosterRuleViolation('This member belongs to a different branch.');
             }
 
@@ -80,10 +85,87 @@ class DutyRosterService
 
     public function remove(DutyAssignment $assignment): void
     {
+        if ($assignment->event->hasStarted()) {
+            throw new RosterRuleViolation('This event has already started, so its duties are kept as a record.');
+        }
+
         if ($assignment->status === DutyStatus::Declined) {
             throw new RosterRuleViolation('A declined duty is kept as a record and cannot be removed.');
         }
 
         $assignment->delete();
+    }
+
+    public function respond(DutyAssignment $assignment, User $member, DutyStatus $answer): DutyAssignment
+    {
+        if (! in_array($answer, [DutyStatus::Accepted, DutyStatus::Declined], true)) {
+            throw new RosterRuleViolation('You can only accept or decline a duty.');
+        }
+
+        return DB::transaction(function () use ($assignment, $member, $answer) {
+            $current = DutyAssignment::query()->whereKey($assignment->id)->lockForUpdate()->firstOrFail();
+
+            if ((int) $current->user_id !== (int) $member->id) {
+                throw new RosterRuleViolation('This duty is not yours to answer.');
+            }
+
+            if ($current->status !== DutyStatus::Assigned) {
+                throw new RosterRuleViolation('You have already responded to this duty.');
+            }
+
+            if ($current->event->hasStarted()) {
+                throw new RosterRuleViolation('This event has already started, so you can no longer respond.');
+            }
+
+            $current->update(['status' => $answer, 'responded_at' => now()]);
+
+            return $current;
+        });
+    }
+
+    /**
+     * @param  array<int, int>  $quantitiesByRoleId  [dutyRoleId => quantity]; a missing role id means the slot is removed.
+     */
+    public function assertSlotChangesAllowed(Event $event, array $quantitiesByRoleId): void
+    {
+        $filled = DutyAssignment::query()
+            ->active()
+            ->where('event_id', $event->id)
+            ->selectRaw('duty_role_id, count(*) as total')
+            ->groupBy('duty_role_id')
+            ->pluck('total', 'duty_role_id');
+
+        foreach ($filled as $roleId => $total) {
+            $newQuantity = (int) ($quantitiesByRoleId[$roleId] ?? 0);
+
+            if ($newQuantity < (int) $total) {
+                throw new RosterRuleViolation('A duty already filled by members cannot be reduced below the number of people serving. Remove them first.');
+            }
+        }
+    }
+
+    public function assertTimeChangeAllowed(Event $event, CarbonInterface $startsAt, CarbonInterface $endsAt): void
+    {
+        if (! $endsAt->greaterThan($startsAt)) {
+            throw new RosterRuleViolation('The end time must be after the start time.');
+        }
+
+        $userIds = DutyAssignment::query()
+            ->active()
+            ->where('event_id', $event->id)
+            ->pluck('user_id');
+
+        $clash = DutyAssignment::query()
+            ->active()
+            ->whereIn('user_id', $userIds)
+            ->where('event_id', '!=', $event->id)
+            ->whereHas('event', fn ($q) => $q
+                ->where('starts_at', '<', $endsAt)
+                ->where('ends_at', '>', $startsAt))
+            ->exists();
+
+        if ($clash) {
+            throw new RosterRuleViolation('A member on this event is already serving at the new time.');
+        }
     }
 }
