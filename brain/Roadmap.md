@@ -120,7 +120,7 @@ Status: done (2026-11-25). Slices 1-7 and final review done; tests 552 total, 55
 ## Phase 4: Duty Roster
 **Goal:** event and duty management with swaps, availability, and member acceptance workflow.
 
-- Duty roster v1 merged to main 2026-11-26; guest assign (typed guest name) built, awaiting merge; v2 swaps + availability next. See [[duty-guest-assign]].
+- Duty roster v1 merged to main 2026-11-26; guest assign (typed guest name) merged 2026-11-26; v2 swaps + availability next. See [[duty-guest-assign]].
 
 ### Tasks
 - `events` model, migration: date, time, branch, type (Sunday Service, Revival Night, etc.)

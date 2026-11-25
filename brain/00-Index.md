@@ -69,7 +69,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[dashboards]]: member dashboard and admin widgets (Phase 2 add-on, done, merged to main 2026-11-25; slice 5 built in Phase 3; replaces the missing slice 2 of [[login-dashboard-polish]]; tasks in [[dashboards-tasks]])
 - [[admin-resources-polish]]: Team, Services, Gallery, Branches Filament resources restyled like Users; add-on before Phase 3 (done, merged to main 2026-11-25)
 - [[join-applications]]: public join form, branch review, approval creates member account (Phase 3, planned, spec written 2026-11-25; tasks in [[join-applications-tasks]])
-- [[duty-roster]]: events, duty roles, slots, assignments, accept/decline (Phase 4 v1, built on `feature/duty-roster`, awaiting merge; tasks in [[duty-roster-tasks]])
+- [[duty-roster]]: events, duty roles, slots, assignments, accept/decline (Phase 4 v1, merged to main 2026-11-26; tasks in [[duty-roster-tasks]])
 - [[duty-guest-assign]]: assign a typed guest name to a duty, auto-confirmed (Phase 4, done, merged; tasks in [[duty-guest-assign-tasks]])
 - [[loading-states]]: progress bar, view transitions, image skeletons, submit guard, admin skeletons, scroll reveal (UI polish add-on before Phase 3, done and merged 2026-11-25; tasks in [[loading-states-tasks]])
 
