@@ -63,6 +63,7 @@ Status: done. 2a and 2b merged to main 2026-11-25. Split into two parts (owner d
 - **2b Filament screens:** Service, GalleryImage, TeamMember, Faq, Branch, and User resources. The "Our churches" list moves from config to the `branches` table (nullable `facebook_url`).
 - [x] **Add-on done 2026-11-25** (built and reviewed on `feature/temp-password`; merge pending owner OK): temporary passwords and forced password change, plus branch-style demo emails. See [[temp-password]], [[temp-password-tasks]].
 - [ ] **Add-on before Phase 3 (owner decision 2026-11-25): member and admin dashboards** (`feature/dashboards`, not yet merged). Slices 1-4 built, reviewed, fixed (369 tests, 368 pass, 1 pre-existing skip); browser check at 360px and dark mode and merge still open. Slice 5 (pending applications widget) is built during Phase 3. See [[dashboards]], [[dashboards-tasks]], [[filament-widget-styling]].
+- [x] **UI polish add-on before Phase 3 (owner request 2026-11-25): loading states.** Progress bar and view transitions, image skeletons, submit guard, admin widget skeletons, scroll reveal. Merged to main 2026-11-25; 403 tests (402 pass, 1 pre-existing skip). See [[loading-states]], [[loading-states-approach]], [[loading-states-tasks]].
 
 ### Tasks
 - Breeze Blade login/register; accounts created by approval only (no open signup)

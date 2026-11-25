@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Filament\Resources\Users\UserResource;
+use App\Filament\Widgets\Concerns\HasSkeletonPlaceholder;
 use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -11,6 +12,10 @@ use Filament\Widgets\TableWidget;
 /** The 5 newest accounts in the admin's scope. Read-only. */
 class RecentAccountsWidget extends TableWidget
 {
+    use HasSkeletonPlaceholder;
+
+    protected string $skeletonVariant = 'table';
+
     protected static ?int $sort = 5;
 
     protected int|string|array $columnSpan = 'full';

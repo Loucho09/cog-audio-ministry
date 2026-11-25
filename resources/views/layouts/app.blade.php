@@ -31,6 +31,7 @@
         <style>[x-cloak] { display: none !important; }</style>
     </head>
     <body class="flex min-h-screen flex-col bg-background font-sans text-text antialiased">
+        <x-site.page-progress />
 
         <a
             href="#main"

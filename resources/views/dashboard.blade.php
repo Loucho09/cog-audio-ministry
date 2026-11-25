@@ -6,7 +6,7 @@
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <div class="space-y-6 sm:space-y-8">
-        <section aria-labelledby="welcome-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+        <section data-reveal aria-labelledby="welcome-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
             <h2 id="welcome-heading" class="text-xl font-semibold text-text sm:text-2xl">
                 {{ __($greeting) }}, {{ auth()->user()->name }}
             </h2>
@@ -14,7 +14,7 @@
         </section>
 
         <div class="grid gap-6 sm:gap-8 lg:grid-cols-2">
-            <section aria-labelledby="branch-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+            <section data-reveal aria-labelledby="branch-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
                 <h2 id="branch-heading" class="text-lg font-semibold text-text">{{ __('Your branch') }}</h2>
 
                 @if ($branch)
@@ -58,7 +58,7 @@
                 @endif
             </section>
 
-            <section aria-labelledby="services-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+            <section data-reveal data-reveal-delay="80" aria-labelledby="services-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
                 <h2 id="services-heading" class="text-lg font-semibold text-text">{{ __('Upcoming services') }}</h2>
 
                 @forelse ($serviceGroups as $group)
@@ -86,7 +86,7 @@
             </section>
         </div>
 
-        <section aria-labelledby="links-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+        <section data-reveal aria-labelledby="links-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
             <h2 id="links-heading" class="text-lg font-semibold text-text">{{ __('Quick links') }}</h2>
             <ul class="mt-4 flex flex-col gap-3 text-sm sm:flex-row sm:flex-wrap sm:gap-6">
                 <li><a href="{{ route('profile.edit') }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">{{ __('Edit profile') }}</a></li>
@@ -98,13 +98,13 @@
         </section>
 
         <div class="grid gap-6 sm:grid-cols-2 sm:gap-8">
-            <section aria-labelledby="duties-heading" class="rounded-2xl border border-dashed border-text/30 bg-background p-6 sm:p-8">
+            <section data-reveal aria-labelledby="duties-heading" class="rounded-2xl border border-dashed border-text/30 bg-background p-6 sm:p-8">
                 <h2 id="duties-heading" class="text-lg font-semibold text-text">{{ __('Duties') }}</h2>
                 <p class="mt-1 text-xs font-medium uppercase tracking-wide text-accent-text">{{ __('Coming soon') }}</p>
                 <p class="mt-3 text-sm text-text/70">{{ __('Your duties and schedule will appear here.') }}</p>
             </section>
 
-            <section aria-labelledby="announcements-heading" class="rounded-2xl border border-dashed border-text/30 bg-background p-6 sm:p-8">
+            <section data-reveal data-reveal-delay="80" aria-labelledby="announcements-heading" class="rounded-2xl border border-dashed border-text/30 bg-background p-6 sm:p-8">
                 <h2 id="announcements-heading" class="text-lg font-semibold text-text">{{ __('Announcements') }}</h2>
                 <p class="mt-1 text-xs font-medium uppercase tracking-wide text-accent-text">{{ __('Coming soon') }}</p>
                 <p class="mt-3 text-sm text-text/70">{{ __('News from your branch will appear here.') }}</p>

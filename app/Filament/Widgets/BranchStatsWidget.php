@@ -6,6 +6,7 @@ use App\Filament\Resources\GalleryImages\GalleryImageResource;
 use App\Filament\Resources\Services\ServiceResource;
 use App\Filament\Resources\TeamMembers\TeamMemberResource;
 use App\Filament\Resources\Users\UserResource;
+use App\Filament\Widgets\Concerns\HasSkeletonPlaceholder;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -15,6 +16,10 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
  */
 class BranchStatsWidget extends StatsOverviewWidget
 {
+    use HasSkeletonPlaceholder;
+
+    protected string $skeletonVariant = 'stats';
+
     protected static ?int $sort = 1;
 
     public static function canView(): bool

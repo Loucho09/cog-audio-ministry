@@ -9,7 +9,7 @@
     $todayName = now()->format('l');
 @endphp
 
-<section id="services" aria-labelledby="services-title" class="relative isolate overflow-hidden bg-surface py-16 sm:py-20 lg:py-24">
+<section id="services" data-reveal aria-labelledby="services-title" class="relative isolate overflow-hidden bg-surface py-16 sm:py-20 lg:py-24">
     <x-site.section-backdrop variant="cone" fade-from="background" />
     <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <x-site.section-header

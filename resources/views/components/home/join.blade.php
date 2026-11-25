@@ -1,4 +1,4 @@
-<section id="join" aria-labelledby="join-title" class="relative isolate overflow-hidden bg-primary-dark py-20 sm:py-24 lg:py-32">
+<section id="join" data-reveal aria-labelledby="join-title" class="relative isolate overflow-hidden bg-primary-dark py-20 sm:py-24 lg:py-32">
     {{-- Light mode: a bold deep-blue band (primary-dark, white text passes AA). Dark mode: near-black stage band with glows.
          Both get crisp white sound-wave rings (.backdrop-waves). Text is white in both themes. Decorative layers are aria-hidden. --}}
     <div aria-hidden="true" class="absolute inset-0 -z-20 hidden bg-black dark:block"></div>

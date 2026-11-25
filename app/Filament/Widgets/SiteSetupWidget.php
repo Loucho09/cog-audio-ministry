@@ -2,12 +2,17 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\HasSkeletonPlaceholder;
 use App\Support\SiteSetupChecklist;
 use Filament\Widgets\Widget;
 
 /** Super-admin only: checklist of owner-provided content that is still missing. */
 class SiteSetupWidget extends Widget
 {
+    use HasSkeletonPlaceholder;
+
+    protected string $skeletonVariant = 'checklist';
+
     protected static ?int $sort = 3;
 
     protected int|string|array $columnSpan = 'full';

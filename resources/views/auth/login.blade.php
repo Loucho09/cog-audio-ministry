@@ -46,9 +46,8 @@
         method="POST"
         action="{{ route('login') }}"
         class="space-y-5"
-        x-data="{ showPassword: false, hasPassword: false, capsLock: false, submitting: false }"
-        @submit="if (submitting) { $event.preventDefault(); } else { submitting = true; }"
-        @pageshow.window="submitting = false"
+        x-data="{ showPassword: false, hasPassword: false, capsLock: false }"
+        data-submit-guard
     >
         @csrf
 
@@ -131,16 +130,7 @@
                 </a>
             @endif
 
-            <x-primary-button class="w-full sm:w-auto disabled:cursor-not-allowed disabled:opacity-70" x-bind:disabled="submitting" x-bind:aria-busy="submitting.toString()">
-                <span x-show="!submitting">{{ __('Log in') }}</span>
-                <span x-show="submitting" x-cloak class="inline-flex items-center gap-2">
-                    <svg class="h-4 w-4 animate-spin motion-reduce:animate-none" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"></path>
-                    </svg>
-                    Logging in…
-                </span>
-            </x-primary-button>
+            <x-primary-button class="w-full sm:w-auto" :loading-text="__('Signing in…')">{{ __('Log in') }}</x-primary-button>
         </div>
     </form>
 </x-guest-layout>

@@ -239,3 +239,126 @@
         --orb-alpha: 0.4;
     }
 }
+
+/* Page transitions: cross-document View Transitions. Browsers without support just navigate normally.
+   Quick fade out, then the new page fades in with a small rise (~200ms). */
+@view-transition {
+    navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 200ms;
+    animation-timing-function: ease-out;
+}
+
+::view-transition-old(root) {
+    animation-name: page-fade-out;
+}
+
+::view-transition-new(root) {
+    animation-name: page-fade-rise;
+}
+
+@keyframes page-fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes page-fade-rise {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Reduced motion: page changes are instant (no snapshot animation). */
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation: none !important;
+    }
+}
+
+/* Skeleton placeholders (shared primitive, used by <x-skeleton-image> and later features).
+   A moving highlight over a faint text-coloured base. Dark mode uses a slightly stronger base so it shows on near-black.
+   Once settled (data-state="loaded" or "error") the shimmer stops. Reduced motion: a static block, no shimmer. */
+@layer components {
+    .skeleton {
+        background-color: rgb(var(--color-text) / 0.06);
+        background-image: linear-gradient(90deg, transparent 0%, rgb(var(--color-surface) / 0.7) 50%, transparent 100%);
+        background-repeat: no-repeat;
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.4s ease-in-out infinite;
+    }
+
+    .dark .skeleton {
+        background-color: rgb(var(--color-text) / 0.08);
+        background-image: linear-gradient(90deg, transparent 0%, rgb(var(--color-text) / 0.1) 50%, transparent 100%);
+    }
+
+    .skeleton[data-state='loaded'],
+    .skeleton[data-state='error'] {
+        background-image: none;
+        animation: none;
+    }
+
+    /* Shape helpers for <x-skeleton> (components/skeleton.blade.php). Use with .skeleton. */
+    .skeleton-text {
+        display: block;
+        width: 100%;
+        height: 0.875rem;
+        border-radius: 9999px;
+    }
+
+    .skeleton-circle {
+        display: block;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 9999px;
+        flex-shrink: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .skeleton {
+            animation: none;
+        }
+    }
+}
+
+/* Scroll reveal (resources/js/reveal.js). Elements with data-reveal fade in and rise 8px once they scroll
+   into view (~400ms). Only hidden when <html> has the "js" class (added by components/site/theme-script
+   before first paint) AND the user has no reduced-motion preference, so content is never hidden without
+   JS and never hidden for reduced-motion users. The reveal script sets data-revealed. The stagger delay
+   comes from data-reveal-delay (ms), applied through --reveal-delay. */
+/* The "reveal-ready" class is added by reveal.js once it runs, so if app.js never loads or throws,
+   nothing is hidden. The transition lives on its own class, removed after the reveal, so a card's own
+   hover transitions (shadow, colour) are not overridden for good. */
+@media screen and (prefers-reduced-motion: no-preference) {
+    .reveal-ready [data-reveal]:not([data-revealed]) {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    .reveal-ready [data-reveal].reveal-animating {
+        transition: opacity 400ms ease-out, transform 400ms ease-out;
+        transition-delay: var(--reveal-delay, 0ms);
+    }
+}
+
+@keyframes skeleton-shimmer {
+    from {
+        background-position: 100% 0;
+    }
+    to {
+        background-position: -100% 0;
+    }
+}

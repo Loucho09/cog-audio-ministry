@@ -5,7 +5,7 @@
 @endphp
 
 @if (filled($facebookUrl) || filled($messengerUrl))
-    <section id="updates" aria-labelledby="updates-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
+    <section id="updates" data-reveal aria-labelledby="updates-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
         <x-site.section-backdrop variant="vignette" />
 
         <div class="relative mx-auto max-w-7xl px-5 text-center sm:px-6 lg:px-8">

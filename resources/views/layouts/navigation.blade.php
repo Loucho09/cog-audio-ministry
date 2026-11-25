@@ -45,12 +45,12 @@
                         </li>
                     @endif
                     <li>
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form method="POST" action="{{ route('logout') }}" data-submit-guard>
                             @csrf
                             <button
                                 type="submit"
-                                class="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-text/80 transition-colors duration-200 hover:text-accent-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
-                            >Log out</button>
+                                class="group inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-text/80 transition-colors duration-200 hover:text-accent-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark disabled:cursor-wait disabled:opacity-70"
+                            ><x-loading-label :loading-text="__('Logging out…')">Log out</x-loading-label></button>
                         </form>
                     </li>
                 </ul>
@@ -110,12 +110,12 @@
                     </li>
                 @endif
                 <li>
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ route('logout') }}" data-submit-guard>
                         @csrf
                         <button
                             type="submit"
-                            class="block w-full rounded-2xl px-4 py-3.5 text-left text-base font-medium text-text transition-colors duration-200 hover:bg-background hover:text-accent-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
-                        >Log out</button>
+                            class="group block w-full rounded-2xl px-4 py-3.5 text-left text-base font-medium text-text transition-colors duration-200 hover:bg-background hover:text-accent-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark disabled:cursor-wait disabled:opacity-70"
+                        ><x-loading-label :loading-text="__('Logging out…')">Log out</x-loading-label></button>
                     </form>
                 </li>
             </ul>
