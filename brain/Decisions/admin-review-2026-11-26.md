@@ -11,3 +11,5 @@ Result: no cross-branch leaks or role escalation found. Fixed:
 - Services: sort order defaults to 0; delete explains what happens to events; duplicate day/time shows a message.
 
 Owner decisions: remove the branch-head role ([[remove-branch-head-decision]]); homepage per-branch content decided later ([[Backlog]]).
+
+Follow-up (owner: "looks messy, not aligned"): every admin list (Users, Gallery, Team, Join applications, Services, Branches, pending widget) rebuilt as real table columns with headers instead of Split/Stack, so columns line up whatever actions a row has; secondary columns hide on phones. Checked with screenshots in dark, light and 390px.
