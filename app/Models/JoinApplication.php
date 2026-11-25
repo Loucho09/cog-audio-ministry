@@ -21,19 +21,16 @@ class JoinApplication extends Model
 
     public const STATUS_REJECTED = 'rejected';
 
-    public const INTERESTS = ['FOH', 'Monitors', 'Livestream', 'Stage Tech', 'Other'];
-
     /** status, reviewed_by, reviewed_at and user_id are set by the review action only. */
     protected $fillable = [
         'branch_id', 'full_name', 'age', 'contact_number', 'email', 'facebook_url',
-        'interests', 'experience', 'availability', 'consented_at',
+        'consented_at',
     ];
 
     protected function casts(): array
     {
         return [
             'age' => 'integer',
-            'interests' => 'array',
             'consented_at' => 'datetime',
             'reviewed_at' => 'datetime',
         ];

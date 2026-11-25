@@ -50,7 +50,6 @@ class NewJoinApplication extends Notification implements ShouldQueue
                 'ministry' => $ministry,
                 'name' => self::escapeMarkdown($application->full_name),
                 'branch' => self::escapeMarkdown($this->branchName),
-                'interests' => implode(', ', $application->interests ?? []),
                 'submitted' => $submitted,
                 // Panel passed explicitly: a queue worker has no current panel.
                 'url' => JoinApplicationResource::getUrl('view', ['record' => $application], panel: 'admin'),

@@ -32,9 +32,6 @@ function submission(Branch $branch, array $overrides = []): array
         'contact_number' => '09171234567',
         'email' => 'juan@example.com',
         'branch_id' => $branch->id,
-        'interests' => ['FOH', 'Livestream'],
-        'experience' => 'Some.',
-        'availability' => 'Sundays.',
         'consent' => '1',
         'website' => '',
     ], $overrides);
@@ -128,7 +125,6 @@ it('renders the mail with escaped applicant details', function () {
     $app = JoinApplication::factory()->create([
         'branch_id' => $branch->id,
         'full_name' => 'Maria <script>alert(1)</script>',
-        'interests' => ['FOH', 'Monitors'],
     ]);
 
     $mail = (new NewJoinApplication($app))->toMail(new User);
@@ -138,7 +134,6 @@ it('renders the mail with escaped applicant details', function () {
         ->and($html)->toContain('Maria &lt;script&gt;')
         ->and($html)->not->toContain('<script>alert(1)')
         ->and($html)->toContain('Trece &lt;b&gt;Branch')
-        ->and($html)->toContain('FOH, Monitors')
         ->and($html)->toContain(JoinApplicationResource::getUrl('view', ['record' => $app], panel: 'admin'));
 });
 

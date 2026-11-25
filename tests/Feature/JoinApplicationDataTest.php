@@ -21,9 +21,6 @@ it('ignores guarded columns on mass assignment', function () {
         'age' => 20,
         'contact_number' => '09123456789',
         'email' => 'x@example.test',
-        'interests' => ['FOH'],
-        'experience' => 'None',
-        'availability' => 'Sundays',
         'consented_at' => now(),
         'status' => 'approved',
         'reviewed_by' => $user->id,
@@ -40,8 +37,7 @@ it('ignores guarded columns on mass assignment', function () {
 it('casts attributes', function () {
     $app = $this->appA->fresh();
 
-    expect($app->interests)->toBeArray()
-        ->and($app->age)->toBeInt()
+    expect($app->age)->toBeInt()
         ->and($app->consented_at)->toBeInstanceOf(Carbon::class);
 
     $reviewed = JoinApplication::factory()->approved()->create(['branch_id' => $this->branchA->id])->fresh();

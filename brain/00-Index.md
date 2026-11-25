@@ -45,6 +45,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[full-review-2026-11-25]]: owner decisions from the Phase 1-2 full review (3-day invite link, gallery/team approval, super-admin rescue path, member-only self-delete) (2026-11-25)
 - [[login-and-dashboard-decisions]]: split-photo login and all-branch services on the dashboard (2026-11-25)
 - [[join-application-rules]]: no rejection email, duplicates blocked, no age minimum (2026-11-25)
+- [[join-form-fields-trimmed]]: interests, experience and availability removed from the join form to keep it short (2026-11-25)
 - [[filament-widget-styling]]: Filament widgets use Filament components only; custom theme later, owner approval first (2026-11-25)
 - [[loading-states-approach]]: hand-built loading UI, View Transitions, reveal fallback, submit buttons disabled on next tick (2026-11-25)
 - [[faq-removed]]: owner removed FAQ fully (resource, model, policy, seeder, factory, component, tests); drop migration (2026-11-25)

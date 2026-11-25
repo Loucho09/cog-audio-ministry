@@ -17,7 +17,6 @@ class JoinApplicationController extends Controller
     {
         return view('join.create', [
             'branches' => Branch::orderByDesc('is_main')->orderBy('name')->get(['id', 'name']),
-            'interests' => JoinApplication::INTERESTS,
         ]);
     }
 
@@ -35,7 +34,7 @@ class JoinApplicationController extends Controller
             return JoinApplication::create([
                 ...$request->safe()->only([
                     'full_name', 'age', 'contact_number', 'email', 'facebook_url',
-                    'branch_id', 'interests', 'experience', 'availability',
+                    'branch_id',
                 ]),
                 'consented_at' => now(),
             ]);

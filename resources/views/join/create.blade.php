@@ -74,33 +74,6 @@
                 <x-input-error id="branch_id-error" :messages="$errors->get('branch_id')" class="mt-1" />
             </div>
 
-            <fieldset @if ($errors->has('interests') || $errors->has('interests.*')) aria-describedby="interests-error" @endif>
-                <legend class="{{ $label }}">Where would you like to serve? *</legend>
-                <div class="mt-2 grid gap-2 sm:grid-cols-2">
-                    @foreach ($interests as $i => $interest)
-                        <label for="interest-{{ $i }}" class="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-text/25 bg-surface px-3 py-2 text-base text-text">
-                            <input type="checkbox" id="interest-{{ $i }}" name="interests[]" value="{{ $interest }}" @checked(in_array($interest, (array) old('interests', []), true)) class="size-5 rounded border-text/40 text-primary-dark focus:ring-2 focus:ring-primary-dark" @if ($errors->has('interests') || $errors->has('interests.*')) aria-invalid="true" aria-describedby="interests-error" @endif>
-                            {{ $interest }}
-                        </label>
-                    @endforeach
-                </div>
-                <x-input-error id="interests-error" :messages="\Illuminate\Support\Arr::flatten([$errors->get('interests'), $errors->get('interests.*')])" class="mt-1" />
-            </fieldset>
-
-            <div>
-                <label for="experience" class="{{ $label }}">Your experience *</label>
-                <textarea id="experience" name="experience" rows="4" required maxlength="2000" class="{{ $field }}" aria-describedby="experience-hint{{ $errors->has('experience') ? ' experience-error' : '' }}" @error('experience') aria-invalid="true" @enderror>{{ old('experience') }}</textarea>
-                <p id="experience-hint" class="{{ $hint }}">Tell us any sound, stage, or livestream experience. It is fine if you are just starting.</p>
-                <x-input-error id="experience-error" :messages="$errors->get('experience')" class="mt-1" />
-            </div>
-
-            <div>
-                <label for="availability" class="{{ $label }}">Your availability *</label>
-                <textarea id="availability" name="availability" rows="3" required maxlength="2000" class="{{ $field }}" aria-describedby="availability-hint{{ $errors->has('availability') ? ' availability-error' : '' }}" @error('availability') aria-invalid="true" @enderror>{{ old('availability') }}</textarea>
-                <p id="availability-hint" class="{{ $hint }}">Which days and times can you usually serve?</p>
-                <x-input-error id="availability-error" :messages="$errors->get('availability')" class="mt-1" />
-            </div>
-
             <div>
                 <label for="consent" class="flex cursor-pointer items-start gap-3 text-base text-text">
                     <input type="checkbox" id="consent" name="consent" value="1" required @checked(old('consent')) class="mt-1 size-5 shrink-0 rounded border-text/40 text-primary-dark focus:ring-2 focus:ring-primary-dark" @error('consent') aria-invalid="true" aria-describedby="consent-error" @enderror>
