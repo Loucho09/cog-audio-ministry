@@ -12,10 +12,10 @@ Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./ve
 - [x] Tests: 13:30 = AM, 15:00 = PM, 15:30 = PM, cutoff read from config
 
 ## Slice A2: mark / remove rules (backend-builder)
-- [ ] `app/Services/AvailabilityService.php`: `mark(user, date, part, note)`, `remove(entry)`; violations throw `RosterRuleViolation`
-- [ ] Rules: today..+6 months, one entry per day, blocked if active duty in that block (whole day = both), past entries can't be removed
-- [ ] `app/Policies/MemberUnavailabilityPolicy.php`: owner only
-- [ ] Tests first for every rule + policy
+- [x] `app/Services/AvailabilityService.php`: `mark(user, date, part, note)`, `remove(entry)`; violations throw `RosterRuleViolation`
+- [x] Rules: today..+6 months, one entry per day, blocked if active duty in that block (whole day = both), past entries can't be removed
+- [x] `app/Policies/MemberUnavailabilityPolicy.php`: owner only
+- [x] Tests first for every rule + policy
 
 ## Slice A3: assign respects availability (backend-builder)
 - [ ] `DutyRosterService::assign()` rejects unavailable member (whole day or matching block); guests unaffected
