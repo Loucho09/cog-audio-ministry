@@ -1,11 +1,12 @@
 {{-- Our churches: one team serving every COG church. Names only; addresses and times are TODO.
-     Light mode: soft watermark of the church logo behind dark text. Dark mode: the logo as a dark photo band.
+     Light mode: plain background (the upscaled logo read as a blurry shape behind the cards; removed 2026-11-25).
+     Dark mode: the logo as a dark photo band. The hidden light-mode image is lazy, so it is not downloaded.
      Text uses theme tokens, so it stays readable in both. --}}
 @props(['churches' => collect()])
 
 <section id="churches" data-reveal aria-labelledby="churches-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
     {{-- Church logo as a full-bleed background. The role="img" wrapper carries the accessible name; the image itself is decorative. --}}
-    <div role="img" aria-label="Church of God logo: We Exalt You Jesus" class="absolute inset-0 -z-10">
+    <div role="img" aria-label="Church of God logo: We Exalt You Jesus" class="absolute inset-0 -z-10 hidden dark:block">
         {{-- Opacity sits on the wrapper so the img's own fade-in opacity is not overridden. --}}
         <x-skeleton-image
             src="{{ asset('images/cog-church-logo.png') }}"
@@ -13,12 +14,10 @@
             aria-hidden="true"
             width="960"
             height="960"
-            class="h-full w-full opacity-40 dark:opacity-100"
+            class="h-full w-full"
             img-class="object-center"
         />
     </div>
-    {{-- Light mode: a background-coloured veil keeps the logo a faint watermark. --}}
-    <div aria-hidden="true" class="absolute inset-0 -z-10 bg-gradient-to-r from-background via-background/85 to-background/55 dark:hidden"></div>
     {{-- Dark mode: the original dark photo treatment. --}}
     <div aria-hidden="true" class="absolute inset-0 -z-10 hidden bg-gradient-to-r from-black/90 via-black/75 to-black/60 dark:block"></div>
     <div aria-hidden="true" class="absolute inset-0 -z-10 hidden bg-gradient-to-t from-black/70 via-transparent to-black/40 dark:block"></div>
@@ -32,7 +31,7 @@
 
                 <ul class="mt-8 grid grid-cols-2 gap-3 [&>li:last-child:nth-child(odd)]:col-span-2">
                     @foreach ($churches as $church)
-                        <li class="flex flex-col gap-2 rounded-2xl border border-text/15 bg-surface px-3 py-3 shadow-sm sm:px-4 dark:border-white/15 dark:bg-black/55 dark:shadow-none dark:backdrop-blur-sm">
+                        <li class="flex flex-col rounded-2xl border border-text/15 bg-surface px-3 pb-0.5 pt-3 shadow-sm sm:px-4 dark:border-white/15 dark:bg-black/55 dark:shadow-none dark:backdrop-blur-sm">
                             <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                                 <span class="min-w-0 break-words font-semibold text-text">{{ $church->name }}</span>
                                 @if ($church->is_main)
@@ -45,7 +44,7 @@
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="{{ $church->name }} on Facebook (opens in a new tab)"
-                                    class="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-primary-dark underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-dark dark:text-white dark:focus-visible:outline-white"
+                                    class="inline-flex min-h-11 w-fit items-center gap-1.5 text-sm font-semibold text-primary-dark underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-dark dark:text-white dark:focus-visible:outline-white"
                                 >
                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                         <path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H7.9v3h2.6V21h3z" />
@@ -63,8 +62,8 @@
                 <p class="mt-3 text-base leading-relaxed text-text/80">
                     Before every service, the Audio team does a sound check, balances the mix, and makes sure the microphones and speakers are ready. During worship, we keep watch so every sermon and every song is heard clearly, by everyone in the room.
                 </p>
-                <p class="mt-5 text-center">
-                    <a href="#join" class="font-semibold text-primary-dark underline underline-offset-4 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-dark dark:text-white dark:hover:text-white/80 dark:focus-visible:outline-white">
+                <p class="mt-3 text-center">
+                    <a href="#join" class="inline-block py-2.5 font-semibold text-primary-dark underline underline-offset-4 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-dark dark:text-white dark:hover:text-white/80 dark:focus-visible:outline-white">
                         Want to serve with us? Join the team
                     </a>
                 </p>

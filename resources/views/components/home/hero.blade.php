@@ -44,7 +44,7 @@
         <div class="motion-safe:animate-fade-up flex flex-col items-center text-center lg:items-start lg:text-left">
 
             {{-- Small pill above the title: EQ bars and the location line. --}}
-            <p class="inline-flex max-w-full items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-sm">
+            <p class="inline-flex max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] sm:gap-3 sm:px-4 sm:tracking-[0.2em] text-white backdrop-blur-sm">
                 <x-site.eq-bars />
                 <span class="min-w-0 break-words">Church of God &middot; {{ config('ministry.subheader') }}</span>
             </p>

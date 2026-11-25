@@ -23,10 +23,10 @@
         @foreach ($groups as $name => $items)
             <div>
                 <p class="text-sm font-semibold text-text">{{ $name }}</p>
-                <ul class="mt-1.5 flex flex-wrap gap-1.5">
+                <ul class="mt-1.5 grid grid-cols-[repeat(auto-fill,minmax(4.75rem,1fr))] gap-1.5">
                     @foreach ($items as $item)
                         <li>
-                            <time datetime="{{ $item['starts_at']->format('c') }}" class="inline-flex whitespace-nowrap rounded-full border border-text/15 bg-surface px-2.5 py-0.5 text-xs text-text">{{ $item['starts_at']->format('g:i A') }}</time>
+                            <time datetime="{{ $item['starts_at']->format('c') }}" class="flex justify-center whitespace-nowrap rounded-full border border-text/15 bg-surface px-2.5 py-0.5 text-xs text-text">{{ $item['starts_at']->format('g:i A') }}</time>
                         </li>
                     @endforeach
                 </ul>
