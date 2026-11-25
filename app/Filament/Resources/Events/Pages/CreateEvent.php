@@ -13,6 +13,12 @@ class CreateEvent extends CreateRecord
 {
     protected static string $resource = EventResource::class;
 
+    /** Duties are assigned on the event page, so go there after creating. */
+    protected function getRedirectUrl(): string
+    {
+        return EventResource::getUrl('view', ['record' => $this->record]);
+    }
+
     protected function handleRecordCreation(array $data): Model
     {
         $data = EventResource::forceBranch($data);

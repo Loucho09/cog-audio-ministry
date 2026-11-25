@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Events\Pages;
 
 use App\Exceptions\RosterRuleViolation;
+use App\Filament\Concerns\ReturnsToResourceList;
 use App\Filament\Resources\Events\EventResource;
 use App\Models\Event;
 use App\Services\DutyRosterService;
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class EditEvent extends EditRecord
 {
+    use ReturnsToResourceList;
+
     protected static string $resource = EventResource::class;
 
     /** Slots are not a Filament relationship here; they save through the roster service. */
