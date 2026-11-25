@@ -18,6 +18,17 @@ class UpcomingServices
      */
     public static function forBranch(Branch $branch, int $weeks = 4, ?CarbonInterface $from = null): Collection
     {
+        return self::fromServices($branch->services()->active()->ordered()->get(), $weeks, $from);
+    }
+
+    /**
+     * Same as forBranch(), but from an already-loaded (active, ordered) services collection.
+     *
+     * @param  Collection<int, Service>  $services
+     * @return Collection<int, array{service: Service, starts_at: CarbonImmutable}>
+     */
+    public static function fromServices(Collection $services, int $weeks = 4, ?CarbonInterface $from = null): Collection
+    {
         $from = $from
             ? CarbonImmutable::instance($from)->setTimezone(config('app.timezone'))
             : CarbonImmutable::now(config('app.timezone'));
@@ -25,7 +36,7 @@ class UpcomingServices
 
         $items = collect();
 
-        foreach ($branch->services()->active()->ordered()->get() as $service) {
+        foreach ($services as $service) {
             $startsAt = $service->nextOccurrence($from);
 
             while ($startsAt !== null && $startsAt->lessThan($until)) {

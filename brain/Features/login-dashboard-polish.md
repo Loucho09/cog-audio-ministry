@@ -23,7 +23,7 @@ Slice 1, Login (`/login`):
 - Light and dark mode.
 - Reduced motion respected (`prefers-reduced-motion`).
 
-Slice 2, Dashboard (`/dashboard`):
+Slice 2, Dashboard (`/dashboard`): **OBSOLETE (2026-11-25).** This slice was never built. The earlier progress note was wrong: `resources/views/dashboard.blade.php` was still the placeholder and there was no `DashboardTest`. Superseded by [[dashboards]] (slice 1 = member dashboard, built on `feature/dashboards`). The original list below is kept for the record only.
 - Time-of-day greeting (Asia/Manila time).
 - Branch info card (branch name, address and contact if filled in; otherwise TODO-friendly empty state).
 - Upcoming services from ALL branches (owner decision 2026-11-25). Grouped or labelled by branch, member's own branch first.
