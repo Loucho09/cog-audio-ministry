@@ -48,5 +48,14 @@ Out of scope:
 - Any schema change.
 - Any change to auth, roles, or throttle rules.
 
+Progress (2026-11-25):
+- `feature/login-dashboard-polish` reviewed and merged to main.
+- Shared `<x-password-input>` component (show/hide eye) used on the change-password and profile update-password forms.
+- Filament user edit: Status badge on the Account card is full width.
+- Branch `fix/password-logout-and-login-a11y` (not yet merged):
+  - Profile password change rotates `remember_token`, calls `Auth::logoutOtherDevices`, and regenerates the session (same as the forced change flow).
+  - Login: email and password inputs set `aria-invalid` and `aria-describedby` to their error lists (`#email-error`, `#password-error`). The caps-lock hint is referenced only while caps lock is on.
+- Items parked from review: see [[Backlog]].
+
 Tasks: [[login-dashboard-polish-tasks]]
 Notes / decisions: [[login-and-dashboard-decisions]], [[member-accounts-roles]], [[temp-password]], [[Roadmap]]
