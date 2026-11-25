@@ -128,6 +128,15 @@ Admin UX rework (2026-11-25, commit 1ba1f6d, branch `feature/join-admin-ux`, mer
 - Dashboard widget renamed "Waiting for review (N)". Rows use the list style.
 - Browser check 2026-11-25: passed. Desktop in light mode, and 360px in dark mode.
 
+Set-password page (Phase 2 reset page, updated 2026-11-25, commit f623b4f):
+- Two modes. Invite links (detected with `InviteToken::unwrap`) show "Set your password", a "Hi {first name}, your application was approved…" greeting and a "Save password and continue" button. Normal resets show "Choose a new password".
+- First name shown only when `Password::broker('invites')->tokenExists($user, $raw)` is true. The signed marker covers the token, not the email, so without this check a swapped email would reveal another person's name.
+- Email field is read-only.
+- Shows the real password rules: at least 10 characters, with letters and numbers.
+- Show/hide toggle and a live "passwords match" hint.
+- Expired link shows a friendly message after submit.
+- Login status after success: "Your password is set…" for invites, "Your password has been reset…" for normal resets.
+
 Definition of done:
 - [x] Matches its spec (routes, fields, duplicate rule, notifications, approval flow)
 - [x] Works on mobile and desktop: browser-checked 2026-11-25, passed (see Browser check above).

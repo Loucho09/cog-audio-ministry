@@ -181,6 +181,9 @@ Status: done (2026-11-25). Slices 1-7 and final review done; tests 552 total, 55
   - **WARNING:** copying `.env.example` (APP_ENV=local) to production would run the demo seeder with a known super-admin password. Consider requiring an explicit `--demo` flag on the seeder path.
   - Run the tests and `php artisan migrate:fresh --seed` once on MySQL 8 (tests use SQLite)
   - PHP `upload_max_filesize` must be at least 4M for 4MB uploads
+- **Mail testing (2026-11-25):** real email sending tested with Gmail SMTP (smtp.gmail.com:587, App Password) from the owner's personal Gmail. The welcome email arrived.
+  - For production, the sender switches to cogdasmaaudio@gmail.com, using an App Password created on that account.
+  - Local admin accounts stay as the demo `@cog<branch>.audio` emails.
 
 ### Checklist (11 items)
 - [ ] APP_ENV=production, APP_DEBUG=false, strong APP_KEY generated
