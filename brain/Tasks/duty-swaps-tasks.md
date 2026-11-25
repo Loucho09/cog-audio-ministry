@@ -21,11 +21,11 @@ Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./ve
 - [x] Tests first (incl. second claimer rejected, cross-branch rejected)
 
 ## Slice S4: approve / reject (backend-builder)
-- [ ] `DutySwapService::approve(swap, admin)`: re-check claim rules, original → `swapped`, new `accepted` assignment for claimer, one transaction
-- [ ] `reject(swap, admin)`: swap `rejected`, assignment back to `accepted`
-- [ ] Approver rule: admin of the branch or super-admin; an admin who offered/claimed can't self-approve unless they're the branch's only admin
-- [ ] `DutyRosterService::remove()` cancels a live swap
-- [ ] Tests first (incl. expired swap can't be approved, slot never empty)
+- [x] `DutySwapService::approve(swap, admin)`: re-check claim rules, original → `swapped`, new `accepted` assignment for claimer, one transaction
+- [x] `reject(swap, admin)`: swap `rejected`, assignment back to `accepted`
+- [x] Approver rule: admin of the branch or super-admin; an admin who offered/claimed can't self-approve unless they're the branch's only admin
+- [x] `DutyRosterService::remove()` cancels a live swap
+- [x] Tests first (incl. expired swap can't be approved, slot never empty)
 
 ## Slice S5: member dashboard (fullstack)
 - [ ] `DutySwapPolicy` (offer/cancel/claim)

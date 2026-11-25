@@ -199,7 +199,7 @@ class AssignmentsRelationManager extends RelationManager
                     ->icon('heroicon-o-trash')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->hidden(fn (DutyAssignment $record) => $this->started() || $record->status === DutyStatus::Declined || ! $this->canManage())
+                    ->hidden(fn (DutyAssignment $record) => $this->started() || in_array($record->status, [DutyStatus::Declined, DutyStatus::Swapped], true) || ! $this->canManage())
                     ->authorize(fn () => $this->canManage())
                     ->action(function (DutyAssignment $record): void {
                         try {

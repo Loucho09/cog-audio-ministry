@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Enums\DutyStatus;
+use App\Enums\SwapStatus;
 use App\Exceptions\RosterRuleViolation;
 use App\Models\Branch;
 use App\Models\DutyAssignment;
 use App\Models\DutyRole;
+use App\Models\DutySwap;
 use App\Models\Event;
 use App\Models\EventDutySlot;
 use App\Models\MemberUnavailability;
@@ -175,6 +177,8 @@ class DutyRosterService
     public function remove(DutyAssignment $assignment): void
     {
         DB::transaction(function () use ($assignment) {
+            // Lock order: swaps, then assignment (same as DutySwapService::cancel).
+            $swaps = DutySwap::query()->where('duty_assignment_id', $assignment->id)->lockForUpdate()->get();
             $current = DutyAssignment::query()->whereKey($assignment->id)->lockForUpdate()->firstOrFail();
 
             if ($current->event->hasStarted()) {
@@ -183,6 +187,14 @@ class DutyRosterService
 
             if ($current->status === DutyStatus::Declined) {
                 throw new RosterRuleViolation('A declined duty is kept as a record and cannot be removed.');
+            }
+
+            if ($current->status === DutyStatus::Swapped) {
+                throw new RosterRuleViolation("This duty was swapped and can't be removed.");
+            }
+
+            foreach ($swaps->whereIn('status', [SwapStatus::Open, SwapStatus::Claimed]) as $swap) {
+                $swap->update(['status' => SwapStatus::Cancelled]);
             }
 
             $current->delete();
