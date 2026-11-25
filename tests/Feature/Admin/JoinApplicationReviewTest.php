@@ -152,7 +152,7 @@ it('filament: approve and reject work end to end from the view page', function (
     Livewire::test(ViewJoinApplication::class, ['record' => $this->appA->getKey()])
         ->assertActionVisible('approve')
         ->callAction('approve')
-        ->assertNotified('Application approved');
+        ->assertNotified($this->appA->full_name.' approved');
 
     expect($this->appA->fresh()->status)->toBe('approved');
     Notification::assertSentTo(User::where('email', 'new.member@example.test')->first(), WelcomeSetPassword::class);
@@ -160,7 +160,7 @@ it('filament: approve and reject work end to end from the view page', function (
     $other = JoinApplication::factory()->pending()->create(['branch_id' => $this->branchA->id]);
     Livewire::test(ViewJoinApplication::class, ['record' => $other->getKey()])
         ->callAction('reject')
-        ->assertNotified('Application rejected');
+        ->assertNotified($other->full_name."'s application was rejected");
     expect($other->fresh()->status)->toBe('rejected');
 });
 
@@ -189,7 +189,7 @@ it('filament table row actions approve', function () {
 
     Livewire::test(ListJoinApplications::class)
         ->callTableAction('approve', $this->appA)
-        ->assertNotified('Application approved');
+        ->assertNotified($this->appA->full_name.' approved');
 
     expect($this->appA->fresh()->status)->toBe('approved');
 });
@@ -267,7 +267,7 @@ it('filament table row action rejects', function () {
 
     Livewire::test(ListJoinApplications::class)
         ->callTableAction('reject', $this->appA)
-        ->assertNotified('Application rejected');
+        ->assertNotified($this->appA->full_name."'s application was rejected");
 
     $app = $this->appA->fresh();
     expect($app->status)->toBe('rejected')->and($app->reviewed_by)->toBe($this->headA->id)->and($app->reviewed_at)->not->toBeNull();

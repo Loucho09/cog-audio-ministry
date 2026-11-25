@@ -7,18 +7,24 @@ use App\Actions\RejectJoinApplication;
 use App\Exceptions\JoinApplicationReviewException;
 use App\Filament\Resources\JoinApplications\Pages\ListJoinApplications;
 use App\Filament\Resources\JoinApplications\Pages\ViewJoinApplication;
+use App\Filament\Resources\Users\UserResource;
 use App\Models\Branch;
 use App\Models\JoinApplication;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -36,6 +42,10 @@ class JoinApplicationResource extends Resource
     protected static ?string $navigationLabel = 'Join applications';
 
     protected static ?string $modelLabel = 'join application';
+
+    protected static ?string $breadcrumb = 'Join applications';
+
+    protected static ?string $recordTitleAttribute = 'full_name';
 
     protected static ?int $navigationSort = 20;
 
@@ -101,6 +111,15 @@ class JoinApplicationResource extends Resource
         };
     }
 
+    public static function statusIcon(?string $state): Heroicon
+    {
+        return match ($state) {
+            JoinApplication::STATUS_APPROVED => Heroicon::OutlinedCheckCircle,
+            JoinApplication::STATUS_REJECTED => Heroicon::OutlinedXCircle,
+            default => Heroicon::OutlinedClock,
+        };
+    }
+
     // visible() is only UI; the service classes re-authorize server-side on every call.
     public static function approveAction(): Action
     {
@@ -109,12 +128,19 @@ class JoinApplicationResource extends Resource
             ->icon(Heroicon::OutlinedCheckCircle)
             ->color('success')
             ->requiresConfirmation()
-            ->modalHeading('Approve this application?')
-            ->modalDescription('A member account is created and a set-password email is sent to the applicant.')
-            ->modalSubmitActionLabel('Approve')
+            ->modalIcon(Heroicon::OutlinedUserPlus)
+            ->modalIconColor('success')
+            ->modalHeading(fn (JoinApplication $record) => "Approve {$record->full_name}?")
+            ->modalDescription(fn (JoinApplication $record) => "This creates a member account for {$record->full_name} in {$record->branch?->name} and emails them a link to set their password. The link works for 3 days.")
+            ->modalSubmitActionLabel('Approve and send email')
             ->visible(fn (JoinApplication $record) => $record->isPending() && (auth()->user()?->can('approve', $record) ?? false))
             ->action(function (JoinApplication $record) {
-                self::review(fn () => app(ApproveJoinApplication::class)->handle($record, auth()->user()), 'Application approved', 'The set-password email is on its way.');
+                self::review(
+                    fn () => app(ApproveJoinApplication::class)->handle($record, auth()->user()),
+                    "{$record->full_name} approved",
+                    "A set-password email is on its way to {$record->email}.",
+                    "Couldn't approve",
+                );
             });
     }
 
@@ -125,25 +151,32 @@ class JoinApplicationResource extends Resource
             ->icon(Heroicon::OutlinedXCircle)
             ->color('danger')
             ->requiresConfirmation()
-            ->modalHeading('Reject this application?')
-            ->modalDescription('The applicant is not emailed.')
+            ->modalIcon(Heroicon::OutlinedXCircle)
+            ->modalIconColor('danger')
+            ->modalHeading(fn (JoinApplication $record) => "Reject {$record->full_name}?")
+            ->modalDescription(fn (JoinApplication $record) => "{$record->full_name} will not be emailed. This can't be undone.")
             ->modalSubmitActionLabel('Reject')
             ->visible(fn (JoinApplication $record) => $record->isPending() && (auth()->user()?->can('reject', $record) ?? false))
             ->action(function (JoinApplication $record) {
-                self::review(fn () => app(RejectJoinApplication::class)->handle($record, auth()->user()), 'Application rejected');
+                self::review(
+                    fn () => app(RejectJoinApplication::class)->handle($record, auth()->user()),
+                    "{$record->full_name}'s application was rejected",
+                    null,
+                    "Couldn't reject",
+                );
             });
     }
 
-    private static function review(callable $run, string $successTitle, ?string $body = null): void
+    private static function review(callable $run, string $successTitle, ?string $body, string $failTitle): void
     {
         try {
             $run();
         } catch (JoinApplicationReviewException $e) {
-            Notification::make()->danger()->title('Could not complete')->body($e->getMessage())->send();
+            Notification::make()->danger()->title($failTitle)->body($e->getMessage())->send();
 
             return;
         } catch (AuthorizationException) {
-            Notification::make()->danger()->title('Not allowed')->send();
+            Notification::make()->danger()->title("You're not allowed to do this")->send();
 
             return;
         }
@@ -153,99 +186,201 @@ class JoinApplicationResource extends Resource
 
     public static function infolist(Schema $schema): Schema
     {
-        return $schema->components([
-            Section::make('Applicant')
-                ->icon(Heroicon::OutlinedUser)
-                ->columns(2)
-                ->schema([
-                    TextEntry::make('full_name')->label('Full name')->weight(FontWeight::SemiBold),
-                    TextEntry::make('age'),
-                    TextEntry::make('contact_number')->label('Contact number')->copyable(),
-                    TextEntry::make('email')->copyable(),
-                    TextEntry::make('facebook_url')
-                        ->label('Facebook')
-                        ->placeholder('Not provided')
-                        ->url(
-                            fn (JoinApplication $record) => str_starts_with((string) $record->facebook_url, 'https://')
-                                ? $record->facebook_url
-                                : null,
-                            shouldOpenInNewTab: true,
-                        )
-                        ->extraAttributes(['rel' => 'noopener noreferrer nofollow']),
-                    TextEntry::make('branch.name')->label('Branch'),
-                ]),
-            Section::make('Application')
-                ->icon(Heroicon::OutlinedClipboardDocumentList)
-                ->columns(2)
-                ->schema([
-                    TextEntry::make('consented_at')->label('Consent given')->dateTime('M j, Y g:i A'),
-                    TextEntry::make('created_at')->label('Submitted')->dateTime('M j, Y g:i A'),
-                ]),
-            Section::make('Review')
-                ->icon(Heroicon::OutlinedCheckBadge)
-                ->columns(3)
-                ->schema([
-                    TextEntry::make('status')
-                        ->badge()
-                        ->formatStateUsing(fn (string $state) => Str::headline($state))
-                        ->color(fn (string $state) => self::statusColor($state)),
-                    TextEntry::make('reviewer.name')
-                        ->label('Reviewed by')
-                        ->visible(fn (JoinApplication $record) => $record->reviewed_by !== null),
-                    TextEntry::make('reviewed_at')
-                        ->label('Reviewed at')
-                        ->dateTime('M j, Y g:i A')
-                        ->visible(fn (JoinApplication $record) => $record->reviewed_at !== null),
-                ]),
-        ]);
+        return $schema
+            ->columns(3)
+            ->components([
+                Group::make([
+                    Section::make('Contact details')
+                        ->description('How to reach the applicant.')
+                        ->icon(Heroicon::OutlinedIdentification)
+                        ->columns(2)
+                        ->schema([
+                            TextEntry::make('contact_number')
+                                ->label('Contact number')
+                                ->icon(Heroicon::OutlinedPhone)
+                                ->copyable()
+                                ->copyMessage('Number copied'),
+                            TextEntry::make('email')
+                                ->icon(Heroicon::OutlinedEnvelope)
+                                ->copyable()
+                                ->copyMessage('Email copied'),
+                            TextEntry::make('facebook_url')
+                                ->label('Facebook')
+                                ->icon(Heroicon::OutlinedLink)
+                                ->placeholder('Not provided')
+                                ->url(
+                                    fn (JoinApplication $record) => str_starts_with((string) $record->facebook_url, 'https://')
+                                        ? $record->facebook_url
+                                        : null,
+                                    shouldOpenInNewTab: true,
+                                )
+                                ->extraAttributes(['rel' => 'noopener noreferrer nofollow']),
+                            TextEntry::make('age')
+                                ->icon(Heroicon::OutlinedCake),
+                        ]),
+                    Section::make('Application')
+                        ->description('When they applied and agreed to be contacted.')
+                        ->icon(Heroicon::OutlinedClipboardDocumentList)
+                        ->columns(2)
+                        ->schema([
+                            TextEntry::make('created_at')
+                                ->label('Submitted')
+                                ->dateTime('M j, Y g:i A')
+                                ->tooltip(fn (JoinApplication $record) => $record->created_at?->diffForHumans()),
+                            TextEntry::make('consented_at')
+                                ->label('Consent given')
+                                ->dateTime('M j, Y g:i A'),
+                        ]),
+                    Section::make('Review')
+                        ->description('What was decided, and by whom.')
+                        ->icon(Heroicon::OutlinedCheckBadge)
+                        ->columns(2)
+                        ->schema([
+                            TextEntry::make('status')
+                                ->badge()
+                                ->formatStateUsing(fn (string $state) => Str::headline($state))
+                                ->color(fn (string $state) => self::statusColor($state))
+                                ->icon(fn (string $state) => self::statusIcon($state)),
+                            TextEntry::make('waiting')
+                                ->hiddenLabel()
+                                ->color('gray')
+                                ->state('Waiting for review')
+                                ->visible(fn (JoinApplication $record) => $record->isPending()),
+                            TextEntry::make('reviewer.name')
+                                ->label('Reviewed by')
+                                ->icon(Heroicon::OutlinedUser)
+                                ->visible(fn (JoinApplication $record) => $record->reviewed_by !== null),
+                            TextEntry::make('reviewed_at')
+                                ->label('Reviewed at')
+                                ->dateTime('M j, Y g:i A')
+                                ->visible(fn (JoinApplication $record) => $record->reviewed_at !== null),
+                            TextEntry::make('member_account')
+                                ->label('Member account')
+                                ->icon(Heroicon::OutlinedUserCircle)
+                                ->state(fn (JoinApplication $record) => $record->user?->name)
+                                ->url(fn (JoinApplication $record) => $record->user && UserResource::canEdit($record->user)
+                                    ? UserResource::getUrl('edit', ['record' => $record->user])
+                                    : null)
+                                ->visible(fn (JoinApplication $record) => $record->user_id !== null
+                                    && $record->user !== null
+                                    && (auth()->user()?->can('view', $record->user) ?? false)),
+                        ]),
+                ])->columnSpan(['default' => 3, 'lg' => 2]),
+                self::applicantSummary(),
+            ]);
+    }
+
+    /** Read-only side card on the view page: who this is at a glance. */
+    protected static function applicantSummary(): Section
+    {
+        return Section::make('Applicant')
+            ->icon(Heroicon::OutlinedUserCircle)
+            ->columnSpan(['default' => 3, 'lg' => 1])
+            ->schema([
+                TextEntry::make('summary_name')
+                    ->hiddenLabel()
+                    ->weight(FontWeight::Bold)
+                    ->size(TextSize::Large)
+                    ->state(fn (JoinApplication $record) => $record->full_name),
+                TextEntry::make('summary_email')
+                    ->hiddenLabel()
+                    ->color('gray')
+                    ->icon(Heroicon::OutlinedEnvelope)
+                    ->copyable()
+                    ->state(fn (JoinApplication $record) => $record->email),
+                TextEntry::make('summary_status')
+                    ->label('Status')
+                    ->badge()
+                    ->state(fn (JoinApplication $record) => $record->status)
+                    ->formatStateUsing(fn (string $state) => Str::headline($state))
+                    ->color(fn (string $state) => self::statusColor($state))
+                    ->icon(fn (string $state) => self::statusIcon($state)),
+                TextEntry::make('summary_branch')
+                    ->label('Branch')
+                    ->icon(Heroicon::OutlinedBuildingLibrary)
+                    ->state(fn (JoinApplication $record) => $record->branch?->name ?? 'No branch'),
+                TextEntry::make('summary_applied')
+                    ->label('Applied')
+                    ->state(fn (JoinApplication $record) => $record->created_at)
+                    ->since()
+                    ->dateTimeTooltip('M j, Y g:i A'),
+            ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('full_name')
-                    ->label('Name')
-                    ->weight(FontWeight::SemiBold)
-                    ->searchable(['full_name', 'email']),
-                TextColumn::make('branch.name')
-                    ->label('Branch')
-                    ->icon(Heroicon::OutlinedBuildingLibrary)
-                    ->iconColor('gray'),
-                TextColumn::make('status')
-                    ->badge()
-                    ->formatStateUsing(fn (string $state) => Str::headline($state))
-                    ->color(fn (string $state) => self::statusColor($state)),
-                TextColumn::make('created_at')
-                    ->label('Submitted')
-                    ->since()
-                    ->dateTimeTooltip('M j, Y g:i A')
-                    ->sortable(),
+                // Split/Stack reflow each row to the screen width, so the table never scrolls sideways.
+                Split::make([
+                    Stack::make([
+                        TextColumn::make('full_name')
+                            ->label('Name')
+                            ->weight(FontWeight::SemiBold)
+                            ->searchable(['full_name', 'email']),
+                        TextColumn::make('email')
+                            ->label('Email')
+                            ->color('gray')
+                            ->size(TextSize::Small)
+                            ->wrap(),
+                    ]),
+                    Stack::make([
+                        TextColumn::make('branch.name')
+                            ->label('Branch')
+                            ->icon(Heroicon::OutlinedBuildingLibrary)
+                            ->iconColor('gray')
+                            ->size(TextSize::Small),
+                    ]),
+                    Stack::make([
+                        TextColumn::make('status')
+                            ->badge()
+                            ->formatStateUsing(fn (string $state) => Str::headline($state))
+                            ->color(fn (string $state) => self::statusColor($state))
+                            ->icon(fn (string $state) => self::statusIcon($state)),
+                        TextColumn::make('created_at')
+                            ->label('Submitted')
+                            ->since()
+                            ->prefix('Submitted ')
+                            ->dateTimeTooltip('M j, Y g:i A')
+                            ->color('gray')
+                            ->size(TextSize::Small)
+                            ->sortable(),
+                    ])->space(1),
+                ])->from('md'),
             ])
             ->defaultSort('created_at', 'desc')
             ->striped()
-            ->searchPlaceholder('Search name or email')
-            ->emptyStateIcon(Heroicon::OutlinedInboxArrowDown)
-            ->emptyStateHeading('No applications here')
-            ->emptyStateDescription('New join applications will show up in this list.')
+            ->searchPlaceholder('Search by name or email')
+            ->emptyStateIcon(fn ($livewire) => match ($livewire->activeTab ?? null) {
+                'pending' => Heroicon::OutlinedCheckCircle,
+                'approved' => Heroicon::OutlinedUserPlus,
+                default => Heroicon::OutlinedInboxArrowDown,
+            })
+            ->emptyStateHeading(fn ($livewire) => match ($livewire->activeTab ?? null) {
+                'pending' => 'All caught up',
+                'approved' => 'No approved applications yet',
+                'rejected' => 'No rejected applications',
+                default => 'No applications yet',
+            })
+            ->emptyStateDescription(fn ($livewire) => match ($livewire->activeTab ?? null) {
+                'pending' => 'No applications are waiting for review.',
+                'approved' => 'Applicants you approve will show up here.',
+                'rejected' => 'Applications you reject will show up here.',
+                default => 'New join applications will show up in this list.',
+            })
             ->filters([
-                // Review queue first: pending by default; clear the filter to see history.
-                SelectFilter::make('status')
-                    ->options([
-                        JoinApplication::STATUS_PENDING => 'Pending',
-                        JoinApplication::STATUS_APPROVED => 'Approved',
-                        JoinApplication::STATUS_REJECTED => 'Rejected',
-                    ])
-                    ->default(JoinApplication::STATUS_PENDING),
                 SelectFilter::make('branch_id')
                     ->label('Branch')
                     ->options(fn () => Branch::query()->orderBy('name')->pluck('name', 'id'))
                     ->visible(fn () => self::isSuperAdmin()),
             ])
+            ->filtersTriggerAction(fn (Action $action) => $action->button()->label('Filters'))
             ->recordActions([
-                ViewAction::make(),
-                self::approveAction(),
-                self::rejectAction(),
+                ViewAction::make()->iconButton()->tooltip('View'),
+                ActionGroup::make([
+                    self::approveAction(),
+                    self::rejectAction(),
+                ])->tooltip('Review'),
             ])
             ->recordUrl(fn (JoinApplication $record) => static::getUrl('view', ['record' => $record]));
     }

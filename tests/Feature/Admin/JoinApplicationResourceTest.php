@@ -71,16 +71,74 @@ it('keeps members and guests out', function () {
     $this->get(JoinApplicationResource::getUrl('index'))->assertRedirect();
 });
 
-it('filters by status', function () {
+it('opens on the pending tab and shows only pending', function () {
     $approved = JoinApplication::factory()->approved()->create(['branch_id' => $this->branchA->id]);
+    $rejected = JoinApplication::factory()->rejected()->create(['branch_id' => $this->branchA->id]);
     $this->actingAs(User::factory()->superAdmin()->create());
 
     Livewire::test(ListJoinApplications::class)
-        ->assertCanSeeTableRecords([$this->appA])
-        ->assertCanNotSeeTableRecords([$approved])
-        ->filterTable('status', 'approved')
+        ->assertSet('activeTab', 'pending')
+        ->assertCanSeeTableRecords([$this->appA, $this->appB])
+        ->assertCanNotSeeTableRecords([$approved, $rejected]);
+});
+
+it('filters the approved and rejected tabs', function () {
+    $approved = JoinApplication::factory()->approved()->create(['branch_id' => $this->branchA->id]);
+    $rejected = JoinApplication::factory()->rejected()->create(['branch_id' => $this->branchA->id]);
+    $this->actingAs(User::factory()->superAdmin()->create());
+
+    Livewire::test(ListJoinApplications::class)
+        ->set('activeTab', 'approved')
         ->assertCanSeeTableRecords([$approved])
-        ->assertCanNotSeeTableRecords([$this->appA]);
+        ->assertCanNotSeeTableRecords([$this->appA, $rejected])
+        ->set('activeTab', 'rejected')
+        ->assertCanSeeTableRecords([$rejected])
+        ->assertCanNotSeeTableRecords([$this->appA, $approved])
+        ->set('activeTab', 'all')
+        ->assertCanSeeTableRecords([$this->appA, $approved, $rejected]);
+});
+
+it('scopes tab badge counts to the branch', function () {
+    JoinApplication::factory()->approved()->create(['branch_id' => $this->branchA->id]);
+    JoinApplication::factory()->approved()->count(2)->create(['branch_id' => $this->branchB->id]);
+    JoinApplication::factory()->rejected()->create(['branch_id' => $this->branchB->id]);
+
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+    $tabs = Livewire::test(ListJoinApplications::class)->instance()->getTabs();
+
+    expect($tabs['pending']->getBadge())->toBe('1')
+        ->and($tabs['approved']->getBadge())->toBe('1')
+        ->and($tabs['rejected']->getBadge())->toBe('0')
+        ->and($tabs['all']->getBadge())->toBe('2');
+
+    $this->actingAs(User::factory()->superAdmin()->create());
+    $tabs = Livewire::test(ListJoinApplications::class)->instance()->getTabs();
+
+    expect($tabs['pending']->getBadge())->toBe('2')
+        ->and($tabs['approved']->getBadge())->toBe('3')
+        ->and($tabs['all']->getBadge())->toBe('6');
+});
+
+it('hides the pending badge at zero', function () {
+    $this->appA->delete();
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+
+    $tabs = Livewire::test(ListJoinApplications::class)->instance()->getTabs();
+
+    expect($tabs['pending']->getBadge())->toBeNull();
+});
+
+it('titles the view page with the applicant name', function () {
+    $this->appA->update(['full_name' => 'Maria Santos']);
+    $this->actingAs(User::factory()->branchHead($this->branchA)->create());
+
+    $component = Livewire::test(ViewJoinApplication::class, ['record' => $this->appA->id]);
+
+    expect($component->instance()->getTitle())->toBe('Maria Santos');
+    $this->get(JoinApplicationResource::getUrl('view', ['record' => $this->appA]))
+        ->assertOk()
+        ->assertSee('Maria Santos')
+        ->assertSee('Waiting for review');
 });
 
 it('filters by branch for super-admin and hides that filter from branch staff', function () {
