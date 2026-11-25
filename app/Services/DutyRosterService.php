@@ -9,6 +9,7 @@ use App\Models\DutyAssignment;
 use App\Models\DutyRole;
 use App\Models\Event;
 use App\Models\EventDutySlot;
+use App\Models\MemberUnavailability;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Arr;
@@ -71,6 +72,10 @@ class DutyRosterService
 
             if ($overlaps) {
                 throw new RosterRuleViolation('This member is already serving at that time.');
+            }
+
+            if (MemberUnavailability::blocks($member, $event)) {
+                throw new RosterRuleViolation("{$member->name} marked this time as unavailable.");
             }
 
             $filled = DutyAssignment::query()

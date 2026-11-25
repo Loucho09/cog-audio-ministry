@@ -18,9 +18,9 @@ Rule: rule tests first (Pest), then code. Each slice: `php artisan test` + `./ve
 - [x] Tests first for every rule + policy
 
 ## Slice A3: assign respects availability (backend-builder)
-- [ ] `DutyRosterService::assign()` rejects unavailable member (whole day or matching block); guests unaffected
-- [ ] Helper `MemberUnavailability::blocks(user, event)` (or service method) reused by Filament and swaps
-- [ ] Tests first: AM entry blocks 9:30, not 15:30; whole day blocks both; other date doesn't block
+- [x] `DutyRosterService::assign()` rejects unavailable member (whole day or matching block); guests unaffected
+- [x] Helper `MemberUnavailability::blocks(user, event)` (or service method) reused by Filament and swaps
+- [x] Tests first: AM entry blocks 9:30, not 15:30; whole day blocks both; other date doesn't block
 
 ## Slice A4: member dashboard UI (fullstack)
 - [ ] Routes `availability.store`, `availability.destroy` (auth)

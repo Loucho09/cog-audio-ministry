@@ -32,6 +32,18 @@ class MemberUnavailability extends Model
         return $this->belongsTo(Branch::class);
     }
 
+    /** True when the user marked the event's date (app timezone) as whole day or the event's AM/PM block. */
+    public static function blocks(User $user, Event $event): bool
+    {
+        $date = $event->starts_at->copy()->setTimezone(config('app.timezone'))->toDateString();
+
+        return static::query()
+            ->where('user_id', $user->id)
+            ->whereDate('date', $date)
+            ->whereIn('part', [AvailabilityPart::WholeDay, $event->block()])
+            ->exists();
+    }
+
     public function scopeUpcoming(Builder $query): Builder
     {
         return $query->whereDate('date', '>=', now()->toDateString());
