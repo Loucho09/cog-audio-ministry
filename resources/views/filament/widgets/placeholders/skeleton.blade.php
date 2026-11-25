@@ -4,19 +4,21 @@
     $rows = match ($variant) { 'checklist' => 6, default => 4 };
 @endphp
 
-<style>
-    @keyframes cog-skel { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
-    .cog-skel-bar { background-color: var(--gray-200, #e5e7eb); border-radius: 0.375rem; animation: cog-skel 1.5s ease-in-out infinite; }
-    :is(.dark *).cog-skel-bar, .dark .cog-skel-bar { background-color: var(--gray-700, #374151); }
-    @media (prefers-reduced-motion: reduce) { .cog-skel-bar { animation: none; } }
-</style>
-
 <div
     role="status"
     aria-busy="true"
     {{-- One merged style attribute: gridColumn() emits its own style, and a second style="" would be ignored. --}}
     {{ (new \Filament\Support\View\ComponentAttributeBag)->gridColumn($columnSpan, $columnStart)->class(['fi-section'])->style(['padding: 1.5rem']) }}
 >
+    {{-- Livewire puts its lazy-load trigger on the FIRST root element, so the <style> must live inside this div.
+         As a root sibling it took the trigger and the widget never loaded. --}}
+    <style>
+        @keyframes cog-skel { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+        .cog-skel-bar { background-color: var(--gray-200, #e5e7eb); border-radius: 0.375rem; animation: cog-skel 1.5s ease-in-out infinite; }
+        :is(.dark *).cog-skel-bar, .dark .cog-skel-bar { background-color: var(--gray-700, #374151); }
+        @media (prefers-reduced-motion: reduce) { .cog-skel-bar { animation: none; } }
+    </style>
+
     <span class="fi-sr-only">Loading…</span>
 
     <div aria-hidden="true">
