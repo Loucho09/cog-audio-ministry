@@ -61,5 +61,17 @@ Slice 1 done 2026-11-26 (commits 5e684c6, d1c66ea). See [[duty-notifications-tas
 - Notification: `App\Notifications\DutyAssigned` (queued, afterCommit; database always, mail when `email_notifications` true or null).
 - Trigger: `DutyRosterService::assign()` after commit, new param `bool $notify = true`. Seeder passes `notify: false`. `assignGuest` and swap approve do not notify.
 - Database payload keys: `assignment_id`, `event_id`, `role`, `event_title`, `starts_at` (ISO 8601), `place`, `message`.
+- DutyAssigned payload now also has `type` = `duty_assigned`.
 - Reminder column names: TODO (slice 3).
+
+### Swap notifications (slice 2 done 2026-11-26, commits 89d7b8d, fdae051)
+- Class `App\Notifications\DutySwapUpdated(DutySwap $swap, string $type)`; types `swap_claimed`, `swap_approved`, `swap_rejected`.
+- Hooked in `DutySwapService::claim/approve/reject` via private `notifySwap()` after commit. Per-recipient try/catch. `shouldSend` skips a stale claim if the swap is no longer Claimed.
+- Recipients as built: claim = branch-admins of the swap's branch + all super-admins + offerer (claimer not notified, own action). Approve/reject = offerer + claimer, acting admin excluded. Reject of open swap = offerer only. Open offer = nobody.
+- Super-admins on claim match join applications; owner can drop it (one line in `notifySwap`).
+- Approve does NOT also send `DutyAssigned` to the claimer.
+- Link: admins go to Filament `DutySwapResource` index; members go to the dashboard.
+- Payload keys: `type`, `swap_id`, `assignment_id`, `event_id`, `role`, `event_title`, `starts_at`, `status`, `url`, `message`.
+- No user active/suspended flag exists, so no inactive filtering (see [[Backlog]]).
+- Slice 4: the bell must render payload `message` with `{{ }}` escaping, never `{!! !!}`.
 - Production needs a running queue worker for emails (see Phase 7 checklist in [[Roadmap]]).

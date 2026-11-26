@@ -11,8 +11,12 @@ Loop per slice: build, test, review, commit.
   - Guests skipped; toggle respected (mail off, bell still on)
   - Guest names escaped
   - Tests
-- [ ] 2. Swap notifications
-  - Claimed (admins + offerer), approved, rejected to the right people (see [[duty-swaps]])
+- [x] 2. Swap notifications. DONE 2026-11-26
+  - Commits 89d7b8d (feature), fdae051 (review fixes)
+  - 942 tests (941 pass, 1 skipped). Reviewer: no must-fix; fixes applied (per-recipient try/catch, stale claim skipped via shouldSend when swap no longer Claimed, null-safe details, eager-load once)
+  - `DutySwapUpdated(DutySwap $swap, string $type)`: swap_claimed / swap_approved / swap_rejected (see [[duty-swaps]])
+  - Hooked in `DutySwapService::claim/approve/reject` via private `notifySwap()` after commit
+  - Recipients: claim = branch-admins + super-admins + offerer; approve/reject = offerer + claimer (acting admin excluded); reject of open swap = offerer only; open offer = nobody
   - Tests
 - [ ] 3. Reminders
   - Config offsets in `config/ministry.php` (24h, 2h)
