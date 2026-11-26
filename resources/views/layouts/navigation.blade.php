@@ -56,6 +56,8 @@
                 </ul>
             </nav>
 
+            <x-notification-bell />
+
             <x-site.theme-toggle />
 
             {{-- Mobile menu toggle --}}

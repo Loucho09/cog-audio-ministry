@@ -7,6 +7,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -39,6 +40,15 @@ class AppServiceProvider extends ServiceProvider
 
         // Public join form: a few submits per minute per IP.
         RateLimiter::for('join-form', fn (Request $request) => Limit::perMinute(5)->by('join:'.$request->ip()));
+
+        // Bell data for the member navbar only (never runs for guests or public pages).
+        View::composer('components.notification-bell', function ($view) {
+            $user = auth()->user();
+            $view->with([
+                'latest' => $user->notifications()->limit(5)->get(),
+                'unreadCount' => $user->unreadNotifications()->count(),
+            ]);
+        });
 
         // Gate::before runs ahead of every Policy: super-admin is allowed everything.
         // Returning null for everyone else lets their Policy decide.
