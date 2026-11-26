@@ -126,7 +126,7 @@
                                             @csrf
                                             <x-primary-button aria-label="{{ __('Accept :event duty', ['event' => $duty->event->name]) }}">{{ __('Accept') }}</x-primary-button>
                                         </form>
-                                        <form method="POST" action="{{ route('duties.decline', $duty) }}" data-submit-guard onsubmit="return confirm(@js(__('Decline this duty? You won't be able to take it back.')))">
+                                        <form method="POST" action="{{ route('duties.decline', $duty) }}" data-submit-guard onsubmit="return confirm(@js(__("Decline this duty? You won't be able to take it back.")))">
                                             @csrf
                                             <x-secondary-button type="submit" aria-label="{{ __('Decline :event duty', ['event' => $duty->event->name]) }}">{{ __('Decline') }}</x-secondary-button>
                                         </form>
