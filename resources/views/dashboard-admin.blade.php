@@ -6,9 +6,11 @@
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     @php($tz = config('app.timezone'))
+    @php($h = $isSuper ? 'h3' : 'h2')
+    @php($h4 = $isSuper ? 'h4' : 'h3')
 
     <div class="space-y-6 sm:space-y-8">
-        <section data-reveal aria-labelledby="welcome-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+        <section aria-labelledby="welcome-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
             <h2 id="welcome-heading" class="text-xl font-semibold text-text sm:text-2xl">
                 {{ __($greeting) }}, {{ auth()->user()->name }}
             </h2>
@@ -17,7 +19,8 @@
             </p>
         </section>
 
-        <section data-reveal aria-labelledby="actions-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+        @if ($groups->isNotEmpty())
+        <section aria-labelledby="actions-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
             <h2 id="actions-heading" class="text-lg font-semibold text-text">{{ __('Quick actions') }}</h2>
             <ul class="mt-4 flex flex-col gap-3 text-sm sm:flex-row sm:flex-wrap sm:gap-6">
                 <li><a href="{{ $links['event'] }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">{{ __('Create an event') }}</a></li>
@@ -27,18 +30,19 @@
                 <li><a href="{{ route('profile.edit') }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">{{ __('Edit profile') }}</a></li>
             </ul>
         </section>
+        @endif
 
         @forelse ($groups as $group)
             @php($b = $group['branch'])
             @php($att = $group['attention'])
 
-            <div class="space-y-6 sm:space-y-8">
+            <section @if ($isSuper) aria-labelledby="branch-{{ $b->id }}-heading" @endif class="space-y-6 sm:space-y-8">
                 @if ($isSuper)
                     <h2 id="branch-{{ $b->id }}-heading" class="border-b border-text/15 pb-2 text-xl font-bold text-text">{{ $b->name }}</h2>
                 @endif
 
-                <section data-reveal aria-labelledby="attention-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
-                    <h3 id="attention-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Needs attention') }}</h3>
+                <section aria-labelledby="attention-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+                    <{{ $h }} id="attention-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Needs attention') }}</{{ $h }}>
 
                     @if (array_sum($att) === 0)
                         <p class="mt-3 text-sm text-text/70">{{ __('All caught up. Nothing is waiting for you right now.') }}</p>
@@ -48,7 +52,7 @@
                                 <dt class="text-sm text-text/70">{{ __('Join applications to review') }}</dt>
                                 <dd class="mt-1 text-2xl font-bold {{ $att['applications'] > 0 ? 'text-accent-text' : 'text-text' }}">
                                     @if ($att['applications'] > 0)
-                                        <a href="{{ $links['applications'] }}" class="underline underline-offset-2 hover:no-underline">{{ $att['applications'] }}</a>
+                                        <a href="{{ $links['applications'] }}" aria-label="{{ __('Join applications to review') }}: {{ $att['applications'] }}" class="underline underline-offset-2 hover:no-underline">{{ $att['applications'] }}</a>
                                     @else
                                         {{ $att['applications'] }}
                                     @endif
@@ -58,7 +62,7 @@
                                 <dt class="text-sm text-text/70">{{ __('Swaps to approve') }}</dt>
                                 <dd class="mt-1 text-2xl font-bold {{ $att['swaps'] > 0 ? 'text-accent-text' : 'text-text' }}">
                                     @if ($att['swaps'] > 0)
-                                        <a href="{{ $links['swaps'] }}" class="underline underline-offset-2 hover:no-underline">{{ $att['swaps'] }}</a>
+                                        <a href="{{ $links['swaps'] }}" aria-label="{{ __('Swaps to approve') }}: {{ $att['swaps'] }}" class="underline underline-offset-2 hover:no-underline">{{ $att['swaps'] }}</a>
                                     @else
                                         {{ $att['swaps'] }}
                                     @endif
@@ -73,14 +77,14 @@
                 </section>
 
                 <div class="grid gap-6 sm:gap-8 lg:grid-cols-2">
-                    <section data-reveal aria-labelledby="unfilled-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
-                        <h3 id="unfilled-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Open slots, next 14 days') }}</h3>
+                    <section aria-labelledby="unfilled-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+                        <{{ $h }} id="unfilled-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Open slots, next 14 days') }}</{{ $h }}>
 
                         @if ($group['unfilled']->isEmpty())
                             <p class="mt-3 text-sm text-text/70">{{ __('Every duty is filled for the next two weeks. Well done!') }}</p>
                         @else
                             <ul class="mt-4 divide-y divide-text/10">
-                                @foreach ($group['unfilled'] as $row)
+                                @foreach ($group['unfilled']->take(6) as $row)
                                     <li class="py-3 first:pt-0 last:pb-0">
                                         <a href="{{ $row['url'] }}" class="break-words font-medium text-primary underline underline-offset-2 hover:no-underline">{{ $row['event']->name }}</a>
                                         <p class="mt-0.5 text-sm text-text/70">
@@ -90,11 +94,14 @@
                                     </li>
                                 @endforeach
                             </ul>
+                            @if ($group['unfilled']->count() > 6)
+                                <p class="mt-4 text-sm"><a href="{{ $links['events'] }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">+{{ $group['unfilled']->count() - 6 }} {{ __('more') }}</a></p>
+                            @endif
                         @endif
                     </section>
 
-                    <section data-reveal data-reveal-delay="80" aria-labelledby="waiting-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
-                        <h3 id="waiting-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Waiting for a reply') }}</h3>
+                    <section aria-labelledby="waiting-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+                        <{{ $h }} id="waiting-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Waiting for a reply') }}</{{ $h }}>
 
                         @if ($group['waiting']->isEmpty())
                             <p class="mt-3 text-sm text-text/70">{{ __('Everyone has replied. Nothing to chase.') }}</p>
@@ -115,8 +122,8 @@
                 </div>
 
                 <div class="grid gap-6 sm:gap-8 lg:grid-cols-2">
-                    <section data-reveal aria-labelledby="unavailable-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
-                        <h3 id="unavailable-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Who is unavailable, next 14 days') }}</h3>
+                    <section aria-labelledby="unavailable-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+                        <{{ $h }} id="unavailable-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Who is unavailable, next 14 days') }}</{{ $h }}>
 
                         @if ($group['unavailable']->isEmpty())
                             <p class="mt-3 text-sm text-text/70">{{ __('No one has marked a day off yet.') }}</p>
@@ -138,8 +145,8 @@
                         @endif
                     </section>
 
-                    <section data-reveal data-reveal-delay="80" aria-labelledby="snapshot-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
-                        <h3 id="snapshot-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Branch snapshot') }}</h3>
+                    <section aria-labelledby="snapshot-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+                        <{{ $h }} id="snapshot-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Branch snapshot') }}</{{ $h }}>
                         <dl class="mt-4 grid grid-cols-3 gap-3 text-center">
                             <div class="rounded-xl border border-text/15 px-2 py-3">
                                 <dt class="text-xs text-text/70">{{ __('Members') }}</dt>
@@ -155,7 +162,7 @@
                             </div>
                         </dl>
 
-                        <h4 class="mt-6 text-sm font-semibold text-text">{{ __('Upcoming services') }}</h4>
+                        <{{ $h4 }} class="mt-6 text-sm font-semibold text-text">{{ __('Upcoming services') }}</{{ $h4 }}>
                         @if ($group['snapshot']['services']->isEmpty())
                             <p class="mt-2 text-sm text-text/70">{{ __('No upcoming services are scheduled yet.') }}</p>
                         @else
@@ -164,7 +171,7 @@
                                     <li class="flex flex-col py-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-4">
                                         <span class="text-text">{{ $item['service']->name }}</span>
                                         <time datetime="{{ $item['starts_at']->toIso8601String() }}" class="text-text/70">
-                                            {{ $item['starts_at']->format('D, M j') }} &middot; {{ $item['starts_at']->format('g:i A') }}
+                                            {{ $item['starts_at']->timezone($tz)->format('D, M j') }} &middot; {{ $item['starts_at']->timezone($tz)->format('g:i A') }}
                                         </time>
                                     </li>
                                 @endforeach
@@ -172,9 +179,9 @@
                         @endif
                     </section>
                 </div>
-            </div>
+            </section>
         @empty
-            <p class="rounded-2xl border border-dashed border-text/30 bg-background p-6 text-sm text-text/70">{{ __('No branch is set up for your account yet.') }}</p>
+            <p class="rounded-2xl border border-dashed border-text/30 bg-background p-6 text-sm text-text/70">{{ __('No branch is set up yet. Please ask the super admin to add you to a branch.') }}</p>
         @endforelse
     </div>
 </x-app-layout>

@@ -71,6 +71,11 @@ class DutyAssignment extends Model
     }
 
     /** Still serving: not declined, and not replaced by an approved swap. SwapRequested stays active. */
+    public function scopeDeclined(Builder $query): Builder
+    {
+        return $query->where('status', DutyStatus::Declined->value);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->whereNotIn('status', [DutyStatus::Declined->value, DutyStatus::Swapped->value]);

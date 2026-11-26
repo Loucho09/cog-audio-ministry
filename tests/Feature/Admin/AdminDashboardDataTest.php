@@ -36,6 +36,7 @@ test('super admin gets every branch', function () {
 test('needs attention counts applications, claimed swaps and declined upcoming duties', function () {
     [$swap, $duty, $claimer] = claimedSwap();
     $branch = $duty->event->branch;
+    $duty->event->dutySlots()->update(['quantity' => 2]);
     JoinApplication::factory()->pending()->create(['branch_id' => $branch->id]);
     JoinApplication::factory()->approved()->create(['branch_id' => $branch->id]);
     DutyAssignment::factory()->create([
@@ -115,4 +116,38 @@ test('snapshot counts members and recent answers, excluding admins', function ()
     $snap = adminData(User::factory()->branchAdmin($branch)->create())[0]['snapshot'];
 
     expect($snap['members'])->toBe(4)->and($snap['accepted'])->toBe(2)->and($snap['declined'])->toBe(1);
+});
+
+test('declined count drops once the declined seat is refilled', function () {
+    [$event, $role] = rosterEvent();
+    $branch = $event->branch;
+    DutyAssignment::factory()->create(['event_id' => $event->id, 'duty_role_id' => $role->id, 'user_id' => User::factory()->member($branch)->create()->id, 'status' => DutyStatus::Declined]);
+    $admin = User::factory()->branchAdmin($branch)->create();
+
+    expect(adminData($admin)[0]['attention']['declined'])->toBe(1);
+
+    DutyAssignment::factory()->create(['event_id' => $event->id, 'duty_role_id' => $role->id, 'user_id' => User::factory()->member($branch)->create()->id]);
+
+    expect(adminData($admin)[0]['attention']['declined'])->toBe(0);
+});
+
+test('legacy admin-held duties are ignored in waiting and filled counts', function () {
+    [$event, $role] = rosterEvent();
+    $event->update(['starts_at' => now()->addDays(2), 'ends_at' => now()->addDays(2)->addHours(2)]);
+    $branch = $event->branch;
+    $legacy = User::factory()->branchAdmin($branch)->create();
+    DutyAssignment::factory()->create(['event_id' => $event->id, 'duty_role_id' => $role->id, 'user_id' => $legacy->id]);
+
+    $group = adminData(User::factory()->branchAdmin($branch)->create())[0];
+
+    expect($group['waiting'])->toBeEmpty()
+        ->and($group['unfilled'][0]['gaps'])->toBe(["{$role->name} 0 of 1"]);
+});
+
+test('waiting for reply only covers the next 14 days', function () {
+    [$event, $role] = rosterEvent();
+    $event->update(['starts_at' => now()->addDays(20), 'ends_at' => now()->addDays(20)->addHours(2)]);
+    DutyAssignment::factory()->create(['event_id' => $event->id, 'duty_role_id' => $role->id, 'user_id' => rosterMember($event)->id]);
+
+    expect(adminData(User::factory()->branchAdmin($event->branch)->create())[0]['waiting'])->toBeEmpty();
 });

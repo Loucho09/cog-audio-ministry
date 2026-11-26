@@ -9,9 +9,11 @@ use App\Models\Branch;
 use App\Models\DutyAssignment;
 use App\Models\DutySwap;
 use App\Models\Event;
+use App\Models\EventDutySlot;
 use App\Models\JoinApplication;
 use App\Models\MemberUnavailability;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
@@ -49,11 +51,6 @@ class AdminDashboardData
             ->where('status', SwapStatus::Claimed->value)->whereIn('branch_id', $ids)
             ->selectRaw('branch_id, count(*) as total')->groupBy('branch_id')->pluck('total', 'branch_id');
 
-        $declined = DutyAssignment::query()
-            ->where('status', DutyStatus::Declined->value)->whereIn('branch_id', $ids)
-            ->whereHas('event', fn ($q) => $q->where('starts_at', '>', $now))
-            ->selectRaw('branch_id, count(*) as total')->groupBy('branch_id')->pluck('total', 'branch_id');
-
         $events = Event::query()
             ->whereIn('branch_id', $ids)
             ->where('starts_at', '>', $now)->where('starts_at', '<=', $until)
@@ -61,19 +58,34 @@ class AdminDashboardData
             ->orderBy('starts_at')
             ->get();
 
-        $filled = DutyAssignment::query()->active()
-            ->whereIn('event_id', $events->pluck('id'))
+        $declinedRows = DutyAssignment::query()->declined()->whereIn('branch_id', $ids)
+            ->whereHas('event', fn ($q) => $q->where('starts_at', '>', $now))
+            ->get(['id', 'branch_id', 'event_id', 'duty_role_id']);
+
+        $slots = EventDutySlot::query()->whereIn('event_id', $declinedRows->pluck('event_id'))->get()
+            ->keyBy(fn ($slot) => $slot->event_id.'-'.$slot->duty_role_id);
+
+        $filled = $this->withoutAdmins(DutyAssignment::query()->active())
+            ->whereIn('event_id', $events->pluck('id')->merge($declinedRows->pluck('event_id'))->unique()->values())
             ->selectRaw('event_id, duty_role_id, count(*) as total')
             ->groupBy('event_id', 'duty_role_id')->get()
             ->groupBy('event_id');
 
-        $waiting = DutyAssignment::query()
+        // A declined seat only needs refilling while its slot is still short.
+        $declined = $declinedRows->filter(function ($row) use ($slots, $filled) {
+            $slot = $slots->get($row->event_id.'-'.$row->duty_role_id);
+            $count = ($filled->get($row->event_id) ?? collect())->firstWhere('duty_role_id', $row->duty_role_id)?->total ?? 0;
+
+            return $slot && (int) $count < $slot->quantity;
+        })->countBy('branch_id');
+
+        $waiting = $this->withoutAdmins(DutyAssignment::query())
             ->select('duty_assignments.*')
             ->join('events', 'events.id', '=', 'duty_assignments.event_id')
             ->whereIn('duty_assignments.branch_id', $ids)
             ->where('duty_assignments.status', DutyStatus::Assigned->value)
             ->whereNotNull('duty_assignments.user_id')
-            ->where('events.starts_at', '>', $now)
+            ->where('events.starts_at', '>', $now)->where('events.starts_at', '<=', $until)
             ->with(['user', 'dutyRole', 'event'])
             ->orderBy('events.starts_at')->orderBy('duty_assignments.id')
             ->get()
@@ -120,6 +132,13 @@ class AdminDashboardData
                 ],
             ];
         })->values();
+    }
+
+    /** Legacy rows held by admins are ignored: admins never serve. Guests (no user) stay. */
+    private function withoutAdmins(Builder $query): Builder
+    {
+        return $query->where(fn ($q) => $q->whereNull('duty_assignments.user_id')
+            ->orWhereDoesntHave('user.roles', fn ($r) => $r->whereIn('name', ['branch-admin', 'super-admin'])));
     }
 
     /**

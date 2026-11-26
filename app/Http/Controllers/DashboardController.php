@@ -34,13 +34,14 @@ class DashboardController extends Controller
         };
 
         // Admins manage the roster and never serve, so they get their own dashboard.
-        if ($user->hasAdminAccess()) {
+        if ($user->isAdminRole()) {
             return view('dashboard-admin', [
                 'greeting' => $greeting,
                 'groups' => $this->adminData->for($user),
                 'isSuper' => $user->hasRole('super-admin'),
                 'links' => [
                     'event' => EventResource::getUrl('create'),
+                    'events' => EventResource::getUrl('index'),
                     'applications' => JoinApplicationResource::getUrl('index'),
                     'swaps' => DutySwapResource::getUrl('index'),
                 ],

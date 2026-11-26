@@ -87,3 +87,33 @@ test('open slots show the gap and link to the event page', function () {
         ->assertSee("{$role->name} 0 of 2")
         ->assertSee('/admin/events/'.$event->id, false);
 });
+
+test('a branchless branch admin gets the admin view with an empty state and no admin links', function () {
+    $user = User::factory()->branchAdmin(Branch::factory()->create())->create(['branch_id' => null]);
+
+    $this->actingAs($user)->get('/dashboard')
+        ->assertOk()
+        ->assertViewIs('dashboard-admin')
+        ->assertSee('No branch is set up yet')
+        ->assertDontSee('Admin panel')
+        ->assertDontSee('My upcoming duties');
+    $this->get('/admin')->assertForbidden();
+});
+
+test('open slots show at most 6 events with a link to see more', function () {
+    $branch = Branch::factory()->create();
+    foreach (range(1, 8) as $i) {
+        [$event] = rosterEvent(like: Event::factory()->create(['branch_id' => $branch->id]));
+        $event->update(['name' => "Gap Event {$i}", 'starts_at' => now()->addDays(1)->addMinutes($i), 'ends_at' => now()->addDays(1)->addHours(2)]);
+    }
+
+    $this->actingAs(User::factory()->branchAdmin($branch)->create())
+        ->get('/dashboard')->assertOk()
+        ->assertSee('Gap Event 6')->assertDontSee('Gap Event 7')
+        ->assertSee('+2 more');
+});
+
+test('the admin dashboard does not hide content behind scroll reveal', function () {
+    $this->actingAs(User::factory()->branchAdmin(Branch::factory()->create())->create())
+        ->get('/dashboard')->assertOk()->assertDontSee('data-reveal', false);
+});
