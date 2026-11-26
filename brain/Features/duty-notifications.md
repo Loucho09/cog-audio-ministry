@@ -1,5 +1,5 @@
 # Duty notifications
-Status: in progress
+Status: done (v1), 2026-11-26
 Phase: 5 (v1; announcements are Phase 5 v2, see [[Backlog]])
 Goal: members hear about their duties without checking the site: in-app (bell) + queued email for new assignments and swap events; reminders before each duty.
 Users: member (receives); branch-admin and super-admin (trigger by assigning; receive "claimed swap needs approval" because they approve swaps, see [[duty-swaps]]).
@@ -98,3 +98,12 @@ Slice 1 done 2026-11-26 (commits 5e684c6, d1c66ea). See [[duty-notifications-tas
 
 ### Production
 - Needs the scheduler cron and a queue worker (Phase 7 checklist in [[Roadmap]]).
+
+## How to check in the browser
+1. Run `php artisan queue:work` and `php artisan schedule:work` locally.
+2. Assign a member in /admin: the bell shows it; the email is in `storage/logs/laravel.log` (`MAIL_MAILER=log`).
+3. Claim a swap as a member, then approve it as an admin: check the bell for each side.
+4. Profile, Notifications switch off: new duties reach only the bell.
+
+Remaining TODOs: owner browser check at 360px and dark mode; production needs cron + queue worker.
+Related: [[dashboard-ux-polish]] (dashboard polish done alongside this feature).

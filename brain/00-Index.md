@@ -80,7 +80,8 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[duty-availability]]: members mark unavailable dates and AM/PM blocks; assign respects it (Phase 4 v2a, done, merged 2026-11-26; tasks in [[duty-availability-tasks]])
 - [[duty-swaps]]: open offer, claim, admin approve or reject; Roster → Swaps (Phase 4 v2b, done, merged 2026-11-26; tasks in [[duty-swaps-tasks]])
 - [[admin-dashboard]]: role-based `/dashboard`, admin view for branch running (Phase 4 follow-up, done and merged 2026-11-26; tasks in [[admin-dashboard-tasks]])
-- [[duty-notifications]]: bell + queued email for assignments and swaps, reminders (Phase 5 v1, in progress 2026-11-26; tasks in [[duty-notifications-tasks]])
+- [[duty-notifications]]: bell + queued email for assignments and swaps, reminders (Phase 5 v1, done 2026-11-26; tasks in [[duty-notifications-tasks]])
+- [[dashboard-ux-polish]]: member and admin dashboard UX polish from a UI audit (Phase 5, done 2026-11-26)
 - [[remove-branch-head]]: remove branch-head role, admin limit per branch (Phase 4, done, merged; tasks in [[remove-branch-head-tasks]])
 - [[loading-states]]: progress bar, view transitions, image skeletons, submit guard, admin skeletons, scroll reveal (UI polish add-on before Phase 3, done and merged 2026-11-25; tasks in [[loading-states-tasks]])
 

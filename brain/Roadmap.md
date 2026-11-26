@@ -14,7 +14,7 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 | 6 | Equipment, training, reports | planned |
 | 7 | Production launch | planned |
 
-Current: Phase 5 (Notifications and reminders) in progress. Phase 4 is complete.
+Current: Phase 5 v1 (duty notifications) done 2026-11-26. Next: Phase 5 v2 announcements (plan with owner first). Phase 4 is complete.
 
 ## Phase 1: Setup and Homepage
 **Goal:** scaffold Laravel with required packages, build a mobile-first homepage.
@@ -149,7 +149,7 @@ Status: done (2026-11-26).
 ## Phase 5: Notifications and Reminders
 **Goal:** in-app + email notifications for assignments, swaps, announcements; scheduled reminders.
 
-In progress 2026-11-26: v1 duty notifications, see [[duty-notifications]]. Announcements moved to Phase 5 v2 (owner decision 2026-11-26).
+v1 duty notifications done 2026-11-26 (branch feature/duty-notifications, merged to main locally), see [[duty-notifications]] and [[dashboard-ux-polish]]. Next: Phase 5 v2 announcements (plan with owner first).
 
 ### Tasks
 - In-app notifications (Laravel's `Notification` and `Notifiable`)
@@ -237,3 +237,4 @@ The original 9-phase roadmap has been replaced by the brief adopted today. See [
 | 7 | Hardening | (old) |
 | 8 | Production launch | (old) |
 | 9 | Maintenance | (old) |
+  

@@ -99,4 +99,6 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - If a user active/suspended flag is added later, exclude inactive users from notifications (added 2026-11-26; see [[duty-notifications]])
 - Duty-assign and swap emails: consider a digest if admins assign many duties at once (added 2026-11-26; see [[duty-notifications]])
 - Console warning "ViewTransition opt-in disabled" on `/dashboard`. Pre-existing, not from the admin dashboard. (added 2026-11-26; see [[loading-states]], [[admin-dashboard]])
+- Bell: middle-click / open-in-new-tab not possible because items are POST forms (reviewer note 2026-11-26; see [[duty-notifications]])
+- Admin "Declined duties to refill" tile links to the events list; a filtered assignments view would be better (added 2026-11-26; see [[dashboard-ux-polish]])
 - Optional cleanup command to remove legacy duty rows held by admins (hidden now, see [[admins-manage-not-serve]]). Owner to decide. (added 2026-11-26; see [[admin-dashboard]])

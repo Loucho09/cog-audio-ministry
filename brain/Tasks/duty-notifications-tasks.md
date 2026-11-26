@@ -37,4 +37,10 @@ Loop per slice: build, test, review, commit.
   - Own throttle 30/min instead of password-change bucket; role=switch; 3:1 off track; live status
   - Switch on profile page
   - Tests
-- Extra (owner asked for UI/UX fixes 2026-11-26): d84d7b9 fixed a pre-Phase-5 bug. Secondary-button forced `type="button"`, so Decline, Offer swap, Cancel swap and availability Remove never submitted. An apostrophe in the decline confirm text also broke that form's Blade parsing (no CSRF). Found by a UI audit; tests now render the real HTML. Dashboard UX polish slice in progress (record later).
+- Extra (owner asked for UI/UX fixes 2026-11-26): d84d7b9 fixed a pre-Phase-5 bug. Secondary-button forced `type="button"`, so Decline, Offer swap, Cancel swap and availability Remove never submitted. An apostrophe in the decline confirm text also broke that form's Blade parsing (no CSRF). Found by a UI audit; tests now render the real HTML. Dashboard UX polish slice recorded below.
+- [x] Dashboard UX polish (owner request 2026-11-26, from a UI audit). DONE 2026-11-26. Spec: [[dashboard-ux-polish]]
+  - Commits 52a1d61 + d2546bf
+  - Member: greeting is the single h1; "Needs your reply" first (Assigned, not started); duties sorted by action needed, 5 shown + "Show all", declined under a "Declined (N)" disclosure; colour + icon status pills (`x-duty-status-pill`, tokens only); announcements placeholder removed; quick links as pills in greeting; services capped at 3 with disclosure; copy "branch admin"; availability inputs aligned
+  - Admin: Needs attention first as whole-card links, open-slot chips, quick actions as pills last, items-start grids
+  - Reviewer: no must-fix; fixes applied (empty-state wording, list spacing, primary-dark links for AA, test helper isolation)
+  - Bell pagination test now asserts paginator data instead of HTML (was flaky under parallel load)
