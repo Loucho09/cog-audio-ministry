@@ -18,13 +18,15 @@ class DutyAssignment extends Model
 {
     use BelongsToBranch, HasFactory;
 
-    protected $fillable = ['branch_id', 'event_id', 'duty_role_id', 'user_id', 'guest_name', 'assigned_by', 'status', 'responded_at'];
+    protected $fillable = ['branch_id', 'event_id', 'duty_role_id', 'user_id', 'guest_name', 'assigned_by', 'status', 'responded_at', 'reminded_day_at', 'reminded_soon_at'];
 
     protected function casts(): array
     {
         return [
             'status' => DutyStatus::class,
             'responded_at' => 'datetime',
+            'reminded_day_at' => 'datetime',
+            'reminded_soon_at' => 'datetime',
         ];
     }
 

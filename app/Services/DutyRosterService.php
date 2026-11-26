@@ -278,6 +278,12 @@ class DutyRosterService
 
             $event->update($attributes);
 
+            // A moved start time means reminders must be sent again for the new time.
+            if ($event->wasChanged('starts_at')) {
+                DutyAssignment::query()->where('event_id', $event->id)
+                    ->update(['reminded_day_at' => null, 'reminded_soon_at' => null]);
+            }
+
             foreach ($quantitiesByRoleId as $roleId => $quantity) {
                 EventDutySlot::query()->updateOrCreate(
                     ['event_id' => $event->id, 'duty_role_id' => $roleId],

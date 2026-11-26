@@ -19,3 +19,6 @@ Artisan::command('gallery:thumbnails', function () {
 
     $this->info("Gallery thumbnails created: {$made}.");
 })->purpose('Create small grid copies of gallery photos');
+
+// Duty reminders (day before and shortly before). Needs the scheduler cron + a queue worker.
+Schedule::command('duty:send-reminders')->everyFiveMinutes()->withoutOverlapping();
