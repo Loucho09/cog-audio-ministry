@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Requests\UpdateNotificationPreferencesRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,6 +36,19 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Turn duty emails on or off. In-app notifications are always kept.
+     */
+    public function updateNotifications(UpdateNotificationPreferencesRequest $request): RedirectResponse
+    {
+        // forceFill: the column is deliberately not mass-assignable.
+        $request->user()->forceFill([
+            'email_notifications' => $request->boolean('email_notifications'),
+        ])->save();
+
+        return Redirect::route('profile.edit')->with('status', 'notifications-updated');
     }
 
     /**
