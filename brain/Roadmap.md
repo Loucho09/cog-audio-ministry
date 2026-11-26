@@ -10,11 +10,11 @@ Work one phase at a time. A phase starts only after the previous one is marked d
 | 2 | Member accounts and roles | done (2a and 2b merged to main 2026-11-25) |
 | 3 | Join applications | done (2026-11-25; slices 1-7 and final review, last commit cc05d36; merged into main; browser check at 360px and dark mode still owner-pending) |
 | 4 | Duty roster | done (2026-11-26): v1, guest assign, v2a availability ([[duty-availability]]), v2b swaps ([[duty-swaps]]) all merged. See [[duty-roster]] |
-| 5 | Notifications and reminders | next |
+| 5 | Notifications and reminders | in progress (2026-11-26): v1 duty notifications |
 | 6 | Equipment, training, reports | planned |
 | 7 | Production launch | planned |
 
-Current: Phase 5 (Notifications and reminders) is next. Phase 4 is complete.
+Current: Phase 5 (Notifications and reminders) in progress. Phase 4 is complete.
 
 ## Phase 1: Setup and Homepage
 **Goal:** scaffold Laravel with required packages, build a mobile-first homepage.
@@ -148,6 +148,8 @@ Status: done (2026-11-26).
 
 ## Phase 5: Notifications and Reminders
 **Goal:** in-app + email notifications for assignments, swaps, announcements; scheduled reminders.
+
+In progress 2026-11-26: v1 duty notifications, see [[duty-notifications]]. Announcements moved to Phase 5 v2 (owner decision 2026-11-26).
 
 ### Tasks
 - In-app notifications (Laravel's `Notification` and `Notifiable`)

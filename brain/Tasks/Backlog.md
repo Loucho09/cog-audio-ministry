@@ -94,5 +94,7 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Clean up expired swap_requested duties (scheduler); Phase 5 could do this with reminders (added 2026-11-26; see [[duty-swaps]])
 - Notify on swap offered/claimed/approved/rejected (Phase 5) (added 2026-11-26; see [[duty-swaps]])
 - Assignment notification (Phase 5 slice 1): email + in-app when a member is assigned; shows role, event name, date/time, place (branch address, else branch name), satellite branch; guests get none; bell + unread count + mark read on member dashboard. Owner chose email + in-app 2026-11-26. (added 2026-11-26; see [[admin-dashboard]], [[duty-roster]])
+- Phase 5 v2: announcements (branch-admin posts, dashboard, optional email blast) (owner decision 2026-11-26; see [[duty-notifications]])
+- Per-type email preferences (added 2026-11-26; see [[duty-notifications]])
 - Console warning "ViewTransition opt-in disabled" on `/dashboard`. Pre-existing, not from the admin dashboard. (added 2026-11-26; see [[loading-states]], [[admin-dashboard]])
 - Optional cleanup command to remove legacy duty rows held by admins (hidden now, see [[admins-manage-not-serve]]). Owner to decide. (added 2026-11-26; see [[admin-dashboard]])
