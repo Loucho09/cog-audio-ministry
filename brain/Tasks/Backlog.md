@@ -97,5 +97,6 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Phase 5 v2: announcements (branch-admin posts, dashboard, optional email blast) (owner decision 2026-11-26; see [[duty-notifications]])
 - Per-type email preferences (added 2026-11-26; see [[duty-notifications]])
 - If a user active/suspended flag is added later, exclude inactive users from notifications (added 2026-11-26; see [[duty-notifications]])
+- Duty-assign and swap emails: consider a digest if admins assign many duties at once (added 2026-11-26; see [[duty-notifications]])
 - Console warning "ViewTransition opt-in disabled" on `/dashboard`. Pre-existing, not from the admin dashboard. (added 2026-11-26; see [[loading-states]], [[admin-dashboard]])
 - Optional cleanup command to remove legacy duty rows held by admins (hidden now, see [[admins-manage-not-serve]]). Owner to decide. (added 2026-11-26; see [[admin-dashboard]])

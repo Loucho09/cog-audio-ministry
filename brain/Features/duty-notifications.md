@@ -62,7 +62,7 @@ Slice 1 done 2026-11-26 (commits 5e684c6, d1c66ea). See [[duty-notifications-tas
 - Trigger: `DutyRosterService::assign()` after commit, new param `bool $notify = true`. Seeder passes `notify: false`. `assignGuest` and swap approve do not notify.
 - Database payload keys: `assignment_id`, `event_id`, `role`, `event_title`, `starts_at` (ISO 8601), `place`, `message`.
 - DutyAssigned payload now also has `type` = `duty_assigned`.
-- Reminder column names: TODO (slice 3).
+- Reminder column names: see Slice 3 below.
 
 ### Swap notifications (slice 2 done 2026-11-26, commits 89d7b8d, fdae051)
 - Class `App\Notifications\DutySwapUpdated(DutySwap $swap, string $type)`; types `swap_claimed`, `swap_approved`, `swap_rejected`.
@@ -75,3 +75,26 @@ Slice 1 done 2026-11-26 (commits 5e684c6, d1c66ea). See [[duty-notifications-tas
 - No user active/suspended flag exists, so no inactive filtering (see [[Backlog]]).
 - Slice 4: the bell must render payload `message` with `{{ }}` escaping, never `{!! !!}`.
 - Production needs a running queue worker for emails (see Phase 7 checklist in [[Roadmap]]).
+
+### Reminders (slice 3 done 2026-11-26, commits 6f51de3, 7e88f78)
+- Config `ministry.reminders` (`day_before_hours` 24, `soon_hours` 2).
+- Columns `duty_assignments.reminded_day_at` / `reminded_soon_at` (not fillable). Migrations `2026_11_26_200803` (reminder columns) and `200804` (index on `events.starts_at`).
+- `App\Notifications\DutyReminder`: types `duty_reminder_day` / `duty_reminder_soon`. `shouldSend` re-checks Accepted, same user, same future `starts_at`.
+- `App\Services\DutyReminderService`: chunkById, atomic conditional claim, claim released if notify throws.
+- Command `duty:send-reminders`, scheduled everyFiveMinutes withoutOverlapping in `routes/console.php`. Returns failure if any row failed.
+- Accepted duties only. Soon window (now, now+2h] sets both columns; day window (now+2h, now+24h].
+- `DutyRosterService::updateEvent` resets both columns when `starts_at` changes (Filament EditEvent goes through it).
+- At-most-once delivery after the job is queued. See [[reminder-delivery-at-most-once]].
+
+### Bell (slice 4 done 2026-11-26, commits e489e53, 149f8b5)
+- `NotificationController`: index (paginate 20), read (safe same-app redirect), readAll.
+- Routes `notifications.index`, `notifications.read`, `notifications.read-all`.
+- Components `notification-bell`, `notification-item`, `notification-icon`. View composer on the bell (2 queries max). Messages rendered escaped.
+
+### Profile toggle (slice 5 done 2026-11-26, commits ff9cfc9, c08259b)
+- `PATCH /profile/notifications` (`profile.notifications.update`), `UpdateNotificationPreferencesRequest`.
+- `ProfileController::updateNotifications` uses `forceFill` (column stays out of `$fillable`).
+- Partial `profile/partials/update-notifications-form.blade.php`.
+
+### Production
+- Needs the scheduler cron and a queue worker (Phase 7 checklist in [[Roadmap]]).

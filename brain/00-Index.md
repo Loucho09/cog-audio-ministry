@@ -58,6 +58,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[admin-review-2026-11-26]]: full admin review fixes (2026-11-26)
 - [[remove-branch-head-decision]]: branch-head role removed; 1 branch-admin per branch, 2 for Dasma (2026-11-26)
 - [[duty-guest-assign-decision]]: typed guest names on duty assignments, auto-confirmed (2026-11-26)
+- [[reminder-delivery-at-most-once]]: duty reminders are claimed then sent; released if enqueue fails, skipped if stale (2026-11-26)
 - [[duty-availability-decision]]: AM/PM availability blocks with 15:00 cutoff; open-offer swaps and self-approval rule (2026-11-26)
 - [[admins-manage-not-serve]]: admins only manage; cannot be assigned, claim swaps, or mark availability (2026-11-26)
 
