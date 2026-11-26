@@ -2,7 +2,9 @@
 
 namespace App\Notifications;
 
+use App\Enums\DutyStatus;
 use App\Models\DutyAssignment;
+use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -19,9 +21,29 @@ class DutyReminder extends Notification implements ShouldQueue
 
     public $deleteWhenMissingModels = true;
 
-    public function __construct(public DutyAssignment $assignment, public string $kind)
+    /** Event start the reminder was claimed for; if it moves before sending, the reminder is dropped. */
+    public ?CarbonInterface $expectedStart;
+
+    public function __construct(public DutyAssignment $assignment, public string $kind, ?CarbonInterface $expectedStart = null)
     {
+        $this->expectedStart = $expectedStart ?? $assignment->loadMissing('event')->event?->starts_at;
         $this->afterCommit();
+    }
+
+    /** Last check at send time: the duty must still be accepted, the member's own, and the start unchanged. */
+    public function shouldSend(object $notifiable, string $channel): bool
+    {
+        $assignment = $this->assignment->fresh(['event']);
+        $start = $assignment?->event?->starts_at;
+
+        return $assignment !== null
+            && $assignment->status === DutyStatus::Accepted
+            && $assignment->user_id !== null
+            && (int) $assignment->user_id === (int) $notifiable->id
+            && $start !== null
+            && $start->isFuture()
+            && $this->expectedStart !== null
+            && $start->equalTo($this->expectedStart);
     }
 
     /** @return array<int, string> */

@@ -12,9 +12,13 @@ use Throwable;
 /** Sends the "tomorrow" and "soon" reminders for accepted member duties. Safe to run often and overlapped. */
 class DutyReminderService
 {
+    /** Rows that failed in the last run() (already reported and released for retry). */
+    public int $failures = 0;
+
     /** @return int number of reminders sent */
     public function run(): int
     {
+        $this->failures = 0;
         $now = now();
         $soonEnd = $now->copy()->addHours((int) config('ministry.reminders.soon_hours', 2));
         $dayEnd = $now->copy()->addHours((int) config('ministry.reminders.day_before_hours', 24));
@@ -26,39 +30,51 @@ class DutyReminderService
     /** Window is (from, to]. A "soon" reminder also marks the day reminder done so a late accept gets only one. */
     private function process(CarbonInterface $from, CarbonInterface $to, string $column, string $kind): int
     {
-        $assignments = DutyAssignment::query()->withoutGlobalScopes()
+        $eligible = fn () => DutyAssignment::query()
             ->whereNotNull('user_id')
             ->where('status', DutyStatus::Accepted->value)
             ->whereNull($column)
             ->whereHas('event', fn (Builder $q) => $q
                 ->where('starts_at', '>', $from)
-                ->where('starts_at', '<=', $to))
-            ->with('user')
-            ->get();
+                ->where('starts_at', '<=', $to));
 
         $sent = 0;
 
-        foreach ($assignments as $assignment) {
-            try {
-                // Claim the row first so an overlapping run cannot send the same reminder twice.
-                $values = [$column => now()];
-                if ($kind === DutyReminder::SOON) {
-                    $values['reminded_day_at'] = $assignment->reminded_day_at ?? now();
+        $eligible()->with(['user', 'event.branch', 'dutyRole'])->chunkById(200, function ($assignments) use (&$sent, $eligible, $column, $kind) {
+            foreach ($assignments as $assignment) {
+                $previousDay = $assignment->reminded_day_at;
+                $claimed = false;
+
+                try {
+                    // Claim the row first (re-checking the rules) so an overlapping run cannot send twice.
+                    $values = [$column => now()];
+                    if ($kind === DutyReminder::SOON) {
+                        $values['reminded_day_at'] = $previousDay ?? now();
+                    }
+
+                    $claimed = $eligible()->whereKey($assignment->id)->update($values) === 1;
+
+                    if (! $claimed || $assignment->user === null) {
+                        continue;
+                    }
+
+                    $assignment->user->notify(new DutyReminder($assignment, $kind));
+                    $sent++;
+                } catch (Throwable $e) {
+                    $this->failures++;
+                    report($e);
+
+                    if ($claimed) {
+                        // Release the claim so the next run retries this row.
+                        $release = [$column => null];
+                        if ($kind === DutyReminder::SOON) {
+                            $release['reminded_day_at'] = $previousDay;
+                        }
+                        DutyAssignment::query()->whereKey($assignment->id)->update($release);
+                    }
                 }
-
-                $claimed = DutyAssignment::query()->withoutGlobalScopes()
-                    ->whereKey($assignment->id)->whereNull($column)->update($values);
-
-                if ($claimed !== 1 || $assignment->user === null) {
-                    continue;
-                }
-
-                $assignment->user->notify(new DutyReminder($assignment, $kind));
-                $sent++;
-            } catch (Throwable $e) {
-                report($e);
             }
-        }
+        });
 
         return $sent;
     }

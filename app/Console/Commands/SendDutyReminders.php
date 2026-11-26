@@ -15,6 +15,12 @@ class SendDutyReminders extends Command
     {
         $this->info('Duty reminders sent: '.$reminders->run().'.');
 
+        if ($reminders->failures > 0) {
+            $this->error('Reminders failed: '.$reminders->failures.'.');
+
+            return self::FAILURE;
+        }
+
         return self::SUCCESS;
     }
 }
