@@ -12,6 +12,7 @@ use App\Models\Event;
 use App\Models\EventDutySlot;
 use App\Models\MemberUnavailability;
 use App\Models\User;
+use App\Notifications\DutyAssigned;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
@@ -19,9 +20,10 @@ use Illuminate\Support\Facades\DB;
 
 class DutyRosterService
 {
-    public function assign(Event $event, DutyRole $role, User $member, ?User $by = null): DutyAssignment
+    /** Pass $notify = false for seeders/bulk code that must not message members. */
+    public function assign(Event $event, DutyRole $role, User $member, ?User $by = null, bool $notify = true): DutyAssignment
     {
-        return DB::transaction(function () use ($event, $role, $member, $by) {
+        $assignment = DB::transaction(function () use ($event, $role, $member, $by) {
             // Lock order everywhere: event, then users, then slots. Re-read fresh values inside the locks.
             $event = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
             $member = User::query()->whereKey($member->id)->lockForUpdate()->firstOrFail();
@@ -94,6 +96,13 @@ class DutyRosterService
                 'status' => DutyStatus::Assigned,
             ]);
         });
+
+        if ($notify) {
+            // Single trigger point: only a fresh admin assignment of a real member. Guests and swaps never come through here.
+            $member->notify(new DutyAssigned($assignment));
+        }
+
+        return $assignment;
     }
 
     /** True when the member has an active duty on an event overlapping this one. */

@@ -137,6 +137,7 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'must_change_password' => 'boolean',
+            'email_notifications' => 'boolean',
         ];
     }
 }

@@ -84,7 +84,7 @@ class DutyRosterSeeder extends Seeder
                     $member = $members[$n % $members->count()];
 
                     try {
-                        $assignment = $roster->assign($event, $role, $member, $head);
+                        $assignment = $roster->assign($event, $role, $member, $head, notify: false);
                     } catch (RosterRuleViolation) {
                         continue;
                     }
