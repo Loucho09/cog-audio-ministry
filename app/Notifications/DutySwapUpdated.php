@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Enums\SwapStatus;
 use App\Filament\Resources\DutySwaps\DutySwapResource;
 use App\Models\DutySwap;
 use Illuminate\Bus\Queueable;
@@ -36,6 +37,16 @@ class DutySwapUpdated extends Notification implements ShouldQueue
         return ($notifiable->email_notifications ?? true) ? ['database', 'mail'] : ['database'];
     }
 
+    /** A claim message is dropped if the swap moved on (cancelled, decided) before the queue sent it. */
+    public function shouldSend(object $notifiable, string $channel): bool
+    {
+        if ($this->type !== self::CLAIMED) {
+            return true;
+        }
+
+        return DutySwap::query()->whereKey($this->swap->id)->where('status', SwapStatus::Claimed)->exists();
+    }
+
     public function toMail(object $notifiable): MailMessage
     {
         $d = $this->details($notifiable);
@@ -60,7 +71,7 @@ class DutySwapUpdated extends Notification implements ShouldQueue
             'type' => $this->type,
             'swap_id' => $this->swap->id,
             'assignment_id' => $this->swap->duty_assignment_id,
-            'event_id' => $this->swap->assignment->event_id,
+            'event_id' => $this->swap->assignment?->event_id,
             'role' => $d['role'],
             'event_title' => $d['event'],
             'starts_at' => $d['starts_at'],
@@ -74,11 +85,11 @@ class DutySwapUpdated extends Notification implements ShouldQueue
     private function details(object $notifiable): array
     {
         $swap = $this->swap->loadMissing('assignment.event', 'assignment.dutyRole', 'offeredBy', 'claimedBy');
-        $event = $swap->assignment->event;
-        $start = $event->starts_at?->copy()->timezone(config('app.timezone'));
+        $event = $swap->assignment?->event;
+        $start = $event?->starts_at?->copy()->timezone(config('app.timezone'));
 
-        $role = $swap->assignment->dutyRole->name;
-        $title = $event->name;
+        $role = $swap->assignment?->dutyRole?->name ?? 'a duty';
+        $title = $event?->name ?? 'an event';
         $when = $start?->format('l, F j, Y \a\t g:i A') ?? 'a date to be confirmed';
         $offerer = $swap->offeredBy?->name ?? 'A member';
         $claimer = $swap->claimedBy?->name ?? 'a member';

@@ -156,3 +156,47 @@ test('mail escapes html in names and titles', function () {
         ->and($html)->not->toContain('<b>Evil</b>')
         ->and($html)->toContain('&lt;script&gt;');
 });
+
+test('a stale claim notification is not sent once the swap is no longer claimed', function () {
+    [$swap, $duty, $claimer] = claimedSwap();
+    $admin = branchAdminFor($duty);
+    $note = new DutySwapUpdated($swap, 'swap_claimed');
+
+    expect($note->shouldSend($admin, 'mail'))->toBeTrue();
+
+    swapSvc()->cancel($swap, $duty->user);
+
+    expect($note->shouldSend($admin, 'mail'))->toBeFalse()
+        ->and((new DutySwapUpdated($swap, 'swap_rejected'))->shouldSend($admin, 'mail'))->toBeTrue();
+});
+
+test('one recipient failing does not stop the others', function () {
+    [$swap, $duty] = openSwap();
+    $admin = branchAdminFor($duty);
+    $claimer = rosterMember($duty->event);
+    $calls = 0;
+    app()->instance(Dispatcher::class, new class($calls)
+    {
+        public function __construct(public int &$n) {}
+
+        public function __call($name, $args)
+        {
+            if (++$this->n === 1) {
+                throw new RuntimeException('boom');
+            }
+        }
+    });
+
+    swapSvc()->claim($swap, $claimer);
+
+    expect($calls)->toBe(2); // admin + offerer: first threw, second still attempted
+});
+
+test('details survive a missing event or role', function () {
+    [$swap, $duty] = claimedSwap();
+    $admin = branchAdminFor($duty);
+    $note = new DutySwapUpdated($swap->fresh(), 'swap_claimed');
+    $note->swap->setRelation('assignment', null);
+
+    expect($note->toArray($admin)['message'])->toBeString()->and($note->toArray($admin)['event_id'])->toBeNull();
+});

@@ -244,8 +244,14 @@ class DutySwapService
                 ->whereIn('id', $ids->filter()->unique()->reject(fn ($id) => (int) $id === (int) $actor->id)->values())
                 ->get();
 
+            $swap->load('assignment.event', 'assignment.dutyRole', 'offeredBy', 'claimedBy');
+
             foreach ($recipients as $recipient) {
-                $recipient->notify(new DutySwapUpdated($swap, $type));
+                try {
+                    $recipient->notify(new DutySwapUpdated($swap, $type));
+                } catch (Throwable $e) {
+                    report($e); // One bad recipient must not skip the others.
+                }
             }
         } catch (Throwable $e) {
             report($e);
