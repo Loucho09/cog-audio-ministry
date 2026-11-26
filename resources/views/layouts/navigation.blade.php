@@ -11,21 +11,21 @@
 @endphp
 
 <header x-data="{ open: false }" @keydown.escape.window="if (open) { open = false; $refs.menuButton.focus() }" class="sticky top-0 z-50 w-full border-b border-text/15 bg-surface/90 backdrop-blur-md">
-    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-5 sm:px-6 lg:px-8">
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:gap-3 sm:px-6 lg:px-8">
 
         {{-- Brand: links to the public homepage --}}
         <a
             href="{{ route('home') }}"
-            class="flex min-h-11 min-w-0 items-center gap-3 rounded-md transition-opacity duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
+            class="flex min-h-11 min-w-0 items-center gap-2 rounded-md sm:gap-3 transition-opacity duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
         >
             <x-site.logo />
             <span class="min-w-0 leading-tight">
-                <span class="block truncate text-[0.8125rem] font-bold tracking-tight text-text sm:text-base">{{ config('ministry.name') }}</span>
+                <span class="block text-[0.8125rem] font-bold tracking-tight text-text sm:truncate sm:text-base">{{ config('ministry.name') }}</span>
                 <span class="block truncate text-xs text-text/70">{{ config('ministry.subheader') }}</span>
             </span>
         </a>
 
-        <div class="flex shrink-0 items-center gap-1 sm:gap-2">
+        <div class="flex shrink-0 items-center gap-0 sm:gap-2">
 
             {{-- Desktop links --}}
             <nav aria-label="Member" class="hidden sm:block">
@@ -55,6 +55,8 @@
                     </li>
                 </ul>
             </nav>
+
+            <x-notification-bell />
 
             <x-site.theme-toggle />
 

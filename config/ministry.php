@@ -60,6 +60,9 @@ return [
     // Events starting at or after this time (24h, app timezone) count as PM for availability.
     'duty_pm_starts_at' => '15:00',
 
+    // Duty reminders (hours before the event starts): the "tomorrow" reminder and the "soon" reminder.
+    'reminders' => ['day_before_hours' => 24, 'soon_hours' => 2],
+
     // "Meet the Team" section and nav link. Default OFF.
     'show_team' => filter_var(env('MINISTRY_SHOW_TEAM', false), FILTER_VALIDATE_BOOLEAN),
 

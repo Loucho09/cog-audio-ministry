@@ -30,6 +30,12 @@
             </div>
         </div>
 
+        <div class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+            <div class="max-w-xl">
+                @include('profile.partials.update-notifications-form')
+            </div>
+        </div>
+
         @if ($user->canSelfDelete())
             <div class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
                 <div class="max-w-xl">

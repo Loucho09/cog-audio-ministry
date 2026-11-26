@@ -1,83 +1,66 @@
 <x-app-layout :title="__('Dashboard')">
-    <x-slot name="header">
-        <h1 class="text-2xl font-bold tracking-tight text-text sm:text-3xl">{{ __('Dashboard') }}</h1>
-    </x-slot>
-
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    @php($tz = config('app.timezone'))
-    @php($h = $isSuper ? 'h3' : 'h2')
-    @php($h4 = $isSuper ? 'h4' : 'h3')
+    @php $tz = config('app.timezone'); @endphp
+    @php $h = $isSuper ? 'h3' : 'h2'; @endphp
+    @php $h4 = $isSuper ? 'h4' : 'h3'; @endphp
 
     <div class="space-y-6 sm:space-y-8">
-        <section aria-labelledby="welcome-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
-            <h2 id="welcome-heading" class="text-xl font-semibold text-text sm:text-2xl">
+        <section aria-labelledby="welcome-heading" class="rounded-2xl border border-text/15 bg-surface p-5 shadow-sm sm:p-8">
+            <h1 id="welcome-heading" class="text-2xl font-bold tracking-tight text-text sm:text-3xl">
                 {{ __($greeting) }}, {{ auth()->user()->name }}
-            </h2>
+            </h1>
             <p class="mt-2 text-sm text-text/70">
                 {{ $isSuper ? __('Here is how every branch is doing.') : __('Here is what needs your care today.') }}
             </p>
         </section>
 
-        @if ($groups->isNotEmpty())
-        <section aria-labelledby="actions-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
-            <h2 id="actions-heading" class="text-lg font-semibold text-text">{{ __('Quick actions') }}</h2>
-            <ul class="mt-4 flex flex-col gap-3 text-sm sm:flex-row sm:flex-wrap sm:gap-6">
-                <li><a href="{{ $links['event'] }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">{{ __('Create an event') }}</a></li>
-                <li><a href="{{ $links['applications'] }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">{{ __('Join applications') }}</a></li>
-                <li><a href="{{ $links['swaps'] }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">{{ __('Duty swaps') }}</a></li>
-                <li><a href="{{ filament()->getPanel('admin')->getUrl() }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">{{ __('Admin panel') }}</a></li>
-                <li><a href="{{ route('profile.edit') }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">{{ __('Edit profile') }}</a></li>
-            </ul>
-        </section>
-        @endif
 
         @forelse ($groups as $group)
-            @php($b = $group['branch'])
-            @php($att = $group['attention'])
+            @php $b = $group['branch']; @endphp
+            @php $att = $group['attention']; @endphp
 
             <section @if ($isSuper) aria-labelledby="branch-{{ $b->id }}-heading" @endif class="space-y-6 sm:space-y-8">
                 @if ($isSuper)
                     <h2 id="branch-{{ $b->id }}-heading" class="border-b border-text/15 pb-2 text-xl font-bold text-text">{{ $b->name }}</h2>
                 @endif
 
-                <section aria-labelledby="attention-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+                <section aria-labelledby="attention-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-5 shadow-sm sm:p-8">
                     <{{ $h }} id="attention-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Needs attention') }}</{{ $h }}>
 
                     @if (array_sum($att) === 0)
                         <p class="mt-3 text-sm text-text/70">{{ __('All caught up. Nothing is waiting for you right now.') }}</p>
                     @else
-                        <dl class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            <div class="rounded-xl border border-text/15 px-4 py-3">
-                                <dt class="text-sm text-text/70">{{ __('Join applications to review') }}</dt>
-                                <dd class="mt-1 text-2xl font-bold {{ $att['applications'] > 0 ? 'text-accent-text' : 'text-text' }}">
-                                    @if ($att['applications'] > 0)
-                                        <a href="{{ $links['applications'] }}" aria-label="{{ __('Join applications to review') }}: {{ $att['applications'] }}" class="underline underline-offset-2 hover:no-underline">{{ $att['applications'] }}</a>
+                        @php
+                            $tiles = [
+                                ['label' => __('Join applications to review'), 'count' => $att['applications'], 'url' => $links['applications']],
+                                ['label' => __('Swaps to approve'), 'count' => $att['swaps'], 'url' => $links['swaps']],
+                                ['label' => __('Declined duties to refill'), 'count' => $att['declined'], 'url' => $links['events']],
+                            ];
+                        @endphp
+                        <ul class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            @foreach ($tiles as $tile)
+                                @php $hot = $tile['count'] > 0; @endphp
+                                <li>
+                                    @if ($hot)
+                                        <a href="{{ $tile['url'] }}" class="block min-h-11 rounded-xl border border-accent-text/40 bg-accent/5 px-4 py-3 transition hover:border-accent-text hover:bg-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark">
+                                            <span class="block text-sm text-text/70">{{ $tile['label'] }}</span>
+                                            <span class="mt-1 block text-2xl font-bold text-accent-text">{{ $tile['count'] }}</span>
+                                        </a>
                                     @else
-                                        {{ $att['applications'] }}
+                                        <div class="min-h-11 rounded-xl border border-text/15 px-4 py-3">
+                                            <span class="block text-sm text-text/70">{{ $tile['label'] }}</span>
+                                            <span class="mt-1 block text-2xl font-bold text-text">{{ $tile['count'] }}</span>
+                                        </div>
                                     @endif
-                                </dd>
-                            </div>
-                            <div class="rounded-xl border border-text/15 px-4 py-3">
-                                <dt class="text-sm text-text/70">{{ __('Swaps to approve') }}</dt>
-                                <dd class="mt-1 text-2xl font-bold {{ $att['swaps'] > 0 ? 'text-accent-text' : 'text-text' }}">
-                                    @if ($att['swaps'] > 0)
-                                        <a href="{{ $links['swaps'] }}" aria-label="{{ __('Swaps to approve') }}: {{ $att['swaps'] }}" class="underline underline-offset-2 hover:no-underline">{{ $att['swaps'] }}</a>
-                                    @else
-                                        {{ $att['swaps'] }}
-                                    @endif
-                                </dd>
-                            </div>
-                            <div class="rounded-xl border border-text/15 px-4 py-3">
-                                <dt class="text-sm text-text/70">{{ __('Declined duties to refill') }}</dt>
-                                <dd class="mt-1 text-2xl font-bold {{ $att['declined'] > 0 ? 'text-accent-text' : 'text-text' }}">{{ $att['declined'] }}</dd>
-                            </div>
-                        </dl>
+                                </li>
+                            @endforeach
+                        </ul>
                     @endif
                 </section>
 
-                <div class="grid gap-6 sm:gap-8 lg:grid-cols-2">
-                    <section aria-labelledby="unfilled-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+                <div class="grid items-start gap-6 sm:gap-8 lg:grid-cols-2">
+                    <section aria-labelledby="unfilled-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-5 shadow-sm sm:p-8">
                         <{{ $h }} id="unfilled-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Open slots, next 14 days') }}</{{ $h }}>
 
                         @if ($group['unfilled']->isEmpty())
@@ -86,21 +69,25 @@
                             <ul class="mt-4 divide-y divide-text/10">
                                 @foreach ($group['unfilled']->take(6) as $row)
                                     <li class="py-3 first:pt-0 last:pb-0">
-                                        <a href="{{ $row['url'] }}" class="break-words font-medium text-primary underline underline-offset-2 hover:no-underline">{{ $row['event']->name }}</a>
+                                        <a href="{{ $row['url'] }}" class="break-words font-medium text-primary-dark underline underline-offset-2 hover:no-underline">{{ $row['event']->name }}</a>
                                         <p class="mt-0.5 text-sm text-text/70">
                                             <time datetime="{{ $row['event']->starts_at->toIso8601String() }}">{{ $row['event']->starts_at->timezone($tz)->format('D, M j · g:i A') }}</time>
                                         </p>
-                                        <p class="mt-0.5 text-sm text-text">{{ implode(', ', $row['gaps']) }}</p>
+                                        <ul class="mt-2 flex flex-wrap gap-2" aria-label="{{ __('Open slots') }}">
+                                            @foreach ($row['gaps'] as $gap)
+                                                <li class="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent-text">{{ $gap }}</li>
+                                            @endforeach
+                                        </ul>
                                     </li>
                                 @endforeach
                             </ul>
                             @if ($group['unfilled']->count() > 6)
-                                <p class="mt-4 text-sm"><a href="{{ $links['events'] }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">+{{ $group['unfilled']->count() - 6 }} {{ __('more') }}</a></p>
+                                <p class="mt-4 text-sm"><a href="{{ $links['events'] }}" class="font-medium text-primary-dark underline underline-offset-2 hover:no-underline">+{{ $group['unfilled']->count() - 6 }} {{ __('more') }}</a></p>
                             @endif
                         @endif
                     </section>
 
-                    <section aria-labelledby="waiting-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+                    <section aria-labelledby="waiting-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-5 shadow-sm sm:p-8">
                         <{{ $h }} id="waiting-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Waiting for a reply') }}</{{ $h }}>
 
                         @if ($group['waiting']->isEmpty())
@@ -121,8 +108,8 @@
                     </section>
                 </div>
 
-                <div class="grid gap-6 sm:gap-8 lg:grid-cols-2">
-                    <section aria-labelledby="unavailable-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+                <div class="grid items-start gap-6 sm:gap-8 lg:grid-cols-2">
+                    <section aria-labelledby="unavailable-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-5 shadow-sm sm:p-8">
                         <{{ $h }} id="unavailable-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Who is unavailable, next 14 days') }}</{{ $h }}>
 
                         @if ($group['unavailable']->isEmpty())
@@ -145,7 +132,7 @@
                         @endif
                     </section>
 
-                    <section aria-labelledby="snapshot-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8">
+                    <section aria-labelledby="snapshot-{{ $b->id }}-heading" class="rounded-2xl border border-text/15 bg-surface p-5 shadow-sm sm:p-8">
                         <{{ $h }} id="snapshot-{{ $b->id }}-heading" class="text-lg font-semibold text-text">{{ __('Branch snapshot') }}</{{ $h }}>
                         <dl class="mt-4 grid grid-cols-3 gap-3 text-center">
                             <div class="rounded-xl border border-text/15 px-2 py-3">
@@ -183,5 +170,18 @@
         @empty
             <p class="rounded-2xl border border-dashed border-text/30 bg-background p-6 text-sm text-text/70">{{ __('No branch is set up yet. Please ask the super admin to add you to a branch.') }}</p>
         @endforelse
+
+        @if ($groups->isNotEmpty())
+            <section aria-labelledby="actions-heading" class="rounded-2xl border border-text/15 bg-surface p-5 shadow-sm sm:p-8">
+                <h2 id="actions-heading" class="text-lg font-semibold text-text">{{ __('Quick actions') }}</h2>
+                <div class="mt-4 flex flex-wrap gap-3">
+                    <x-site.button :href="$links['event']">{{ __('Create an event') }}</x-site.button>
+                    <x-site.button variant="secondary" :href="$links['applications']">{{ __('Join applications') }}</x-site.button>
+                    <x-site.button variant="secondary" :href="$links['swaps']">{{ __('Duty swaps') }}</x-site.button>
+                    <x-site.button variant="secondary" :href="filament()->getPanel('admin')->getUrl()">{{ __('Admin panel') }}</x-site.button>
+                    <x-site.button variant="secondary" :href="route('profile.edit')">{{ __('Edit profile') }}</x-site.button>
+                </div>
+            </section>
+        @endif
     </div>
 </x-app-layout>

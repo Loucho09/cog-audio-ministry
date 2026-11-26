@@ -30,10 +30,34 @@ it('lists own upcoming duties and not others or past ones', function () {
         ->assertDontSee('Long Gone Event');
 });
 
+it('renders a working decline form with a csrf token and confirm text', function () {
+    $me = User::factory()->member(Branch::factory()->create())->create();
+    $duty = memberDuty($me, ['name' => 'Decline Me Event']);
+
+    $html = $this->actingAs($me)->get('/dashboard')->assertOk()->getContent();
+
+    expect($html)->not->toContain('@csrf')
+        ->and($html)->not->toContain('@js(');
+
+    preg_match('#<form[^>]*action="'.preg_quote(route('duties.decline', $duty), '#').'"[^>]*>(.*?)</form>#s', $html, $m);
+    expect($m)->not->toBeEmpty()
+        ->and($m[0])->toContain('name="_token"')
+        ->and($m[0])->toContain('type="submit"')
+        ->and($m[0])->toContain('Decline this duty?');
+});
+
+it('renders secondary buttons as submit when asked and as button by default', function () {
+    $submit = (string) $this->blade('<x-secondary-button type="submit">Go</x-secondary-button>');
+    $plain = (string) $this->blade('<x-secondary-button>Go</x-secondary-button>');
+
+    expect($submit)->toContain('type="submit"')->not->toContain('type="button"')
+        ->and($plain)->toContain('type="button"');
+});
+
 it('shows an empty state and hides buttons for non-assigned duties', function () {
     $me = User::factory()->member(Branch::factory()->create())->create();
     $this->actingAs($me)->get('/dashboard')->assertOk()
-        ->assertSee('No duties yet. Your branch leaders will assign you.');
+        ->assertSee('No duties yet. Your branch admin will assign you.');
 
     memberDuty($me, ['name' => 'Done Event'], ['status' => DutyStatus::Declined]);
     $this->get('/dashboard')->assertOk()

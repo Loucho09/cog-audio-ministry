@@ -25,6 +25,8 @@ class DutyAssignment extends Model
         return [
             'status' => DutyStatus::class,
             'responded_at' => 'datetime',
+            'reminded_day_at' => 'datetime',
+            'reminded_soon_at' => 'datetime',
         ];
     }
 
