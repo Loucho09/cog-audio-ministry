@@ -13,6 +13,7 @@ class NotificationController extends Controller
     {
         return view('notifications.index', [
             'notifications' => $request->user()->notifications()->paginate(20),
+            'hasUnread' => $request->user()->unreadNotifications()->exists(),
         ]);
     }
 
@@ -30,17 +31,17 @@ class NotificationController extends Controller
     {
         $request->user()->unreadNotifications()->update(['read_at' => now()]);
 
-        return back();
+        return back(fallback: route('notifications.index'));
     }
 
     /** Only same-app URLs: a relative path (not protocol-relative) or one under APP_URL. */
     private function safeUrl(mixed $url): ?string
     {
-        if (! is_string($url) || $url === '' || str_contains($url, '\\')) {
+        if (! is_string($url) || $url === '' || preg_match('/[\x00-\x20\x7f]/', $url)) {
             return null;
         }
 
-        if (Str::startsWith($url, '/') && ! Str::startsWith($url, '//')) {
+        if (preg_match('#^/(?![/\\\\])#', $url)) {
             return $url;
         }
 

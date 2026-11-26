@@ -44,6 +44,11 @@ class AppServiceProvider extends ServiceProvider
         // Bell data for the member navbar only (never runs for guests or public pages).
         View::composer('components.notification-bell', function ($view) {
             $user = auth()->user();
+
+            if (! $user) {
+                return;
+            }
+
             $view->with([
                 'latest' => $user->notifications()->limit(5)->get(),
                 'unreadCount' => $user->unreadNotifications()->count(),

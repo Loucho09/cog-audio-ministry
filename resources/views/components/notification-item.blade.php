@@ -13,12 +13,12 @@
     >
         <x-notification-icon :type="$data['type'] ?? null" />
         <span class="min-w-0 flex-1">
+            @if ($unread)<span class="sr-only">{{ __('Unread') }}: </span>@endif
             <span class="block break-words text-sm text-text {{ $unread ? 'font-semibold' : 'font-normal text-text/80' }}">{{ $data['message'] ?? '' }}</span>
             <span class="mt-0.5 block text-xs text-text/70">{{ $notification->created_at->diffForHumans() }}</span>
         </span>
         @if ($unread)
             <span class="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>
-            <span class="sr-only">{{ __('Unread') }}</span>
         @endif
     </button>
 </form>

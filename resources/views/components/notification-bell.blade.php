@@ -1,11 +1,10 @@
 {{-- Bell + dropdown. Data comes from the view composer in AppServiceProvider. --}}
-<div x-data="{ open: false }" @keydown.escape.window="if (open) { open = false; $refs.bell.focus() }" @click.outside="open = false" class="sm:relative">
+<div x-data="{ open: false }" @keydown.escape.window="if (open) { open = false; $refs.bell.focus() }" @click.outside="open = false" @focusout="if (open && !$el.contains($event.relatedTarget)) open = false" class="sm:relative">
     <button
         type="button"
         x-ref="bell"
         @click="open = !open"
-        :aria-expanded="open.toString()"
-        aria-haspopup="true"
+        :aria-expanded="open"
         aria-controls="notification-panel"
         aria-label="Notifications, {{ $unreadCount }} unread"
         class="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-text transition-colors duration-200 hover:bg-text/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark"
@@ -14,7 +13,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
         </svg>
         @if ($unreadCount > 0)
-            <span class="absolute right-0.5 top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[0.6875rem] font-bold leading-none text-white" aria-hidden="true">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+            <span class="absolute right-0.5 top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[0.6875rem] font-bold leading-none text-white dark:text-background" aria-hidden="true">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
         @endif
     </button>
 
