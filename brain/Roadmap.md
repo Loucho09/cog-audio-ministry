@@ -125,6 +125,7 @@ Status: done (2026-11-25). Slices 1-7 and final review done; tests 552 total, 55
 Status: done (2026-11-26).
 
 - Duty roster v1 merged to main 2026-11-26; guest assign (typed guest name) merged 2026-11-26; v2a availability done and merged 2026-11-26 (see [[duty-availability]]); v2b swaps done and merged 2026-11-26, spec [[duty-swaps]], tasks [[duty-swaps-tasks]]. See [[duty-guest-assign]].
+- [x] Follow-up done (2026-11-26, branch `feature/admin-dashboard`, merged to main; 916 tests, 915 pass, 1 skipped): admin dashboard and admins-only-manage rule. See [[admin-dashboard]], tasks in [[admin-dashboard-tasks]], decision [[admins-manage-not-serve]].
 
 ### Tasks
 - `events` model, migration: date, time, branch, type (Sunday Service, Revival Night, etc.)
@@ -153,7 +154,7 @@ Status: done (2026-11-26).
 - Email notifications per trigger (new assignment, swap approved, announcement)
 - Queued job for email (Laravel `Queue`)
 - Scheduled reminders (Laravel `Schedule`): day before and 2 hours before each assigned duty
-- Announcements posted by branch-heads, shown on dashboard, optional email blast
+- Announcements posted by branch-admins, shown on dashboard, optional email blast
 - Tests per trigger
 
 ## Phase 6: Equipment, Training, Reports

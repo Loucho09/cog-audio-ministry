@@ -95,7 +95,11 @@ class DutySwapService
                 throw new RosterRuleViolation('You cannot take your own swap.');
             }
 
-            if (! $user->hasAnyRole(['member', 'branch-admin'])) {
+            if ($user->isAdminRole()) {
+                throw new RosterRuleViolation('Admins manage the roster and cannot take swaps.');
+            }
+
+            if (! $user->hasRole('member')) {
                 throw new RosterRuleViolation('This person cannot be given duties.');
             }
 

@@ -147,16 +147,6 @@ test('offerer admin cannot self-approve when another admin exists', function () 
     expect(swapSvc()->approve($swap->fresh(), $adminB)->status)->toBe(DutyStatus::Accepted);
 });
 
-test('sole branch admin who is the claimer may approve', function () {
-    [$swap, $duty] = openSwap();
-    $solo = branchAdminFor($duty);
-    swapSvc()->claim($swap, $solo);
-
-    $new = swapSvc()->approve($swap->fresh(), $solo);
-
-    expect($new->user_id)->toBe($solo->id);
-});
-
 test('remove deletes the assignment and cascades its live swap', function () {
     [$swap, $duty] = claimedSwap();
 

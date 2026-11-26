@@ -109,6 +109,12 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasAdminAccess();
     }
 
+    /** Admins manage the roster; they never serve duties. */
+    public function isAdminRole(): bool
+    {
+        return $this->hasAnyRole(['branch-admin', 'super-admin']);
+    }
+
     /** Same rule as canAccessPanel, usable without a Panel instance. */
     public function hasAdminAccess(): bool
     {

@@ -59,6 +59,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[remove-branch-head-decision]]: branch-head role removed; 1 branch-admin per branch, 2 for Dasma (2026-11-26)
 - [[duty-guest-assign-decision]]: typed guest names on duty assignments, auto-confirmed (2026-11-26)
 - [[duty-availability-decision]]: AM/PM availability blocks with 15:00 cutoff; open-offer swaps and self-approval rule (2026-11-26)
+- [[admins-manage-not-serve]]: admins only manage; cannot be assigned, claim swaps, or mark availability (2026-11-26)
 
 ## Features
 - [[public-layout]]: navbar, footer, theme tokens, placeholder home page (Phase 1, done)
@@ -77,6 +78,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[duty-guest-assign]]: assign a typed guest name to a duty, auto-confirmed (Phase 4, done, merged; tasks in [[duty-guest-assign-tasks]])
 - [[duty-availability]]: members mark unavailable dates and AM/PM blocks; assign respects it (Phase 4 v2a, done, merged 2026-11-26; tasks in [[duty-availability-tasks]])
 - [[duty-swaps]]: open offer, claim, admin approve or reject; Roster → Swaps (Phase 4 v2b, done, merged 2026-11-26; tasks in [[duty-swaps-tasks]])
+- [[admin-dashboard]]: role-based `/dashboard`, admin view for branch running (Phase 4 follow-up, done and merged 2026-11-26; tasks in [[admin-dashboard-tasks]])
 - [[remove-branch-head]]: remove branch-head role, admin limit per branch (Phase 4, done, merged; tasks in [[remove-branch-head-tasks]])
 - [[loading-states]]: progress bar, view transitions, image skeletons, submit guard, admin skeletons, scroll reveal (UI polish add-on before Phase 3, done and merged 2026-11-25; tasks in [[loading-states-tasks]])
 

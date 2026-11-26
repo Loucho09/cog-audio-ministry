@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\AdminDashboardData;
 use App\Actions\UpcomingServices;
 use App\Enums\AvailabilityPart;
 use App\Enums\DutyStatus;
+use App\Filament\Resources\DutySwaps\DutySwapResource;
+use App\Filament\Resources\Events\EventResource;
+use App\Filament\Resources\JoinApplications\JoinApplicationResource;
 use App\Models\Branch;
 use App\Models\DutyAssignment;
 use App\Models\DutySwap;
@@ -15,7 +19,7 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function __construct(private DutyRosterService $roster) {}
+    public function __construct(private DutyRosterService $roster, private AdminDashboardData $adminData) {}
 
     public function __invoke(Request $request): View
     {
@@ -28,6 +32,21 @@ class DashboardController extends Controller
             $hour < 18 => 'Good afternoon',
             default => 'Good evening',
         };
+
+        // Admins manage the roster and never serve, so they get their own dashboard.
+        if ($user->isAdminRole()) {
+            return view('dashboard-admin', [
+                'greeting' => $greeting,
+                'groups' => $this->adminData->for($user),
+                'isSuper' => $user->hasRole('super-admin'),
+                'links' => [
+                    'event' => EventResource::getUrl('create'),
+                    'events' => EventResource::getUrl('index'),
+                    'applications' => JoinApplicationResource::getUrl('index'),
+                    'swaps' => DutySwapResource::getUrl('index'),
+                ],
+            ]);
+        }
 
         $branch = $user->branch;
 

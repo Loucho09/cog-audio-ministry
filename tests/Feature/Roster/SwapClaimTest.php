@@ -21,13 +21,6 @@ test('same-branch member claims an open swap', function () {
         ->and($duty->fresh()->status)->toBe(DutyStatus::SwapRequested);
 });
 
-test('branch admin of the branch can claim', function () {
-    [$swap, $duty] = openSwap();
-    $admin = User::factory()->branchAdmin($duty->event->branch)->create();
-
-    expect(swapSvc()->claim($swap, $admin)->status)->toBe(SwapStatus::Claimed);
-});
-
 test('second claimer is rejected', function () {
     [$swap, $duty] = openSwap();
     swapSvc()->claim($swap, rosterMember($duty->event));

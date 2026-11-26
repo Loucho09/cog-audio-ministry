@@ -40,7 +40,11 @@ class DutyRosterService
                 throw new RosterRuleViolation('This member belongs to a different branch.');
             }
 
-            if (! $member->hasAnyRole(['member', 'branch-admin'])) {
+            if ($member->isAdminRole()) {
+                throw new RosterRuleViolation('Admins manage the roster and are not given duties.');
+            }
+
+            if (! $member->hasRole('member')) {
                 throw new RosterRuleViolation('This person cannot be given duties.');
             }
 

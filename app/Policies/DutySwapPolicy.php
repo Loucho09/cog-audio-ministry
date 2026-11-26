@@ -18,13 +18,13 @@ class DutySwapPolicy
         return $user->hasRole('super-admin') || ($this->viewAny($user) && $swap->belongsToBranch($user->branch_id));
     }
 
-    /** Same-branch member or branch-admin who is not the offerer. The service enforces the rest. */
+    /** Same-branch member (never an admin) who is not the offerer. The service enforces the rest. */
     public function claim(User $user, DutySwap $swap): bool
     {
         return (int) $swap->offered_by !== (int) $user->id
             && $user->branch_id !== null
             && $swap->belongsToBranch($user->branch_id)
-            && $user->hasAnyRole(['member', 'branch-admin']);
+            && $user->hasRole('member');
     }
 
     public function cancel(User $user, DutySwap $swap): bool
