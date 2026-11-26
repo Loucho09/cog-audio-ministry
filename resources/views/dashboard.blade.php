@@ -44,7 +44,7 @@
                 <p class="mt-3 text-sm text-text/70">{{ __('No duties yet. Your branch admin will assign you.') }}</p>
             @else
                 @if ($upcomingDuties->isEmpty())
-                    <p class="mt-3 text-sm text-text/70">{{ __('Duties you accept will show up here.') }}</p>
+                    <p class="mt-3 text-sm text-text/70">{{ $needsReply->isNotEmpty() ? __('Once you accept a duty above, it will show here.') : __('Duties you accept will show up here.') }}</p>
                 @else
                     <ul class="mt-4 divide-y divide-text/10">
                         @foreach ($upcomingDuties->take(5) as $duty)
@@ -52,7 +52,7 @@
                         @endforeach
                     </ul>
                     @if ($upcomingDuties->count() > 5)
-                        <details class="group mt-2 border-t border-text/10">
+                        <details class="group mt-4 border-t border-text/10">
                             <summary class="flex min-h-11 cursor-pointer items-center text-sm font-medium text-primary-dark underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark">
                                 <span class="group-open:hidden">{{ __('Show all (:count)', ['count' => $upcomingDuties->count()]) }}</span>
                                 <span class="hidden group-open:inline">{{ __('Show fewer') }}</span>
@@ -67,7 +67,7 @@
                 @endif
 
                 @if ($declinedDuties->isNotEmpty())
-                    <details class="mt-2 border-t border-text/10">
+                    <details class="mt-4 border-t border-text/10">
                         <summary class="flex min-h-11 cursor-pointer items-center text-sm font-medium text-text/70 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark">
                             {{ __('Declined (:count)', ['count' => $declinedDuties->count()]) }}
                         </summary>
@@ -197,7 +197,8 @@
         </div>
 
         @php
-            $serviceRows = collect($serviceGroups)->flatMap(fn ($group) => collect($group['occurrences'])->map(fn ($item) => $item + ['branch' => $group['branch'], 'is_own' => $group['is_own']]));        @endphp
+            $serviceRows = collect($serviceGroups)->flatMap(fn ($group) => collect($group['occurrences'])->map(fn ($item) => $item + ['branch' => $group['branch'], 'is_own' => $group['is_own']]));
+        @endphp
 
         <div class="grid items-start gap-6 sm:gap-8 lg:grid-cols-2">
             <section data-reveal aria-labelledby="services-heading" class="{{ $card }}">
@@ -258,7 +259,7 @@
                                 <div>
                                     <dt class="font-medium text-text/70">{{ __('Facebook') }}</dt>
                                     <dd class="mt-0.5 break-words">
-                                        <a href="{{ $facebook }}" target="_blank" rel="noopener noreferrer" class="text-primary underline underline-offset-2 hover:no-underline">{{ __('Visit our Facebook page') }}</a>
+                                        <a href="{{ $facebook }}" target="_blank" rel="noopener noreferrer" class="text-primary-dark underline underline-offset-2 hover:no-underline">{{ __('Visit our Facebook page') }}</a>
                                     </dd>
                                 </div>
                             @endif

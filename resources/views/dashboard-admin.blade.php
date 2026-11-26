@@ -69,7 +69,7 @@
                             <ul class="mt-4 divide-y divide-text/10">
                                 @foreach ($group['unfilled']->take(6) as $row)
                                     <li class="py-3 first:pt-0 last:pb-0">
-                                        <a href="{{ $row['url'] }}" class="break-words font-medium text-primary underline underline-offset-2 hover:no-underline">{{ $row['event']->name }}</a>
+                                        <a href="{{ $row['url'] }}" class="break-words font-medium text-primary-dark underline underline-offset-2 hover:no-underline">{{ $row['event']->name }}</a>
                                         <p class="mt-0.5 text-sm text-text/70">
                                             <time datetime="{{ $row['event']->starts_at->toIso8601String() }}">{{ $row['event']->starts_at->timezone($tz)->format('D, M j · g:i A') }}</time>
                                         </p>
@@ -82,7 +82,7 @@
                                 @endforeach
                             </ul>
                             @if ($group['unfilled']->count() > 6)
-                                <p class="mt-4 text-sm"><a href="{{ $links['events'] }}" class="font-medium text-primary underline underline-offset-2 hover:no-underline">+{{ $group['unfilled']->count() - 6 }} {{ __('more') }}</a></p>
+                                <p class="mt-4 text-sm"><a href="{{ $links['events'] }}" class="font-medium text-primary-dark underline underline-offset-2 hover:no-underline">+{{ $group['unfilled']->count() - 6 }} {{ __('more') }}</a></p>
                             @endif
                         @endif
                     </section>

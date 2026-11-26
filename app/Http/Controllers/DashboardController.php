@@ -126,8 +126,10 @@ class DashboardController extends Controller
             ->filter(fn (DutyAssignment $duty) => $duty->status === DutyStatus::Assigned && ! $duty->event->hasStarted())
             ->values();
 
+        $needsReplyIds = $needsReply->pluck('id');
+
         $upcomingDuties = $duties
-            ->reject(fn (DutyAssignment $duty) => $duty->status === DutyStatus::Declined || $needsReply->contains($duty))
+            ->reject(fn (DutyAssignment $duty) => $duty->status === DutyStatus::Declined || $needsReplyIds->contains($duty->id))
             ->sortBy(fn (DutyAssignment $duty) => [
                 match ($duty->status) {
                     DutyStatus::Assigned => 0,

@@ -2,26 +2,35 @@
 
 use App\Enums\DutyStatus;
 use App\Models\Branch;
+use App\Models\DutyAssignment;
+use App\Models\Event;
 use App\Models\JoinApplication;
 use App\Models\User;
+
+function polishDuty(User $user, array $event = [], array $attrs = []): DutyAssignment
+{
+    $event = Event::factory()->create(['branch_id' => $user->branch_id] + $event);
+
+    return DutyAssignment::factory()->create(['event_id' => $event->id, 'user_id' => $user->id] + $attrs);
+}
 
 it('shows Needs your reply only when a duty is assigned and not started', function () {
     $me = User::factory()->member(Branch::factory()->create())->create();
 
     $this->actingAs($me)->get('/dashboard')->assertOk()->assertDontSee('Needs your reply');
 
-    memberDuty($me, ['name' => 'Accepted One'], ['status' => DutyStatus::Accepted]);
+    polishDuty($me, ['name' => 'Accepted One'], ['status' => DutyStatus::Accepted]);
     $this->get('/dashboard')->assertOk()->assertDontSee('Needs your reply');
 
-    memberDuty($me, ['name' => 'Waiting One']);
+    polishDuty($me, ['name' => 'Waiting One']);
     $this->get('/dashboard')->assertOk()
         ->assertSeeInOrder(['Needs your reply', 'Waiting One', 'My upcoming duties', 'Accepted One']);
 });
 
 it('puts declined duties inside a details disclosure at the end', function () {
     $me = User::factory()->member(Branch::factory()->create())->create();
-    memberDuty($me, ['name' => 'Turned Down Event'], ['status' => DutyStatus::Declined]);
-    memberDuty($me, ['name' => 'Kept Event'], ['status' => DutyStatus::Accepted]);
+    polishDuty($me, ['name' => 'Turned Down Event'], ['status' => DutyStatus::Declined]);
+    polishDuty($me, ['name' => 'Kept Event'], ['status' => DutyStatus::Accepted]);
 
     $html = $this->actingAs($me)->get('/dashboard')->assertOk()->getContent();
 
@@ -32,7 +41,7 @@ it('puts declined duties inside a details disclosure at the end', function () {
 it('caps upcoming duties at five behind a show all disclosure', function () {
     $me = User::factory()->member(Branch::factory()->create())->create();
     foreach (range(1, 7) as $i) {
-        memberDuty($me, ['name' => "Cap Event {$i}", 'starts_at' => now()->addDays($i), 'ends_at' => now()->addDays($i)->addHours(2)], ['status' => DutyStatus::Accepted]);
+        polishDuty($me, ['name' => "Cap Event {$i}", 'starts_at' => now()->addDays($i), 'ends_at' => now()->addDays($i)->addHours(2)], ['status' => DutyStatus::Accepted]);
     }
 
     $this->actingAs($me)->get('/dashboard')->assertOk()->assertSee('Show all (7)');
