@@ -115,8 +115,10 @@ test('index paginates 20 per page', function () {
         bellNote($user, ['message' => "Note number {$i}"]);
     }
 
-    $this->actingAs($user)->get(route('notifications.index'))->assertOk()->assertSee('page=2', false);
-    $this->actingAs($user)->get(route('notifications.index', ['page' => 2]))->assertOk();
+    $this->actingAs($user)->get(route('notifications.index'))->assertOk()
+        ->assertViewHas('notifications', fn ($page) => $page->total() === 21 && $page->count() === 20 && $page->hasMorePages());
+    $this->actingAs($user)->get(route('notifications.index', ['page' => 2]))->assertOk()
+        ->assertViewHas('notifications', fn ($page) => $page->count() === 1 && $page->currentPage() === 2);
 });
 
 test('the bell adds at most two queries', function () {
