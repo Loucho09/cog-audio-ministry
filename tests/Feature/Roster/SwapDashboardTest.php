@@ -159,7 +159,7 @@ it('shows an expired notice when the swap event has started', function () {
     $duty->event->update(['starts_at' => now()->subHour(), 'ends_at' => now()->addHour()]);
 
     $this->actingAs($owner)->get('/dashboard')->assertOk()
-        ->assertSee("Swap expired. You're still on this duty.")
+        ->assertSee("No one took this swap in time, so you're still on this duty.")
         ->assertDontSee('Cancel swap');
 });
 

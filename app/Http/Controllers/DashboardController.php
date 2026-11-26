@@ -121,9 +121,33 @@ class DashboardController extends Controller
 
         $availability = $user->can('create', MemberUnavailability::class) ? $unavailability : collect();
 
+        // Duties that can still be answered come first, then the rest by what needs attention, then by date.
+        $needsReply = $duties
+            ->filter(fn (DutyAssignment $duty) => $duty->status === DutyStatus::Assigned && ! $duty->event->hasStarted())
+            ->values();
+
+        $upcomingDuties = $duties
+            ->reject(fn (DutyAssignment $duty) => $duty->status === DutyStatus::Declined || $needsReply->contains($duty))
+            ->sortBy(fn (DutyAssignment $duty) => [
+                match ($duty->status) {
+                    DutyStatus::Assigned => 0,
+                    DutyStatus::SwapRequested => 1,
+                    default => 2,
+                },
+                $duty->event->starts_at->getTimestamp(),
+            ])
+            ->values();
+
+        $declinedDuties = $duties
+            ->filter(fn (DutyAssignment $duty) => $duty->status === DutyStatus::Declined)
+            ->values();
+
         return view('dashboard', [
             'availability' => $availability,
             'duties' => $duties,
+            'needsReply' => $needsReply,
+            'upcomingDuties' => $upcomingDuties,
+            'declinedDuties' => $declinedDuties,
             'openSwaps' => $openSwaps,
             'claimedSwaps' => $claimedSwaps,
             'greeting' => $greeting,

@@ -26,7 +26,7 @@ it('never reveal-animates the hero (above the fold)', function () {
 });
 
 it('marks the member dashboard cards for scroll reveal', function () {
-    // A plain member (no admin role) sees 7 sections on the dashboard.
+    // A plain member (no admin role) sees 6 sections on the dashboard.
     $branch = Branch::factory()->create();
     $member = User::factory()->member($branch)->create();
     expect($member->hasRole('member'))->toBeTrue()->and($member->hasRole(['branch-admin', 'super-admin']))->toBeFalse();
@@ -36,7 +36,7 @@ it('marks the member dashboard cards for scroll reveal', function () {
         ->assertOk()
         ->getContent();
 
-    expect(substr_count($html, '<section data-reveal'))->toBe(8)
+    expect(substr_count($html, '<section data-reveal'))->toBe(6)
         ->and($html)->toContain('data-reveal-delay="80"');
 });
 

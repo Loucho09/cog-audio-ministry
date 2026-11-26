@@ -57,7 +57,7 @@ it('renders secondary buttons as submit when asked and as button by default', fu
 it('shows an empty state and hides buttons for non-assigned duties', function () {
     $me = User::factory()->member(Branch::factory()->create())->create();
     $this->actingAs($me)->get('/dashboard')->assertOk()
-        ->assertSee('No duties yet. Your branch leaders will assign you.');
+        ->assertSee('No duties yet. Your branch admin will assign you.');
 
     memberDuty($me, ['name' => 'Done Event'], ['status' => DutyStatus::Declined]);
     $this->get('/dashboard')->assertOk()
