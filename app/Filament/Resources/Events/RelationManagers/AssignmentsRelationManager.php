@@ -69,7 +69,7 @@ class AssignmentsRelationManager extends RelationManager
     {
         return User::query()
             ->where('branch_id', $this->event()->branch_id)
-            ->whereHas('roles', fn (Builder $q) => $q->whereIn('name', ['member', 'branch-admin']));
+            ->whereHas('roles', fn (Builder $q) => $q->where('name', 'member'));
     }
 
     /** @var array<int, array<int, true>> memoized per event id for this request */

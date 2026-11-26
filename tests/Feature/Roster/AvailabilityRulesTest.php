@@ -168,13 +168,13 @@ test('policy: owner can delete, another member cannot', function () {
         ->and($other->can('delete', $entry))->toBeFalse();
 });
 
-test('policy: members and branch admins can create, others cannot', function () {
+test('policy: members can create, admins and others cannot', function () {
     $member = availMember();
     $admin = User::factory()->branchAdmin($member->branch)->create();
     $roleless = User::factory()->create();
 
     expect($member->can('create', MemberUnavailability::class))->toBeTrue()
-        ->and($admin->can('create', MemberUnavailability::class))->toBeTrue()
+        ->and($admin->can('create', MemberUnavailability::class))->toBeFalse()
         ->and($roleless->can('create', MemberUnavailability::class))->toBeFalse();
 });
 

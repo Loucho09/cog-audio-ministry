@@ -9,7 +9,7 @@ class MemberUnavailabilityPolicy
 {
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['member', 'branch-admin']);
+        return $user->hasRole('member') && ! $user->isAdminRole();
     }
 
     public function delete(User $user, MemberUnavailability $entry): bool
