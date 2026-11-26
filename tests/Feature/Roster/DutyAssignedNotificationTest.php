@@ -115,7 +115,7 @@ test('database payload has the bell fields', function () {
     ]);
 
     expect((new DutyAssigned($assignment))->toArray($member))
-        ->toHaveKeys(['assignment_id', 'event_id', 'role', 'event_title', 'starts_at', 'place', 'message']);
+        ->toHaveKeys(['type', 'assignment_id', 'event_id', 'role', 'event_title', 'starts_at', 'place', 'message']);
 });
 
 test('email_notifications null still includes mail', function () {

@@ -48,6 +48,7 @@ class DutyAssigned extends Notification implements ShouldQueue
         $d = $this->details($notifiable);
 
         return [
+            'type' => 'duty_assigned',
             'assignment_id' => $this->assignment->id,
             'event_id' => $this->assignment->event_id,
             'role' => $d['role'],

@@ -10,7 +10,9 @@ use App\Models\DutySwap;
 use App\Models\Event;
 use App\Models\MemberUnavailability;
 use App\Models\User;
+use App\Notifications\DutySwapUpdated;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class DutySwapService
 {
@@ -73,7 +75,7 @@ class DutySwapService
 
     public function claim(DutySwap $swap, User $user): DutySwap
     {
-        return DB::transaction(function () use ($swap, $user) {
+        $swap = DB::transaction(function () use ($swap, $user) {
             // Lock order: swap, then user (the assignment is only read).
             $swap = DutySwap::query()->whereKey($swap->id)->lockForUpdate()->firstOrFail();
             $user = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
@@ -123,6 +125,10 @@ class DutySwapService
 
             return $swap;
         });
+
+        $this->notifySwap($swap, DutySwapUpdated::CLAIMED, $user);
+
+        return $swap;
     }
 
     /**
@@ -136,7 +142,7 @@ class DutySwapService
      */
     public function approve(DutySwap $swap, User $admin): DutyAssignment
     {
-        return DB::transaction(function () use ($swap, $admin) {
+        [$new, $swap] = DB::transaction(function () use ($swap, $admin) {
             $swap = DutySwap::query()->whereKey($swap->id)->lockForUpdate()->firstOrFail();
             $event = Event::query()->whereKey(DutyAssignment::query()->whereKey($swap->duty_assignment_id)->value('event_id'))->lockForUpdate()->firstOrFail();
             $claimer = $swap->claimed_by
@@ -184,14 +190,18 @@ class DutySwapService
                 'decided_at' => now(),
             ]);
 
-            return $new;
+            return [$new, $swap];
         });
+
+        $this->notifySwap($swap, DutySwapUpdated::APPROVED, $admin);
+
+        return $new;
     }
 
     /** Rejects an open or claimed swap; the duty goes back to Accepted. Lock order: swap, then assignment. */
     public function reject(DutySwap $swap, User $admin): DutySwap
     {
-        return DB::transaction(function () use ($swap, $admin) {
+        $swap = DB::transaction(function () use ($swap, $admin) {
             $swap = DutySwap::query()->whereKey($swap->id)->lockForUpdate()->firstOrFail();
             $assignment = DutyAssignment::query()->whereKey($swap->duty_assignment_id)->lockForUpdate()->firstOrFail();
 
@@ -206,6 +216,40 @@ class DutySwapService
 
             return $swap;
         });
+
+        $this->notifySwap($swap, DutySwapUpdated::REJECTED, $admin);
+
+        return $swap;
+    }
+
+    /**
+     * Single trigger point for swap messages, called after the transaction commits.
+     * Claim: branch admins + super-admins + offerer. Approve/reject: offerer + claimer (a rejected open
+     * swap has no claimer). The actor is never notified about their own action.
+     * A notification problem is reported, never thrown: the swap action is already committed.
+     */
+    private function notifySwap(DutySwap $swap, string $type, User $actor): void
+    {
+        try {
+            $ids = $type === DutySwapUpdated::CLAIMED
+                ? User::query()
+                    // whereHas, not ->role(): the role scope throws if a role row does not exist.
+                    ->whereHas('roles', fn ($r) => $r->where('name', 'super-admin'))
+                    ->orWhere(fn ($q) => $q->where('branch_id', $swap->branch_id)
+                        ->whereHas('roles', fn ($r) => $r->where('name', 'branch-admin')))
+                    ->pluck('id')->push($swap->offered_by)
+                : collect([$swap->offered_by, $swap->claimed_by]);
+
+            $recipients = User::query()
+                ->whereIn('id', $ids->filter()->unique()->reject(fn ($id) => (int) $id === (int) $actor->id)->values())
+                ->get();
+
+            foreach ($recipients as $recipient) {
+                $recipient->notify(new DutySwapUpdated($swap, $type));
+            }
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 
     /** Super-admin always; a branch-admin of the swap's branch, except self-approval unless they are the only admin. */
