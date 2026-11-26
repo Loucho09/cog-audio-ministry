@@ -17,6 +17,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class DutyRosterService
 {
@@ -99,7 +100,11 @@ class DutyRosterService
 
         if ($notify) {
             // Single trigger point: only a fresh admin assignment of a real member. Guests and swaps never come through here.
-            $member->notify(new DutyAssigned($assignment));
+            try {
+                $member->notify(new DutyAssigned($assignment));
+            } catch (Throwable $e) {
+                report($e); // The assignment is already committed; a notification problem must not undo it.
+            }
         }
 
         return $assignment;

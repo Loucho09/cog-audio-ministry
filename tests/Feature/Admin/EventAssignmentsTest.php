@@ -13,10 +13,12 @@ use App\Models\DutyRole;
 use App\Models\Event;
 use App\Models\MemberUnavailability;
 use App\Models\User;
+use App\Notifications\DutyAssigned;
 use App\Policies\EventPolicy;
 use App\Services\DutyRosterService;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -359,4 +361,14 @@ it('hint set equals the set of members assign() rejects for the event', function
     })->pluck('id')->all();
 
     expect($hinted)->toEqualCanonicalizing($rejected)->and($rejected)->not->toBeEmpty();
+});
+
+test('the assign action notifies the member', function () {
+    Notification::fake();
+    $this->actingAs(User::factory()->branchAdmin($this->branchA)->create());
+
+    manager($this->event)
+        ->callTableAction('assign', data: ['duty_role_id' => $this->role->id, 'user_id' => $this->member->id]);
+
+    Notification::assertSentTo($this->member, DutyAssigned::class);
 });

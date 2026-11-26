@@ -13,6 +13,8 @@ class DutyAssigned extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    public $deleteWhenMissingModels = true;
+
     public function __construct(public DutyAssignment $assignment)
     {
         $this->afterCommit();
@@ -56,30 +58,25 @@ class DutyAssigned extends Notification implements ShouldQueue
         ];
     }
 
-    public function toDatabase(object $notifiable): array
-    {
-        return $this->toArray($notifiable);
-    }
-
     /** @return array<string, string> */
     private function details(object $notifiable): array
     {
         $assignment = $this->assignment->loadMissing('event.branch', 'dutyRole');
         $event = $assignment->event;
         $branch = $event->branch;
-        $start = $event->starts_at->copy()->timezone(config('app.timezone'));
+        $start = $event->starts_at?->copy()->timezone(config('app.timezone'));
 
-        $place = filled($branch->address) ? $branch->address : $branch->name;
+        $place = filled($branch?->address) ? $branch->address : (string) $branch?->name;
 
         if ($notifiable->branch_id !== null && (int) $notifiable->branch_id !== (int) $event->branch_id) {
-            $place .= ' ('.$branch->name.' branch)';
+            $place .= ' ('.$branch?->name.' branch)';
         }
 
         return [
             'role' => $assignment->dutyRole->name,
             'event' => $event->name,
-            'when' => $start->format('l, F j, Y \a\t g:i A'),
-            'starts_at' => $start->toIso8601String(),
+            'when' => $start?->format('l, F j, Y \a\t g:i A') ?? 'a date to be confirmed',
+            'starts_at' => $start?->toIso8601String() ?? '',
             'place' => $place,
         ];
     }
