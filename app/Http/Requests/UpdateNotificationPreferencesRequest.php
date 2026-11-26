@@ -21,7 +21,7 @@ class UpdateNotificationPreferencesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email_notifications' => ['required', 'boolean'],
+            'email_notifications' => ['boolean'],
         ];
     }
 }

@@ -17,15 +17,16 @@
             <span class="relative mt-0.5 inline-flex h-6 w-11 shrink-0">
                 <input
                     type="checkbox"
+                    role="switch"
                     id="email_notifications"
                     name="email_notifications"
                     value="1"
                     aria-describedby="email_notifications_help"
-                    @checked(old('email_notifications', auth()->user()->email_notifications))
-                    class="peer absolute -inset-2.5 z-10 h-11 w-16 cursor-pointer opacity-0"
+                    @checked(old('email_notifications', $user->email_notifications))
+                    class="peer sr-only"
                 >
-                <span class="pointer-events-none absolute inset-0 rounded-full bg-text/25 transition-colors peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-surface"></span>
-                <span class="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5"></span>
+                <span aria-hidden="true" class="pointer-events-none absolute inset-0 rounded-full bg-text/50 transition-colors motion-reduce:transition-none peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-surface"></span>
+                <span aria-hidden="true" class="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform motion-reduce:transition-none peer-checked:translate-x-5"></span>
             </span>
             <span>
                 <span class="block text-sm font-medium text-text">{{ __('Email me about my duties (new assignments, swaps, reminders)') }}</span>
@@ -37,16 +38,17 @@
         <div class="flex flex-wrap items-center gap-4">
             <x-primary-button :loading-text="__('Saving…')">{{ __('Save') }}</x-primary-button>
 
-            @if (session('status') === 'notifications-updated')
-                <p
-                    role="status"
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-text/70"
-                >{{ __('Saved.') }}</p>
-            @endif
+            <div role="status" aria-live="polite">
+                @if (session('status') === 'notifications-updated')
+                    <p
+                        x-data="{ show: true }"
+                        x-show="show"
+                        x-transition
+                        x-init="setTimeout(() => show = false, 2000)"
+                        class="text-sm text-text/70"
+                    >{{ __('Saved.') }}</p>
+                @endif
+            </div>
         </div>
     </form>
 </section>

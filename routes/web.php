@@ -40,7 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->middleware('throttle:password-change')->name('profile.update');
-    Route::patch('/profile/notifications', [ProfileController::class, 'updateNotifications'])->middleware('throttle:password-change')->name('profile.notifications.update');
+    Route::patch('/profile/notifications', [ProfileController::class, 'updateNotifications'])->middleware('throttle:30,1')->name('profile.notifications.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->middleware('throttle:password-change')->name('profile.destroy');
 });
 

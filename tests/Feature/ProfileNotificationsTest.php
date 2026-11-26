@@ -73,3 +73,10 @@ test('main profile update cannot change email_notifications', function () {
     expect($user->fresh()->name)->toBe('New Name');
     expect($user->fresh()->email_notifications)->toBeTrue();
 });
+
+test('notification route has its own throttle, not the password bucket', function () {
+    $middleware = collect(app('router')->getRoutes()->getByName('profile.notifications.update')->gatherMiddleware());
+
+    expect($middleware->contains('throttle:30,1'))->toBeTrue();
+    expect($middleware->contains('throttle:password-change'))->toBeFalse();
+});
