@@ -498,6 +498,12 @@
     opacity: 0;
 }
 
+/* Marquee outline row: hollow letters on the dark console band (home/marquee). */
+.marquee-outline {
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(255 255 255 / 0.35);
+}
+
 /* Masked heading reveal: a little room so descenders (g, y) are not clipped by the mask. */
 .split-word-mask {
     padding-bottom: 0.14em;

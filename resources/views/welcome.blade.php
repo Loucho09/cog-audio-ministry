@@ -11,6 +11,7 @@
             $sundayServices = collect($schedule['weekly'] ?? [])->where('day', 'Sunday')->sum(fn ($line) => count($line['times'] ?? []));
         @endphp
         <x-home.hero :sunday-services="$sundayServices" />
+        <x-home.marquee />
         <x-home.about :services-per-week="$servicesPerWeek" :churches-count="$churches->count()" />
         <x-home.what-we-do />
         <x-home.services :branch="$branch" :schedule="$schedule" />
@@ -20,5 +21,5 @@
         <x-home.join />
         <x-home.contact />
     </div>
-    {{-- Not used on the homepage any more (files kept on disk): home/marquee, home/impact (now in About), home/stay-updated (now in Contact). --}}
+    {{-- Not used on the homepage any more (files kept on disk): home/impact (now in About), home/stay-updated (now in Contact). --}}
 </x-public-layout>

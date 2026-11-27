@@ -22,6 +22,7 @@ import {
     signalLine,
     spotlight,
     strips,
+    velocityMarquee,
 } from './effects';
 import { initHero } from './hero';
 
@@ -97,6 +98,7 @@ async function initSmoothScroll() {
 // Entrances that are set up lazily: each one builds its tweens and ScrollTriggers only when its element nears the
 // viewport (see initSections). Listed in page order.
 const LAZY_SETUPS = [
+    ['[data-fx="marquee"]', velocityMarquee],
     ['[data-fx="fader-heading"]', faderHeading],
     ['[data-fx="patch-rows"]', patchRows],
     ['[data-fx="meters"]', meters],

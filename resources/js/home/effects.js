@@ -15,6 +15,7 @@
  * - cascade: team cards fade in.
  * - led: the join panel's LEDs power on, and the glow follows the pointer.
  * - signalLine: the gutter line draws down, and nodes light as sections enter.
+ * - velocityMarquee: the word band under the hero; speed and skew follow scroll velocity.
  *
  * Start states are set from JS only, so without JS every element is visible.
  * Every reveal goes through revealWhen(), which also plays when the page is already past the trigger
@@ -304,4 +305,50 @@ export function signalLine(line) {
             onToggle: (self) => section.classList.toggle('is-signal', self.isActive),
         });
     });
+}
+
+/**
+ * Word band under the hero. Each row drifts at its base speed; scrolling speeds it up and leans it (skew), then it
+ * eases back. Rows hold two identical copies, so wrapping at half the width is seamless. Runs only while visible.
+ * Returns a teardown that removes the ticker callback.
+ */
+export function velocityMarquee(band) {
+    const rows = Array.from(band.querySelectorAll('[data-marquee-row]')).map((row) => ({
+        row,
+        direction: Number(row.dataset.direction) || 1,
+        speed: Number(row.dataset.speed) || 40, // px per second
+        x: 0,
+        skew: gsap.quickTo(row, 'skewX', { duration: 0.5, ease: 'power3.out' }),
+        setX: gsap.quickSetter(row, 'x', 'px'),
+    }));
+
+    let velocity = 0;
+    let sign = 1;
+    let visible = false;
+
+    ScrollTrigger.create({
+        trigger: band,
+        start: 'top bottom',
+        end: 'bottom top',
+        onToggle: (self) => (visible = self.isActive),
+        onUpdate: (self) => {
+            velocity = self.getVelocity();
+            if (Math.abs(velocity) > 20) sign = velocity > 0 ? 1 : -1;
+        },
+    });
+
+    const tick = (time, deltaTime) => {
+        velocity *= 0.92; // back to base speed once scrolling stops
+        if (!visible || document.hidden) return;
+        const boost = 1 + Math.min(Math.abs(velocity) / 300, 6);
+        rows.forEach((r) => {
+            const half = r.row.scrollWidth / 2;
+            r.x -= r.speed * r.direction * sign * boost * (deltaTime / 1000);
+            r.x = gsap.utils.wrap(-half, 0, r.x);
+            r.setX(r.x);
+            r.skew(gsap.utils.clamp(-8, 8, (velocity / -320) * r.direction));
+        });
+    };
+    gsap.ticker.add(tick);
+    return () => gsap.ticker.remove(tick);
 }

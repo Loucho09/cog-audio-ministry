@@ -34,8 +34,8 @@ it('renders exactly one h1 with the ministry name in the hero', function () {
     $h1s = $xpath->query('//h1');
 
     expect($h1s->length)->toBe(1)
-        ->and(homepageText($xpath, '//h1'))->toBe('We serve behind the sound.')
-        ->and(homepageText($xpath, '//section[@aria-labelledby="hero-title"]//p[contains(normalize-space(), "CH 00")]'))->toContain(config('ministry.name'))
+        ->and(homepageText($xpath, '//h1'))->toBe(config('ministry.name'))
+        ->and(homepageText($xpath, '//section[@aria-labelledby="hero-title"]//p[contains(normalize-space(), "CH 00")]'))->toContain(config('ministry.subheader'))
         ->and(homepageText($xpath, '//section[@aria-labelledby="hero-title"]'))->toContain(config('ministry.tagline'));
 });
 
@@ -82,26 +82,28 @@ it('renders the hero background as a responsive, decorative picture with a jpg f
         ->and($source->length)->toBe(1)
         ->and($source->item(0)->getAttribute('type'))->toBe('image/webp')
         ->and($source->item(0)->getAttribute('srcset'))->toBe(
-            asset('images/hero-console-800.webp').' 800w, '
-            .asset('images/hero-console-1600.webp').' 1600w'
+            asset('images/cover-800.webp').' 800w, '
+            .asset('images/cover-1200.webp').' 1200w, '
+            .asset('images/cover.webp').' 1600w'
         )
-        ->and($source->item(0)->getAttribute('sizes'))->toBe('(min-width: 1024px) 58vw, 100vw')
+        ->and($source->item(0)->getAttribute('sizes'))->toBe('100vw')
         ->and($img->length)->toBe(1)
-        ->and($img->item(0)->getAttribute('src'))->toBe(asset('images/hero-console-1600.jpg'))
+        ->and($img->item(0)->getAttribute('src'))->toBe(asset('images/cover.jpg'))
         ->and($img->item(0)->getAttribute('width'))->toBe('1600')
-        ->and($img->item(0)->getAttribute('height'))->toBe('1724')
+        ->and($img->item(0)->getAttribute('height'))->toBe('609')
         ->and($img->item(0)->getAttribute('fetchpriority'))->toBe('high')
         ->and($img->item(0)->getAttribute('decoding'))->toBe('async')
         ->and($img->item(0)->getAttribute('loading'))->toBe('')
         ->and($img->item(0)->hasAttribute('alt'))->toBeTrue()
         ->and($img->item(0)->getAttribute('alt'))->toBe('')
-        ->and($img->item(0)->getAttribute('class'))->toContain('object-contain');
+        ->and($img->item(0)->getAttribute('class'))->toContain('object-cover');
 });
 
-it('ships the console poster (1600 and 800 webp, 1600 jpg) in public/images', function () {
-    expect(file_exists(public_path('images/hero-console-1600.jpg')))->toBeTrue()
-        ->and(file_exists(public_path('images/hero-console-1600.webp')))->toBeTrue()
-        ->and(file_exists(public_path('images/hero-console-800.webp')))->toBeTrue();
+it('ships the hero cover photo (800, 1200 and 1600 webp, 1600 jpg) in public/images', function () {
+    expect(file_exists(public_path('images/cover.jpg')))->toBeTrue()
+        ->and(file_exists(public_path('images/cover.webp')))->toBeTrue()
+        ->and(file_exists(public_path('images/cover-1200.webp')))->toBeTrue()
+        ->and(file_exists(public_path('images/cover-800.webp')))->toBeTrue();
 });
 
 it('renders the hero decorative shapes without blur-3xl', function () {
@@ -166,5 +168,8 @@ it('renders every homepage section in the console order with its channel label',
     }
 
     // Retired section markup is gone from the homepage.
-    expect($xpath->query('//*[@id="impact" or @id="updates" or @data-marquee]')->length)->toBe(0);
+    expect($xpath->query('//*[@id="impact" or @id="updates"]')->length)->toBe(0);
+
+    // The word band under the hero is decorative.
+    expect($xpath->query('//*[@data-marquee][@aria-hidden="true"]')->length)->toBe(1);
 });
