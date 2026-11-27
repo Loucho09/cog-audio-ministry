@@ -27,9 +27,10 @@
         <div class="mt-12 lg:mt-16">
             <p class="font-mono text-sm text-text/70">Photos coming soon.</p>
             {{-- TODO: owner to add real ministry photos in Filament (Gallery). --}}
-            <ul class="mt-6 grid grid-cols-2 gap-6 lg:flex lg:gap-8 lg:overflow-x-auto" data-fx="hscroll">
+            {{-- Placeholders are a plain grid on every screen size; only real photos pin and scroll sideways. --}}
+            <ul class="mt-6 grid grid-cols-2 gap-6 lg:grid-cols-4 lg:gap-8">
                 @foreach (range(1, 4) as $n)
-                    <li class="flex aspect-[4/3] flex-col items-start justify-end gap-1 rounded-console border border-dashed border-text/20 bg-surface p-4 lg:w-[26rem] lg:shrink-0">
+                    <li class="flex aspect-[4/3] flex-col items-start justify-end gap-1 rounded-console border border-dashed border-text/20 bg-surface p-4">
                         <span class="t-label text-text/60">Photo pending</span>
                         <span class="font-mono text-xs text-text/70">Crew at the board</span>
                     </li>
@@ -37,9 +38,9 @@
             </ul>
         </div>
     @elseif ($allPlaceholders)
-        <ul class="mt-12 grid grid-cols-2 gap-6 lg:mt-16 lg:flex lg:gap-8 lg:snap-x lg:overflow-x-auto lg:pb-4" data-fx="hscroll">
+        <ul class="mt-12 grid grid-cols-2 gap-6 lg:mt-16 lg:grid-cols-4 lg:gap-8">
             @foreach ($images as $image)
-                <li class="lg:w-[26rem] lg:shrink-0 lg:snap-start">
+                <li>
                     <x-skeleton-image src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" class="{{ $tileClasses }}"/>
                 </li>
             @endforeach

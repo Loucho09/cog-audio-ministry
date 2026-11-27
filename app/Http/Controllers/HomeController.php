@@ -36,7 +36,8 @@ class HomeController extends Controller
                 'url' => $image->url,
                 'thumb' => Arr::first(GalleryThumbnail::variants($image->path, $thumbnails)),
                 'srcset' => collect(GalleryThumbnail::variants($image->path, $thumbnails))->map(fn (string $url, int $width) => "{$url} {$width}w")->implode(', '),
-                'alt' => $image->alt_text,
+                // Never empty: alt text, then the title, then a generic label (keeps aria-labels readable).
+                'alt' => trim((string) $image->alt_text) ?: trim((string) $image->title) ?: 'Audio Ministry photo',
                 'title' => $image->title,
                 'placeholder' => $image->isPlaceholder(),
             ])

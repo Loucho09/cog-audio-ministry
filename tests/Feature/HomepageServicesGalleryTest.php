@@ -83,6 +83,18 @@ it('renders published gallery images and hides unpublished ones', function () {
         ->assertSee('role="dialog"', false);
 });
 
+it('falls back to the title, then a generic label, when a photo has no alt text', function () {
+    // alt_text is NOT NULL in the schema, so "no alt" means an empty string.
+    GalleryImage::factory()->create(['path' => 'images/gallery/c.jpg', 'alt_text' => '', 'title' => 'Youth night', 'is_published' => true]);
+    GalleryImage::factory()->create(['path' => 'images/gallery/d.jpg', 'alt_text' => '  ', 'title' => null, 'is_published' => true]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('View larger photo: Youth night')
+        ->assertSee('View larger photo: Audio Ministry photo')
+        ->assertDontSee('View larger photo: "', false);
+});
+
 it('shows a placeholder note without a lightbox when all images are placeholders', function () {
     GalleryImage::factory()->create();
 
