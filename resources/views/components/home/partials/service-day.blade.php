@@ -16,7 +16,15 @@
             <li class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                 <time datetime="{{ $item['starts_at']->format('c') }}" class="font-mono text-2xl font-medium tabular-nums tracking-tight">{{ $item['starts_at']->format('g:i A') }}</time>
                 <span class="font-medium">{{ $item['service']->name }}</span>
-                <a href="{{ route('services.calendar', $item['service']) }}" class="link-fader ml-auto text-sm text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-signal dark:text-primary">Add to calendar<span class="sr-only">: {{ $item['service']->name }} {{ $item['starts_at']->format('g:i A') }}</span></a>
+                {{-- Compact icon button: the label lives in aria-label (and a tooltip), so rows stay quiet. --}}
+                <a
+                    href="{{ route('services.calendar', $item['service']) }}"
+                    title="Add to calendar"
+                    aria-label="Add {{ $item['service']->name }} {{ $dateLabel }} {{ $item['starts_at']->format('g:i A') }} to calendar"
+                    class="ml-auto inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-console text-text/60 transition-colors duration-200 hover:bg-text/5 hover:text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-signal dark:hover:text-primary"
+                >
+                    <x-tabler-icon name="calendar" class="h-5 w-5" />
+                </a>
             </li>
         @endforeach
     </ul>

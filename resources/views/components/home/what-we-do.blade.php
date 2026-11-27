@@ -26,13 +26,25 @@
     </div>
 
     <div class="mt-12 grid gap-6 lg:mt-16 lg:grid-cols-12 lg:gap-8" data-fx="patch-rows">
-        <article data-patch-row class="fx-spot relative flex flex-col justify-between rounded-console border border-text/10 bg-background p-6 transition-colors hover:border-primary/40 lg:col-span-5 lg:p-10">
-            <div class="flex items-start justify-between gap-4">
-                <x-tabler-icon :name="$lead['icon']" class="h-12 w-12 text-primary-dark dark:text-primary" />
-                <p class="t-label text-text/60">CH {{ $lead['n'] }}</p>
+        <article data-patch-row class="fx-spot relative flex flex-col overflow-hidden rounded-console border border-text/10 bg-background transition-colors hover:border-primary/40 lg:col-span-5">
+            {{-- Real photo of the board fills the lead card, so it has no empty field on desktop. --}}
+            <div class="photo-tone relative aspect-[16/10] w-full border-b border-text/10 lg:aspect-auto lg:min-h-72 lg:flex-1">
+                <img
+                    src="{{ asset('images/gallery/02-sound-console.webp') }}"
+                    alt="The sound console the audio team mixes from"
+                    width="1200"
+                    height="1600"
+                    loading="lazy"
+                    decoding="async"
+                    class="absolute inset-0 h-full w-full object-cover object-center"
+                >
             </div>
-            <div class="mt-16 lg:mt-24">
-                <h3 class="text-3xl font-semibold tracking-tight lg:text-4xl">{{ $lead['title'] }}</h3>
+            <div class="p-6 lg:p-8">
+                <div class="flex items-start justify-between gap-4">
+                    <x-tabler-icon :name="$lead['icon']" class="h-10 w-10 text-primary-dark dark:text-primary" />
+                    <p class="t-label text-text/60">CH {{ $lead['n'] }}</p>
+                </div>
+                <h3 class="mt-6 text-3xl font-semibold tracking-tight lg:text-4xl">{{ $lead['title'] }}</h3>
                 <p class="mt-4 max-w-md leading-relaxed text-text/70">{{ $lead['text'] }}</p>
             </div>
         </article>
