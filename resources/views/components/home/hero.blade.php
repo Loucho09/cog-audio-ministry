@@ -48,7 +48,8 @@
     </div>
 
     <div class="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end px-5 pb-20 pt-28 sm:px-6 sm:pt-10 lg:min-h-[100svh] lg:justify-center lg:px-8 lg:pb-16 lg:pt-28">
-        <div class="relative lg:w-5/12">
+        {{-- Desktop: the copy column ends 48px before the 3D stage (stage starts at 42vw), so text never touches it. --}}
+        <div class="relative lg:w-[calc(42vw_-_max(2rem,calc((100vw_-_80rem)/2_+_2rem))_-_3rem)]">
             {{-- Panel 1: the copy that is always there (no JS, reduced motion, and the top of the scroll). --}}
             <div data-hero-panel class="relative">
                 <div data-hero-content class="motion-safe:animate-fade-up">
@@ -71,8 +72,8 @@
                     @endif
 
                     <div class="mt-9 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
-                        <x-button :href="route('join.create')" class="w-full sm:w-auto">Join Us</x-button>
-                        <x-button :href="route('home').'#services'" variant="on-dark" class="w-full sm:w-auto">See Service Times</x-button>
+                        <x-button :href="route('join.create')" class="w-full whitespace-nowrap sm:w-auto">Join Us</x-button>
+                        <x-button :href="route('home').'#services'" variant="on-dark" class="w-full whitespace-nowrap sm:w-auto">See Service Times</x-button>
                     </div>
                 </div>
             </div>
