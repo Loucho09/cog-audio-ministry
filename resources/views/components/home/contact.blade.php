@@ -24,14 +24,14 @@
             <p class="t-label text-text/60">Email</p>
             @if ($email)
                 {{-- <wbr> after "@" lets a long address wrap at a clean point on small phones. The email is escaped first. --}}
-                <a href="mailto:{{ $email }}" class="link-fader mt-4 block break-words font-mono text-xl font-medium tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal sm:text-3xl lg:text-4xl">{!! str_replace('@', '@<wbr>', e($email)) !!}</a>
+                <a href="mailto:{{ $email }}" class="link-fader mt-4 block break-words font-mono text-xl font-medium tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal sm:text-3xl lg:text-5xl">{!! str_replace('@', '@<wbr>', e($email)) !!}</a>
             @else
                 {{-- TODO: set MINISTRY_EMAIL in config/ministry.php. --}}
                 <p class="mt-4 font-mono text-lg text-text/70">Email to be added.</p>
             @endif
         </div>
 
-        <ul class="divide-y divide-text/10 border-y border-text/10 lg:col-span-4 lg:col-start-9">
+        <ul class="divide-y divide-text/10 border-y border-text/10 lg:col-span-4 lg:col-start-9 lg:self-start">
             <li>
                 @if ($facebook)
                     <a href="{{ $facebook }}" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Facebook (opens in a new tab)" class="{{ $rowClasses }}">

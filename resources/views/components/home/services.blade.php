@@ -76,11 +76,11 @@
                                     data-day="{{ $slot['dow'] }}"
                                     data-time="{{ $slot['time24'] }}"
                                     data-name="{{ $slot['name'] }}"
-                                    @class(['relative grid grid-cols-[auto_1fr] items-baseline gap-x-6 gap-y-1 py-5 data-[state]:bg-primary/5 sm:grid-cols-[7rem_8rem_1fr_auto]', 'bg-primary/5' => $isToday])
+                                    @class(['relative grid grid-cols-[auto_1fr_auto] items-baseline gap-x-6 gap-y-1 py-5 data-[state]:bg-primary/5 sm:grid-cols-[7rem_8rem_1fr_auto]', 'bg-primary/5' => $isToday])
                                 >
                                     <p class="t-label text-text/70">{{ $slot['day'] }}@if ($isToday)<span class="sr-only"> (today)</span>@endif</p>
                                     <p class="font-mono text-2xl font-medium tabular-nums tracking-tight">{{ $slot['time'] }}</p>
-                                    <div class="col-span-2 flex flex-wrap items-center gap-x-3 gap-y-1 sm:col-span-1">
+                                    <div class="col-span-3 flex flex-wrap items-center gap-x-3 gap-y-1 sm:col-span-1">
                                         <span class="font-medium">{{ $slot['name'] }}</span>
                                         @if ($slot['note'])
                                             <span class="font-mono text-xs uppercase tracking-[0.12em] text-text/60">{{ $slot['note'] }}</span>
@@ -93,7 +93,7 @@
                                             href="{{ $slot['url'] }}"
                                             title="Add to calendar"
                                             aria-label="Add {{ $slot['name'] }} {{ $slot['day'] }} {{ $slot['time'] }} to calendar"
-                                            class="col-span-2 inline-flex h-11 w-11 items-center justify-center justify-self-start rounded-console text-text/60 transition-colors duration-200 hover:bg-text/5 hover:text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-signal sm:col-span-1 sm:justify-self-end dark:hover:text-primary"
+                                            class="col-start-3 row-start-1 inline-flex h-11 w-11 items-center justify-center justify-self-end self-center rounded-console text-text/60 transition-colors duration-200 hover:bg-text/5 hover:text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-signal sm:col-start-auto sm:row-start-auto sm:self-auto dark:hover:text-primary"
                                         >
                                             <x-tabler-icon name="calendar" class="h-5 w-5" />
                                         </a>
