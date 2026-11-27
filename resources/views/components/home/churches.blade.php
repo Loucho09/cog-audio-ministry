@@ -1,73 +1,121 @@
-{{-- Our churches: one team serving every COG church. Names only; addresses and times are TODO.
-     Light mode: plain background (the upscaled logo read as a blurry shape behind the cards; removed 2026-11-25).
-     Dark mode: the logo as a dark photo band. The hidden light-mode image is lazy, so it is not downloaded.
-     Text uses theme tokens, so it stays readable in both. --}}
+{{-- CH 04. One channel strip per church, read from the branches table: the main church is the wide master strip.
+     Addresses that are not in the database yet show a clear "to be added" note, never a guess. --}}
 @props(['churches' => collect()])
 
-<section id="churches" data-reveal aria-labelledby="churches-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
-    {{-- Church logo as a full-bleed background. The role="img" wrapper carries the accessible name; the image itself is decorative. --}}
-    <div role="img" aria-label="Church of God logo: We Exalt You Jesus" class="absolute inset-0 -z-10 hidden dark:block">
-        {{-- Opacity sits on the wrapper so the img's own fade-in opacity is not overridden. --}}
-        <x-skeleton-image
-            src="{{ asset('images/cog-church-logo.png') }}"
-            alt=""
-            aria-hidden="true"
-            width="960"
-            height="960"
-            class="h-full w-full"
-            img-class="object-center"
+@php
+    $count = $churches->count();
+    $words = [1 => 'one', 2 => 'two', 3 => 'three', 4 => 'four', 5 => 'five', 6 => 'six', 7 => 'seven', 8 => 'eight', 9 => 'nine', 10 => 'ten'];
+    $countWord = $words[$count] ?? (string) $count;
+    $title = 'One sound, '.$countWord.' '.\Illuminate\Support\Str::plural('church', $count);
+    $master = $churches->first(fn ($church) => $church->is_main);
+    $others = $churches->reject(fn ($church) => $master && $church->is($master))->values();
+    // Static fader positions (percent from the bottom), decoration only.
+    $levels = [72, 58, 66, 48, 62, 54];
+@endphp
+
+<x-section id="churches">
+    <div data-fx="fader-heading">
+        <x-section-heading
+            id="churches"
+            channel="04"
+            eyebrow="Our churches"
+            :title="$title"
+            description="The same heart for worship, shared across every church we serve."
         />
     </div>
-    {{-- Dark mode: the original dark photo treatment. --}}
-    <div aria-hidden="true" class="absolute inset-0 -z-10 hidden bg-gradient-to-r from-black/90 via-black/75 to-black/60 dark:block"></div>
-    <div aria-hidden="true" class="absolute inset-0 -z-10 hidden bg-gradient-to-t from-black/70 via-transparent to-black/40 dark:block"></div>
 
-    <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-        <div class="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
-            <div>
-                <p class="inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent-text dark:text-white/90"><span aria-hidden="true" class="h-0.5 w-8 rounded-full bg-accent"></span>Our Churches</p>
-                <h2 id="churches-title" class="mt-4 text-3xl font-extrabold leading-tight tracking-tight text-text [text-wrap:balance] sm:text-4xl lg:text-5xl">One sound, all our churches</h2>
-                <p class="mt-4 max-w-xl text-base leading-relaxed text-text/80 sm:text-lg">The same heart for worship, shared across every church we serve.</p>
+    @if ($count > 0)
+        <div class="mt-12 flex flex-col gap-6 lg:mt-16 lg:gap-8" data-fx="strips">
+            @if ($master)
+                <article data-strip class="grid gap-6 rounded-console border border-text/10 bg-surface p-6 lg:grid-cols-12 lg:gap-8 lg:p-8">
+                    <div class="flex items-start gap-5 lg:col-span-5">
+                        <div role="img" aria-label="Church of God logo: We Exalt You Jesus" class="h-16 w-16 shrink-0 overflow-hidden rounded-console">
+                            <x-skeleton-image
+                                src="{{ asset('images/cog-church-logo.png') }}"
+                                alt=""
+                                aria-hidden="true"
+                                width="960"
+                                height="960"
+                                class="h-full w-full"
+                                img-class="object-contain"
+                            />
+                        </div>
+                        <div class="min-w-0">
+                            <p class="t-label text-text/60">Strip 01 · Master</p>
+                            <h3 class="mt-2 break-words text-2xl font-semibold tracking-tight lg:text-3xl">{{ $master->name }}</h3>
+                            <p class="mt-2 inline-block rounded-console border border-primary/40 px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-primary-dark dark:text-primary">Main church</p>
+                        </div>
+                    </div>
 
-                <ul class="mt-12 grid sm:mt-16 grid-cols-2 gap-3 [&>li:last-child:nth-child(odd)]:col-span-2">
-                    @foreach ($churches as $church)
-                        <li class="flex h-full flex-col rounded-3xl border border-text/15 bg-surface px-3 pb-0.5 pt-3 shadow-sm sm:px-4 dark:border-white/15 dark:bg-black/55 dark:shadow-none dark:backdrop-blur-sm">
-                            <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                                <span class="min-w-0 break-words font-semibold text-text">{{ $church->name }}</span>
-                                @if ($church->is_main)
-                                    <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary-dark dark:bg-white/15 dark:text-white">Main church</span>
+                    <div class="lg:col-span-5 lg:col-start-7">
+                        <p class="t-label text-text/60">Address</p>
+                        @if (filled($master->address))
+                            <p class="mt-2 leading-relaxed">{{ $master->address }}</p>
+                        @else
+                            {{-- TODO: add the address in Filament (Branches). --}}
+                            <p class="mt-2 font-mono text-sm text-text/50">Address to be added.</p>
+                        @endif
+
+                        @if ($master->safeFacebookUrl())
+                            <a
+                                href="{{ $master->safeFacebookUrl() }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="{{ $master->name }} on Facebook (opens in a new tab)"
+                                class="link-fader mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal dark:text-primary"
+                            >
+                                <x-tabler-icon name="brand-facebook" class="h-4 w-4" />
+                                Facebook
+                            </a>
+                        @endif
+                    </div>
+
+                    <div aria-hidden="true" class="hidden justify-self-end lg:col-span-1 lg:flex">
+                        <div class="relative h-24 w-px bg-text/20">
+                            <span class="absolute -left-2.5 h-3 w-5 rounded-sm bg-text" style="bottom: {{ $levels[0] }}%"></span>
+                        </div>
+                    </div>
+                </article>
+            @endif
+
+            @if ($others->isNotEmpty())
+                <ul class="flex flex-wrap gap-6 lg:gap-8">
+                    @foreach ($others as $church)
+                        <li data-strip class="flex min-w-[15rem] flex-1 basis-60 justify-between gap-4 rounded-console border border-text/10 bg-surface p-6">
+                            <div class="flex min-w-0 flex-col">
+                                <p class="t-label text-text/60">Strip {{ str_pad((string) ($loop->index + 2), 2, '0', STR_PAD_LEFT) }}</p>
+                                <h3 class="mt-2 break-words text-xl font-semibold tracking-tight">{{ $church->name }}</h3>
+
+                                @if (filled($church->address))
+                                    <p class="mt-3 text-sm leading-relaxed text-text/70">{{ $church->address }}</p>
+                                @else
+                                    {{-- TODO: add the address in Filament (Branches). --}}
+                                    <p class="mt-3 font-mono text-xs text-text/50">Address to be added.</p>
+                                @endif
+
+                                @if ($church->safeFacebookUrl())
+                                    <a
+                                        href="{{ $church->safeFacebookUrl() }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        aria-label="{{ $church->name }} on Facebook (opens in a new tab)"
+                                        class="link-fader mt-auto inline-flex min-h-11 w-fit items-center gap-2 pt-4 text-sm font-medium text-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal dark:text-primary"
+                                    >
+                                        <x-tabler-icon name="brand-facebook" class="h-4 w-4" />
+                                        Facebook
+                                    </a>
                                 @endif
                             </div>
-                            @if ($church->safeFacebookUrl())
-                                <a
-                                    href="{{ $church->safeFacebookUrl() }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    aria-label="{{ $church->name }} on Facebook (opens in a new tab)"
-                                    class="inline-flex min-h-11 w-fit items-center gap-1.5 text-sm font-semibold text-primary-dark underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-dark dark:text-white dark:focus-visible:outline-white"
-                                >
-                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H7.9v3h2.6V21h3z" />
-                                    </svg>
-                                    Facebook
-                                </a>
-                            @endif
+
+                            <div aria-hidden="true" class="flex shrink-0 items-stretch py-1">
+                                <div class="relative w-px bg-text/20">
+                                    <span class="absolute -left-2 h-2.5 w-4 rounded-sm bg-text" style="bottom: {{ $levels[$loop->index + 1] ?? 55 }}%"></span>
+                                </div>
+                            </div>
                         </li>
                     @endforeach
                 </ul>
-            </div>
-
-            <div data-tilt class="relative rounded-3xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8 dark:border-white/15 dark:bg-black/60 dark:shadow-none dark:backdrop-blur-sm">
-                <h3 class="text-center text-lg font-bold text-text">Behind the sound</h3>
-                <p data-scroll-words class="mt-3 text-base leading-relaxed text-text/80">
-                    Before every service, the Audio team does a sound check, balances the mix, and makes sure the microphones and speakers are ready. During worship, we keep watch so every sermon and every song is heard clearly, by everyone in the room.
-                </p>
-                <p class="mt-3 text-center">
-                    <a href="{{ route('join.create') }}" class="inline-block py-2.5 font-semibold text-primary-dark underline underline-offset-4 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-dark dark:text-white dark:hover:text-white/80 dark:focus-visible:outline-white">
-                        Want to serve with us? Join the team
-                    </a>
-                </p>
-            </div>
+            @endif
         </div>
-    </div>
-</section>
+    @endif
+</x-section>

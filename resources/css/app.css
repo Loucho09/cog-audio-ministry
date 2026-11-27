@@ -555,3 +555,22 @@
         animation: none;
     }
 }
+
+/* Photo treatment used everywhere on the homepage: cooler and slightly desaturated, with a faint blue wash. */
+.photo-tone {
+    position: relative;
+    overflow: hidden;
+}
+
+.photo-tone img {
+    filter: saturate(0.82) contrast(1.03);
+}
+
+.photo-tone::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: rgb(8 47 73 / 0.1);
+    mix-blend-mode: multiply;
+}

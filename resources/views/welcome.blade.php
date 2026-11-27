@@ -6,10 +6,10 @@
     <x-home.marquee />
     <x-home.about :services-per-week="$servicesPerWeek" :churches-count="$churches->count()" />
     <x-home.what-we-do />
-    <x-home.churches :churches="$churches" />
-    <x-home.team :members="$teamMembers" />
     <x-home.services :branch="$branch" :schedule="$schedule" />
+    <x-home.churches :churches="$churches" />
     <x-home.gallery :images="$galleryImages" />
+    <x-home.team :members="$teamMembers" />
     <x-home.join />
     <x-home.stay-updated />
     <x-home.contact />

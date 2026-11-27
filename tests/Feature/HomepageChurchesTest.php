@@ -8,12 +8,12 @@ uses(RefreshDatabase::class);
 
 beforeEach(fn () => $this->withoutVite());
 
-it('shows our churches section with logo background and no satellite wording', function () {
+it('shows our churches section with the logo and no satellite wording', function () {
     (new BranchSeeder)->run();
 
     $response = $this->get('/')
         ->assertOk()
-        ->assertSee('One sound, all our churches')
+        ->assertSee('One sound, four churches')
         ->assertSee('aria-label="Church of God logo: We Exalt You Jesus"', false)
         ->assertSee('images/cog-church-logo.png', false)
         ->assertDontSee('cog-church-logo-256.png', false);

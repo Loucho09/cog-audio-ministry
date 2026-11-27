@@ -1,3 +1,5 @@
+{{-- CH 06. Behind the show_team flag (config/ministry.php). Members arrive full-time first from the controller.
+     With the flag on and nobody featured yet, three clearly labelled placeholders show instead. --}}
 @props(['members' => collect()])
 
 @php
@@ -7,32 +9,56 @@
         ->take(2)
         ->map(fn ($part) => \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($part, 0, 1)))
         ->implode('');
+    $members = collect($members);
 @endphp
 
-@if (config('ministry.show_team') && collect($members)->isNotEmpty())
-    <section id="team" data-reveal aria-labelledby="team-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
-        <x-site.section-backdrop variant="spotlight-left" :mirror="true" />
-        <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-            <x-site.section-header id="team-title" title="Meet the Team" />
+@if (config('ministry.show_team'))
+    <x-section id="team" tone="surface">
+        <div data-fx="fader-heading">
+            <x-section-heading
+                id="team"
+                channel="06"
+                eyebrow="The team"
+                title="Meet the team."
+                description="The people who keep every service clear."
+            />
+        </div>
 
-            <ul class="mt-12 grid grid-cols-1 gap-5 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
-                @foreach ($members as $member)
-                    <li class="group h-full rounded-3xl border border-text/15 bg-surface p-6 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl motion-reduce:transform-none sm:p-8 dark:hover:shadow-black/60">
-                        {{-- Gradient ring around the photo (or initials). --}}
-                        <div class="mx-auto flex h-36 w-36 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent p-[3px] transition duration-300 motion-safe:group-hover:rotate-3">
+        <ul class="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4 lg:gap-8" data-fx="cascade">
+            @forelse ($members as $member)
+                <li data-cascade-item>
+                    <x-card class="gap-4">
+                        <div class="photo-tone aspect-square w-full overflow-hidden rounded-console bg-background">
                             @if ($member->photo_url)
-                                <x-skeleton-image src="{{ $member->photo_url }}" alt="{{ $member->name }}" width="128" height="128" rounded="rounded-full" class="h-full w-full" img-class="rounded-full border-4 border-surface"/>
+                                <x-skeleton-image src="{{ $member->photo_url }}" alt="{{ $member->name }}" width="400" height="400" class="h-full w-full" img-class="object-cover"/>
                             @else
-                                <span aria-hidden="true" class="flex h-full w-full items-center justify-center rounded-full border-4 border-surface bg-background text-3xl font-extrabold tracking-tight text-text">{{ $initials($member->name) }}</span>
+                                <span aria-hidden="true" class="flex h-full w-full items-center justify-center font-mono text-4xl font-medium text-text/40">{{ $initials($member->name) }}</span>
                             @endif
                         </div>
-                        <h3 class="mt-5 text-lg font-bold text-text break-words">{{ $member->name }}</h3>
-                        @if ($member->role_title)
-                            <p class="mt-1 text-sm text-text/80">{{ $member->role_title }}</p>
-                        @endif
+                        <div>
+                            <h3 class="break-words text-lg font-semibold tracking-tight">{{ $member->name }}</h3>
+                            @if ($member->role_title)
+                                <p class="t-label mt-1 text-text/60">{{ $member->role_title }}</p>
+                            @endif
+                        </div>
+                    </x-card>
+                </li>
+            @empty
+                @foreach (range(1, 3) as $n)
+                    {{-- TODO: team member placeholder. Add featured team members in Filament; placeholders disappear automatically. --}}
+                    <li data-cascade-item>
+                        <x-card class="gap-4 border-dashed">
+                            <div class="flex aspect-square w-full items-center justify-center rounded-console bg-background">
+                                <span class="font-mono text-xs uppercase tracking-[0.12em] text-text/50">Photo pending</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold tracking-tight text-text/70">TODO: team member</h3>
+                                <p class="t-label mt-1 text-text/50">Role to be added</p>
+                            </div>
+                        </x-card>
                     </li>
                 @endforeach
-            </ul>
-        </div>
-    </section>
+            @endforelse
+        </ul>
+    </x-section>
 @endif
