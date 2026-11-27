@@ -44,7 +44,9 @@
 
         <!-- Fonts: Schibsted Grotesk (headings, body) and JetBrains Mono (labels, readouts) -->
         <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-        <link href="https://fonts.bunny.net/css?family=schibsted-grotesk:400,500,600,700,800|jetbrains-mono:400,500&display=swap" rel="stylesheet" />
+        {{-- Loaded without blocking first paint (media swap); the page falls back to the system sans until the fonts arrive. --}}
+        <link href="https://fonts.bunny.net/css?family=schibsted-grotesk:400,500,600,700,800|jetbrains-mono:400,500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+        <noscript><link href="https://fonts.bunny.net/css?family=schibsted-grotesk:400,500,600,700,800|jetbrains-mono:400,500&display=swap" rel="stylesheet" /></noscript>
 
         <!-- Scripts / Styles -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

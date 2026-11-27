@@ -34,6 +34,7 @@
                     alt="The sound console the audio team mixes from"
                     width="1200"
                     height="1600"
+                    sizes="(min-width: 1024px) 40vw, 100vw"
                     loading="lazy"
                     decoding="async"
                     class="absolute inset-0 h-full w-full object-cover object-center"
