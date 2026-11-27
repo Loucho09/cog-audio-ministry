@@ -500,13 +500,63 @@
     margin-bottom: -0.14em;
 }
 
-/* Marquee band: outlined second row. */
-.marquee-outline {
-    color: transparent;
-    -webkit-text-stroke: 1.5px rgb(var(--color-text) / 0.4);
+/* Fader cap: a thin bar that travels under a section heading (effects.js faderHeading). */
+.fader-cap {
+    position: absolute;
+    left: 0;
+    bottom: -1rem;
+    height: 2px;
+    width: 3rem;
+    background: rgb(var(--color-primary));
+    pointer-events: none;
 }
 
-/* Tilt cards: a soft stage light follows the pointer (position from --mx / --my). */
+/* Patch line: a 1px rule drawn across a list (effects.js patchRows). */
+.patch-line {
+    position: absolute;
+    top: -1.5rem;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgb(var(--color-primary) / 0.6);
+    transform-origin: left center;
+    pointer-events: none;
+}
+
+/* Service level meters: small bars beside the day name (effects.js meters). */
+.fx-meter {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 0.9rem;
+    margin-left: 0.75rem;
+    vertical-align: middle;
+}
+
+.fx-meter-bar {
+    display: block;
+    width: 3px;
+    height: 100%;
+    background: rgb(var(--color-signal));
+    transform-origin: bottom center;
+}
+
+/* Join LED panel: a glow that follows the pointer (--lx / --ly / --lk set in effects.js). */
+.led-panel {
+    position: relative;
+    overflow: hidden;
+}
+
+.led-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(260px circle at var(--lx, 50%) var(--ly, 50%), rgb(var(--color-signal) / 0.22), transparent 70%);
+    opacity: var(--lk, 0);
+    transition: opacity 300ms ease-out;
+}
+
+/* Card light: a soft stage light follows the pointer (position from --mx / --my). */
 .fx-spot::after {
     content: '';
     position: absolute;
@@ -575,7 +625,8 @@
     mix-blend-mode: multiply;
 }
 
-/* Signal line nodes: one small LED dot on the gutter line at each homepage section after the hero (lg+ only). */
+/* Signal line nodes: one small dot on the gutter line at each homepage section after the hero (lg+ only).
+   Muted until the section enters (effects.js signalLine adds .is-signal), then it lights in the signal colour. */
 @media (min-width: 1024px) {
     .signal-wrap > section:not(:first-child)::before {
         content: '';
@@ -586,7 +637,13 @@
         height: 7px;
         width: 7px;
         border-radius: 9999px;
-        background: rgb(var(--color-signal));
+        background: rgb(var(--color-text) / 0.25);
+        transition: background-color 400ms ease-out, box-shadow 400ms ease-out;
         pointer-events: none;
+    }
+
+    .signal-wrap > section.is-signal:not(:first-child)::before {
+        background: rgb(var(--color-signal));
+        box-shadow: 0 0 0 4px rgb(var(--color-signal) / 0.18);
     }
 }

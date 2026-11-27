@@ -42,7 +42,7 @@
     </div>
 
     @if (count($stats) > 0)
-        <dl class="mt-16 grid gap-6 border-t border-text/10 pt-8 {{ match (count($stats)) { 3 => 'sm:grid-cols-3', 2 => 'sm:grid-cols-2', default => '' } }} lg:mt-20 lg:gap-8" data-fx="meters">
+        <dl class="mt-16 grid gap-6 border-t border-text/10 pt-8 {{ match (count($stats)) { 3 => 'sm:grid-cols-3', 2 => 'sm:grid-cols-2', default => '' } }} lg:mt-20 lg:gap-8">
             @foreach ($stats as $stat)
                 <div class="flex flex-col-reverse gap-2 sm:border-l sm:border-text/10 sm:pl-6 sm:first:border-l-0 sm:first:pl-0">
                     <dt class="t-label text-text/60">{{ $stat['label'] }}</dt>

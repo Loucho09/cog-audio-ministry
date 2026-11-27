@@ -2,10 +2,10 @@
  * Homepage motion layer. Loaded on demand by app.js only when the page has [data-home-fx],
  * so other pages never download GSAP, Lenis or Three.
  *
- * - Lenis smooth scroll, driven by the GSAP ticker so ScrollTrigger stays in sync.
- * - Hero: split-word title, a hand-written reveal for "Audio", magnetic buttons, and a 3D mixing console
- *   (Three.js) that boots up, plays meters, and flies the camera in as you scroll (pinned on desktop).
- * - Sections: masked heading reveals, scroll-lit paragraphs, tilt/spotlight cards, velocity marquee.
+ * - One Lenis instance, driven by the GSAP ticker so ScrollTrigger stays in sync.
+ * - Everything is set up inside one gsap.context(); breakpoint branches use gsap.matchMedia().
+ * - Section entrances live in ./effects.js (one signature entrance per section).
+ * - Hero: title split, 3D console (./console-scene), scroll-driven camera.
  *
  * Reduced motion: nothing here runs; the page stays exactly as the server rendered it.
  */
@@ -14,7 +14,18 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
-import { magnet, scrollWords, splitHeadings, tiltSpotlight, velocityMarquee } from './effects';
+import {
+    cascade,
+    countUp,
+    faderHeading,
+    hscroll,
+    led,
+    meters,
+    patchRows,
+    signalLine,
+    spotlight,
+    strips,
+} from './effects';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -171,24 +182,43 @@ function initHeroScroll(hero, heroProgress) {
     });
 }
 
+/** Section entrances and readouts. Created inside one context, so a single revert cleans everything. */
+function initSections(root) {
+    // Created top to bottom, so ScrollTrigger refresh order matches the page.
+    root.querySelectorAll('[data-fx="fader-heading"]').forEach(faderHeading);
+    root.querySelectorAll('[data-fx="patch-rows"]').forEach(patchRows);
+    root.querySelectorAll('[data-fx="meters"]').forEach(meters);
+    root.querySelectorAll('[data-fx="strips"]').forEach(strips);
+    root.querySelectorAll('[data-fx="cascade"]').forEach(cascade);
+    root.querySelectorAll('[data-count]').forEach(countUp);
+    root.querySelectorAll('[data-fx="led"]').forEach(led);
+    document.querySelectorAll('[data-fx="signal-line"]').forEach(signalLine);
+
+    spotlight('.fx-spot');
+
+    // Desktop: the gallery pins and slides sideways. Mobile keeps the two-column grid (nothing to set up).
+    const mm = gsap.matchMedia();
+    mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)' }, ({ conditions }) => {
+        if (conditions.desktop) root.querySelectorAll('[data-fx="hscroll"]').forEach(hscroll);
+    });
+}
+
 export function initHome() {
     const hero = document.querySelector('[data-hero]');
     const heroProgress = { value: 0 };
+    const root = document.getElementById('main') ?? document.body;
 
     initLenis();
 
+    gsap.context(() => {
+        if (hero) initHeroTitle(hero);
+        initSections(root);
+    }, root);
+
     if (hero) {
-        initHeroTitle(hero);
         initHeroScroll(hero, heroProgress);
         initHeroStage(hero, heroProgress);
     }
-
-    // Created top to bottom, after the hero pin, so trigger positions account for the pin spacer.
-    velocityMarquee('[data-marquee]');
-    splitHeadings('#main section:not([data-hero]) h2');
-    scrollWords('[data-scroll-words], #about-title ~ p');
-    tiltSpotlight('[data-tilt]');
-    magnet('[data-magnet]');
 
     // Fonts change line heights and widths: re-measure once they are in.
     document.fonts?.ready.then(() => ScrollTrigger.refresh());
