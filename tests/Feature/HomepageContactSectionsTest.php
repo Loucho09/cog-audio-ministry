@@ -35,7 +35,7 @@ it('links the join button to the application form in the same tab', function () 
     $html = $this->get('/')->assertOk()->getContent();
     $url = preg_quote(route('join.create'), '/');
 
-    preg_match('/<section id="join".*?(<a href="'.$url.'"[^>]*>)(.*?)<\/a>/s', $html, $m);
+    preg_match('/<section[^>]*id="join".*?(<a href="'.$url.'"[^>]*>)(.*?)<\/a>/s', $html, $m);
 
     expect($m)->not->toBeEmpty()
         ->and($m[1])->not->toContain('target=')->not->toContain('rel=')

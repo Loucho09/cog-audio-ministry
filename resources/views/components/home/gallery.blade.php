@@ -6,30 +6,45 @@
     // Only real photos open in the lightbox; placeholders stay plain images.
     $viewable = $images->reject(fn ($i) => $i['placeholder'])->values();
     $viewIndex = 0;
-    $controlClasses = 'rounded-full bg-surface p-2.5 text-text shadow-lg transition-colors duration-200 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2';
-    $tileClasses = 'aspect-[4/3] w-full rounded-3xl shadow-sm';
+    $controlClasses = 'rounded-console border border-text/20 bg-surface p-2.5 text-text transition-colors duration-200 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2';
+    $tileClasses = 'aspect-[4/3] w-full rounded-console border border-text/10';
 @endphp
 
-<section id="gallery" data-reveal aria-labelledby="gallery-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
-    <x-site.section-backdrop variant="vignette" fade-from="surface" />
-    <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-        <x-site.section-header
-            id="gallery-title"
-            title="Gallery"
-            :lead="$allPlaceholders ? 'Photos coming soon. These are placeholders.' : null"
+<x-section id="gallery">
+    <div data-fx="fader-heading">
+        <x-section-heading
+            id="gallery"
+            channel="05"
+            eyebrow="Gallery"
+            title="Behind the board."
+            :description="$allPlaceholders ? 'Photos coming soon. These are placeholders.' : null"
         />
+    </div>
 
-        @if ($images->isEmpty())
-            <p class="mt-12 text-center text-base text-text/80 sm:mt-16">Photos coming soon.</p>
-        @elseif ($allPlaceholders)
-            <ul class="mt-12 grid grid-cols-2 gap-3 sm:mt-16 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
-                @foreach ($images as $image)
-                    <li>
-                        <x-skeleton-image src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" class="{{ $tileClasses }}"/>
+    {{-- Desktop: one horizontal track (the motion layer pins it later; plain scroll-snap works without JS).
+         Mobile: a normal two-column grid. --}}
+    @if ($images->isEmpty())
+        <div class="mt-12 lg:mt-16">
+            <p class="font-mono text-sm text-text/70">Photos coming soon.</p>
+            {{-- TODO: owner to add real ministry photos in Filament (Gallery). --}}
+            <ul class="mt-6 grid grid-cols-2 gap-6 lg:flex lg:gap-8 lg:overflow-x-auto" data-fx="hscroll">
+                @foreach (range(1, 4) as $n)
+                    <li class="flex aspect-[4/3] flex-col items-start justify-end gap-1 rounded-console border border-dashed border-text/20 bg-surface p-4 lg:w-[26rem] lg:shrink-0">
+                        <span class="t-label text-text/60">Photo pending</span>
+                        <span class="font-mono text-xs text-text/50">Crew at the board</span>
                     </li>
                 @endforeach
             </ul>
-        @else
+        </div>
+    @elseif ($allPlaceholders)
+        <ul class="mt-12 grid grid-cols-2 gap-6 lg:mt-16 lg:flex lg:gap-8 lg:snap-x lg:overflow-x-auto lg:pb-4" data-fx="hscroll">
+            @foreach ($images as $image)
+                <li class="lg:w-[26rem] lg:shrink-0 lg:snap-start">
+                    <x-skeleton-image src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" class="{{ $tileClasses }}"/>
+                </li>
+            @endforeach
+        </ul>
+    @else
             <div
                 x-data="{
                     images: @js($viewable),
@@ -89,69 +104,31 @@
                 x-on:keydown.arrow-right.window="open && next()"
                 x-on:keydown.arrow-left.window="open && prev()"
             >
-                @php
-                    // Bento layout: with 5+ photos the first one is featured (2x2 on md+, full width on mobile).
-                    $featured = $images->count() >= 5;
-                    // On the 2-column mobile grid, stretch the last photo across both columns if it would sit alone.
-                    $mobileOrphan = ($images->count() - ($featured ? 1 : 0)) % 2 === 1;
-                    // Featured layout stays 3 columns on desktop (featured = 4 cells); fill any short last row.
-                    $wideRemainder = $featured ? ($images->count() + 3) % 3 : 0;
-                @endphp
-                <ul @class([
-                    'mt-12 grid grid-cols-2 gap-3 sm:mt-16 md:grid-cols-3 md:gap-4',
-                    'lg:grid-cols-4' => ! $featured,
-                ])>
+                <ul class="mt-12 grid grid-cols-2 gap-6 lg:mt-16 lg:flex lg:snap-x lg:gap-8 lg:overflow-x-auto lg:pb-4" data-fx="hscroll">
                     @foreach ($images as $image)
                         @php
-                            $isFeatured = $featured && $loop->first;
-                            $isOrphan = $mobileOrphan && $loop->last && ! $isFeatured;
-                            // Mobile (2 columns) and md+ (3 columns) are decided separately so each grid stays gap-free.
-                            $mobileCell = $isOrphan ? 'col-span-2 aspect-[16/9]' : 'aspect-[4/3]';
-                            $mdCell = match (true) {
-                                $loop->last && $wideRemainder === 1 => 'md:col-span-3 md:aspect-[21/9]',
-                                $loop->last && $wideRemainder === 2 => 'md:col-span-2 md:aspect-auto',
-                                $isOrphan => 'md:col-span-1 md:aspect-[4/3]',
-                                default => '',
-                            };
-                            $cell = $isFeatured ? 'col-span-2 aspect-[4/3] md:row-span-2 md:aspect-auto' : trim($mobileCell.' '.$mdCell);
-                            // Rendered tile width, so the browser picks the small thumbnail unless the tile is big on a sharp screen.
-                            $mdSize = match (true) {
-                                $loop->last && $wideRemainder === 1 => '100vw',
-                                $isFeatured || ($loop->last && $wideRemainder === 2) => '66vw',
-                                default => '33vw',
-                            };
-                            $sizes = '(min-width: 768px) '.$mdSize.', '.($isFeatured || $isOrphan ? '100vw' : '50vw');
+                            // Rendered width: half the viewport on mobile, a fixed track card on desktop.
+                            $sizes = '(min-width: 1024px) 26rem, 50vw';
                         @endphp
-                        <li class="{{ $cell }}">
+                        <li class="aspect-[4/3] lg:w-[26rem] lg:shrink-0 lg:snap-start">
                             @if ($image['placeholder'])
-                                <x-skeleton-image src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" class="h-full w-full rounded-3xl shadow-sm"/>
+                                <x-skeleton-image src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" class="h-full w-full rounded-console border border-text/10"/>
                             @else
                                 <button
                                     type="button"
                                     x-on:click="show({{ $viewIndex++ }}, $el)"
                                     aria-label="View larger photo: {{ $image['alt'] }}"
-                                    class="group relative block h-full w-full overflow-hidden rounded-3xl bg-text/5 shadow-sm ring-1 ring-text/10 transition-shadow duration-300 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2"
+                                    class="photo-tone group relative block h-full w-full rounded-console border border-text/10 bg-text/5 transition-colors duration-300 hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                                 >
-                                    {{-- The hover zoom sits on the wrapper (not the img) so it does not clash with the img's own fade transition. --}}
-                                    {{-- Grid uses the WebP thumbnails (800w, and up to 1600w for big tiles on sharp screens); the full
-                                         photo is only loaded by the lightbox. Lazy: the gallery is far below the fold. --}}
+                                    {{-- Grid uses the WebP thumbnails; the full photo is only loaded by the lightbox. Lazy: far below the fold. --}}
                                     @if ($image['thumb'])
-                                        <x-skeleton-image src="{{ $image['thumb'] }}" srcset="{{ $image['srcset'] }}" sizes="{{ $sizes }}" alt="{{ $image['alt'] }}" class="h-full w-full transition duration-700 ease-out motion-safe:group-hover:scale-105"/>
+                                        <x-skeleton-image src="{{ $image['thumb'] }}" srcset="{{ $image['srcset'] }}" sizes="{{ $sizes }}" alt="{{ $image['alt'] }}" class="h-full w-full"/>
                                     @else
-                                        <x-skeleton-image src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" class="h-full w-full transition duration-700 ease-out motion-safe:group-hover:scale-105"/>
+                                        <x-skeleton-image src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" class="h-full w-full"/>
                                     @endif
-                                    {{-- Caption shade. Decorative copy: the button's aria-label already names the photo.
-                                         Captions always show on touch-size screens; on md+ only the featured one does, others reveal on hover/focus. --}}
-                                    <span aria-hidden="true" @class([
-                                        'pointer-events-none absolute inset-0 flex items-end bg-gradient-to-t from-black/75 via-black/10 to-transparent text-left transition duration-300',
-                                        'p-5 sm:p-6' => $isFeatured,
-                                        'p-3 sm:p-4 md:opacity-0 md:group-hover:opacity-100 md:group-focus-visible:opacity-100' => ! $isFeatured,
-                                    ])>
-                                        <span @class([
-                                            'line-clamp-2 font-medium text-white',
-                                            'text-base sm:text-lg' => $isFeatured,
-                                            'text-xs sm:text-sm' => ! $isFeatured,
-                                        ])>{{ $image['title'] ?: $image['alt'] }}</span>
+                                    {{-- Mono caption strip. Decorative: the button's aria-label already names the photo. --}}
+                                    <span aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-console/80 px-3 py-2 text-left font-mono text-[11px] uppercase tracking-[0.12em] text-white">
+                                        <span class="line-clamp-1">{{ $image['title'] ?: $image['alt'] }}</span>
                                     </span>
                                 </button>
                             @endif
@@ -203,6 +180,5 @@
                     </div>
                 </template>
             </div>
-        @endif
-    </div>
-</section>
+    @endif
+</x-section>
