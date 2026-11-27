@@ -58,6 +58,37 @@
         @apply font-mono text-xs uppercase;
         letter-spacing: 0.12em;
     }
+
+    /* Fader underline for links: a 1px bar (currentColor) scales in from the left on hover and focus.
+       Transform only. Reduced motion: the bar snaps on, nothing slides. */
+    .link-fader {
+        position: relative;
+    }
+
+    .link-fader::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -0.25em;
+        height: 1px;
+        background-color: currentColor;
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 400ms ease-out;
+        pointer-events: none;
+    }
+
+    .link-fader:hover::after,
+    .link-fader:focus-visible::after {
+        transform: scaleX(1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .link-fader::after {
+            transition: none;
+        }
+    }
 }
 
 /* No one-word last lines on paragraphs and quotes (browsers without support just ignore it). */
