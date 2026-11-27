@@ -486,14 +486,6 @@
     opacity: 0;
 }
 
-/* Wide screens: the console sits right of the text, so the side shade only needs to cover the text column.
-   Black is fine here: the hero is always a dark stage in both themes (same exception as the photo). */
-@media (min-width: 1024px) {
-    [data-hero].is-3d .hero-overlay-side {
-        background-image: linear-gradient(to right, rgb(0 0 0 / 0.88), rgb(0 0 0 / 0.5) 42%, transparent 72%);
-    }
-}
-
 /* Masked heading reveal: a little room so descenders (g, y) are not clipped by the mask. */
 .split-word-mask {
     padding-bottom: 0.14em;

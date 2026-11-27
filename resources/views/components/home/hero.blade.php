@@ -1,98 +1,108 @@
-<section data-hero data-home-fx aria-labelledby="hero-title" class="relative isolate flex min-h-[100svh] items-center overflow-hidden bg-black sm:min-h-[44rem] lg:min-h-[max(44rem,100svh)]">
-    {{-- Cover photo as a full-bleed background. Decorative (the h1 carries the name), so alt is empty.
-         Above the fold, so no lazy loading.
-         The frame caps the photo at 110rem (1760px at the default 16px root, 1980px at the 18px root from 1920px),
-         and at 2000px from 2400px (21px root), because the largest source is 1600px wide (more would look soft;
-         TODO: a larger original from the owner would allow a wider cap). The side fade starts once the frame is
-         narrower than the screen (above 1980px). It is centred, so on very wide screens the photo's wordmark stays
-         beside the text column instead of drifting to the far edge; its sides fade into the black section. --}}
-    <div data-hero-photo aria-hidden="true" class="absolute inset-y-0 left-1/2 -z-10 w-full max-w-[min(110rem,2000px)] -translate-x-1/2 min-[1981px]:[mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
-    <picture>
-        <source
-            type="image/webp"
-            srcset="{{ asset('images/cover-800.webp') }} 800w, {{ asset('images/cover-1200.webp') }} 1200w, {{ asset('images/cover.webp') }} 1600w"
-            sizes="100vw"
-        >
-        <img
-            src="{{ asset('images/cover.jpg') }}"
-            alt=""
-            width="1600"
-            height="609"
-            fetchpriority="high"
-            decoding="async"
-            class="absolute inset-0 h-full w-full object-cover object-left lg:top-auto lg:h-auto lg:max-h-full lg:[mask-image:linear-gradient(to_top,black_65%,transparent)]"
-        >
-        {{-- Desktop: fit the photo to the width (not cover) and pin it to the bottom, so the photo's own
-             "COG Audio" wordmark sits low-right, below the h1 and right of the text column at 1024px and up.
-             The top edge fades into the black section. --}}
-    </picture>
+{{-- CH 00. Dark console hero, in both themes. The 3D desk (resources/js/home/hero.js) draws on the right on wide
+     screens and above the copy on phones. The cover photo is the poster: it shows with no JS, with reduced motion,
+     or on a device without WebGL. It is decorative, so alt is empty.
+     The copy is one panel plus two decorative panels (aria-hidden) that the scroll story crossfades on desktop. --}}
+@props(['sundayServices' => 0])
+
+@php
+    $glb = file_exists(public_path('models/dlive.glb')) ? asset('models/dlive.glb') : null;
+@endphp
+
+<section data-hero data-home-fx aria-labelledby="hero-title" class="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-console text-white">
+    {{-- Poster: the cover photo, cooler and darkened so the copy keeps its contrast. --}}
+    <div data-hero-photo aria-hidden="true" class="absolute inset-0 -z-10">
+        <picture class="block h-full w-full">
+            <source
+                type="image/webp"
+                srcset="{{ asset('images/cover-800.webp') }} 800w, {{ asset('images/cover-1200.webp') }} 1200w, {{ asset('images/cover.webp') }} 1600w"
+                sizes="100vw"
+            >
+            <img
+                src="{{ asset('images/cover.jpg') }}"
+                alt=""
+                width="1600"
+                height="609"
+                fetchpriority="high"
+                decoding="async"
+                class="h-full w-full object-cover object-[60%_center]"
+            >
+        </picture>
+        <div class="absolute inset-0 bg-console/80 lg:hidden"></div>
+        <div class="absolute inset-0 hidden bg-gradient-to-r from-console via-console/70 to-transparent lg:block"></div>
     </div>
 
-    {{-- Live 3D stage (Three.js mixing console), drawn by resources/js/home. Hidden until its first frame, then it
-         crossfades over the photo (which it reuses as the LED wall). No WebGL, reduced motion, or no JS: photo only. --}}
-    <div data-hero-stage data-wall-image="{{ asset('images/cover-1200.webp') }}" aria-hidden="true" class="hero-stage absolute inset-0 -z-10">
+    {{-- The 3D desk. Its own box on phones (above the copy); the right side of the hero on desktop. --}}
+    <div
+        data-hero-stage
+        @if ($glb) data-glb="{{ $glb }}" @endif
+        aria-hidden="true"
+        class="hero-stage relative h-[50svh] w-full shrink-0 pt-16 lg:absolute lg:inset-y-0 lg:left-[42%] lg:right-0 lg:h-auto lg:w-auto lg:pt-0"
+    >
         <canvas class="block h-full w-full"></canvas>
-    </div>
 
-    {{-- Readability overlay. Darker on the left where the text sits; the photo's wordmark stays visible on the right.
-         The photo is always dark, so hero text uses white directly instead of theme tokens. --}}
-    <div data-hero-overlay aria-hidden="true" class="hero-overlay-side absolute inset-0 -z-10 bg-gradient-to-r from-black/90 via-black/70 to-black/50 lg:via-black/60"></div>
-    <div data-hero-overlay aria-hidden="true" class="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
-
-    {{-- Stage-light glows in the brand colours. --}}
-    <x-site.glow tone="primary" class="-left-40 top-10 h-[28rem] w-[28rem] opacity-70 sm:-left-24" />
-    {{-- Accent glow only in dark mode: in light mode it smears pink into the light section below. --}}
-    <x-site.glow tone="accent" class="-bottom-24 right-0 hidden h-80 w-80 opacity-70 dark:block sm:right-10" />
-
-    {{-- Dark mode: bottom fade into the next section (background token), so the photo does not end in a hard edge.
-         Light mode: no fade (dark-to-light fades look blurry); the photo ends crisply on a thin stage-colour line. Decorative only. --}}
-    <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-0 hidden h-32 bg-gradient-to-t from-background to-transparent dark:block"></div>
-    <span aria-hidden="true" class="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-primary via-primary to-accent dark:hidden"></span>
-
-    <div class="relative mx-auto w-full max-w-7xl px-5 pb-24 pt-28 sm:px-6 sm:pt-32 lg:px-8">
-        <div data-hero-content class="motion-safe:animate-fade-up flex flex-col items-center text-center lg:items-start lg:text-left">
-
-            {{-- Small pill above the title: EQ bars and the location line. --}}
-            <p class="inline-flex max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] sm:gap-3 sm:px-4 sm:tracking-[0.2em] text-white backdrop-blur-sm">
-                <x-site.eq-bars />
-                <span class="min-w-0 break-words">Church of God &middot; {{ config('ministry.subheader') }}</span>
-            </p>
-
-            {{-- "Audio" is set in the script font to echo the logo. The name is escaped first, so the replace is safe. --}}
-            <h1 id="hero-title" data-hero-title class="hero-title mt-6 max-w-full break-words text-5xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl 2xl:text-8xl">{{ config('ministry.name') }}</h1>
-
-            <p class="mt-5 text-lg font-semibold text-white sm:text-xl 2xl:text-2xl">{{ config('ministry.tagline') }}</p>
-
-            {{-- Theme verse (from config, as on the Facebook page). Red bar echoes the section eyebrows. --}}
-            @if (filled(config('ministry.verse.text')))
-                <figure class="mt-6 max-w-xl">
-                    <span aria-hidden="true" class="mx-auto mb-4 block h-0.5 w-10 rounded-full bg-accent lg:mx-0"></span>
-                    <blockquote class="text-base italic leading-relaxed text-white sm:text-lg">
-                        <p>&ldquo;{{ config('ministry.verse.text') }}&rdquo;</p>
-                    </blockquote>
-                    @if (filled(config('ministry.verse.reference')))
-                        <figcaption class="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/90">{{ config('ministry.verse.reference') }}</figcaption>
-                    @endif
-                </figure>
-            @endif
-            <p class="mt-4 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
-                We serve our church through sound. Whether you mix, stream, or set up the stage, there is a place for you to serve with us.
-            </p>
-
-            <div class="mt-9 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
-                {{-- data-magnet: the wrapper leans toward the pointer (fine pointers only; see resources/js/home/effects.js). --}}
-                <span data-magnet class="inline-flex w-full sm:w-auto"><x-site.button :href="route('join.create')" size="lg" class="w-full sm:w-auto">Join Us</x-site.button></span>
-                <span data-magnet class="inline-flex w-full sm:w-auto"><x-site.button :href="route('home').'#services'" variant="outline-light" size="lg" class="w-full sm:w-auto">See Service Times</x-site.button></span>
+        {{-- Loader: hidden until the 3D work starts (hero.js). Without JS it never appears. --}}
+        <div data-hero-loader hidden class="pointer-events-none absolute inset-x-5 bottom-5 sm:inset-x-6">
+            <div class="flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.12em] text-white/70">
+                <p class="shrink-0">Loading surface <span data-hero-percent>000</span>%</p>
+                <span class="relative h-px flex-1 overflow-hidden bg-white/20">
+                    <span data-hero-meter class="absolute inset-0 origin-left bg-signal"></span>
+                </span>
             </div>
         </div>
     </div>
 
-    {{-- Scroll cue: a real link to the next section. It sits on the dark photo, so white (the dark-mode fade ends near-black too). The bounce is motion-safe only. --}}
+    <div class="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end px-5 pb-20 pt-28 sm:px-6 sm:pt-10 lg:min-h-[100svh] lg:justify-center lg:px-8 lg:pb-16 lg:pt-28">
+        <div class="relative lg:w-5/12">
+            {{-- Panel 1: the copy that is always there (no JS, reduced motion, and the top of the scroll). --}}
+            <div data-hero-panel class="relative">
+                <div data-hero-content class="motion-safe:animate-fade-up">
+                    <p class="t-label text-white/70">CH 00 — COG Audio Ministry · {{ config('ministry.subheader') }}</p>
+
+                    <h1 id="hero-title" data-hero-title class="hero-title t-display mt-6 break-words">We serve behind the sound.</h1>
+
+                    <p class="t-lead mt-6 max-w-xl text-white/80">{{ config('ministry.tagline') }}</p>
+
+                    {{-- Theme verse (from config). Hidden when no verse text is set. --}}
+                    @if (filled(config('ministry.verse.text')))
+                        <figure class="mt-6 max-w-xl border-l border-white/25 pl-5">
+                            <blockquote class="text-base italic leading-relaxed text-white/90 sm:text-lg">
+                                <p>&ldquo;{{ config('ministry.verse.text') }}&rdquo;</p>
+                            </blockquote>
+                            @if (filled(config('ministry.verse.reference')))
+                                <figcaption class="mt-2 font-mono text-xs uppercase tracking-[0.12em] text-white/60">{{ config('ministry.verse.reference') }}</figcaption>
+                            @endif
+                        </figure>
+                    @endif
+
+                    <div class="mt-9 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
+                        <x-button :href="route('join.create')" class="w-full sm:w-auto">Join Us</x-button>
+                        <x-button :href="route('home').'#services'" variant="on-dark" class="w-full sm:w-auto">See Service Times</x-button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Panel 2 (desktop only, scroll story). Decorative: the same services are listed below. --}}
+            <div data-hero-panel aria-hidden="true" class="hidden lg:invisible lg:absolute lg:inset-0 lg:flex lg:flex-col lg:justify-center">
+                <p class="t-display">Every service, every voice — clearly heard.</p>
+                @if ($sundayServices > 0)
+                    <p class="t-lead mt-6 max-w-xl text-white/80">{{ $sundayServices }} Sunday {{ \Illuminate\Support\Str::plural('service', $sundayServices) }}. One team.</p>
+                @endif
+            </div>
+
+            {{-- Panel 3 (desktop only, scroll story): the call to action. Text only, so nothing focusable is hidden. --}}
+            <div data-hero-panel aria-hidden="true" class="hidden lg:invisible lg:absolute lg:inset-0 lg:flex lg:flex-col lg:justify-center">
+                <p class="t-display">Serve with us.</p>
+                <p class="t-lead mt-6 max-w-xl text-white/80">Halina at sumama sa amin!</p>
+            </div>
+        </div>
+    </div>
+
+    {{-- Scroll cue: a real link to the next section. White on the dark hero. --}}
     <a
         href="#about"
         data-hero-cue
         aria-label="Scroll to About"
-        class="absolute inset-x-0 bottom-4 mx-auto flex h-11 w-11 items-center justify-center rounded-full text-white/85 transition-colors duration-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black motion-safe:animate-nudge"
+        class="absolute inset-x-0 bottom-4 z-10 mx-auto flex h-11 w-11 items-center justify-center rounded-console text-white/85 transition-colors duration-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-console motion-safe:animate-nudge"
     >
         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />

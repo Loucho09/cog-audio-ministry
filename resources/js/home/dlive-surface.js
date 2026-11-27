@@ -1,11 +1,14 @@
 /**
- * A large-format digital mixing surface, modelled on the layout of the S-class dLive-style desks the team uses:
- * banks of 12 motorised faders, each strip with Mix / PAFL / Mute keys, an RGB scribble-strip LCD,
- * a meter, and a rotary encoder with an LED ring; a 12" touchscreen above each bank; aluminium end cheeks,
- * a padded armrest, and a control panel on the right. No maker's name or logo is drawn (trademark).
+ * A large-format digital mixing surface, modelled on the layout of a dLive-class desk:
+ * - two banks of 12 motorised faders (24 strips), each strip with Mix / PAFL / Mute keys, a scribble-strip
+ *   LCD, a 10-segment meter and a rotary encoder with an LED ring;
+ * - a 12" touchscreen above each bank, leaning back into a low rear hood, with its encoder row in front;
+ * - a centre master section with soft keys and a small rotary cluster;
+ * - dark anodised chassis with brushed-metal side cheeks and a matte armrest.
+ * No maker's name, logo or wordmark is drawn (trademark). Desktop shows two banks; phones show one.
  *
- * Built from primitives (instanced where repeated), so it is light enough for phones. The touchscreens are
- * canvas textures redrawn ~20 times a second: a PEQ view (live EQ curve + RTA) and a mixer overview.
+ * Built from primitives (instanced where repeated) so it stays light. The touchscreens are canvas textures
+ * redrawn about 20 times a second (12 on phones): a PEQ view and a mixer overview, driven by a fake signal.
  *
  * Units: 1 = 10 cm. Top of the work surface is y = 0; the operator sits at +z.
  */
@@ -19,7 +22,7 @@ import {
     MathUtils,
     Mesh,
     MeshBasicMaterial,
-    MeshStandardMaterial,
+    MeshPhysicalMaterial,
     Object3D,
     PlaneGeometry,
     SRGBColorSpace,
@@ -28,13 +31,15 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 
 const PITCH = 0.32; // fader strip width
 const BANK = 12; // faders per bank
-const BANK_GAP = 0.55;
-const SIDE = 1.35; // right-hand control panel
+const BANK_W = BANK * PITCH; // 3.84
+const CENTER = 1.5; // centre master section between the banks
 const FADER_NEAR = 1.85; // fader at the bottom of its travel
 const TRAVEL = 1.0;
 const RING = 15; // LED segments per encoder ring
 const METER = 10; // segments per strip meter
 const BPM = 72;
+const SANS = '"Schibsted Grotesk", system-ui, sans-serif';
+const MONO = '"JetBrains Mono", ui-monospace, monospace';
 
 // Decorative channel names (a typical worship input list). Groups pick the scribble-strip colour.
 const CHANNELS = [
@@ -52,14 +57,13 @@ const css = (color, alpha = 1) => {
 export function buildSurface({ tokens, mobile, random }) {
     const banks = mobile ? 1 : 2;
     const strips = banks * BANK;
-    const side = mobile ? 0 : SIDE;
-    const banksWidth = banks * BANK * PITCH + (banks - 1) * BANK_GAP;
-    const width = banksWidth + (side ? side + 0.25 : 0);
-    const x0 = -width / 2;
-    const bankX = (b) => x0 + b * (BANK * PITCH + BANK_GAP);
-    const stripX = (s) => bankX(Math.floor(s / BANK)) + PITCH / 2 + (s % BANK) * PITCH;
-    const bankCenter = (b) => bankX(b) + (BANK * PITCH) / 2;
-    const sideX = x0 + banksWidth + 0.25 + side / 2;
+    const centre = mobile ? 0 : CENTER;
+    const totalW = banks * BANK_W + centre;
+    const width = totalW + 0.5; // with cheeks
+
+    // Bank centres: desktop has one bank either side of the master section; phones show a single centred bank.
+    const bankCenter = (b) => (mobile ? 0 : (b === 0 ? -1 : 1) * (centre / 2 + BANK_W / 2));
+    const stripX = (s) => bankCenter(Math.floor(s / BANK)) - BANK_W / 2 + PITCH / 2 + (s % BANK) * PITCH;
 
     const group = new Group();
     const dummy = new Object3D();
@@ -73,59 +77,72 @@ export function buildSurface({ tokens, mobile, random }) {
     };
 
     // Materials ------------------------------------------------------------------------------------------
-    const black = tokens.background;
-    const graphite = tokens.surface.clone().multiplyScalar(1.6);
-    const anthracite = new MeshStandardMaterial({ color: graphite, metalness: 0.35, roughness: 0.62 });
-    const body = new MeshStandardMaterial({ color: tokens.surface.clone().multiplyScalar(1.1), metalness: 0.5, roughness: 0.5 });
-    const aluminium = new MeshStandardMaterial({ color: tokens.text.clone().multiplyScalar(0.5), metalness: 1, roughness: 0.32 });
-    const leather = new MeshStandardMaterial({ color: black.clone().multiplyScalar(1.4), metalness: 0, roughness: 0.92 });
-    const slotMat = new MeshStandardMaterial({ color: black, metalness: 0, roughness: 1 });
+    const black = tokens.background.clone();
+    const chassisMat = new MeshPhysicalMaterial({
+        color: tokens.surface.clone().multiplyScalar(1.4),
+        metalness: 0.35,
+        roughness: 0.5,
+        clearcoat: 0.25,
+        clearcoatRoughness: 0.4,
+    });
+    const brushed = new MeshPhysicalMaterial({
+        color: tokens.text.clone().multiplyScalar(0.28),
+        metalness: 0.7,
+        roughness: 0.5,
+        anisotropy: 0.6,
+    });
+    const plastic = new MeshPhysicalMaterial({ color: black.clone().multiplyScalar(2), metalness: 0, roughness: 0.8 });
+    const rubber = new MeshPhysicalMaterial({ color: tokens.text.clone().multiplyScalar(0.7), metalness: 0, roughness: 0.92 });
+    const slotMat = new MeshPhysicalMaterial({ color: black, metalness: 0, roughness: 1 });
+    const armMat = new MeshPhysicalMaterial({ color: black.clone().multiplyScalar(1.6), metalness: 0, roughness: 0.9, sheen: 0.4, sheenRoughness: 0.8 });
     const glow = () => new MeshBasicMaterial({ color: 0xffffff, toneMapped: false });
 
     // Chassis --------------------------------------------------------------------------------------------
-    const chassis = new Mesh(new RoundedBoxGeometry(width + 0.5, 0.32, 4.4, 4, 0.06), body);
+    const chassis = new Mesh(new RoundedBoxGeometry(totalW + 0.4, 0.32, 4.4, 4, 0.06), chassisMat);
     chassis.position.set(0, -0.16, 0.3);
     group.add(chassis);
 
-    const plate = new Mesh(new BoxGeometry(width + 0.3, 0.014, 3.05), anthracite);
+    // Contact shadow: a soft radial falloff under the desk (no hard shadow map).
+    const shadow = new Mesh(
+        new PlaneGeometry(width * 1.5, 6.2),
+        new MeshBasicMaterial({ map: contactShadowTexture(), transparent: true, depthWrite: false, opacity: 0.9 }),
+    );
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.set(0, -0.335, 0.3);
+    group.add(shadow);
+
+    // Brushed side cheeks, plus a plate on top of the work surface.
+    [-1, 1].forEach((dir) => {
+        const cheek = new Mesh(new RoundedBoxGeometry(0.13, 0.62, 4.5, 3, 0.05), brushed);
+        cheek.position.set(dir * (width / 2 - 0.02), -0.02, 0.3);
+        group.add(cheek);
+    });
+    const plate = new Mesh(new BoxGeometry(totalW + 0.2, 0.014, 3.05), plastic);
     plate.position.set(0, 0.007, 0.72);
     group.add(plate);
 
-    [-1, 1].forEach((dir) => {
-        const cheek = new Mesh(new RoundedBoxGeometry(0.13, 0.62, 4.5, 3, 0.05), aluminium);
-        cheek.position.set(dir * (width / 2 + 0.31), 0.0, 0.3);
-        group.add(cheek);
-    });
-
-    const armrest = new Mesh(new RoundedBoxGeometry(width + 0.5, 0.16, 0.55, 5, 0.075), leather);
+    // Matte armrest along the front edge.
+    const armrest = new Mesh(new RoundedBoxGeometry(totalW + 0.4, 0.16, 0.55, 5, 0.075), armMat);
     armrest.position.set(0, 0.06, 2.3);
     group.add(armrest);
-    const trim = new Mesh(new BoxGeometry(width + 0.5, 0.018, 0.018), aluminium);
-    trim.position.set(0, 0.02, 2.0);
-    group.add(trim);
-    const lightBar = new Mesh(new BoxGeometry(width + 0.4, 0.008, 0.01), glow());
-    lightBar.material.color.copy(tokens.primary).multiplyScalar(1.8);
-    lightBar.position.set(0, -0.02, 2.585);
-    group.add(lightBar);
 
-    // Rear hood that carries the touchscreens.
-    const hood = new Mesh(new RoundedBoxGeometry(width + 0.5, 0.5, 1.45, 4, 0.06), body);
+    // Low rear hood: the touchscreens lean back into it.
+    const hood = new Mesh(new RoundedBoxGeometry(totalW + 0.4, 0.5, 1.45, 4, 0.06), chassisMat);
     hood.position.set(0, 0.2, -1.38);
     group.add(hood);
 
-    // Bank separators (thin aluminium bars between banks and the side panel).
-    const dividers = [];
-    for (let b = 1; b < banks; b++) dividers.push(bankX(b) - BANK_GAP / 2);
-    if (side) dividers.push(x0 + banksWidth + 0.125);
-    dividers.forEach((x) => {
-        const bar = new Mesh(new BoxGeometry(0.05, 0.02, 2.9), aluminium);
-        bar.position.set(x, 0.016, 0.72);
-        group.add(bar);
-    });
+    // Bank separators (thin brushed bars between the banks and the master section).
+    if (!mobile) {
+        [-centre / 2, centre / 2].forEach((x) => {
+            const bar = new Mesh(new BoxGeometry(0.05, 0.02, 2.9), brushed);
+            bar.position.set(x, 0.016, 0.72);
+            group.add(bar);
+        });
+    }
 
     // Fader strips -----------------------------------------------------------------------------------------
     const slots = new InstancedMesh(new BoxGeometry(0.026, 0.012, TRAVEL + 0.2), slotMat, strips);
-    const caps = new InstancedMesh(new RoundedBoxGeometry(0.2, 0.15, 0.12, 2, 0.03), new MeshStandardMaterial({ color: black.clone().multiplyScalar(2.2), metalness: 0.2, roughness: 0.45 }), strips);
+    const caps = new InstancedMesh(new RoundedBoxGeometry(0.2, 0.15, 0.12, 2, 0.03), rubber, strips);
     const capLines = new InstancedMesh(new BoxGeometry(0.2, 0.004, 0.012), glow(), strips);
     for (let s = 0; s < strips; s++) {
         place(slots, s, stripX(s), 0.012, FADER_NEAR - TRAVEL / 2);
@@ -135,16 +152,14 @@ export function buildSurface({ tokens, mobile, random }) {
     // Mix / PAFL / Mute keys (RGB lit, always faintly glowing like the real thing).
     const keyRows = [
         { z: 0.66, color: tokens.primary }, // Mix
-        { z: 0.53, color: tokens.text.clone().lerp(tokens.accent, 0.25) }, // PAFL
-        { z: 0.4, color: tokens.accent }, // Mute
+        { z: 0.53, color: tokens.text.clone().lerp(tokens.primary, 0.4) }, // PAFL
+        { z: 0.4, color: tokens.primary.clone().lerp(tokens.text, 0.5) }, // Mute
     ];
     const keys = new InstancedMesh(new RoundedBoxGeometry(0.22, 0.04, 0.095, 2, 0.014), glow(), strips * keyRows.length);
     for (let s = 0; s < strips; s++) keyRows.forEach((row, r) => place(keys, s * 3 + r, stripX(s), 0.024, row.z));
 
     // Strip meters: horizontal segments just above the scribble strip.
     const meters = new InstancedMesh(new BoxGeometry(0.02, 0.006, 0.028), glow(), strips * METER);
-    const meterBase = [];
-    for (let m = 0; m < METER; m++) meterBase.push(m >= METER - 1 ? tokens.accent : m >= METER - 3 ? tokens.text : tokens.primary);
     for (let s = 0; s < strips; s++) for (let m = 0; m < METER; m++) place(meters, s * METER + m, stripX(s) - 0.12 + m * 0.0267, 0.012, 0.035);
 
     // Scribble-strip LCDs: one canvas per bank, 12 coloured name tiles.
@@ -152,8 +167,8 @@ export function buildSurface({ tokens, mobile, random }) {
         speech: tokens.text.clone(),
         vocal: tokens.primary.clone(),
         choir: tokens.primary.clone().lerp(tokens.text, 0.45),
-        band: tokens.accent.clone(),
-        drums: tokens.accent.clone().lerp(tokens.primary, 0.5),
+        band: tokens.primary.clone().lerp(tokens.text, 0.2),
+        drums: tokens.primary.clone().lerp(tokens.text, 0.65),
         play: tokens.text.clone().lerp(tokens.primary, 0.2).multiplyScalar(0.6),
     };
     const lcdTextures = [];
@@ -170,31 +185,30 @@ export function buildSurface({ tokens, mobile, random }) {
             ctx.fillStyle = css(groupColor[kind], 0.95);
             ctx.fillRect(x + 6, 6, 116, 84);
             ctx.fillStyle = kind === 'speech' || kind === 'choir' ? css(black) : 'rgba(255,255,255,0.95)';
-            ctx.font = '700 26px Montserrat, system-ui, sans-serif';
             ctx.textAlign = 'center';
+            ctx.font = `700 26px ${SANS}`;
             ctx.fillText(name, x + 64, 46);
-            ctx.font = '600 18px Montserrat, system-ui, sans-serif';
+            ctx.font = `600 18px ${MONO}`;
             ctx.fillText(String(b * BANK + i + 1).padStart(2, '0'), x + 64, 76);
         }
         const texture = new CanvasTexture(canvas);
         texture.colorSpace = SRGBColorSpace;
         texture.anisotropy = 4;
         lcdTextures.push(texture);
-        const lcd = new Mesh(new PlaneGeometry(BANK * PITCH - 0.04, 0.19), new MeshBasicMaterial({ map: texture, toneMapped: false }));
+        const lcd = new Mesh(new PlaneGeometry(BANK_W - 0.04, 0.19), new MeshBasicMaterial({ map: texture, toneMapped: false }));
         lcd.material.color.setScalar(1.15);
         lcd.rotation.x = -Math.PI / 2;
         lcd.position.set(bankCenter(b), 0.016, 0.19);
         group.add(lcd);
     }
 
-    // Rotary encoders with LED rings: one per strip, plus six on the side panel.
+    // Rotary encoders with LED rings: one per strip (row beneath each screen), three in the master cluster.
     const encoderSpots = [];
     for (let s = 0; s < strips; s++) encoderSpots.push({ x: stripX(s), z: -0.22, strip: s });
-    if (side) {
-        for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) encoderSpots.push({ x: sideX - 0.4 + c * 0.4, z: -0.15 + r * 0.42, strip: -1 });
-    }
-    const knobBodies = new InstancedMesh(new CylinderGeometry(0.068, 0.074, 0.09, 32), new MeshStandardMaterial({ color: black.clone().multiplyScalar(2), metalness: 0.3, roughness: 0.5 }), encoderSpots.length);
-    const knobCaps = new InstancedMesh(new CylinderGeometry(0.048, 0.048, 0.094, 32), aluminium, encoderSpots.length);
+    const clusterX = [-0.3, 0, 0.3];
+    if (!mobile) clusterX.forEach((x) => encoderSpots.push({ x, z: -0.2, strip: -1 }));
+    const knobBodies = new InstancedMesh(new CylinderGeometry(0.068, 0.074, 0.09, 32), plastic, encoderSpots.length);
+    const knobCaps = new InstancedMesh(new CylinderGeometry(0.048, 0.048, 0.094, 32), brushed, encoderSpots.length);
     const knobPointers = new InstancedMesh(new BoxGeometry(0.01, 0.006, 0.04), glow(), encoderSpots.length);
     const rings = new InstancedMesh(new BoxGeometry(0.016, 0.005, 0.03), glow(), encoderSpots.length * RING);
     encoderSpots.forEach((spot, e) => {
@@ -209,23 +223,22 @@ export function buildSurface({ tokens, mobile, random }) {
         }
     });
 
-    // Side panel: a softkey grid and a row of function keys.
+    // Master section: a grid of soft keys (lit at random, colour per function).
     let softkeys = null;
-    if (side) {
-        softkeys = new InstancedMesh(new RoundedBoxGeometry(0.22, 0.04, 0.14, 2, 0.015), glow(), 16 + 8);
+    if (!mobile) {
+        softkeys = new InstancedMesh(new RoundedBoxGeometry(0.24, 0.04, 0.14, 2, 0.015), glow(), 8);
         let k = 0;
-        for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) place(softkeys, k++, sideX - 0.45 + c * 0.3, 0.024, 0.72 + r * 0.24);
-        for (let c = 0; c < 4; c++) for (let r = 0; r < 2; r++) place(softkeys, k++, sideX - 0.45 + c * 0.3, 0.024, 0.32 + r * 0.17 - 0.17);
-        softkeys.userData.lit = Array.from({ length: 24 }, () => random() < 0.35);
-        softkeys.userData.color = Array.from({ length: 24 }, (_, i) => (i % 5 === 0 ? tokens.accent : i % 3 === 0 ? tokens.text : tokens.primary));
+        for (let r = 0; r < 2; r++) for (let c = 0; c < 4; c++) place(softkeys, k++, -0.45 + c * 0.3, 0.024, 0.45 + r * 0.22);
+        softkeys.userData.lit = Array.from({ length: 8 }, () => random() < 0.4);
+        softkeys.userData.color = Array.from({ length: 8 }, (_, i) => (i % 3 === 0 ? tokens.primary : i % 3 === 1 ? tokens.text : tokens.primary.clone().lerp(tokens.text, 0.5)));
     }
 
     group.add(slots, caps, capLines, keys, meters, knobBodies, knobCaps, knobPointers, rings);
     if (softkeys) group.add(softkeys);
 
-    // Touchscreens -----------------------------------------------------------------------------------------
+    // Touchscreens: side by side in the rear section, leaning back into the hood. ----------------------------
     const screens = [];
-    const tilt = -0.58; // leaning back toward the hood
+    const tilt = -0.58;
     for (let b = 0; b < banks; b++) {
         const canvas = document.createElement('canvas');
         canvas.width = 1024;
@@ -237,11 +250,20 @@ export function buildSurface({ tokens, mobile, random }) {
         const holder = new Group();
         holder.position.set(bankCenter(b), 1.27, -1.22);
         holder.rotation.x = tilt;
-        const bezel = new Mesh(new RoundedBoxGeometry(BANK * PITCH - 0.25, 2.2, 0.12, 4, 0.05), body);
+        const bezel = new Mesh(new RoundedBoxGeometry(BANK_W - 0.25, 2.2, 0.12, 4, 0.05), chassisMat);
         bezel.position.z = -0.065;
         const glass = new Mesh(
-            new PlaneGeometry(BANK * PITCH - 0.42, (BANK * PITCH - 0.42) * (640 / 1024)),
-            new MeshStandardMaterial({ color: 0x000000, roughness: 0.08, metalness: 0, emissive: 0xffffff, emissiveMap: texture, emissiveIntensity: 0 }),
+            new PlaneGeometry(BANK_W - 0.42, (BANK_W - 0.42) * (640 / 1024)),
+            new MeshPhysicalMaterial({
+                color: black,
+                roughness: 0.2,
+                metalness: 0,
+                clearcoat: 1,
+                clearcoatRoughness: 0.05,
+                emissive: 0xffffff,
+                emissiveMap: texture,
+                emissiveIntensity: 0,
+            }),
         );
         glass.position.y = 0.06;
         holder.add(bezel, glass);
@@ -249,7 +271,7 @@ export function buildSurface({ tokens, mobile, random }) {
         screens.push({ canvas, ctx: canvas.getContext('2d'), texture, glass, view: b === 0 ? 'peq' : 'overview', bank: b });
     }
 
-    // "Music" per strip: the meters, rings and screens all read from this --------------------------------
+    // "Music" per strip: the meters, rings and screens all read from this. --------------------------------
     const voices = Array.from({ length: strips }, (_, s) => ({
         name: CHANNELS[s % CHANNELS.length][0],
         kind: CHANNELS[s % CHANNELS.length][1],
@@ -280,7 +302,7 @@ export function buildSurface({ tokens, mobile, random }) {
         text: css(tokens.text, 0.92),
         primary: css(tokens.primary),
         primarySoft: css(tokens.primary, 0.22),
-        accent: css(tokens.accent),
+        hot: css(tokens.primary.clone().lerp(tokens.text, 0.6)),
     };
     const rta = new Float32Array(56);
     const bands = [
@@ -297,11 +319,11 @@ export function buildSurface({ tokens, mobile, random }) {
         ctx.fillRect(0, 0, 1024, 58);
         ctx.fillStyle = ui.primary;
         ctx.fillRect(16, 12, 10, 34);
-        ctx.font = '700 24px Montserrat, system-ui, sans-serif';
+        ctx.font = `700 24px ${SANS}`;
         ctx.textAlign = 'left';
         ctx.fillStyle = ui.text;
         ctx.fillText(title, 38, 38);
-        ctx.font = '600 16px Montserrat, system-ui, sans-serif';
+        ctx.font = `600 16px ${MONO}`;
         tabs.forEach((tab, i) => {
             const x = 470 + i * 108;
             ctx.fillStyle = i === active ? ui.primary : ui.line;
@@ -320,9 +342,8 @@ export function buildSurface({ tokens, mobile, random }) {
         const lit = Math.round(MathUtils.clamp(value, 0, 1) * segments);
         for (let i = 0; i < segments; i++) {
             const top = y + h - (i + 1) * (segH + gap) + gap;
-            const color = i >= segments - 2 ? ui.accent : i >= segments - 6 ? ui.text : ui.primary;
             ctx.globalAlpha = i < lit ? 1 : 0.12;
-            ctx.fillStyle = color;
+            ctx.fillStyle = i >= segments - 2 ? ui.hot : i >= segments - 6 ? ui.text : ui.primary;
             ctx.fillRect(x, top, w, segH);
         }
         ctx.globalAlpha = 1;
@@ -341,7 +362,7 @@ export function buildSurface({ tokens, mobile, random }) {
         ctx.fillRect(gx, gy, gw, gh);
         ctx.strokeStyle = ui.line;
         ctx.lineWidth = 1;
-        ctx.font = '500 13px Montserrat, system-ui, sans-serif';
+        ctx.font = `500 13px ${MONO}`;
         ctx.fillStyle = ui.dim;
         ctx.textAlign = 'center';
         [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000].forEach((f) => {
@@ -361,8 +382,8 @@ export function buildSurface({ tokens, mobile, random }) {
         // RTA bars behind the curve.
         const bw = gw / rta.length;
         for (let i = 0; i < rta.length; i++) {
-            const tilt = 1 - i / rta.length;
-            const target = v.level * (0.45 + 0.55 * tilt) * (0.65 + 0.35 * Math.sin(time * 3 + i * 0.7) * Math.sin(time * 1.3 + i));
+            const tiltAmount = 1 - i / rta.length;
+            const target = v.level * (0.45 + 0.55 * tiltAmount) * (0.65 + 0.35 * Math.sin(time * 3 + i * 0.7) * Math.sin(time * 1.3 + i));
             rta[i] += (target - rta[i]) * 0.35;
             const h = MathUtils.clamp(rta[i], 0, 1) * gh * 0.9;
             ctx.fillStyle = ui.primarySoft;
@@ -373,25 +394,21 @@ export function buildSurface({ tokens, mobile, random }) {
         bands[2].g = 3 + Math.sin(time * 0.35) * 2.2;
         bands[0].g = -3 + Math.sin(time * 0.22 + 1) * 1.5;
         const response = (f) => bands.reduce((sum, b) => sum + b.g * Math.exp(-Math.pow(Math.log2(f / b.f) * b.q, 2)), 0);
-        ctx.beginPath();
-        for (let px = 0; px <= gw; px += 4) {
-            const f = 20 * Math.pow(10, (px / gw) * 3);
-            const y = dy(response(f));
-            px === 0 ? ctx.moveTo(gx + px, y) : ctx.lineTo(gx + px, y);
-        }
-        ctx.save();
+        const tracePath = () => {
+            ctx.beginPath();
+            for (let px = 0; px <= gw; px += 4) {
+                const f = 20 * Math.pow(10, (px / gw) * 3);
+                const y = dy(response(f));
+                px === 0 ? ctx.moveTo(gx + px, y) : ctx.lineTo(gx + px, y);
+            }
+        };
+        tracePath();
         ctx.lineTo(gx + gw, dy(0));
         ctx.lineTo(gx, dy(0));
         ctx.closePath();
         ctx.fillStyle = ui.primarySoft;
         ctx.fill();
-        ctx.restore();
-        ctx.beginPath();
-        for (let px = 0; px <= gw; px += 4) {
-            const f = 20 * Math.pow(10, (px / gw) * 3);
-            const y = dy(response(f));
-            px === 0 ? ctx.moveTo(gx + px, y) : ctx.lineTo(gx + px, y);
-        }
+        tracePath();
         ctx.strokeStyle = ui.primary;
         ctx.lineWidth = 4;
         ctx.shadowColor = ui.primary;
@@ -401,23 +418,23 @@ export function buildSurface({ tokens, mobile, random }) {
         bands.forEach((b, i) => {
             ctx.beginPath();
             ctx.arc(fx(b.f), dy(response(b.f)), 13, 0, Math.PI * 2);
-            ctx.fillStyle = i === 2 ? ui.accent : ui.text;
+            ctx.fillStyle = i === 2 ? ui.hot : ui.text;
             ctx.fill();
             ctx.fillStyle = ui.bg;
-            ctx.font = '700 14px Montserrat, system-ui, sans-serif';
+            ctx.font = `700 14px ${MONO}`;
             ctx.fillText(String(i + 1), fx(b.f), dy(response(b.f)) + 5);
         });
 
         // Right: input / output meters and gain reduction.
         ctx.fillStyle = ui.panel;
         ctx.fillRect(804, 80, 196, 380);
-        ctx.font = '600 14px Montserrat, system-ui, sans-serif';
+        ctx.font = `600 14px ${MONO}`;
         ctx.fillStyle = ui.dim;
         ['IN', 'OUT', 'GR'].forEach((label, i) => ctx.fillText(label, 846 + i * 56, 448));
         vMeter(ctx, 832, 96, 28, 330, v.level * 1.05);
         vMeter(ctx, 888, 96, 28, 330, v.level * 0.92);
         const gr = Math.max(0, v.level - 0.55) * 1.6;
-        ctx.fillStyle = ui.accent;
+        ctx.fillStyle = ui.hot;
         ctx.fillRect(944, 96, 28, 330 * gr);
 
         // Bottom: the bank at a glance.
@@ -428,8 +445,9 @@ export function buildSurface({ tokens, mobile, random }) {
             const x = 34 + i * 80.5;
             ctx.fillStyle = css(groupColor[voice.kind], 0.9);
             ctx.fillRect(x, 510, 70, 24);
-            ctx.fillStyle = voice.kind === 'speech' || voice.kind === 'choir' ? ui.bg : '#fff';
-            ctx.font = '700 12px Montserrat, system-ui, sans-serif';
+            ctx.fillStyle = voice.kind === 'speech' || voice.kind === 'choir' ? ui.bg : ui.text;
+            ctx.font = `700 12px ${SANS}`;
+            ctx.textAlign = 'center';
             ctx.fillText(voice.name, x + 35, 527);
             vMeter(ctx, x + 6, 542, 14, 70, voice.level, 12);
             ctx.fillStyle = ui.line;
@@ -450,8 +468,8 @@ export function buildSurface({ tokens, mobile, random }) {
             ctx.fillRect(x + 3, 72, colW - 6, 548);
             ctx.fillStyle = css(groupColor[voice.kind], 0.95);
             ctx.fillRect(x + 3, 72, colW - 6, 40);
-            ctx.fillStyle = voice.kind === 'speech' || voice.kind === 'choir' ? ui.bg : '#fff';
-            ctx.font = '700 14px Montserrat, system-ui, sans-serif';
+            ctx.fillStyle = voice.kind === 'speech' || voice.kind === 'choir' ? ui.bg : ui.text;
+            ctx.font = `700 14px ${SANS}`;
             ctx.textAlign = 'center';
             ctx.fillText(voice.name, x + colW / 2, 98);
             // Mini PEQ thumbnail.
@@ -468,10 +486,11 @@ export function buildSurface({ tokens, mobile, random }) {
             ctx.fillRect(x + colW - 30, 210, 5, 360);
             ctx.fillStyle = ui.text;
             ctx.fillRect(x + colW - 44, 210 + 348 - voice.fader * 348, 32, 12);
-            ctx.fillStyle = voice.muted ? ui.accent : ui.line;
+            ctx.fillStyle = voice.muted ? ui.hot : ui.line;
             ctx.fillRect(x + 8, 584, colW - 16, 26);
-            ctx.fillStyle = voice.muted ? '#fff' : ui.dim;
-            ctx.font = '700 12px Montserrat, system-ui, sans-serif';
+            ctx.fillStyle = voice.muted ? ui.text : ui.dim;
+            ctx.font = `700 12px ${MONO}`;
+            ctx.textAlign = 'center';
             ctx.fillText('MUTE', x + colW / 2, 602);
         }
     }
@@ -484,12 +503,14 @@ export function buildSurface({ tokens, mobile, random }) {
         const beat = (time * BPM) / 60;
         const kick = Math.pow(1 - (beat % 1), 6);
         const blink = Math.floor(beat * 2) % 2 === 0;
-        const power = state.power;
 
         for (let s = 0; s < strips; s++) {
             const v = voices[s];
             const local = s % BANK;
-            const sweep = Math.sin(MathUtils.clamp((state.boot * 1.6 - (Math.floor(s / BANK) * 0.2 + local * 0.04)) / 0.55, 0, 1) * Math.PI);
+            const bank = Math.floor(s / BANK);
+            // LEDs light in sequence: each strip comes up a moment after the one before it.
+            const pw = MathUtils.clamp(state.power * 1.6 - (bank * 0.2 + local * 0.035), 0, 1);
+            const sweep = Math.sin(MathUtils.clamp((state.boot * 1.6 - (bank * 0.2 + local * 0.04)) / 0.55, 0, 1) * Math.PI);
             const scrolled = MathUtils.smoothstep(state.progress, local * 0.02, 0.45 + local * 0.02);
             let fader = MathUtils.lerp(v.rest, v.up, scrolled) + Math.sin(time * 0.4 + v.p2) * 0.01;
             fader = MathUtils.lerp(fader, 1, sweep);
@@ -500,7 +521,7 @@ export function buildSurface({ tokens, mobile, random }) {
             place(capLines, s, stripX(s), 0.166, z);
 
             const music = v.base + v.amp * (0.5 + 0.5 * Math.sin(time * v.f1 + v.p1)) * (0.55 + 0.45 * Math.sin(time * v.f2 + v.p2)) + v.kick * kick;
-            const raw = music * (0.3 + 0.85 * fader) * power * (v.muted ? 0.1 : 1) + (Math.random() - 0.5) * 0.04;
+            const raw = music * (0.3 + 0.85 * fader) * pw * (v.muted ? 0.1 : 1) + (Math.random() - 0.5) * 0.04;
             v.level += (raw - v.level) * (raw > v.level ? 0.45 : 0.07);
             if (v.level > v.peak) {
                 v.peak = v.level;
@@ -509,20 +530,21 @@ export function buildSurface({ tokens, mobile, random }) {
                 v.peak = Math.max(v.level, v.peak - dt * 0.5);
             }
 
-            const dim = 0.1 * power;
-            keys.setColorAt(s * 3, unit.copy(keyRows[0].color).multiplyScalar(v.mix ? 2.2 * power : dim));
-            keys.setColorAt(s * 3 + 1, unit.copy(keyRows[1].color).multiplyScalar(v.pafl && blink ? 2 * power : dim));
-            keys.setColorAt(s * 3 + 2, unit.copy(keyRows[2].color).multiplyScalar(v.muted ? 2.4 * power : dim));
+            const dim = 0.1 * pw;
+            keys.setColorAt(s * 3, unit.copy(keyRows[0].color).multiplyScalar(v.mix ? 2.2 * pw : dim));
+            keys.setColorAt(s * 3 + 1, unit.copy(keyRows[1].color).multiplyScalar(v.pafl && blink ? 2 * pw : dim));
+            keys.setColorAt(s * 3 + 2, unit.copy(keyRows[2].color).multiplyScalar(v.muted ? 2.4 * pw : dim));
 
             const lit = Math.round(MathUtils.clamp(v.level, 0, 1) * METER);
             const peak = Math.min(METER - 1, Math.round(MathUtils.clamp(v.peak, 0, 1) * METER) - 1);
             for (let m = 0; m < METER; m++) {
-                meters.setColorAt(s * METER + m, unit.copy(meterBase[m]).multiplyScalar(m < lit || m === peak ? 2.4 : 0.05 + 0.03 * power));
+                meters.setColorAt(s * METER + m, unit.copy(meterBase[m]).multiplyScalar(m < lit || m === peak ? 2.4 * pw : 0.05 + 0.03 * pw));
             }
         }
 
         encoderSpots.forEach((spot, e) => {
             const voice = spot.strip >= 0 ? voices[spot.strip] : null;
+            const pw = MathUtils.clamp(state.power * 1.6 - ((spot.strip >= 0 ? Math.floor(spot.strip / BANK) * 0.2 : 0.1) + 0.2), 0, 1);
             const scrolled = MathUtils.smoothstep(state.progress, 0, 0.6);
             const value = MathUtils.clamp(spot.value + scrolled * 0.25 + Math.sin(time * 0.2 + spot.phase) * 0.02, 0, 1);
             const angle = MathUtils.degToRad(-135 + 270 * value);
@@ -530,13 +552,14 @@ export function buildSurface({ tokens, mobile, random }) {
             const litCount = Math.round(value * RING);
             const color = voice ? groupColor[voice.kind] : tokens.primary;
             for (let k = 0; k < RING; k++) {
-                rings.setColorAt(e * RING + k, unit.copy(color).multiplyScalar(k < litCount ? 2.2 * power : 0.04 * power));
+                rings.setColorAt(e * RING + k, unit.copy(color).multiplyScalar(k < litCount ? 2.2 * pw : 0.04 * pw));
             }
         });
 
         if (softkeys) {
+            const pw = state.power;
             softkeys.userData.lit.forEach((on, i) => {
-                softkeys.setColorAt(i, unit.copy(softkeys.userData.color[i]).multiplyScalar(on ? 1.8 * power : 0.08 * power));
+                softkeys.setColorAt(i, unit.copy(softkeys.userData.color[i]).multiplyScalar(on ? 1.8 * pw : 0.08 * pw));
             });
             softkeys.instanceColor.needsUpdate = true;
         }
@@ -547,6 +570,7 @@ export function buildSurface({ tokens, mobile, random }) {
         keys.instanceColor.needsUpdate = true;
         meters.instanceColor.needsUpdate = true;
         rings.instanceColor.needsUpdate = true;
+        capLines.instanceColor.needsUpdate = true;
 
         screenClock += dt;
         if (screenClock >= screenInterval) {
@@ -556,19 +580,39 @@ export function buildSurface({ tokens, mobile, random }) {
                 screen.texture.needsUpdate = true;
             });
         }
-        screens.forEach((screen) => (screen.glass.material.emissiveIntensity = 0.95 * power));
+        // Above 1.0 so the brightest screen text blooms slightly (bloom threshold is 0.9 in console-scene.js).
+        screens.forEach((screen) => (screen.glass.material.emissiveIntensity = 1.5 * state.power));
     }
+
+    const meterBase = [];
+    for (let m = 0; m < METER; m++) meterBase.push(m >= METER - 1 ? tokens.primary.clone().lerp(tokens.text, 0.5) : m >= METER - 3 ? tokens.text : tokens.primary);
 
     // Initial state so the first frame is complete.
     update(0, 0.016, { power: 0, boot: 0, progress: 0 });
 
     return {
         group,
-        width: width + 0.75,
+        width,
+        screens,
         update,
         dispose() {
             lcdTextures.forEach((t) => t.dispose());
             screens.forEach((s) => s.texture.dispose());
         },
     };
+}
+
+/** Soft radial falloff used as the contact shadow under the desk. */
+function contactShadowTexture() {
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    g.addColorStop(0, 'rgba(0,0,0,0.85)');
+    g.addColorStop(0.55, 'rgba(0,0,0,0.4)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, size, size);
+    return new CanvasTexture(canvas);
 }

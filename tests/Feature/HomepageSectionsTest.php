@@ -34,7 +34,8 @@ it('renders exactly one h1 with the ministry name in the hero', function () {
     $h1s = $xpath->query('//h1');
 
     expect($h1s->length)->toBe(1)
-        ->and(homepageText($xpath, '//h1'))->toBe(config('ministry.name'))
+        ->and(homepageText($xpath, '//h1'))->toBe('We serve behind the sound.')
+        ->and(homepageText($xpath, '//section[@aria-labelledby="hero-title"]//p[contains(normalize-space(), "CH 00")]'))->toContain(config('ministry.name'))
         ->and(homepageText($xpath, '//section[@aria-labelledby="hero-title"]'))->toContain(config('ministry.tagline'));
 });
 

@@ -15,7 +15,7 @@ it('sets the hero title as plain text with no script accent', function () {
 
     $h1 = $xpath->query('//h1[@id="hero-title"]')->item(0);
 
-    expect(trim($h1->textContent))->toBe(config('ministry.name'))
+    expect(trim($h1->textContent))->toBe('We serve behind the sound.')
         ->and($xpath->query('//h1[@id="hero-title"]//*')->length)->toBe(0)
         ->and($xpath->query('//*[contains(@class, "font-script")]')->length)->toBe(0);
 });

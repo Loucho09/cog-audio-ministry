@@ -6,7 +6,11 @@
     <div class="signal-wrap relative">
         <div aria-hidden="true" data-fx="signal-line" class="signal-line pointer-events-none absolute inset-y-0 left-4 z-10 hidden w-px bg-text/10 lg:block"></div>
 
-        <x-home.hero />
+        @php
+            // Sunday service count from the same schedule the services section shows (0 hides the panel line).
+            $sundayServices = collect($schedule['weekly'] ?? [])->where('day', 'Sunday')->sum(fn ($line) => count($line['times'] ?? []));
+        @endphp
+        <x-home.hero :sunday-services="$sundayServices" />
         <x-home.about :services-per-week="$servicesPerWeek" :churches-count="$churches->count()" />
         <x-home.what-we-do />
         <x-home.services :branch="$branch" :schedule="$schedule" />
