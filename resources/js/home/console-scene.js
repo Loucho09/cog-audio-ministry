@@ -245,7 +245,8 @@ export function createConsoleScene(canvas, { mobile = false, glbUrl = null, onPr
     resize();
 
     // Optional GLB: replaces the procedural desk when present. Meshopt only (no external decoder files).
-    const ready = glbUrl ? loadGlb(glbUrl) : Promise.resolve();
+    // Shaders compile off the first frame (compileAsync yields between programs), so the first visible frame is smooth.
+    const ready = (glbUrl ? loadGlb(glbUrl) : Promise.resolve()).then(() => renderer.compileAsync?.(scene, camera));
 
     function loadGlb(url) {
         const manager = new LoadingManager();

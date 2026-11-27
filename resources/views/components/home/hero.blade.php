@@ -1,5 +1,4 @@
-{{-- CH 00. Dark console hero, in both themes. The 3D desk (resources/js/home/hero.js) draws on the right on wide
-     screens and above the copy on phones. The cover photo is the poster: it shows with no JS, with reduced motion,
+{{-- CH 00. Dark console hero, in both themes. The desk draws on the right on wide screens and above the copy on phones. The cover photo is the poster: it shows with no JS, with reduced motion,
      or on a device without WebGL. It is decorative, so alt is empty.
      The copy is one panel plus two decorative panels (aria-hidden) that the scroll story crossfades on desktop. --}}
 @props(['sundayServices' => 0])
@@ -9,28 +8,6 @@
 @endphp
 
 <section data-hero data-home-fx aria-labelledby="hero-title" class="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-console text-white">
-    {{-- Poster: the cover photo, cooler and darkened so the copy keeps its contrast. --}}
-    <div data-hero-photo aria-hidden="true" class="absolute inset-0 -z-10">
-        <picture class="block h-full w-full">
-            <source
-                type="image/webp"
-                srcset="{{ asset('images/cover-800.webp') }} 800w, {{ asset('images/cover-1200.webp') }} 1200w, {{ asset('images/cover.webp') }} 1600w"
-                sizes="100vw"
-            >
-            <img
-                src="{{ asset('images/cover.jpg') }}"
-                alt=""
-                width="1600"
-                height="609"
-                fetchpriority="high"
-                decoding="async"
-                class="h-full w-full object-cover object-[60%_center]"
-            >
-        </picture>
-        <div class="absolute inset-0 bg-console/80 lg:hidden"></div>
-        <div class="absolute inset-0 hidden bg-gradient-to-r from-console via-console/70 to-transparent lg:block"></div>
-    </div>
-
     {{-- The 3D desk. Its own box on phones (above the copy); the right side of the hero on desktop. --}}
     <div
         data-hero-stage
@@ -38,6 +15,25 @@
         aria-hidden="true"
         class="hero-stage relative h-[50svh] w-full shrink-0 pt-16 lg:absolute lg:inset-y-0 lg:left-[42%] lg:right-0 lg:h-auto lg:w-auto lg:pt-0"
     >
+        {{-- Poster: a still of the same 3D desk (captured from the live scene, black ground so it screens onto the hero).
+             It is the visual by default; the live canvas fades in over it once the first frame is drawn. --}}
+        <picture data-hero-poster class="pointer-events-none absolute inset-0 block h-full w-full">
+            <source
+                type="image/webp"
+                srcset="{{ asset('images/hero-console-800.webp') }} 800w, {{ asset('images/hero-console-1600.webp') }} 1600w"
+                sizes="(min-width: 1024px) 58vw, 100vw"
+            >
+            <img
+                src="{{ asset('images/hero-console-1600.jpg') }}"
+                alt=""
+                width="1600"
+                height="1724"
+                fetchpriority="high"
+                decoding="async"
+                class="h-full w-full object-contain object-center"
+            >
+        </picture>
+
         <canvas class="block h-full w-full"></canvas>
 
         {{-- Loader: hidden until the 3D work starts (hero.js). Without JS it never appears. --}}

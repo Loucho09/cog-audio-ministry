@@ -74,36 +74,34 @@ it('shows the vision and mission placeholders in the about section', function ()
 it('renders the hero background as a responsive, decorative picture with a jpg fallback', function () {
     $xpath = homepageXPath($this->get('/')->assertOk()->getContent());
 
-    $picture = '//section[@aria-labelledby="hero-title"]//picture';
+    $picture = '//section[@aria-labelledby="hero-title"]//picture[@data-hero-poster]';
     $source = $xpath->query($picture.'/source');
     $img = $xpath->query($picture.'/img');
 
-    expect($xpath->query($picture)->length)->toBe(1)
+    expect($xpath->query('//section[@aria-labelledby="hero-title"]//picture')->length)->toBe(1)
         ->and($source->length)->toBe(1)
         ->and($source->item(0)->getAttribute('type'))->toBe('image/webp')
         ->and($source->item(0)->getAttribute('srcset'))->toBe(
-            asset('images/cover-800.webp').' 800w, '
-            .asset('images/cover-1200.webp').' 1200w, '
-            .asset('images/cover.webp').' 1600w'
+            asset('images/hero-console-800.webp').' 800w, '
+            .asset('images/hero-console-1600.webp').' 1600w'
         )
-        ->and($source->item(0)->getAttribute('sizes'))->toBe('100vw')
+        ->and($source->item(0)->getAttribute('sizes'))->toBe('(min-width: 1024px) 58vw, 100vw')
         ->and($img->length)->toBe(1)
-        ->and($img->item(0)->getAttribute('src'))->toBe(asset('images/cover.jpg'))
+        ->and($img->item(0)->getAttribute('src'))->toBe(asset('images/hero-console-1600.jpg'))
         ->and($img->item(0)->getAttribute('width'))->toBe('1600')
-        ->and($img->item(0)->getAttribute('height'))->toBe('609')
+        ->and($img->item(0)->getAttribute('height'))->toBe('1724')
         ->and($img->item(0)->getAttribute('fetchpriority'))->toBe('high')
         ->and($img->item(0)->getAttribute('decoding'))->toBe('async')
         ->and($img->item(0)->getAttribute('loading'))->toBe('')
         ->and($img->item(0)->hasAttribute('alt'))->toBeTrue()
         ->and($img->item(0)->getAttribute('alt'))->toBe('')
-        ->and($img->item(0)->getAttribute('class'))->toContain('object-cover');
+        ->and($img->item(0)->getAttribute('class'))->toContain('object-contain');
 });
 
-it('ships the cover image and its webp version in public/images', function () {
-    expect(file_exists(public_path('images/cover.jpg')))->toBeTrue()
-        ->and(file_exists(public_path('images/cover.webp')))->toBeTrue()
-        ->and(file_exists(public_path('images/cover-800.webp')))->toBeTrue()
-        ->and(file_exists(public_path('images/cover-1200.webp')))->toBeTrue();
+it('ships the console poster (1600 and 800 webp, 1600 jpg) in public/images', function () {
+    expect(file_exists(public_path('images/hero-console-1600.jpg')))->toBeTrue()
+        ->and(file_exists(public_path('images/hero-console-1600.webp')))->toBeTrue()
+        ->and(file_exists(public_path('images/hero-console-800.webp')))->toBeTrue();
 });
 
 it('renders the hero decorative shapes without blur-3xl', function () {

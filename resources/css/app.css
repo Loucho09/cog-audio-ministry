@@ -451,7 +451,7 @@
 }
 
 /* Homepage motion layer (resources/js/home). Everything here is progressive: without JS, without WebGL,
-   or with reduced motion, the hero shows the cover photo and the page reads exactly as rendered. */
+   or with reduced motion, the hero shows the console poster and the page reads exactly as rendered. */
 
 /* Hero title: hidden only until SplitText has run, so the words do not flash before they animate in.
    Failsafe: if the motion chunk never arrives, the title shows by itself after 3s. */
@@ -468,11 +468,18 @@
     }
 }
 
-/* 3D stage: invisible until its first frame, then it crossfades over the photo (which becomes its LED wall). */
+/* Stage: the poster is the visual; the live canvas fades in over it after its first frame (hero.js). */
 .hero-stage {
     mix-blend-mode: screen;
-    opacity: 0;
+}
+
+.hero-stage canvas,
+[data-hero-poster] {
     transition: opacity 1.4s ease-out;
+}
+
+.hero-stage canvas {
+    opacity: 0;
 }
 
 /* Desktop: the bloom haze fades out toward the copy column, so the canvas edge never shows as a seam. */
@@ -483,15 +490,11 @@
     }
 }
 
-[data-hero-photo] {
-    transition: opacity 1.4s ease-out;
-}
-
-[data-hero].is-3d .hero-stage {
+[data-hero].is-3d .hero-stage canvas {
     opacity: 1;
 }
 
-[data-hero].is-3d [data-hero-photo] {
+[data-hero].is-3d [data-hero-poster] {
     opacity: 0;
 }
 
