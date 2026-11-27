@@ -11,8 +11,8 @@ it('shows the Facebook link and hides Messenger when its URL is empty', function
 
     $response = $this->get('/')
         ->assertOk()
-        ->assertSee('id="updates"', false)
-        ->assertSee('Don&#039;t miss a Sunday', false)
+        ->assertSee('id="contact"', false)
+        ->assertSee('Follow us for service updates and ministry news')
         ->assertSee('Follow us on Facebook')
         ->assertSee('https://www.facebook.com/example', false)
         ->assertDontSee('Message us on Messenger');
@@ -29,11 +29,14 @@ it('shows the Messenger button when its URL is set', function () {
         ->assertSee('https://m.me/example', false);
 });
 
-it('hides the section when both URLs are empty', function () {
+it('hides the links but keeps the contact section when both URLs are empty', function () {
     config(['ministry.facebook_url' => null, 'ministry.messenger_url' => null]);
 
     $this->get('/')
         ->assertOk()
-        ->assertDontSee('id="updates"', false)
-        ->assertDontSee('Follow us on Facebook');
+        ->assertSee('id="contact"', false)
+        ->assertSee('Facebook page to be added')
+        ->assertSee('Chat link to be added')
+        ->assertDontSee('Follow us on Facebook')
+        ->assertDontSee('Message us on Messenger');
 });

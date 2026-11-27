@@ -145,9 +145,27 @@ it('hides every section backdrop from assistive technology', function () {
     // Our variants only; Tailwind's own backdrop-blur-* utilities are not decorative layers.
     $backdrops = $xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " backdrop-") and not(contains(@class, "backdrop-blur"))]/parent::*');
 
-    expect($backdrops->length)->toBeGreaterThan(0);
-
+    // The redesigned sections use none; if one is ever added it must be hidden from assistive technology.
     foreach ($backdrops as $backdrop) {
         expect($backdrop->getAttribute('aria-hidden'))->toBe('true');
     }
+});
+
+it('renders every homepage section in the console order with its channel label', function () {
+    $xpath = homepageXPath($this->get('/')->assertOk()->getContent());
+
+    $ids = [];
+    foreach ($xpath->query('//main//section[@id]') as $section) {
+        $ids[] = $section->getAttribute('id');
+    }
+
+    // Team is behind a config flag (off by default), so it is not in this list.
+    expect($ids)->toBe(['about', 'what-we-do', 'services', 'churches', 'gallery', 'join', 'contact']);
+
+    foreach (['CH 01', 'CH 02', 'CH 03', 'CH 04', 'CH 05', 'CH 07'] as $label) {
+        expect($xpath->evaluate('count(//main//p[contains(normalize-space(), "'.$label.'")])'))->toBeGreaterThan(0);
+    }
+
+    // Retired section markup is gone from the homepage.
+    expect($xpath->query('//*[@id="impact" or @id="updates" or @data-marquee]')->length)->toBe(0);
 });
