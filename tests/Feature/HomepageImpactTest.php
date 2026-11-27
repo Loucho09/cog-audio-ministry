@@ -8,7 +8,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(fn () => $this->withoutVite());
 
-it('shows the impact section with churches and services counts', function () {
+it('shows the about readouts with churches and services counts', function () {
     $branch = Branch::factory()->create(['is_main' => true]);
     Branch::factory()->count(4)->create();
     Service::factory()->create(['branch_id' => $branch->id, 'day_of_week' => 0]);
@@ -16,7 +16,7 @@ it('shows the impact section with churches and services counts', function () {
 
     $this->get('/')
         ->assertOk()
-        ->assertSee('Every sermon, every song, heard clearly.')
+        ->assertSee('data-count="5"', false)
         ->assertSeeInOrder(['Churches served', '<span class="sr-only">5</span>'], false)
         ->assertSeeInOrder(['Services every week', '<span class="sr-only">2</span>'], false);
 });

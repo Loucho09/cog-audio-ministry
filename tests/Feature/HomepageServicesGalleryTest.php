@@ -169,3 +169,14 @@ it('serves the home route through HomeController', function () {
         ->and($route->uri())->toBe('/')
         ->and($route->getActionName())->toBe(HomeController::class);
 });
+
+it('renders data-day, data-time and data-name hooks for the next-service script', function () {
+    seedServices();
+
+    $html = $this->get('/')->assertOk()->getContent();
+
+    // Tuesday (2) Revival Night at 19:00 and Sunday (0) first service at 05:30, both 24h.
+    expect($html)->toMatch('/data-day="2"\s+data-time="19:00"\s+data-name="Revival Night"/')
+        ->and($html)->toMatch('/data-day="0"\s+data-time="05:30"\s+data-name="Sunday Service"/')
+        ->and($html)->toContain('js-led');
+});

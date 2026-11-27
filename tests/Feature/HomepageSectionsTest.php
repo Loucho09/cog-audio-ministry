@@ -49,14 +49,15 @@ it('links the hero buttons to the join form and #services', function () {
         ->toBe(route('home').'#services');
 });
 
-it('renders the about section as an anchor target with its heading and no what-we-do section', function () {
+it('renders the about section as an anchor target with its heading and the what-we-do section with five roles', function () {
     $xpath = homepageXPath($this->get('/')->assertOk()->getContent());
 
     $about = $xpath->query('//section[@id="about"][@aria-labelledby="about-title"]');
 
     expect($about->length)->toBe(1)
-        ->and(homepageText($xpath, '//section[@id="about"]//h2'))->toBe('About Us')
-        ->and($xpath->query('//section[@id="what-we-do"]')->length)->toBe(0);
+        ->and(homepageText($xpath, '//section[@id="about"]//h2'))->toBe('Every service has a crew you never see.')
+        ->and($xpath->query('//section[@id="what-we-do"][@aria-labelledby="what-we-do-title"]')->length)->toBe(1)
+        ->and($xpath->query('//section[@id="what-we-do"]//h3')->length)->toBe(5);
 });
 
 it('shows the vision and mission placeholders in the about section', function () {

@@ -521,3 +521,37 @@
 .fx-spot:hover::after {
     opacity: 1;
 }
+
+/* Next-service LED: hidden until next-service.js marks a service row as next or live. */
+.js-led {
+    display: none;
+}
+
+[data-state='next'] .js-led,
+[data-state='live'] .js-led {
+    display: inline-flex;
+}
+
+.led-dot {
+    display: inline-block;
+    height: 0.5rem;
+    width: 0.5rem;
+    border-radius: 9999px;
+    background: rgb(var(--color-signal));
+}
+
+[data-state='live'] .led-dot {
+    animation: led-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes led-pulse {
+    50% {
+        opacity: 0.35;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-state='live'] .led-dot {
+        animation: none;
+    }
+}

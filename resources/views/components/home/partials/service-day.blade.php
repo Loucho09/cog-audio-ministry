@@ -1,36 +1,23 @@
 @php
-    // Compact card for one upcoming day. One name per service, with its start times as small chips.
-    $groups = collect($day['items'])->groupBy(fn ($item) => $item['service']->name);
+    // One upcoming day: mono date label, optional Today/Tomorrow badge, then one line per start time.
     $dateLabel = $day['date']->format('l, M j');
 @endphp
 
-<li class="group flex flex-col gap-3 rounded-3xl border border-text/15 bg-surface p-4 dark:bg-background shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg motion-reduce:transform-none dark:hover:shadow-black/60 sm:p-5">
-    <div class="flex items-start gap-3">
-        {{-- Heading is the full date for screen readers; the visual block is aria-hidden and placed first with CSS order. --}}
-        <h3 class="sr-only">{{ $dateLabel }}</h3>
-
+<li class="border-t border-text/10 py-5 first:border-t-0 first:pt-0">
+    <div class="flex items-center gap-3">
+        <h3 class="t-label text-text/70">{{ $dateLabel }}</h3>
         @if ($badge)
-            <span class="order-last ml-auto shrink-0 rounded-full bg-accent/15 px-2.5 py-1 text-xs font-semibold text-accent-text ring-1 ring-inset ring-accent/30">{{ $badge }}</span>
+            <span class="rounded-console border border-primary/40 px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-primary-dark dark:text-primary">{{ $badge }}</span>
         @endif
-
-        <div aria-hidden="true" class="order-first min-w-0">
-            <span class="block text-xs font-semibold uppercase tracking-[0.2em] text-text/80">{{ $day['date']->format('l') }}</span>
-            <time datetime="{{ $day['date']->format('Y-m-d') }}" class="mt-0.5 block text-xl font-extrabold leading-tight tracking-tight text-text">{{ $day['date']->format('M j') }}</time>
-        </div>
     </div>
 
-    <div class="space-y-3">
-        @foreach ($groups as $name => $items)
-            <div>
-                <p class="text-sm font-semibold text-text">{{ $name }}</p>
-                <ul class="mt-1.5 grid grid-cols-[repeat(auto-fill,minmax(4.75rem,1fr))] gap-1.5">
-                    @foreach ($items as $item)
-                        <li>
-                            <time datetime="{{ $item['starts_at']->format('c') }}" class="flex justify-center whitespace-nowrap rounded-full border border-text/15 bg-surface px-2.5 py-0.5 text-xs text-text">{{ $item['starts_at']->format('g:i A') }}</time>
-                        </li>
-                    @endforeach
-                </ul>
-            </div>
+    <ul class="mt-3 space-y-2">
+        @foreach ($day['items'] as $item)
+            <li class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <time datetime="{{ $item['starts_at']->format('c') }}" class="font-mono text-2xl font-medium tabular-nums tracking-tight">{{ $item['starts_at']->format('g:i A') }}</time>
+                <span class="font-medium">{{ $item['service']->name }}</span>
+                <a href="{{ route('services.calendar', $item['service']) }}" class="link-fader ml-auto text-sm text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-signal dark:text-primary">Add to calendar<span class="sr-only">: {{ $item['service']->name }} {{ $item['starts_at']->format('g:i A') }}</span></a>
+            </li>
         @endforeach
-    </div>
+    </ul>
 </li>
