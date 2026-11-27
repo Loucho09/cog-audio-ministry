@@ -108,10 +108,14 @@ function initTitle(hero) {
 async function initStory(hero, story, ctx) {
     const panels = Array.from(hero.querySelectorAll('[data-hero-panel]'));
     const cta = hero.querySelector('[data-hero-cta]');
+    // Decided at load: a window that starts narrow and is widened later keeps the static hero (accepted trade-off,
+    // so phones never download SplitText).
     if (panels.length < 5 || !desktopMotion()) return;
 
     const { SplitText } = await import('gsap/SplitText');
     gsap.registerPlugin(SplitText);
+    // Split only once the brand fonts are in, so the masked lines break where the reader sees them.
+    await document.fonts?.ready;
 
     ctx.add(() => {
         gsap.matchMedia().add('(min-width: 1024px)', () => {
@@ -137,6 +141,11 @@ async function initStory(hero, story, ctx) {
                     anticipatePin: 1,
                     invalidateOnRefresh: true,
                     refreshPriority: 1,
+                    // While the CTA row is faded out it must not be clickable or focusable. The headline stays in the
+                    // accessibility tree (only its opacity changes).
+                    onUpdate: (self) => {
+                        if (cta) cta.inert = self.progress > 0.04 && self.progress < 0.8;
+                    },
                 },
             });
 
@@ -158,7 +167,7 @@ async function initStory(hero, story, ctx) {
             const [power, fader, mix, room] = chapters;
 
             // 0 -> 1 Silence to Power on: the headline and CTA leave as the desk boots and the camera pushes in.
-            tl.to([head, cta], { autoAlpha: 0, y: -24, duration: 0.5, ease: 'power2.in' }, 0.1);
+            tl.to([head, cta], { opacity: 0, y: -24, duration: 0.5, ease: 'power2.in' }, 0.1);
             move('power', STANDBY, 1, 0.3, 1.6);
             move('boot', 0, 1, 0.5, 1.8);
             move('shot', 0, 1, 0, 2.2);
@@ -181,7 +190,7 @@ async function initStory(hero, story, ctx) {
             // 4 The room: back to the full desk, the last line and the CTA return, then the hero unpins.
             move('shot', 4, 5, 6.8, 1.4);
             enter(room, 7.4);
-            tl.fromTo(cta, { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out', immediateRender: false }, 7.9);
+            tl.fromTo(cta, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', immediateRender: false }, 7.9);
             tl.to({}, { duration: 1.1 }, 8.9); // a short hold before the unpin
         });
     });
@@ -206,6 +215,7 @@ function initStage(hero, story) {
     let lost = false;
     let scene = null;
     let tick = null;
+    let introTl = null;
     const observers = [];
     const listeners = [];
     const listen = (target, type, handler, options) => {
@@ -233,6 +243,7 @@ function initStage(hero, story) {
     const teardown = () => {
         if (stopped) return;
         stopped = true;
+        introTl?.kill();
         stopRendering();
         scene?.dispose();
         scene = null;
@@ -317,7 +328,7 @@ function initStage(hero, story) {
             if (stopped || lost) return;
             hero.classList.add('is-3d');
             showLoad(1);
-            const tl = gsap.timeline();
+            const tl = (introTl = gsap.timeline());
             if (loader) tl.to(loader, { autoAlpha: 0, duration: 0.6, ease: 'power2.out', onComplete: () => (loader.hidden = true) }, 0.2);
             tl.to(live.state, { intro: 1, duration: 2.6, ease: 'power3.out' }, 0).to(intro, { power: STANDBY, duration: 2.2, ease: 'power2.inOut' }, 0.3);
         });
@@ -328,14 +339,15 @@ function initStage(hero, story) {
 }
 
 /**
- * Returns the teardown for the 3D stage. The title, story and Join us button live for the page's lifetime
- * (inside the caller's gsap context).
+ * Returns the teardown for the 3D stage. The title and story live in the caller's gsap context; the Join us
+ * button's teardown goes into `disposers` (released on a real unload).
  */
-export function initHero(hero, ctx) {
+export function initHero(hero, ctx, disposers = []) {
     const story = { power: 0, boot: 0, shot: 0, pastor: 0, mix: 0 };
     initTitle(hero);
     initStory(hero, story, ctx).catch((error) => console.error(error));
     const join = hero.querySelector('[data-join-cta]');
-    if (join) initJoinButton(join);
+    // The button lives until a real unload (it must keep working after a back-forward cache restore).
+    if (join) disposers.push(initJoinButton(join));
     return initStage(hero, story);
 }

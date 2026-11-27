@@ -103,6 +103,8 @@ export function initJoinButton(wrap) {
             window,
             'pointermove',
             (event) => {
+                // Off-screen or faded out by the hero story (inert): no magnet, and no layout reads.
+                if (wrap.classList.contains('is-offscreen') || wrap.closest('[inert]')) return;
                 const rect = button.getBoundingClientRect();
                 const near = distanceToRect(event.clientX, event.clientY, rect) < MAGNET_RANGE;
                 if (near) {
@@ -124,6 +126,7 @@ export function initJoinButton(wrap) {
 
     // Click: press, burst, "Let's go", then open the form -----------------------------------------------------
     let leaving = false;
+    let navigateTimer = 0;
     listen(button, 'click', (event) => {
         if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
@@ -137,12 +140,13 @@ export function initJoinButton(wrap) {
             gsap.fromTo(burst, { scale: 0.5, opacity: 0.85 }, { scale: 3.2 + i * 1.1, opacity: 0, duration: 0.7, delay: i * 0.08, ease: 'power2.out' }),
         );
         scramble("Let's go", 0.35);
-        window.setTimeout(() => window.location.assign(button.href), 400);
+        navigateTimer = window.setTimeout(() => window.location.assign(button.href), 400);
     });
 
     // A page restored from the back-forward cache must be clickable again.
     listen(window, 'pageshow', (event) => {
         if (!event.persisted) return;
+        clearTimeout(navigateTimer);
         leaving = false;
         gsap.set(button, { scale: 1 });
         label.textContent = text;
@@ -150,6 +154,7 @@ export function initJoinButton(wrap) {
 
     return () => {
         stopMeters();
+        clearTimeout(navigateTimer);
         sonar.kill();
         observer.disconnect();
         undo.splice(0).forEach((remove) => remove());

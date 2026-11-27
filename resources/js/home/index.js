@@ -185,7 +185,7 @@ export function initHome() {
     let stopHeroStage = () => {};
     if (hero) {
         ctx.add(() => {
-            stopHeroStage = initHero(hero, ctx);
+            stopHeroStage = initHero(hero, ctx, disposers);
         });
     }
 
