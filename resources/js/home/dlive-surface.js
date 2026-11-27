@@ -8,7 +8,7 @@
  * No maker's name, logo or wordmark is drawn (trademark). Desktop shows two banks; phones show one.
  *
  * Built from primitives (instanced where repeated) so it stays light. The touchscreens are canvas textures
- * redrawn about 20 times a second (12 on phones): a PEQ view and a mixer overview, driven by a fake signal.
+ * redrawn about 20 times a second (12 on phones): the PASTOR channel (waveform) and a mixer overview, driven by a fake signal.
  *
  * Units: 1 = 10 cm. Top of the work surface is y = 0; the operator sits at +z.
  */
@@ -41,13 +41,22 @@ const BPM = 72;
 const SANS = '"Schibsted Grotesk", system-ui, sans-serif';
 const MONO = '"JetBrains Mono", ui-monospace, monospace';
 
-// Decorative channel names (a typical worship input list). Groups pick the scribble-strip colour.
+// Scribble strips (owner's input list, see brain/Features/hero-console-story.md). Bank 1 holds the inputs; on
+// desktop bank 2 holds the outputs. Groups pick the scribble-strip colour.
 const CHANNELS = [
-    ['PASTOR', 'speech'], ['HOST', 'speech'], ['VOX 1', 'vocal'], ['VOX 2', 'vocal'], ['VOX 3', 'vocal'], ['VOX 4', 'vocal'],
-    ['CHOIR L', 'choir'], ['CHOIR R', 'choir'], ['AC GTR', 'band'], ['E GTR', 'band'], ['BASS', 'band'], ['KEYS', 'band'],
-    ['KICK', 'drums'], ['SNARE', 'drums'], ['HAT', 'drums'], ['TOM 1', 'drums'], ['TOM 2', 'drums'], ['OH L', 'drums'],
-    ['OH R', 'drums'], ['PAD', 'band'], ['TRACKS', 'play'], ['VIDEO', 'play'], ['AMB L', 'play'], ['AMB R', 'play'],
+    ['PASTOR', 'speech'], ['WL 1', 'vocal'], ['WL 2', 'vocal'], ['CHOIR L', 'choir'], ['CHOIR R', 'choir'], ['KEYS', 'band'],
+    ['AG', 'band'], ['BASS', 'band'], ['KICK', 'drums'], ['SNARE', 'drums'], ['OH L', 'drums'], ['OH R', 'drums'],
+    ['MAIN L', 'play'], ['MAIN R', 'play'], ['SUB', 'play'], ['FILL', 'play'], ['MON 1', 'play'], ['MON 2', 'play'],
+    ['MON 3', 'play'], ['MON 4', 'play'], ['IEM 1', 'play'], ['IEM 2', 'play'], ['LIVE', 'play'], ['REC', 'play'],
 ];
+
+// Speech-like envelope for the PASTOR channel: syllables inside words inside phrases, with short pauses.
+const speech = (t) => {
+    const syllable = Math.pow(Math.max(0, Math.sin(t * 9.1) * 0.6 + Math.sin(t * 5.3 + 1.2) * 0.4), 1.4);
+    const word = Math.sin(t * 2.1) > -0.45 ? 1 : 0.12;
+    const phrase = Math.sin(t * 0.55 + 0.8) > -0.7 ? 1 : 0.08;
+    return MathUtils.clamp(syllable * word * phrase * 1.25, 0, 1);
+};
 
 const css = (color, alpha = 1) => {
     const c = color.clone().convertLinearToSRGB();
@@ -101,7 +110,7 @@ export function buildSurface({ tokens, mobile, random }) {
         envMapIntensity: 0.15,
     });
     const plastic = new MeshPhysicalMaterial({ color: black.clone().multiplyScalar(2), metalness: 0, roughness: 0.8 });
-    const rubber = new MeshPhysicalMaterial({ color: tokens.text.clone().multiplyScalar(0.7), metalness: 0, roughness: 0.92 });
+    const rubber = new MeshPhysicalMaterial({ color: tokens.text.clone().multiplyScalar(0.28), metalness: 0, roughness: 0.92 });
     const slotMat = new MeshPhysicalMaterial({ color: black, metalness: 0, roughness: 1 });
     const armMat = new MeshPhysicalMaterial({ color: black.clone().multiplyScalar(1.6), metalness: 0, roughness: 0.9, sheen: 0.4, sheenRoughness: 0.8 });
     const glow = () => new MeshBasicMaterial({ color: new Color(0xffffff).multiplyScalar(2.5), toneMapped: false });
@@ -155,7 +164,7 @@ export function buildSurface({ tokens, mobile, random }) {
     const capLines = new InstancedMesh(new BoxGeometry(0.2, 0.004, 0.012), glow(), strips);
     for (let s = 0; s < strips; s++) {
         place(slots, s, stripX(s), 0.012, FADER_NEAR - TRAVEL / 2);
-        capLines.setColorAt(s, unit.setRGB(1.4, 1.4, 1.4));
+        capLines.setColorAt(s, unit.setRGB(1.1, 1.1, 1.1));
     }
 
     // Mix / PAFL / Mute keys (RGB lit, always faintly glowing like the real thing).
@@ -277,7 +286,7 @@ export function buildSurface({ tokens, mobile, random }) {
         glass.position.y = 0.06;
         holder.add(bezel, glass);
         group.add(holder);
-        screens.push({ canvas, ctx: canvas.getContext('2d'), texture, glass, view: b === 0 ? 'peq' : 'overview', bank: b });
+        screens.push({ canvas, ctx: canvas.getContext('2d'), texture, glass, view: b === 0 ? 'pastor' : 'overview', bank: b });
     }
 
     // "Music" per strip: the meters, rings and screens all read from this. --------------------------------
@@ -295,11 +304,14 @@ export function buildSurface({ tokens, mobile, random }) {
         peak: 0,
         hold: 0,
         fader: 0,
+        alive: 0,
+        input: 0,
+        wave: 0,
         rest: 0.1 + random() * 0.18,
-        up: 0.6 + random() * 0.22,
-        muted: random() < 0.14,
-        mix: s === 2,
-        pafl: random() < 0.08,
+        up: s === 0 ? 0.78 : 0.48 + random() * 0.32, // "faders at different levels" once the mix is up
+        muted: s >= BANK && random() < 0.12,
+        mix: s === 0,
+        pafl: s >= BANK && random() < 0.08,
     }));
 
     // Screen drawing --------------------------------------------------------------------------------------
@@ -313,13 +325,8 @@ export function buildSurface({ tokens, mobile, random }) {
         primarySoft: css(tokens.primary, 0.22),
         hot: css(tokens.primary.clone().lerp(tokens.text, 0.6)),
     };
-    const rta = new Float32Array(56);
-    const bands = [
-        { f: 90, g: -3, q: 1.4 },
-        { f: 350, g: -2, q: 1.2 },
-        { f: 2800, g: 3, q: 1.0 },
-        { f: 9000, g: 2.5, q: 0.9 },
-    ];
+    const wave = new Float32Array(120); // PASTOR waveform history, one column per screen redraw
+    let waveHead = 0;
 
     function header(ctx, title, tabs, active) {
         ctx.fillStyle = ui.bg;
@@ -358,90 +365,57 @@ export function buildSurface({ tokens, mobile, random }) {
         ctx.globalAlpha = 1;
     }
 
-    function drawPeq(screen, time) {
+    // Screen 1: the PASTOR channel. A scrolling waveform that grows from flat to clear speech as the fader comes up.
+    function drawPastor(screen, state) {
         const { ctx } = screen;
-        const v = voices[2];
-        header(ctx, `${String(3).padStart(2, '0')}  ${v.name}`, ['Preamp', 'Gate', 'PEQ', 'Comp'], 2);
+        const v = voices[0];
+        header(ctx, '01  PASTOR', ['Input', 'Gate', 'PEQ', 'Comp'], 0);
 
-        // Graph: log frequency (20 Hz - 20 kHz) by ±18 dB.
+        wave[waveHead] = v.wave;
+        waveHead = (waveHead + 1) % wave.length;
+
         const gx = 24, gy = 80, gw = 760, gh = 380;
-        const fx = (f) => gx + (Math.log10(f / 20) / 3) * gw;
-        const dy = (db) => gy + gh / 2 - (db / 18) * (gh / 2);
+        const mid = gy + gh / 2;
         ctx.fillStyle = ui.panel;
         ctx.fillRect(gx, gy, gw, gh);
         ctx.strokeStyle = ui.line;
         ctx.lineWidth = 1;
-        ctx.font = `500 13px ${MONO}`;
-        ctx.fillStyle = ui.dim;
-        ctx.textAlign = 'center';
-        [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000].forEach((f) => {
+        [-0.45, 0, 0.45].forEach((f) => {
             ctx.beginPath();
-            ctx.moveTo(fx(f), gy);
-            ctx.lineTo(fx(f), gy + gh);
-            ctx.stroke();
-            ctx.fillText(f >= 1000 ? `${f / 1000}k` : String(f), MathUtils.clamp(fx(f), gx + 12, gx + gw - 14), gy + gh + 18);
-        });
-        [-12, -6, 0, 6, 12].forEach((db) => {
-            ctx.beginPath();
-            ctx.moveTo(gx, dy(db));
-            ctx.lineTo(gx + gw, dy(db));
+            ctx.moveTo(gx, mid + f * gh);
+            ctx.lineTo(gx + gw, mid + f * gh);
             ctx.stroke();
         });
 
-        // RTA bars behind the curve.
-        const bw = gw / rta.length;
-        for (let i = 0; i < rta.length; i++) {
-            const tiltAmount = 1 - i / rta.length;
-            const target = v.level * (0.45 + 0.55 * tiltAmount) * (0.65 + 0.35 * Math.sin(time * 3 + i * 0.7) * Math.sin(time * 1.3 + i));
-            rta[i] += (target - rta[i]) * 0.35;
-            const h = MathUtils.clamp(rta[i], 0, 1) * gh * 0.9;
-            ctx.fillStyle = ui.primarySoft;
-            ctx.fillRect(gx + i * bw + 1, gy + gh - h, bw - 2, h);
+        // Mirrored bars, newest on the right. A hairline stays at the centre even when the channel is silent.
+        const bw = gw / wave.length;
+        ctx.fillStyle = ui.primary;
+        for (let i = 0; i < wave.length; i++) {
+            const a = wave[(waveHead + i) % wave.length];
+            const h = Math.max(1.5, a * gh * 0.44);
+            ctx.globalAlpha = 0.35 + 0.65 * (i / wave.length);
+            ctx.fillRect(gx + i * bw + 1, mid - h, Math.max(1, bw - 2), h * 2);
         }
+        ctx.globalAlpha = 1;
 
-        // EQ curve: four bell bands drifting slowly, like an engineer riding them.
-        bands[2].g = 3 + Math.sin(time * 0.35) * 2.2;
-        bands[0].g = -3 + Math.sin(time * 0.22 + 1) * 1.5;
-        const response = (f) => bands.reduce((sum, b) => sum + b.g * Math.exp(-Math.pow(Math.log2(f / b.f) * b.q, 2)), 0);
-        const tracePath = () => {
-            ctx.beginPath();
-            for (let px = 0; px <= gw; px += 4) {
-                const f = 20 * Math.pow(10, (px / gw) * 3);
-                const y = dy(response(f));
-                px === 0 ? ctx.moveTo(gx + px, y) : ctx.lineTo(gx + px, y);
-            }
-        };
-        tracePath();
-        ctx.lineTo(gx + gw, dy(0));
-        ctx.lineTo(gx, dy(0));
-        ctx.closePath();
-        ctx.fillStyle = ui.primarySoft;
-        ctx.fill();
-        tracePath();
-        ctx.strokeStyle = ui.primary;
-        ctx.lineWidth = 4;
-        ctx.shadowColor = ui.primary;
-        ctx.shadowBlur = 14;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-        bands.forEach((b, i) => {
-            ctx.beginPath();
-            ctx.arc(fx(b.f), dy(response(b.f)), 13, 0, Math.PI * 2);
-            ctx.fillStyle = i === 2 ? ui.hot : ui.text;
-            ctx.fill();
-            ctx.fillStyle = ui.bg;
-            ctx.font = `700 14px ${MONO}`;
-            ctx.fillText(String(i + 1), fx(b.f), dy(response(b.f)) + 5);
-        });
+        ctx.font = `600 15px ${MONO}`;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = ui.dim;
+        ctx.fillText('SPEECH  HPF 100Hz  GATE -48dB', gx + 14, gy + 26);
+        const db = v.fader < 0.02 ? '-inf' : (-60 + v.fader * 70).toFixed(1);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = (state.pastor ?? 0) > 0.05 ? ui.primary : ui.dim;
+        ctx.fillText(`FADER ${db} dB`, gx + gw - 14, gy + 26);
 
         // Right: input / output meters and gain reduction.
         ctx.fillStyle = ui.panel;
         ctx.fillRect(804, 80, 196, 380);
         ctx.font = `600 14px ${MONO}`;
+        ctx.textAlign = 'center';
         ctx.fillStyle = ui.dim;
         ['IN', 'OUT', 'GR'].forEach((label, i) => ctx.fillText(label, 846 + i * 56, 448));
-        vMeter(ctx, 832, 96, 28, 330, v.level * 1.05);
-        vMeter(ctx, 888, 96, 28, 330, v.level * 0.92);
+        vMeter(ctx, 832, 96, 28, 330, v.input);
+        vMeter(ctx, 888, 96, 28, 330, v.level);
         const gr = Math.max(0, v.level - 0.55) * 1.6;
         ctx.fillStyle = ui.hot;
         ctx.fillRect(944, 96, 28, 330 * gr);
@@ -466,12 +440,13 @@ export function buildSurface({ tokens, mobile, random }) {
         }
     }
 
+    // Screen 2: the input bank as a mixer overview (the channels coming alive one by one in "The mix").
     function drawOverview(screen) {
-        const { ctx, bank } = screen;
+        const { ctx } = screen;
         header(ctx, 'Scene 04  Worship', ['Mixer', 'Scenes', 'FX', 'Setup'], 0);
         const colW = 976 / BANK;
         for (let i = 0; i < BANK; i++) {
-            const voice = voices[bank * BANK + i];
+            const voice = voices[i];
             const x = 24 + i * colW;
             ctx.fillStyle = ui.panel;
             ctx.fillRect(x + 3, 72, colW - 6, 548);
@@ -513,6 +488,8 @@ export function buildSurface({ tokens, mobile, random }) {
         const kick = Math.pow(1 - (beat % 1), 6);
         const blink = Math.floor(beat * 2) % 2 === 0;
 
+        const pastor = state.pastor ?? 0;
+        const mixAmount = state.mix ?? 0;
         for (let s = 0; s < strips; s++) {
             const v = voices[s];
             const local = s % BANK;
@@ -520,17 +497,32 @@ export function buildSurface({ tokens, mobile, random }) {
             // LEDs light in sequence: each strip comes up a moment after the one before it.
             const pw = MathUtils.clamp(state.power * 1.6 - (bank * 0.2 + local * 0.035), 0, 1);
             const sweep = Math.sin(MathUtils.clamp((state.boot * 1.6 - (bank * 0.2 + local * 0.04)) / 0.55, 0, 1) * Math.PI);
-            const scrolled = MathUtils.smoothstep(state.progress, local * 0.02, 0.45 + local * 0.02);
-            let fader = MathUtils.lerp(v.rest, v.up, scrolled) + Math.sin(time * 0.4 + v.p2) * 0.01;
+            // How "live" this channel is: PASTOR follows its own fader move; the others join one by one in the mix.
+            const alive = s === 0
+                ? pastor
+                : bank === 0
+                    ? MathUtils.smoothstep(mixAmount, ((local - 1) / 11) * 0.75, ((local - 1) / 11) * 0.75 + 0.25)
+                    : MathUtils.smoothstep(mixAmount, 0.5, 1);
+            v.alive = alive;
+            // Idle: every fader drifts a few millimetres (full travel is 10 cm), like a motorised desk settling.
+            let fader = MathUtils.lerp(v.rest, v.up, alive) + Math.sin(time * 0.35 + v.p2) * 0.022;
             fader = MathUtils.lerp(fader, 1, sweep);
-            v.fader = fader;
+            v.fader = MathUtils.clamp(fader, 0, 1);
 
-            const z = FADER_NEAR - fader * TRAVEL;
+            const z = FADER_NEAR - v.fader * TRAVEL;
             place(caps, s, stripX(s), 0.09, z);
             place(capLines, s, stripX(s), 0.166, z);
 
-            const music = v.base + v.amp * (0.5 + 0.5 * Math.sin(time * v.f1 + v.p1)) * (0.55 + 0.45 * Math.sin(time * v.f2 + v.p2)) + v.kick * kick;
-            const raw = music * (0.3 + 0.85 * fader) * pw * (v.muted ? 0.1 : 1) + (Math.random() - 0.5) * 0.04;
+            let raw;
+            if (s === 0) {
+                const env = speech(time);
+                v.input = env * (0.25 + 0.6 * pw);
+                v.wave = env * pastor * pw + Math.random() * 0.012;
+                raw = env * (0.06 + 0.9 * pastor) * pw;
+            } else {
+                const music = v.base + v.amp * (0.5 + 0.5 * Math.sin(time * v.f1 + v.p1)) * (0.55 + 0.45 * Math.sin(time * v.f2 + v.p2)) + v.kick * kick;
+                raw = music * (0.14 + 0.86 * alive) * (0.3 + 0.85 * v.fader) * pw * (v.muted ? 0.1 : 1) + (Math.random() - 0.5) * 0.03;
+            }
             v.level += (raw - v.level) * (raw > v.level ? 0.45 : 0.07);
             if (v.level > v.peak) {
                 v.peak = v.level;
@@ -540,7 +532,7 @@ export function buildSurface({ tokens, mobile, random }) {
             }
 
             const dim = 0.1 * pw;
-            keys.setColorAt(s * 3, unit.copy(keyRows[0].color).multiplyScalar(v.mix ? 2.2 * pw : dim));
+            keys.setColorAt(s * 3, unit.copy(keyRows[0].color).multiplyScalar(v.mix || alive > 0.5 ? 2.2 * pw : dim));
             keys.setColorAt(s * 3 + 1, unit.copy(keyRows[1].color).multiplyScalar(v.pafl && blink ? 2 * pw : dim));
             keys.setColorAt(s * 3 + 2, unit.copy(keyRows[2].color).multiplyScalar(v.muted ? 2.4 * pw : dim));
 
@@ -554,8 +546,7 @@ export function buildSurface({ tokens, mobile, random }) {
         encoderSpots.forEach((spot, e) => {
             const voice = spot.strip >= 0 ? voices[spot.strip] : null;
             const pw = MathUtils.clamp(state.power * 1.6 - ((spot.strip >= 0 ? Math.floor(spot.strip / BANK) * 0.2 : 0.1) + 0.2), 0, 1);
-            const scrolled = MathUtils.smoothstep(state.progress, 0, 0.6);
-            const value = MathUtils.clamp(spot.value + scrolled * 0.25 + Math.sin(time * 0.2 + spot.phase) * 0.02, 0, 1);
+            const value = MathUtils.clamp(spot.value + (voice ? voice.alive * 0.2 : 0) + Math.sin(time * 0.2 + spot.phase) * 0.02, 0, 1);
             const angle = MathUtils.degToRad(-135 + 270 * value);
             place(knobPointers, e, spot.x + Math.sin(angle) * 0.03, 0.095, spot.z - Math.cos(angle) * 0.03, -angle);
             const litCount = Math.round(value * RING);
@@ -585,25 +576,28 @@ export function buildSurface({ tokens, mobile, random }) {
         if (screenClock >= screenInterval) {
             screenClock = 0;
             screens.forEach((screen) => {
-                screen.view === 'peq' ? drawPeq(screen, time) : drawOverview(screen);
+                screen.view === 'pastor' ? drawPastor(screen, state) : drawOverview(screen);
                 screen.texture.needsUpdate = true;
             });
         }
-        // Above 1.0 so the brightest screen text blooms slightly (bloom threshold is 0.9 in console-scene.js).
-        screens.forEach((screen) => (screen.glass.material.emissiveIntensity = 1.5 * state.power));
+        // Above 1.0 so the brightest screen text blooms slightly (bloom threshold is 1.0 in console-scene.js).
+        // The screens boot in order: PASTOR first, then the overview.
+        screens.forEach((screen, i) => (screen.glass.material.emissiveIntensity = 1.5 * MathUtils.clamp(state.power * 1.4 - i * 0.25, 0, 1)));
     }
 
     const meterBase = [];
     for (let m = 0; m < METER; m++) meterBase.push(m >= METER - 1 ? tokens.primary.clone().lerp(tokens.text, 0.5) : m >= METER - 3 ? tokens.text : tokens.primary);
 
     // Initial state so the first frame is complete.
-    update(0, 0.016, { power: 0, boot: 0, progress: 0 });
+    update(0, 0.016, { power: 0, boot: 0, pastor: 0, mix: 0 });
 
     return {
         group,
         width,
         screens,
         update,
+        // Camera anchors in surface units: the PASTOR fader (strip 1) and the input bank centre.
+        anchors: { pastorX: stripX(0), pastorZ: FADER_NEAR - TRAVEL * 0.55, inputBankX: bankCenter(0) },
         dispose() {
             lcdTextures.forEach((t) => t.dispose());
             screens.forEach((s) => s.texture.dispose());

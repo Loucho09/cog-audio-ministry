@@ -71,39 +71,43 @@ it('shows the vision and mission placeholders in the about section', function ()
         ->and($placeholders->length)->toBe(2);
 });
 
-it('renders the hero background as a responsive, decorative picture with a jpg fallback', function () {
+it('renders the hero poster as a decorative picture: desktop and phone renders plus a jpg fallback', function () {
     $xpath = homepageXPath($this->get('/')->assertOk()->getContent());
 
     $picture = '//section[@aria-labelledby="hero-title"]//picture[@data-hero-poster]';
-    $source = $xpath->query($picture.'/source');
+    $sources = $xpath->query($picture.'/source');
     $img = $xpath->query($picture.'/img');
 
     expect($xpath->query('//section[@aria-labelledby="hero-title"]//picture')->length)->toBe(1)
-        ->and($source->length)->toBe(1)
-        ->and($source->item(0)->getAttribute('type'))->toBe('image/webp')
-        ->and($source->item(0)->getAttribute('srcset'))->toBe(
-            asset('images/cover-800.webp').' 800w, '
-            .asset('images/cover-1200.webp').' 1200w, '
-            .asset('images/cover.webp').' 1600w'
-        )
-        ->and($source->item(0)->getAttribute('sizes'))->toBe('100vw')
+        ->and($sources->length)->toBe(2)
+        ->and($sources->item(0)->getAttribute('media'))->toBe('(min-width: 1024px)')
+        ->and($sources->item(0)->getAttribute('srcset'))->toBe(asset('images/hero-console-1600.webp'))
+        ->and($sources->item(1)->getAttribute('srcset'))->toBe(asset('images/hero-console-800.webp'))
         ->and($img->length)->toBe(1)
-        ->and($img->item(0)->getAttribute('src'))->toBe(asset('images/cover.jpg'))
+        ->and($img->item(0)->getAttribute('src'))->toBe(asset('images/hero-console-1600.jpg'))
         ->and($img->item(0)->getAttribute('width'))->toBe('1600')
-        ->and($img->item(0)->getAttribute('height'))->toBe('609')
+        ->and($img->item(0)->getAttribute('height'))->toBe('1000')
         ->and($img->item(0)->getAttribute('fetchpriority'))->toBe('high')
-        ->and($img->item(0)->getAttribute('decoding'))->toBe('async')
         ->and($img->item(0)->getAttribute('loading'))->toBe('')
         ->and($img->item(0)->hasAttribute('alt'))->toBeTrue()
-        ->and($img->item(0)->getAttribute('alt'))->toBe('')
-        ->and($img->item(0)->getAttribute('class'))->toContain('object-cover');
+        ->and($img->item(0)->getAttribute('alt'))->toBe('');
 });
 
-it('ships the hero cover photo (800, 1200 and 1600 webp, 1600 jpg) in public/images', function () {
-    expect(file_exists(public_path('images/cover.jpg')))->toBeTrue()
-        ->and(file_exists(public_path('images/cover.webp')))->toBeTrue()
-        ->and(file_exists(public_path('images/cover-1200.webp')))->toBeTrue()
-        ->and(file_exists(public_path('images/cover-800.webp')))->toBeTrue();
+it('ships the hero poster renders in public/images', function () {
+    expect(file_exists(public_path('images/hero-console-1600.jpg')))->toBeTrue()
+        ->and(file_exists(public_path('images/hero-console-1600.webp')))->toBeTrue()
+        ->and(file_exists(public_path('images/hero-console-800.webp')))->toBeTrue();
+});
+
+it('renders the four decorative chapter panels and the attention-seeking join button in the hero', function () {
+    $xpath = homepageXPath($this->get('/')->assertOk()->getContent());
+    $hero = '//section[@aria-labelledby="hero-title"]';
+
+    expect($xpath->query($hero.'//*[@data-hero-panel][@aria-hidden="true"]')->length)->toBe(4)
+        ->and(homepageText($xpath, $hero.'//*[@data-hero-panel][last()]//p[@data-hero-line]'))->toBe('We serve behind the sound.')
+        ->and($xpath->query($hero.'//*[@data-join-cta]//a[@data-join-button]')->length)->toBe(1)
+        ->and($xpath->query($hero.'//*[@data-join-meter]/i')->length)->toBe(5)
+        ->and(homepageText($xpath, $hero.'//*[@data-join-tip]'))->toContain('Volunteers needed');
 });
 
 it('renders the hero decorative shapes without blur-3xl', function () {
