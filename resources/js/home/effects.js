@@ -17,6 +17,8 @@
  * - signalLine: the gutter line draws down, and nodes light as sections enter.
  *
  * Start states are set from JS only, so without JS every element is visible.
+ * Every reveal goes through revealWhen(), which also plays when the page is already past the trigger
+ * (direct load at an anchor, or a fast jump), so nothing can stay hidden.
  * The caller (index.js) owns the GSAP context, so everything reverts cleanly.
  */
 import gsap from 'gsap';
@@ -24,6 +26,28 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 
 const finePointer = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+/**
+ * Runs `play` once, when the trigger's start is reached. If the page is already past it (load at an anchor,
+ * or a jump), it runs straight away, so an entrance can never be skipped and leave content hidden.
+ */
+function revealWhen(trigger, start, play) {
+    let done = false;
+    const fire = () => {
+        if (done) return;
+        done = true;
+        play();
+    };
+    const st = ScrollTrigger.create({
+        trigger,
+        start,
+        onUpdate: (self) => {
+            if (self.progress > 0) fire();
+        },
+    });
+    if (st.progress > 0) fire();
+    return st;
+}
 
 /** React Bits SplitText: lines rise out of a mask, word by word. */
 export function splitHeading(element, { delay = 0.15 } = {}) {
@@ -57,20 +81,16 @@ export function countUp(readout) {
     const counter = { n: 0 };
     value.textContent = '0';
 
-    ScrollTrigger.create({
-        trigger: readout,
-        start: 'top 88%',
-        once: true,
-        onEnter: () =>
-            gsap.to(counter, {
-                n: target,
-                duration: 1.2,
-                ease: 'power3.out',
-                onUpdate: () => {
-                    value.textContent = String(Math.round(counter.n));
-                },
-            }),
-    });
+    revealWhen(readout, 'top 88%', () =>
+        gsap.to(counter, {
+            n: target,
+            duration: 1.2,
+            ease: 'power3.out',
+            onUpdate: () => {
+                value.textContent = String(Math.round(counter.n));
+            },
+        }),
+    );
 }
 
 /** React Bits SpotlightCard: a radial light follows the pointer (--mx / --my, see .fx-spot in app.css). */
@@ -105,14 +125,14 @@ export function faderHeading(wrapper) {
     gsap.set(heading, { x: -56, autoAlpha: 0 });
     gsap.set(cap, { autoAlpha: 0 });
 
-    gsap.timeline({
-        defaults: { ease: 'expo.out' },
-        scrollTrigger: { trigger: wrapper, start: 'top 86%', once: true },
-    })
+    const tl = gsap
+        .timeline({ paused: true, defaults: { ease: 'expo.out' } })
         .to(heading, { x: 0, autoAlpha: 1, duration: 0.9 })
         .to(cap, { autoAlpha: 1, duration: 0.2 }, 0.1)
         .to(cap, { x: () => Math.max(0, holder.offsetWidth - cap.offsetWidth), duration: 0.9, ease: 'power3.inOut' }, 0.1)
         .to(cap, { autoAlpha: 0, duration: 0.4 }, '>-0.1');
+
+    revealWhen(wrapper, 'top 86%', () => tl.play());
 }
 
 /** A patch line draws across the list, then each row is patched in. */
@@ -129,15 +149,15 @@ export function patchRows(container) {
     gsap.set(line, { scaleX: 0 });
     gsap.set(rows, { autoAlpha: 0, x: -24 });
 
-    gsap.timeline({
-        defaults: { ease: 'expo.out' },
-        scrollTrigger: { trigger: container, start: 'top 82%', once: true },
-    })
+    const tl = gsap
+        .timeline({ paused: true, defaults: { ease: 'expo.out' } })
         .to(line, { scaleX: 1, duration: 1.2, ease: 'power3.inOut' })
         .to(rows, { autoAlpha: 1, x: 0, duration: 0.9, stagger: 0.12 }, '-=0.7');
+
+    revealWhen(container, 'top 82%', () => tl.play());
 }
 
-/** Service rows get small level bars beside the day name; they rise as the rows enter. */
+/** Service rows get small level bars beside the day name; they rise as each row enters. */
 export function meters(container) {
     const rows = Array.from(container.querySelectorAll(':scope > li'));
     if (rows.length === 0) return;
@@ -156,17 +176,10 @@ export function meters(container) {
             group.append(bar);
         }
         day.append(group);
-    });
 
-    gsap.set(container.querySelectorAll('.fx-meter-bar'), { scaleY: 0 });
-
-    ScrollTrigger.batch(rows, {
-        start: 'top 88%',
-        once: true,
-        onEnter: (batch) => {
-            const bars = batch.flatMap((row) => Array.from(row.querySelectorAll('.fx-meter-bar')));
-            gsap.to(bars, { scaleY: 1, duration: 0.6, ease: 'power3.out', stagger: { each: 0.05 } });
-        },
+        const bars = row.querySelectorAll('.fx-meter-bar');
+        gsap.set(bars, { scaleY: 0 });
+        revealWhen(row, 'top 88%', () => gsap.to(bars, { scaleY: 1, duration: 0.6, ease: 'power3.out', stagger: { each: 0.05 } }));
     });
 }
 
@@ -178,14 +191,9 @@ export function strips(container) {
     if (items.length === 0) return;
 
     gsap.set(items, { autoAlpha: 0, y: 48 });
-    gsap.to(items, {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.9,
-        ease: 'expo.out',
-        stagger: 0.12,
-        scrollTrigger: { trigger: container, start: 'top 84%', once: true },
-    });
+    revealWhen(container, 'top 84%', () =>
+        gsap.to(items, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'expo.out', stagger: 0.12 }),
+    );
 }
 
 /** Desktop only: the section pins and the track slides sideways as you scroll. Mobile keeps the grid. */
@@ -218,11 +226,7 @@ export function cascade(list) {
     if (items.length === 0) return;
 
     gsap.set(items, { autoAlpha: 0 });
-    ScrollTrigger.batch(items, {
-        start: 'top 88%',
-        once: true,
-        onEnter: (batch) => gsap.to(batch, { autoAlpha: 1, duration: 0.9, ease: 'power3.out', stagger: 0.12, overwrite: true }),
-    });
+    revealWhen(list, 'top 88%', () => gsap.to(items, { autoAlpha: 1, duration: 0.9, ease: 'power3.out', stagger: 0.12 }));
 }
 
 /** The join panel's LEDs power on in sequence; with a fine pointer, a glow follows the cursor. */
@@ -234,12 +238,11 @@ export function led(panel) {
     gsap.set(ticks, { autoAlpha: 0 });
     if (core) gsap.set(core, { autoAlpha: 0, scale: 0.4 });
 
-    const tl = gsap.timeline({
-        defaults: { ease: 'power3.out' },
-        scrollTrigger: { trigger: panel, start: 'top 85%', once: true },
-    });
+    const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
     if (core) tl.to(core, { autoAlpha: 1, scale: 1, duration: 0.6, ease: 'expo.out' });
     tl.to(ticks, { autoAlpha: 1, duration: 0.3, stagger: 0.06 }, core ? '-=0.2' : 0);
+
+    revealWhen(panel, 'top 85%', () => tl.play());
 
     if (!card || !finePointer()) return;
 

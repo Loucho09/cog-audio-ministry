@@ -29,7 +29,10 @@ import { initHero } from './hero';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-const NAV_OFFSET = -80; // matches scroll-pt-20 on <html>
+// Section top lands 80px below the viewport top (fixed 64px navbar plus a gap). Measured, not Lenis offset, because
+// Lenis resolves element offsets against its cached layout.
+const NAV_OFFSET = -80;
+const targetY = (el) => window.scrollY + el.getBoundingClientRect().top + NAV_OFFSET;
 
 function initLenis() {
     const lenis = new Lenis({ lerp: 0.09, smoothWheel: true, autoRaf: false });
@@ -51,8 +54,7 @@ function initLenis() {
 
         event.preventDefault();
         history.pushState(null, '', url.hash);
-        lenis.scrollTo(target, {
-            offset: NAV_OFFSET,
+        lenis.scrollTo(targetY(target), {
             duration: 1.4,
             onComplete: () => {
                 if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
@@ -94,13 +96,28 @@ export function initHome() {
     const hero = document.querySelector('[data-hero]');
     const root = document.getElementById('main') ?? document.body;
 
-    initLenis();
+    const lenis = initLenis();
 
     // The hero pin goes first: its spacer changes every position below it, so later triggers must measure after it.
     if (hero) initHero(hero);
 
     gsap.context(() => initSections(root), root);
 
-    // Fonts change line heights and widths: re-measure once they are in.
-    document.fonts?.ready.then(() => ScrollTrigger.refresh());
+    // A direct load at an anchor (e.g. /#contact) must land on that section. Lenis starts from the scroll position it
+    // reads at construction, so without this the page snaps back to the top.
+    const landOnHash = () => {
+        const id = decodeURIComponent(window.location.hash.slice(1));
+        const target = id && id !== 'main' ? document.getElementById(id) : null;
+        if (target) lenis.scrollTo(targetY(target), { immediate: true });
+    };
+    // The page is still growing while images, fonts and pin spacers settle: re-measure, then land again.
+    const settle = () => {
+        lenis.resize(); // Lenis caches the scroll limit; re-read it once the page has its final height
+        ScrollTrigger.refresh();
+        landOnHash();
+    };
+    landOnHash();
+    if (document.readyState === 'complete') settle();
+    else window.addEventListener('load', settle, { once: true });
+    document.fonts?.ready.then(settle);
 }
