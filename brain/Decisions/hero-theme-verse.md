@@ -4,6 +4,8 @@ Date: 2026-11-24
 Requested by: owner (to match the Facebook page)
 Status: accepted
 
+Update 2026-11-27: the redesigned hero ([[homepage-redesign]], brand in [[homepage-console-brand]]) still shows the verse in the first copy panel (under the tagline, reference as a mono caption), hidden when empty. Config keys are unchanged.
+
 ## Decision
 Show a theme verse in the hero, under the tagline. Psalm 66:8 (NIV), a short quotation with its reference.
 

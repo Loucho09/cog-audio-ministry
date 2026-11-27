@@ -4,6 +4,8 @@ Date: 2026-11-24
 Approved by: owner (chose "subtle" over "bold")
 Status: accepted
 
+Update 2026-11-27: section backdrops are no longer used on the homepage. See [[homepage-console-brand]] and [[homepage-redesign]]. Component file kept for other pages.
+
 ## Decision
 Homepage sections get a subtle "stage" backdrop from the component `resources/views/components/site/section-backdrop.blade.php`.
 

@@ -102,3 +102,12 @@ Parked ideas. Add them here instead of starting them mid-feature.
 - Bell: middle-click / open-in-new-tab not possible because items are POST forms (reviewer note 2026-11-26; see [[duty-notifications]])
 - Admin "Declined duties to refill" tile links to the events list; a filtered assignments view would be better (added 2026-11-26; see [[dashboard-ux-polish]])
 - Optional cleanup command to remove legacy duty rows held by admins (hidden now, see [[admins-manage-not-serve]]). Owner to decide. (added 2026-11-26; see [[admin-dashboard]])
+- Homepage redesign follow-ups (added 2026-11-27; see [[homepage-redesign]]):
+  - Unused components `home/marquee`, `home/impact`, `home/stay-updated` plus their tests and CSS. Delete after owner OK (never delete without OK).
+  - three.js chunk is about 753 kB. Trim it (see [[motion-and-3d-packages]]).
+  - Draco and KTX2 GLB support (needs decoders in `public/vendor/three/`).
+  - Restyle login and dashboard fully to the new brand. Currently fonts only (see [[homepage-console-brand]]).
+  - Mobile home chunk has about 56 kB unused. Check and trim.
+  - Confirm the service length for the LIVE window (default 90 minutes; see [[homepage-redesign]]).
+  - Real GPU desktop check and phone check of the 3D hero and the motion layer (owner).
+  - Confirm `accent` token state app-wide (see [[homepage-console-brand]]).

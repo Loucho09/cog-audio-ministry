@@ -2,7 +2,7 @@
 
 Date: 2026-11-24
 Approved by: owner
-Status: accepted
+Status: obsolete (superseded 2026-11-27 by [[homepage-console-brand]]). The homepage no longer uses stage red or the script font. `accent` and `accent-text` tokens stay for non-homepage pages (final state to confirm, see [[homepage-console-brand]]).
 
 ## Decision
 Theme colours follow the cover photo (stage blue and stage red). Tokens live in `resources/css/app.css` as CSS variables.
@@ -40,3 +40,7 @@ Owner feedback: light mode was too bright and glary, "Our Churches" stayed dark 
 - Our Churches: theme-aware. Light = light background, church logo as faint watermark under a background veil, white cards, dark text, `primary-dark` links. Dark = unchanged dark photo band.
 - Join Us: light = clean white band with border, no glows or black-to-white fades. Dark = unchanged near-black stage band with glows.
 - This supersedes the earlier rule that Churches and Join are dark bands in both themes. The hero stays dark in both themes.
+
+## Update 2026-11-27
+- Obsolete: superseded by [[homepage-console-brand]].
+- The light background drift is resolved: `#F8FAFC` is the light background now (the 2026-11-24 #EEF2F7 value is no longer used).

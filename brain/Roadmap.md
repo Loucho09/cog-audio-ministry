@@ -36,6 +36,8 @@ Current: Phase 5 v1 (duty notifications) done 2026-11-26. Next: Phase 5 v2 annou
 - Tests after these three fixes: 447 total (446 pass, 1 skipped). Reviewer run; must-fix items addressed. Browser check at 360px and wide screens still owner-pending.
 - [x] Done 2026-11-25 (branch `fix/audit-backlog`, commits 4354f9f and f307974, merging to main): homepage audit backlog items 7-9 (fewer eyebrows, solid impact numbers, neutral dark hover glows, hero frame cap, targeted reduced motion). Reviewer clean; 447 tests (446 pass, 1 skipped). Owner browser check at 360px and dark mode still pending. See [[homepage-theme-polish]] slice K.
 
+- [x] Done 2026-11-27 (Phase 1 follow-up, branch `feature/homepage-redesign`, pending owner check): homepage redesign "console at night, but clean". New section order, console brand (Schibsted Grotesk, JetBrains Mono, blue LEDs), 3D dLive-style hero, GSAP/Lenis motion (desktop only). Lighthouse desktop 97/100/100/100, mobile 89/98/100/100 (local). Tests 1011 (1010 pass, 1 skipped). Owner check still pending on a real GPU desktop and on a phone. Current phase stays 5. See [[homepage-redesign]], [[homepage-console-brand]], [[motion-and-3d-packages]].
+
 ### Tasks
 1. [x] Scaffold Laravel (latest stable) + Tailwind, Alpine, Filament, Spatie Permission, Breeze Blade, Pest; commit
    - Done 2026-11-24. Laravel 13.43, PHP 8.6, Breeze 2.4 Blade, Pest 5.3, Filament 5.12 (`/admin`; `canAccessPanel` returns false until Phase 2), Spatie Permission 8.5 (teams off, `HasRoles` on `User`, no roles yet), Pint, Tailwind 3.4 ([[tailwind-v3-with-breeze]]), Alpine 3, Vite.

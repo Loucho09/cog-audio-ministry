@@ -1,5 +1,5 @@
 # Homepage sections
-Status: in progress
+Status: superseded 2026-11-27 by [[homepage-redesign]] (new section order and console brand). Kept as history.
 Phase: 1
 
 Related: [[00-Index]], [[Roadmap]], [[Project-Brief]], [[public-layout]], [[homepage-hooks]] (new planned slices: impact strip, satellites story, stay updated, FAQ hidden)

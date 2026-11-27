@@ -5,7 +5,7 @@ Goal: take this project from first commit to a live, maintained production site.
 
 **Current phase:** 5 (Notifications and reminders): v1 (duty notifications: assignment, swap, reminders, bell, email toggle) done 2026-11-26; v2 (announcements) not started. Phase 4 (Duty roster: v1, guest assign, availability, swaps) done 2026-11-26.
 
-**Stack:** PHP 8.2+, Laravel (latest stable), MySQL 8, Blade, Tailwind CSS, Alpine.js, Filament (admin panel), Spatie Laravel Permission (roles), Laravel Breeze Blade (auth), Pest (tests), Pint, Laravel Mail + queue (notifications), scheduler (reminders). No Livewire/Inertia/React/Vue (outside Filament's internals), no Postgres/Supabase or extra services.
+**Stack:** PHP 8.2+, Laravel (latest stable), MySQL 8, Blade, Tailwind CSS, Alpine.js, Filament (admin panel), Spatie Laravel Permission (roles), Laravel Breeze Blade (auth), Pest (tests), Pint, Laravel Mail + queue (notifications), scheduler (reminders), GSAP + Lenis + three.js (homepage motion and 3D hero only). No Livewire/Inertia/React/Vue (outside Filament's internals), no Postgres/Supabase or extra services.
 **Dev environment:** VS Code + Claude Code. Notes live in `brain/` (Obsidian vault).
 
 ## Who it serves
@@ -25,9 +25,11 @@ Goal: take this project from first commit to a live, maintained production site.
 
 ## Brand and content
 - Name: "COG Audio Ministry", subheader "Dasmariñas". Logo: official Facebook logo at `public/images/logo.png` (do not redraw; show a text placeholder until the file exists).
-- Colors are Tailwind theme tokens, not hardcoded hex: `background` #EEF2F7, `surface` #FFFFFF, `text` #0F172A, `primary` #0284C7 (stage blue), `accent` #E11D48 (stage red for fills, bars, glows; small red text uses `accent-text` #BE123C / dark #FB7185 for AA contrast; never body text) (light values; dark mode is near-black #07080D with #38BDF8 / #F43F5E, values live in `resources/css/app.css`). Palette matches the cover photo; see `brain/Decisions/stage-palette.md`. Exception: text and overlays on photos (e.g. the hero) may use `white`/`black`, since the photo is dark in both themes.
+- Design concept (2026-11-27, see `brain/Decisions/homepage-console-brand.md`): "pro audio console at night, but clean". Console vocabulary (mono `CH 01 — About` labels, hairlines, dB ticks, mono readouts), editorial asymmetric layouts, flat cards with 1px borders, one radius `rounded-console` (6px), no gradients/glows/glass/emoji, never generic marketing copy.
+- Colors are Tailwind theme tokens, not hardcoded hex: `background` #F8FAFC, `surface` #FFFFFF, `text` #0F172A, `primary` #0284C7, `signal` #0EA5E9 (LED accent only: active/live/next states; dark #38BDF8), `console` #0F172A (dark hero and bands). Blue is used sparingly. Dark mode is near-black #07080D; values live in `resources/css/app.css`. `accent`/`accent-text` (red) stay defined for non-homepage pages only; never on the homepage. Text and overlays on photos or the console band may use `white`/`black`.
 - Light and dark mode: navbar toggle, defaults to the device setting. New public UI must work in both themes.
-- Fonts match the logo: Montserrat for all text; Mrs Saint Delafield (`font-script`) only as a decorative accent (e.g. "Audio" in the hero), never for body text. Style: clean minimalist, spacious, mobile-first.
+- Fonts: Schibsted Grotesk (`font-sans`) for all text, JetBrains Mono (`font-mono`, `.t-label`) for labels, times, and data. Loaded from Bunny. No script font. Fluid type classes `.t-display`, `.t-h2`, `.t-lead`. Mobile-first.
+- Homepage sections use the shared components `x-section`, `x-section-heading`, `x-card`, `x-button`, `x-tabler-icon` (same container and `py-24 lg:py-32` rhythm everywhere). Motion: GSAP + ScrollTrigger + Lenis (desktop only), one signature entrance per section, reduced motion respected; 3D hero (three.js) only on capable desktops, poster image otherwise.
 - Copy: English, warm, simple, respectful, Tagalog-friendly tone.
 - Contacts and flags live in `config/ministry.php`, never hardcoded in views. Service schedule is seeded into the `services` table and managed in Filament.
 - Gallery images and team members are stored in the database and managed in Filament. Placeholder images until real photos are added.

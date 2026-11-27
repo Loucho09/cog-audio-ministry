@@ -1,5 +1,5 @@
 # Homepage theme polish
-Status: done (pending owner browser check at 360px and in light and dark mode)
+Status: superseded 2026-11-27 by [[homepage-redesign]] (console brand replaces the stage palette and Montserrat). Kept as history.
 Phase: 1
 
 Related: [[00-Index]], [[Roadmap]], [[homepage-hooks]], [[section-backdrops]], [[stage-palette]], [[dark-mode]], [[card-style-and-section-rhythm]]

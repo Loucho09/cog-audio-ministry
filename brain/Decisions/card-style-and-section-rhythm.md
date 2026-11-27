@@ -1,5 +1,7 @@
 # Card style and section rhythm
 Status: accepted (2026-11-24)
+
+Update 2026-11-27: the homepage follows [[homepage-console-brand]]. Card rule (opposite background) still applies. Cards use `rounded-console` (6px), 1px border and no shadow. Section rhythm is `py-24 lg:py-32` via the `x-section` component.
 Related: [[homepage-theme-polish]], [[section-backdrops]], [[stage-palette]], [[00-Index]]
 
 Decision: homepage sections follow two rules. Apply them to all future public sections.

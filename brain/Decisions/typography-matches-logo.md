@@ -1,6 +1,7 @@
 # Typography matches the logo
 Date: 2026-11-24
-Status: accepted (owner chose "Montserrat + script accent")
+Status: obsolete (superseded 2026-11-27 by [[homepage-console-brand]]: Schibsted Grotesk and JetBrains Mono on the homepage, script font dropped)
+Originally: accepted (owner chose "Montserrat + script accent")
 
 Related: [[Project-Brief]], [[second-brief-merged]], [[Roadmap]], [[Backlog]], [[00-Index]]
 
