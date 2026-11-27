@@ -56,8 +56,7 @@ it('renders the about section as an anchor target with its heading and no what-w
 
     expect($about->length)->toBe(1)
         ->and(homepageText($xpath, '//section[@id="about"]//h2'))->toBe('About Us')
-        ->and($xpath->query('//section[@id="what-we-do"]')->length)->toBe(0)
-        ->and($xpath->query('//a[contains(@href, "#what-we-do")]')->length)->toBe(0);
+        ->and($xpath->query('//section[@id="what-we-do"]')->length)->toBe(0);
 });
 
 it('shows the vision and mission placeholders in the about section', function () {

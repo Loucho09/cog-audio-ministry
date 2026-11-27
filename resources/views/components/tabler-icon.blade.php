@@ -34,6 +34,6 @@
         stroke-linejoin="round"
         aria-hidden="true"
         focusable="false"
-        {{ $attributes->merge(['class' => 'h-5 w-5 shrink-0']) }}
+        {{ $attributes->has('class') ? $attributes : $attributes->merge(['class' => 'h-5 w-5 shrink-0']) }}
     >{!! $paths[$name] !!}</svg>
 @endif
