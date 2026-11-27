@@ -23,12 +23,12 @@ it('shows featured team members, full-time first, when the flag is on', function
         ->assertDontSee('Hidden One');
 });
 
-it('shows three labelled placeholder cards when the flag is on but nobody is featured', function () {
+it('shows four labelled placeholder cards when the flag is on but nobody is featured', function () {
     config()->set('ministry.show_team', true);
 
     $html = $this->get('/')->assertOk()->assertSee('id="team"', false)->getContent();
 
-    expect(substr_count($html, 'TODO: team member'))->toBe(3);
+    expect(substr_count($html, 'TODO: team member'))->toBe(4);
 });
 
 it('links the join button to the application form in the same tab', function () {
