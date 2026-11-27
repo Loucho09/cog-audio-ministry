@@ -240,10 +240,13 @@ export function cascade(list) {
     revealWhen(list, 'top 88%', () => gsap.to(items, { autoAlpha: 1, duration: 0.9, ease: 'power3.out', stagger: 0.12 }));
 }
 
-/** The join panel's LEDs power on in sequence; with a fine pointer, a glow follows the cursor. */
+/**
+ * The join panel's LEDs power on in sequence; with a fine pointer, a glow follows the cursor.
+ * Returns the undo for its window pointermove listener (called by index.js on unload).
+ */
 export function led(panel) {
     const core = panel.querySelector('.led-core');
-    const ticks = panel.querySelectorAll('.h-6');
+    const ticks = panel.querySelectorAll('[data-led-tick]');
     const card = panel.firstElementChild;
 
     gsap.set(ticks, { autoAlpha: 0 });
@@ -255,7 +258,7 @@ export function led(panel) {
 
     revealWhen(panel, 'top 85%', () => tl.play());
 
-    if (!card || !finePointer()) return;
+    if (!card || !finePointer()) return null;
 
     card.classList.add('led-panel');
     const glow = document.createElement('span');
@@ -263,19 +266,18 @@ export function led(panel) {
     glow.setAttribute('aria-hidden', 'true');
     card.prepend(glow);
 
-    window.addEventListener(
-        'pointermove',
-        (event) => {
-            const rect = card.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            const distance = Math.hypot(x - rect.width / 2, y - rect.height / 2);
-            card.style.setProperty('--lx', `${x}px`);
-            card.style.setProperty('--ly', `${y}px`);
-            card.style.setProperty('--lk', String(Math.max(0, 1 - distance / 420).toFixed(3)));
-        },
-        { passive: true },
-    );
+    const onMove = (event) => {
+        const rect = card.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const distance = Math.hypot(x - rect.width / 2, y - rect.height / 2);
+        card.style.setProperty('--lx', `${x}px`);
+        card.style.setProperty('--ly', `${y}px`);
+        card.style.setProperty('--lk', String(Math.max(0, 1 - distance / 420).toFixed(3)));
+    };
+    window.addEventListener('pointermove', onMove, { passive: true });
+
+    return () => window.removeEventListener('pointermove', onMove);
 }
 
 /** The gutter line draws down with the page; each section's node lights when the section enters. */

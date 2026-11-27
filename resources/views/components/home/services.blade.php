@@ -27,7 +27,8 @@
     $sundaySlots = $slots->filter(fn (array $s) => $s['dow'] === 0)->values();
 @endphp
 
-<x-section id="services" tone="surface">
+{{-- TODO: confirm typical service length --}}
+<x-section id="services" tone="surface" data-live-minutes="90">
     <div data-fx="fader-heading">
         <x-section-heading
             id="services"

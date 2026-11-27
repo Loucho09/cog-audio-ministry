@@ -31,7 +31,7 @@
                 </div>
                 <div class="mt-6 flex gap-1.5">
                     @foreach (range(1, 12) as $tick)
-                        <span class="h-6 flex-1 rounded-sm {{ $tick <= 7 ? 'bg-white/30' : 'bg-white/10' }}"></span>
+                        <span data-led-tick class="h-6 flex-1 rounded-sm {{ $tick <= 7 ? 'bg-white/30' : 'bg-white/10' }}"></span>
                     @endforeach
                 </div>
             </div>

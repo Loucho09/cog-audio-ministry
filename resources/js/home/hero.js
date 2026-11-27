@@ -4,6 +4,7 @@
  * - Title: desktop only, SplitText lines rise out of a mask (effects.js splitHeading). Phones fade the block up.
  * - 3D: a dynamic import after load, idle and the first interaction (or 2.5s). Gated by canRun3D(); without it the
  *   pre-rendered console poster stays (see the hero component). Rendering pauses off-screen and in hidden tabs.
+ * - Context loss: on webglcontextlost the poster comes back and drawing stops. A restored context is not rebuilt.
  * - Load-in: the camera dollies in from darkness, the faders sweep, and the LEDs light in sequence.
  * - Scroll (desktop only): the section pins for 200% of a viewport. The copy panels crossfade and the
  *   camera moves from a 3/4 view, to top-down over the faders, to a close-up on the first screen.
@@ -96,8 +97,8 @@ function initCopyStory(hero, progress) {
     const [main, second, third] = hero.querySelectorAll('[data-hero-panel]');
     if (!main) return;
 
-    const mm = gsap.matchMedia();
-    mm.add('(min-width: 1024px)', () => {
+    // Called inside the initHome gsap context, so the matchMedia and its pin are reverted with the page's other effects.
+    gsap.matchMedia().add('(min-width: 1024px)', () => {
         const tl = gsap.timeline({
             scrollTrigger: {
                 trigger: hero,
@@ -119,80 +120,138 @@ function initCopyStory(hero, progress) {
     });
 }
 
-async function initStage(hero, progress) {
+/**
+ * Starts the live desk. Returns a teardown that stops the loop and observers, removes the listeners and disposes the
+ * stage. Safe to call before the stage exists (e.g. during the idle wait): the start checks `stopped` after each await.
+ */
+function initStage(hero, progress) {
     const host = hero.querySelector('[data-hero-stage]');
     const canvas = host?.querySelector('canvas');
     const loader = hero.querySelector('[data-hero-loader]');
-    if (!canvas || !canRun3D()) return;
+    if (!canvas || !canRun3D()) return () => {};
 
-    await afterIdleAndInteraction();
-
-    const readout = loader?.querySelector('[data-hero-percent]');
-    const bar = loader?.querySelector('[data-hero-meter]');
-    const load = { value: 0 };
-    const showLoad = (value) => {
-        load.value = Math.max(load.value, value);
-        if (readout) readout.textContent = String(Math.round(load.value * 100)).padStart(3, '0');
-        if (bar) gsap.set(bar, { scaleX: load.value });
+    let stopped = false;
+    let lost = false;
+    let scene = null;
+    let tick = null;
+    const observers = [];
+    const listeners = [];
+    const listen = (target, type, handler, options) => {
+        target.addEventListener(type, handler, options);
+        listeners.push(() => target.removeEventListener(type, handler, options));
     };
 
-    if (loader) loader.hidden = false;
-    showLoad(0.1);
+    // Stops drawing and releases observers and listeners. The poster stays. Used on context loss and at teardown.
+    const stopRendering = () => {
+        if (tick) gsap.ticker.remove(tick);
+        tick = null;
+        observers.splice(0).forEach((observer) => observer.disconnect());
+        listeners.splice(0).forEach((remove) => remove());
+    };
 
-    let stage;
-    try {
-        const { createConsoleScene } = await import('./console-scene');
-        showLoad(0.2);
-        stage = createConsoleScene(canvas, {
-            mobile: window.matchMedia('(max-width: 1023px), (pointer: coarse)').matches,
-            glbUrl: host.dataset.glb || null,
-            onProgress: (value) => showLoad(value),
+    const onContextLost = (event) => {
+        // preventDefault asks the browser to allow a restore; we keep the poster either way (no rebuild).
+        event.preventDefault();
+        lost = true;
+        stopRendering();
+        hero.classList.remove('is-3d');
+        if (loader) loader.hidden = true;
+    };
+
+    const teardown = () => {
+        if (stopped) return;
+        stopped = true;
+        stopRendering();
+        scene?.dispose();
+        scene = null;
+        hero.classList.remove('is-3d');
+    };
+
+    const start = async () => {
+        await afterIdleAndInteraction();
+        if (stopped) return;
+
+        const readout = loader?.querySelector('[data-hero-percent]');
+        const bar = loader?.querySelector('[data-hero-meter]');
+        const load = { value: 0 };
+        const showLoad = (value) => {
+            load.value = Math.max(load.value, value);
+            if (readout) readout.textContent = String(Math.round(load.value * 100)).padStart(3, '0');
+            if (bar) gsap.set(bar, { scaleX: load.value });
+        };
+
+        if (loader) loader.hidden = false;
+        showLoad(0.1);
+
+        try {
+            const { createConsoleScene } = await import('./console-scene');
+            if (stopped) return;
+            showLoad(0.2);
+            scene = createConsoleScene(canvas, {
+                mobile: window.matchMedia('(max-width: 1023px), (pointer: coarse)').matches,
+                glbUrl: host.dataset.glb || null,
+                onProgress: (value) => showLoad(value),
+            });
+            // A failed GLB keeps the procedural desk, so the error is swallowed here on purpose.
+            await scene.ready.catch(() => {});
+        } catch {
+            // No WebGL or the chunk failed: the poster stays and the loader is removed.
+            loader?.remove();
+            return;
+        }
+        if (stopped || !scene) return;
+        const live = scene;
+        showLoad(0.95);
+
+        listen(canvas, 'webglcontextlost', onContextLost);
+
+        let visible = true;
+        const intersection = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting));
+        intersection.observe(hero);
+        const resize = new ResizeObserver(() => live.resize());
+        resize.observe(canvas);
+        observers.push(intersection, resize);
+
+        if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+            listen(
+                window,
+                'pointermove',
+                (event) => {
+                    live.state.pointerX = (event.clientX / window.innerWidth - 0.5) * 2;
+                    live.state.pointerY = -(event.clientY / window.innerHeight - 0.5) * 2;
+                },
+                { passive: true },
+            );
+        }
+
+        tick = (time) => {
+            if (!visible || document.hidden) return;
+            live.state.progress = progress.value;
+            live.render(time);
+        };
+        gsap.ticker.add(tick);
+
+        // First frame is drawn: crossfade from the photo to the live desk, then power up.
+        requestAnimationFrame(() => {
+            if (stopped || lost) return;
+            hero.classList.add('is-3d');
+            showLoad(1);
+            const tl = gsap.timeline();
+            if (loader) tl.to(loader, { autoAlpha: 0, duration: 0.6, ease: 'power2.out', onComplete: () => (loader.hidden = true) }, 0.2);
+            tl.to(live.state, { intro: 1, duration: 2.6, ease: 'power3.out' }, 0)
+                .to(live.state, { power: 1, duration: 2.2, ease: 'power2.inOut' }, 0.3)
+                .to(live.state, { boot: 1, duration: 2.6, ease: 'none' }, 0.8);
         });
-        // A failed GLB keeps the procedural desk, so the error is swallowed here on purpose.
-        await stage.ready.catch(() => {});
-    } catch {
-        // No WebGL or the chunk failed: the poster stays and the loader is removed.
-        loader?.remove();
-        return;
-    }
-    showLoad(0.95);
+    };
 
-    let visible = true;
-    new IntersectionObserver(([entry]) => (visible = entry.isIntersecting)).observe(hero);
-    new ResizeObserver(() => stage.resize()).observe(canvas);
-
-    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-        window.addEventListener(
-            'pointermove',
-            (event) => {
-                stage.state.pointerX = (event.clientX / window.innerWidth - 0.5) * 2;
-                stage.state.pointerY = -(event.clientY / window.innerHeight - 0.5) * 2;
-            },
-            { passive: true },
-        );
-    }
-
-    gsap.ticker.add((time) => {
-        if (!visible || document.hidden) return;
-        stage.state.progress = progress.value;
-        stage.render(time);
-    });
-
-    // First frame is drawn: crossfade from the photo to the live desk, then power up.
-    requestAnimationFrame(() => {
-        hero.classList.add('is-3d');
-        showLoad(1);
-        const tl = gsap.timeline();
-        if (loader) tl.to(loader, { autoAlpha: 0, duration: 0.6, ease: 'power2.out', onComplete: () => (loader.hidden = true) }, 0.2);
-        tl.to(stage.state, { intro: 1, duration: 2.6, ease: 'power3.out' }, 0)
-            .to(stage.state, { power: 1, duration: 2.2, ease: 'power2.inOut' }, 0.3)
-            .to(stage.state, { boot: 1, duration: 2.6, ease: 'none' }, 0.8);
-    });
+    start();
+    return teardown;
 }
 
+/** Returns the teardown for the 3D stage (the title and copy story live for the page's lifetime). */
 export function initHero(hero) {
     const progress = { value: 0 };
     initTitle(hero);
     initCopyStory(hero, progress);
-    initStage(hero, progress);
+    return initStage(hero, progress);
 }

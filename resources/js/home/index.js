@@ -32,15 +32,28 @@ gsap.registerPlugin(ScrollTrigger);
 const NAV_OFFSET = -80;
 const targetY = (el) => window.scrollY + el.getBoundingClientRect().top + NAV_OFFSET;
 
+/** Decodes a URL fragment. A malformed one (e.g. "/#%") returns null instead of throwing. */
+function safeDecode(value) {
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        return null;
+    }
+}
+
 /** The on-page section a click points at, or null when the browser should handle the click itself. */
 function samePageTarget(event) {
+    // Only plain left clicks. Modified clicks (new tab, download) and defaultPrevented clicks keep browser behaviour.
+    if (event.button !== 0 || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return null;
+
     const link = event.target.closest('a[href*="#"]');
-    if (!link || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey) return null;
+    if (!link || link.target === '_blank' || link.hasAttribute('download')) return null;
 
     const url = new URL(link.href, window.location.href);
     if (url.origin !== window.location.origin || url.pathname !== window.location.pathname || !url.hash || url.hash === '#main') return null;
 
-    return document.getElementById(decodeURIComponent(url.hash.slice(1)));
+    const id = safeDecode(url.hash.slice(1));
+    return id ? document.getElementById(id) : null;
 }
 
 function focusSection(target) {
@@ -106,7 +119,7 @@ function pinGallery(track) {
  * one gsap context (ctx.add), so a single revert still cleans it all up. Pins below the reader are added below
  * the fold, so nothing above them moves.
  */
-function initSections(root, ctx) {
+function initSections(root, ctx, disposers) {
     const setups = new Map();
     LAZY_SETUPS.forEach(([selector, setup]) => root.querySelectorAll(selector).forEach((el) => setups.set(el, setup)));
     root.querySelectorAll('[data-fx="hscroll"]').forEach((el) => setups.set(el, pinGallery));
@@ -120,7 +133,11 @@ function initSections(root, ctx) {
     const runSetup = (el) => {
         const setup = setups.get(el);
         setups.delete(el);
-        ctx.add(() => setup(el));
+        ctx.add(() => {
+            // Some setups (led) add window listeners; keep their undo functions for teardown.
+            const dispose = setup(el);
+            if (typeof dispose === 'function') disposers.push(dispose);
+        });
     };
 
     // Set-up creates pins and triggers below the reader, so measured positions are refreshed once per batch.
@@ -157,11 +174,20 @@ function initSections(root, ctx) {
 export function initHome() {
     const hero = document.querySelector('[data-hero]');
     const root = document.getElementById('main') ?? document.body;
+    // One context owns every tween, pin and trigger on the page, the hero copy story included.
+    const ctx = gsap.context(() => {}, root);
+    // Undo functions for window listeners (see initSections). Released on a real unload, see pagehide below.
+    const disposers = [];
 
     // The hero pin goes first: its spacer changes every position below it, so later triggers must measure after it.
-    if (hero) initHero(hero);
+    let stopHeroStage = () => {};
+    if (hero) {
+        ctx.add(() => {
+            stopHeroStage = initHero(hero);
+        });
+    }
 
-    initSections(root, gsap.context(() => {}, root));
+    initSections(root, ctx, disposers);
 
     // Set once Lenis has loaded (desktop only). Phones keep native scrolling, so this stays null there.
     let lenis = null;
@@ -170,7 +196,7 @@ export function initHome() {
     // reads at construction, so without this the page snaps back to the top. Phones: the browser's own hash jump
     // already respects scroll-margin-top, so only the re-landing after layout settles is needed there.
     const landOnHash = () => {
-        const id = decodeURIComponent(window.location.hash.slice(1));
+        const id = safeDecode(window.location.hash.slice(1));
         const target = id && id !== 'main' ? document.getElementById(id) : null;
         if (!target) return;
         if (lenis) lenis.scrollTo(targetY(target), { immediate: true });
@@ -205,4 +231,11 @@ export function initHome() {
     if (document.readyState === 'complete') settle();
     else window.addEventListener('load', settle, { once: true });
     document.fonts?.ready.then(settle);
+
+    // Leaving the page: the hero's WebGL loop and listeners stop (the poster returns if the page is restored from the
+    // back-forward cache). Window listeners are released only on a real unload, so a restored page keeps its effects.
+    window.addEventListener('pagehide', (event) => {
+        stopHeroStage();
+        if (!event.persisted) disposers.splice(0).forEach((dispose) => dispose());
+    });
 }
