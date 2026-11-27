@@ -25,7 +25,7 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-        <link href="https://fonts.bunny.net/css?family=montserrat:400,500,600,700,800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=schibsted-grotesk:400,500,600,700,800|jetbrains-mono:400,500&display=swap" rel="stylesheet" />
 
         <!-- Scripts / Styles -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -66,7 +66,7 @@
                     <div aria-hidden="true" class="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/60 to-black/40"></div>
 
                     <div class="relative max-w-md">
-                        <h2 class="text-4xl font-extrabold leading-[1.1] tracking-tight text-white xl:text-5xl">{!! str_replace('Audio', '<span class="font-script text-[1.4em] font-normal leading-none tracking-normal">Audio</span>', e($siteName)) !!}</h2>
+                        <h2 class="text-4xl font-extrabold leading-[1.1] tracking-tight text-white xl:text-5xl">{{ $siteName }}</h2>
                         <p class="mt-4 text-lg text-white/90">Welcome back. Thank you for serving with us.</p>
                     </div>
                 </aside>
