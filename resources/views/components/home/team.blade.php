@@ -1,5 +1,5 @@
 {{-- CH 06. Behind the show_team flag (config/ministry.php). Members arrive full-time first from the controller.
-     With the flag on and nobody featured yet, three clearly labelled placeholders show instead. --}}
+     With the flag on and nobody featured yet, four clearly labelled placeholders show instead (one per grid column). --}}
 @props(['members' => collect()])
 
 @php
@@ -44,16 +44,16 @@
                     </x-card>
                 </li>
             @empty
-                @foreach (range(1, 3) as $n)
+                @foreach (range(1, 4) as $n)
                     {{-- TODO: team member placeholder. Add featured team members in Filament; placeholders disappear automatically. --}}
                     <li data-cascade-item>
                         <x-card class="gap-4 border-dashed">
                             <div class="flex aspect-square w-full items-center justify-center rounded-console bg-background">
-                                <span class="font-mono text-xs uppercase tracking-[0.12em] text-text/50">Photo pending</span>
+                                <span class="font-mono text-xs uppercase tracking-[0.12em] text-text/70">Photo pending</span>
                             </div>
                             <div>
                                 <h3 class="text-lg font-semibold tracking-tight text-text/70">TODO: team member</h3>
-                                <p class="t-label mt-1 text-text/50">Role to be added</p>
+                                <p class="t-label mt-1 text-text/70">Role to be added</p>
                             </div>
                         </x-card>
                     </li>

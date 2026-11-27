@@ -65,7 +65,7 @@
                 <div class="{{ $soon->isNotEmpty() ? 'lg:col-span-8' : 'lg:col-span-12' }}">
                     <div class="flex items-center justify-between gap-4">
                         <h3 class="t-label text-text/60">Weekly schedule</h3>
-                        <p class="t-label text-text/40">Times in Manila</p>
+                        <p class="t-label text-text/60">Times in Manila</p>
                     </div>
 
                     @if ($weekdaySlots->isNotEmpty())
@@ -88,7 +88,15 @@
                                         <span class="js-led items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-primary-dark dark:text-signal"><span aria-hidden="true" class="led-dot"></span><span class="js-led-label"></span></span>
                                     </div>
                                     @if ($slot['url'])
-                                        <a href="{{ $slot['url'] }}" class="link-fader col-span-2 text-sm text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-signal sm:col-span-1 dark:text-primary">Add to calendar<span class="sr-only">: {{ $slot['name'] }} {{ $slot['time'] }}</span></a>
+                                        {{-- Compact calendar icon; the label is in aria-label and the tooltip, so the timetable stays quiet. --}}
+                                        <a
+                                            href="{{ $slot['url'] }}"
+                                            title="Add to calendar"
+                                            aria-label="Add {{ $slot['name'] }} {{ $slot['day'] }} {{ $slot['time'] }} to calendar"
+                                            class="col-span-2 inline-flex h-11 w-11 items-center justify-center justify-self-start rounded-console text-text/60 transition-colors duration-200 hover:bg-text/5 hover:text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-signal sm:col-span-1 sm:justify-self-end dark:hover:text-primary"
+                                        >
+                                            <x-tabler-icon name="calendar" class="h-5 w-5" />
+                                        </a>
                                     @endif
                                 </li>
                             @endforeach
@@ -98,22 +106,32 @@
                     @if ($sundaySlots->isNotEmpty())
                         <div class="mt-8">
                             <p class="t-label text-text/70">Sunday @if ($todayName === 'Sunday')<span class="sr-only"> (today)</span>@endif</p>
-                            <ul class="mt-4 flex flex-wrap gap-4" data-fx="strips">
+                            {{-- One row per Sunday start: a single even column, so no ragged grid of cards. --}}
+                            <ul class="mt-4 divide-y divide-text/10 border-y border-text/10" data-fx="strips">
                                 @foreach ($sundaySlots as $slot)
                                     <li
                                         data-day="0"
                                         data-time="{{ $slot['time24'] }}"
                                         data-name="{{ $slot['name'] }}"
-                                        class="flex min-w-[9rem] flex-1 basis-40 flex-col gap-1 rounded-console border border-text/10 bg-surface p-4 data-[state]:border-primary/40 data-[state]:bg-primary/5 lg:p-5"
+                                        class="flex flex-wrap items-center gap-x-5 gap-y-1 py-3 data-[state]:bg-primary/5 sm:gap-x-6"
                                     >
-                                        <p class="font-mono text-xl font-medium tabular-nums tracking-tight sm:text-2xl">{{ $slot['time'] }}</p>
-                                        <p class="text-sm font-medium">{{ $slot['name'] }}</p>
-                                        @if ($slot['note'])
-                                            <p class="font-mono text-xs uppercase tracking-[0.12em] text-text/60">{{ $slot['note'] }}</p>
-                                        @endif
+                                        <p class="w-28 shrink-0 font-mono text-xl font-medium tabular-nums tracking-tight">{{ $slot['time'] }}</p>
+                                        <p class="min-w-0 flex-1 text-sm font-medium">
+                                            {{ $slot['name'] }}
+                                            @if ($slot['note'])
+                                                <span class="ml-2 font-mono text-xs uppercase tracking-[0.12em] text-text/60">{{ $slot['note'] }}</span>
+                                            @endif
+                                        </p>
                                         <span class="js-led items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-primary-dark dark:text-signal"><span aria-hidden="true" class="led-dot"></span><span class="js-led-label"></span></span>
                                         @if ($slot['url'])
-                                            <a href="{{ $slot['url'] }}" class="link-fader mt-1 self-start text-sm text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-signal dark:text-primary">Add to calendar<span class="sr-only">: {{ $slot['name'] }} {{ $slot['time'] }}</span></a>
+                                            <a
+                                                href="{{ $slot['url'] }}"
+                                                title="Add to calendar"
+                                                aria-label="Add {{ $slot['name'] }} Sunday {{ $slot['time'] }} to calendar"
+                                                class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-console text-text/60 transition-colors duration-200 hover:bg-text/5 hover:text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-signal dark:hover:text-primary"
+                                            >
+                                                <x-tabler-icon name="calendar" class="h-5 w-5" />
+                                            </a>
                                         @endif
                                     </li>
                                 @endforeach

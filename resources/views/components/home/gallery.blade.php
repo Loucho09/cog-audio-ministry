@@ -31,7 +31,7 @@
                 @foreach (range(1, 4) as $n)
                     <li class="flex aspect-[4/3] flex-col items-start justify-end gap-1 rounded-console border border-dashed border-text/20 bg-surface p-4 lg:w-[26rem] lg:shrink-0">
                         <span class="t-label text-text/60">Photo pending</span>
-                        <span class="font-mono text-xs text-text/50">Crew at the board</span>
+                        <span class="font-mono text-xs text-text/70">Crew at the board</span>
                     </li>
                 @endforeach
             </ul>

@@ -53,7 +53,7 @@
                             <p class="mt-2 leading-relaxed">{{ $master->address }}</p>
                         @else
                             {{-- TODO: add the address in Filament (Branches). --}}
-                            <p class="mt-2 font-mono text-sm text-text/50">Address to be added.</p>
+                            <p class="mt-2 font-mono text-sm text-text/70">Address to be added.</p>
                         @endif
 
                         @if ($master->safeFacebookUrl())
@@ -90,7 +90,7 @@
                                     <p class="mt-3 text-sm leading-relaxed text-text/70">{{ $church->address }}</p>
                                 @else
                                     {{-- TODO: add the address in Filament (Branches). --}}
-                                    <p class="mt-3 font-mono text-xs text-text/50">Address to be added.</p>
+                                    <p class="mt-3 font-mono text-xs text-text/70">Address to be added.</p>
                                 @endif
 
                                 @if ($church->safeFacebookUrl())

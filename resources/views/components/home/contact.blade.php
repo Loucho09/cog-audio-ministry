@@ -27,7 +27,7 @@
                 <a href="mailto:{{ $email }}" class="link-fader mt-4 block break-words font-mono text-xl font-medium tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal sm:text-3xl lg:text-4xl">{!! str_replace('@', '@<wbr>', e($email)) !!}</a>
             @else
                 {{-- TODO: set MINISTRY_EMAIL in config/ministry.php. --}}
-                <p class="mt-4 font-mono text-lg text-text/50">Email to be added.</p>
+                <p class="mt-4 font-mono text-lg text-text/70">Email to be added.</p>
             @endif
         </div>
 
@@ -40,7 +40,7 @@
                     </a>
                 @else
                     {{-- TODO: set the Facebook page URL in config/ministry.php. --}}
-                    <p class="{{ $rowClasses }} text-text/50"><span class="flex items-center gap-3"><x-tabler-icon name="brand-facebook" class="h-5 w-5" /><span class="font-mono text-sm">Facebook page to be added</span></span></p>
+                    <p class="{{ $rowClasses }} text-text/70"><span class="flex items-center gap-3"><x-tabler-icon name="brand-facebook" class="h-5 w-5" /><span class="font-mono text-sm">Facebook page to be added</span></span></p>
                 @endif
             </li>
             <li>
@@ -51,11 +51,11 @@
                     </a>
                 @else
                     {{-- TODO: owner to add the Messenger link (config/ministry.php). --}}
-                    <p class="{{ $rowClasses }} text-text/50"><span class="flex items-center gap-3"><x-tabler-icon name="message-circle" class="h-5 w-5" /><span class="font-mono text-sm">Chat link to be added</span></span></p>
+                    <p class="{{ $rowClasses }} text-text/70"><span class="flex items-center gap-3"><x-tabler-icon name="message-circle" class="h-5 w-5" /><span class="font-mono text-sm">Chat link to be added</span></span></p>
                 @endif
             </li>
             <li>
-                <address class="{{ $rowClasses }} items-start not-italic {{ $address ? '' : 'text-text/50' }}">
+                <address class="{{ $rowClasses }} items-start not-italic {{ $address ? '' : 'text-text/70' }}">
                     <span class="flex items-start gap-3">
                         <x-tabler-icon name="map-pin" class="mt-0.5 h-5 w-5 {{ $address ? 'text-primary-dark dark:text-primary' : '' }}" />
                         @if ($address)
