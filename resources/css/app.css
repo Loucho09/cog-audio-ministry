@@ -470,8 +470,17 @@
 
 /* 3D stage: invisible until its first frame, then it crossfades over the photo (which becomes its LED wall). */
 .hero-stage {
+    mix-blend-mode: screen;
     opacity: 0;
     transition: opacity 1.4s ease-out;
+}
+
+/* Desktop: the bloom haze fades out toward the copy column, so the canvas edge never shows as a seam. */
+@media (min-width: 1024px) {
+    .hero-stage {
+        -webkit-mask-image: linear-gradient(to right, transparent 0, #000 56px);
+        mask-image: linear-gradient(to right, transparent 0, #000 56px);
+    }
 }
 
 [data-hero-photo] {

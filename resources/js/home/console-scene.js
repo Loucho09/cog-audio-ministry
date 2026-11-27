@@ -114,7 +114,9 @@ export function createConsoleScene(canvas, { mobile = false, glbUrl = null, onPr
     renderer.outputColorSpace = SRGBColorSpace;
 
     const scene = new Scene();
-    scene.background = tokens.background.clone();
+    // Black, not the console colour: the stage is blended with mix-blend-mode: screen over the hero's bg-console,
+    // so black shows as the page colour exactly (no tone-mapped seam against the copy column).
+    scene.background = new Color(0, 0, 0);
 
     const pmrem = new PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -161,7 +163,7 @@ export function createConsoleScene(canvas, { mobile = false, glbUrl = null, onPr
     const bokeh = mobile ? null : new BokehPass(scene, camera, { focus: 10, aperture: 0.00012, maxblur: 0.004 });
     if (bokeh) composer.addPass(bokeh);
     // Threshold: only LED and screen highlights above 1.0 (in HDR) bloom; the rest of the desk stays crisp.
-    const bloom = new UnrealBloomPass(new Vector2(1, 1), mobile ? 0.35 : 0.55, 0.45, 0.9);
+    const bloom = new UnrealBloomPass(new Vector2(1, 1), mobile ? 0.35 : 0.55, 0.45, 1.0);
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
     if (!mobile) composer.addPass(new SMAAPass());
@@ -225,7 +227,7 @@ export function createConsoleScene(canvas, { mobile = false, glbUrl = null, onPr
         const power = state.power;
         ambient.intensity = 0.12 * power;
         key.intensity = 0.9 * power;
-        rim.intensity = 60 * power;
+        rim.intensity = 26 * power;
         meterGlow.intensity = 1.2 * power;
     }
 

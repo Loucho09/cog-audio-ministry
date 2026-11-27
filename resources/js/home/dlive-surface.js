@@ -91,11 +91,20 @@ export function buildSurface({ tokens, mobile, random }) {
         roughness: 0.5,
         anisotropy: 0.6,
     });
+    // Dark anodised side cheeks and rails: near-black with only a soft edge sheen, so bloom never catches them.
+    const cheekMat = new MeshPhysicalMaterial({
+        color: tokens.surface.clone().multiplyScalar(2.2),
+        metalness: 0.3,
+        roughness: 0.55,
+        clearcoat: 0.3,
+        clearcoatRoughness: 0.35,
+        envMapIntensity: 0.15,
+    });
     const plastic = new MeshPhysicalMaterial({ color: black.clone().multiplyScalar(2), metalness: 0, roughness: 0.8 });
     const rubber = new MeshPhysicalMaterial({ color: tokens.text.clone().multiplyScalar(0.7), metalness: 0, roughness: 0.92 });
     const slotMat = new MeshPhysicalMaterial({ color: black, metalness: 0, roughness: 1 });
     const armMat = new MeshPhysicalMaterial({ color: black.clone().multiplyScalar(1.6), metalness: 0, roughness: 0.9, sheen: 0.4, sheenRoughness: 0.8 });
-    const glow = () => new MeshBasicMaterial({ color: 0xffffff, toneMapped: false });
+    const glow = () => new MeshBasicMaterial({ color: new Color(0xffffff).multiplyScalar(2.5), toneMapped: false });
 
     // Chassis --------------------------------------------------------------------------------------------
     const chassis = new Mesh(new RoundedBoxGeometry(totalW + 0.4, 0.32, 4.4, 4, 0.06), chassisMat);
@@ -113,7 +122,7 @@ export function buildSurface({ tokens, mobile, random }) {
 
     // Brushed side cheeks, plus a plate on top of the work surface.
     [-1, 1].forEach((dir) => {
-        const cheek = new Mesh(new RoundedBoxGeometry(0.13, 0.62, 4.5, 3, 0.05), brushed);
+        const cheek = new Mesh(new RoundedBoxGeometry(0.13, 0.62, 4.5, 3, 0.05), cheekMat);
         cheek.position.set(dir * (width / 2 - 0.02), -0.02, 0.3);
         group.add(cheek);
     });
@@ -134,7 +143,7 @@ export function buildSurface({ tokens, mobile, random }) {
     // Bank separators (thin brushed bars between the banks and the master section).
     if (!mobile) {
         [-centre / 2, centre / 2].forEach((x) => {
-            const bar = new Mesh(new BoxGeometry(0.05, 0.02, 2.9), brushed);
+            const bar = new Mesh(new BoxGeometry(0.05, 0.02, 2.9), cheekMat);
             bar.position.set(x, 0.016, 0.72);
             group.add(bar);
         });
