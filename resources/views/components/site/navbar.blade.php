@@ -25,16 +25,27 @@
 @endphp
 
 <header
-    class="group z-50 w-full border-b border-transparent transition-[background-color,border-color] duration-300 data-[solid=true]:border-text/10 data-[solid=true]:bg-background/90 data-[solid=true]:backdrop-blur-sm {{ $transparent ? 'fixed inset-x-0 top-0' : 'sticky top-0' }}"
+    class="group z-50 w-full border-b border-transparent transition-[background-color,border-color] duration-300 data-[solid=true]:border-text/10 data-[solid=true]:bg-background/90 data-[solid=true]:backdrop-blur-sm data-[dark=true]:border-white/10 data-[dark=true]:bg-console/90 data-[dark=true]:backdrop-blur-sm {{ $transparent ? 'fixed inset-x-0 top-0' : 'sticky top-0' }}"
     data-solid="{{ $transparent ? 'false' : 'true' }}"
+    data-dark="false"
     x-data="{
         open: false,
         transparent: {{ $transparent ? 'true' : 'false' }},
         solid: {{ $transparent ? 'false' : 'true' }},
+        dark: false,
+        sync() {
+            const scrolled = window.scrollY > 24;
+            // Over the dark hero (pinned or still in view) the bar stays dark; the light bar starts only after leaving it.
+            const hero = document.querySelector('[data-hero]');
+            const inHero = hero ? hero.getBoundingClientRect().bottom > 64 : false;
+            this.solid = !this.transparent || (scrolled && !inHero);
+            this.dark = this.transparent && scrolled && inHero;
+        },
     }"
-    x-init="solid = !transparent || window.scrollY > 24"
-    @scroll.window="solid = !transparent || window.scrollY > 24"
+    x-init="sync()"
+    @scroll.window="sync()"
     :data-solid="(solid || open).toString()"
+    :data-dark="(dark && !open).toString()"
     @keydown.escape.window="if (open) { open = false; $refs.menuButton.focus() }"
 >
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-5 sm:px-6 lg:px-8">
