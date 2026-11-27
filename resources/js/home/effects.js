@@ -23,9 +23,14 @@
  */
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SplitText } from 'gsap/SplitText';
 
 const finePointer = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+/**
+ * Desktop motion: wide screen with a fine pointer. Only here do we pin the hero and gallery, run smooth scroll
+ * (Lenis) and load SplitText. Phones and tablets keep native scroll and skip those downloads.
+ */
+export const desktopMotion = () => window.matchMedia('(min-width: 1024px) and (pointer: fine)').matches;
 
 /**
  * Runs `play` once, when the trigger's start is reached. If the page is already past it (load at an anchor,
@@ -49,8 +54,14 @@ function revealWhen(trigger, start, play) {
     return st;
 }
 
-/** React Bits SplitText: lines rise out of a mask, word by word. */
-export function splitHeading(element, { delay = 0.15 } = {}) {
+/**
+ * React Bits SplitText: lines rise out of a mask, word by word. Desktop only; the plugin is a dynamic import so
+ * phones never download it. The element is shown again as soon as it is split (the caller hides it first).
+ */
+export async function splitHeading(element, { delay = 0.15 } = {}) {
+    const { SplitText } = await import('gsap/SplitText');
+    gsap.registerPlugin(SplitText);
+    gsap.set(element, { autoAlpha: 1 });
     return SplitText.create(element, {
         type: 'lines,words',
         mask: 'lines',

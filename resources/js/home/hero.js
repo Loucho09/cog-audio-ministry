@@ -1,7 +1,7 @@
 /**
  * Hero: title reveal, the 3D desk (boot after first paint), its loader, and the pinned copy story.
  *
- * - Title: SplitText lines rise out of a mask (effects.js splitHeading). The other copy lines fade up.
+ * - Title: desktop only, SplitText lines rise out of a mask (effects.js splitHeading). Phones fade the block up.
  * - 3D: a dynamic import after load, idle and the first interaction (or 2.5s). Gated by canRun3D(); without it the
  *   pre-rendered console poster stays (see the hero component). Rendering pauses off-screen and in hidden tabs.
  * - Load-in: the camera dollies in from darkness, the faders sweep, and the LEDs light in sequence.
@@ -14,7 +14,7 @@
  * Reduced motion never reaches this file (app.js checks first).
  */
 import gsap from 'gsap';
-import { splitHeading } from './effects';
+import { desktopMotion, splitHeading } from './effects';
 
 const SOFTWARE_RENDERER = /swiftshader|llvmpipe|software|basic render/i;
 
@@ -39,7 +39,7 @@ function gpuIsHardware() {
  */
 function canRun3D() {
     const matches = (query) => window.matchMedia(query).matches;
-    if (!matches('(min-width: 1024px) and (pointer: fine)')) return false;
+    if (!desktopMotion()) return false;
     if (matches('(prefers-reduced-motion: reduce)')) return false;
     if (navigator.connection?.saveData) return false;
     if ((navigator.hardwareConcurrency || 0) <= 4) return false;
@@ -77,10 +77,19 @@ function initTitle(hero) {
 
     // The CSS fade-up keeps its end state (fill-mode), which would beat GSAP's inline styles. GSAP takes over.
     content?.classList.remove('motion-safe:animate-fade-up');
-    const lines = content ? Array.from(content.children).filter((el) => el !== title) : [];
+    const all = content ? Array.from(content.children) : [title];
+    const lines = all.filter((el) => el !== title);
+    const rise = { y: 28, autoAlpha: 0, duration: 1, stagger: 0.09, delay: 0.35, ease: 'power3.out', clearProps: 'transform' };
 
-    splitHeading(title, { delay: 0.15 });
-    gsap.from(lines, { y: 28, autoAlpha: 0, duration: 1, stagger: 0.09, delay: 0.35, ease: 'power3.out', clearProps: 'transform' });
+    if (desktopMotion()) {
+        // Desktop: the headline splits into masked lines. It stays hidden until the plugin has loaded (then shown).
+        gsap.set(title, { autoAlpha: 0 });
+        splitHeading(title, { delay: 0.15 }).catch(() => gsap.set(title, { autoAlpha: 1 }));
+        gsap.from(lines, rise);
+    } else {
+        // Phones and tablets: no SplitText download, the whole block rises together.
+        gsap.from(all, rise);
+    }
 }
 
 function initCopyStory(hero, progress) {

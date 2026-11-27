@@ -10,12 +10,10 @@
  */
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SplitText } from 'gsap/SplitText';
-import Lenis from 'lenis';
-import 'lenis/dist/lenis.css';
 import {
     cascade,
     countUp,
+    desktopMotion,
     faderHeading,
     hscroll,
     led,
@@ -27,14 +25,35 @@ import {
 } from './effects';
 import { initHero } from './hero';
 
-gsap.registerPlugin(ScrollTrigger, SplitText);
+gsap.registerPlugin(ScrollTrigger);
 
 // Section top lands 80px below the viewport top (fixed 64px navbar plus a gap). Measured, not Lenis offset, because
-// Lenis resolves element offsets against its cached layout.
+// Lenis resolves element offsets against its cached layout. Phones use the same gap as CSS scroll-margin-top.
 const NAV_OFFSET = -80;
 const targetY = (el) => window.scrollY + el.getBoundingClientRect().top + NAV_OFFSET;
 
-function initLenis() {
+/** The on-page section a click points at, or null when the browser should handle the click itself. */
+function samePageTarget(event) {
+    const link = event.target.closest('a[href*="#"]');
+    if (!link || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey) return null;
+
+    const url = new URL(link.href, window.location.href);
+    if (url.origin !== window.location.origin || url.pathname !== window.location.pathname || !url.hash || url.hash === '#main') return null;
+
+    return document.getElementById(decodeURIComponent(url.hash.slice(1)));
+}
+
+function focusSection(target) {
+    if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
+}
+
+/**
+ * Smooth scroll is desktop only. Lenis (and its CSS) is a dynamic import, so phones and tablets never download it
+ * and keep native scrolling; their anchors use scroll-margin-top (app.css) instead.
+ */
+async function initSmoothScroll() {
+    const [{ default: Lenis }] = await Promise.all([import('lenis'), import('lenis/dist/lenis.css')]);
     const lenis = new Lenis({ lerp: 0.09, smoothWheel: true, autoRaf: false });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
@@ -43,23 +62,14 @@ function initLenis() {
     // Same-page anchors (navbar, hero buttons, scroll cue) glide instead of jumping.
     // The skip link is left alone so keyboard focus moves exactly as the browser does it.
     document.addEventListener('click', (event) => {
-        const link = event.target.closest('a[href*="#"]');
-        if (!link || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey) return;
-
-        const url = new URL(link.href, window.location.href);
-        if (url.origin !== window.location.origin || url.pathname !== window.location.pathname || !url.hash || url.hash === '#main') return;
-
-        const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+        const target = samePageTarget(event);
         if (!target) return;
 
         event.preventDefault();
-        history.pushState(null, '', url.hash);
+        history.pushState(null, '', '#' + target.id);
         lenis.scrollTo(targetY(target), {
             duration: 1.4,
-            onComplete: () => {
-                if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
-                target.focus({ preventScroll: true });
-            },
+            onComplete: () => focusSection(target),
         });
     });
 
@@ -148,27 +158,50 @@ export function initHome() {
     const hero = document.querySelector('[data-hero]');
     const root = document.getElementById('main') ?? document.body;
 
-    const lenis = initLenis();
-
     // The hero pin goes first: its spacer changes every position below it, so later triggers must measure after it.
     if (hero) initHero(hero);
 
     initSections(root, gsap.context(() => {}, root));
 
+    // Set once Lenis has loaded (desktop only). Phones keep native scrolling, so this stays null there.
+    let lenis = null;
+
     // A direct load at an anchor (e.g. /#contact) must land on that section. Lenis starts from the scroll position it
-    // reads at construction, so without this the page snaps back to the top.
+    // reads at construction, so without this the page snaps back to the top. Phones: the browser's own hash jump
+    // already respects scroll-margin-top, so only the re-landing after layout settles is needed there.
     const landOnHash = () => {
         const id = decodeURIComponent(window.location.hash.slice(1));
         const target = id && id !== 'main' ? document.getElementById(id) : null;
-        if (target) lenis.scrollTo(targetY(target), { immediate: true });
+        if (!target) return;
+        if (lenis) lenis.scrollTo(targetY(target), { immediate: true });
+        else target.scrollIntoView({ block: 'start', behavior: 'instant' });
     };
     // The page is still growing while images, fonts and pin spacers settle: re-measure, then land again.
     const settle = () => {
-        lenis.resize(); // Lenis caches the scroll limit; re-read it once the page has its final height
+        lenis?.resize(); // Lenis caches the scroll limit; re-read it once the page has its final height
         ScrollTrigger.refresh();
         landOnHash();
     };
-    landOnHash();
+
+    if (desktopMotion()) {
+        initSmoothScroll().then((instance) => {
+            lenis = instance;
+            settle();
+        });
+    } else {
+        // Phones: native scrolling. The page's CSS smooth scroll can stop short on long anchor jumps, so the jump is
+        // instant here (scroll-pt-20 on <html> keeps the section below the navbar).
+        document.addEventListener('click', (event) => {
+            const target = samePageTarget(event);
+            if (!target) return;
+
+            event.preventDefault();
+            history.pushState(null, '', '#' + target.id);
+            target.scrollIntoView({ block: 'start', behavior: 'instant' });
+            focusSection(target);
+        });
+    }
+
     if (document.readyState === 'complete') settle();
     else window.addEventListener('load', settle, { once: true });
     document.fonts?.ready.then(settle);
