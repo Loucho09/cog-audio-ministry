@@ -22,9 +22,18 @@ export default {
                 text: 'rgb(var(--color-text) / <alpha-value>)',
                 primary: 'rgb(var(--color-primary) / <alpha-value>)',
                 'primary-dark': 'rgb(var(--color-primary-dark) / <alpha-value>)',
+                // Blue LED accent for live, active and next states (homepage).
+                signal: 'rgb(var(--color-signal) / <alpha-value>)',
+                // Dark band / dark hero surface. Same value in both themes.
+                console: 'rgb(var(--color-console) / <alpha-value>)',
+                // Legacy stage red (dashboard and other non-homepage pages). Not used on the homepage.
                 accent: 'rgb(var(--color-accent) / <alpha-value>)',
                 // Deeper/lighter red for small text (eyebrows) so it passes AA on both backgrounds.
                 'accent-text': 'rgb(var(--color-accent-text) / <alpha-value>)',
+            },
+            // One radius token for the homepage: flat cards, buttons and strips.
+            borderRadius: {
+                console: '6px',
             },
             // Decorative motion only. Every use is prefixed with motion-safe: so reduced-motion users get the static design.
             keyframes: {
@@ -51,10 +60,10 @@ export default {
                 DEFAULT: 'rgb(var(--color-background))',
             },
             fontFamily: {
-                // Matches the logo: "COG" is a heavy geometric sans (Montserrat), "Audio" a signature script.
-                sans: ['Montserrat', ...defaultTheme.fontFamily.sans],
-                // Decorative accent only (e.g. "Audio" in the hero title). Never for body text.
-                script: ['"Mrs Saint Delafield"', 'cursive'],
+                // Headings and body: Schibsted Grotesk (loaded from Bunny in components/public-layout).
+                sans: ['"Schibsted Grotesk"', ...defaultTheme.fontFamily.sans],
+                // Labels and data readouts: JetBrains Mono.
+                mono: ['"JetBrains Mono"', ...defaultTheme.fontFamily.mono],
             },
         },
     },

@@ -18,3 +18,11 @@ Alpine.start();
         console.error(error);
     }
 });
+
+// Homepage motion layer (GSAP, Lenis, Three.js): its own chunk, fetched only on pages that opt in,
+// and never with reduced motion. If it fails, the server-rendered page is already complete.
+if (document.querySelector('[data-home-fx]') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    import('./home/index')
+        .then(({ initHome }) => initHome())
+        .catch((error) => console.error(error));
+}

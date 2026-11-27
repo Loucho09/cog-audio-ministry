@@ -10,12 +10,14 @@
  * `accent-text` is a deeper (light mode) or lighter (dark mode) red that passes AA for small text (eyebrows).
  */
 :root {
-    --color-background: 238 242 247; /* #EEF2F7 (softer than pure near-white, less glare) */
+    --color-background: 248 250 252; /* #F8FAFC */
     --color-surface: 255 255 255; /* #FFFFFF */
     --color-text: 15 23 42; /* #0F172A */
     --color-primary: 2 132 199; /* #0284C7 */
     --color-primary-dark: 3 105 161; /* #0369A1 */
-    --color-accent: 225 29 72; /* #E11D48 (stage red) */
+    --color-signal: 14 165 233; /* #0EA5E9 (LED accent: live, active, next) */
+    --color-console: 15 23 42; /* #0F172A (dark bands, both themes) */
+    --color-accent: 225 29 72; /* #E11D48 (legacy stage red, non-homepage only) */
     --color-accent-text: 190 18 60; /* #BE123C */
     color-scheme: light;
 }
@@ -26,9 +28,36 @@
     --color-text: 241 245 249; /* #F1F5F9 */
     --color-primary: 56 189 248; /* #38BDF8 */
     --color-primary-dark: 56 189 248; /* #38BDF8 */
+    --color-signal: 56 189 248; /* #38BDF8 */
     --color-accent: 244 63 94; /* #F43F5E */
     --color-accent-text: 251 113 133; /* #FB7185 */
     color-scheme: dark;
+}
+
+/* Homepage type scale: fluid clamp() sizes. Headings are tight, body is relaxed.
+   Weights are left to utilities (font-semibold, font-bold, ...). */
+@layer components {
+    .t-display {
+        font-size: clamp(2.75rem, 1.75rem + 4.2vw, 5.5rem);
+        line-height: 0.95;
+        letter-spacing: -0.025em;
+    }
+
+    .t-h2 {
+        font-size: clamp(2rem, 1.375rem + 2.65vw, 3.5rem);
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+    }
+
+    .t-lead {
+        font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+        line-height: 1.625;
+    }
+
+    .t-label {
+        @apply font-mono text-xs uppercase;
+        letter-spacing: 0.12em;
+    }
 }
 
 /* No one-word last lines on paragraphs and quotes (browsers without support just ignore it). */
@@ -388,4 +417,76 @@
     to {
         background-position: -100% 0;
     }
+}
+
+/* Homepage motion layer (resources/js/home). Everything here is progressive: without JS, without WebGL,
+   or with reduced motion, the hero shows the cover photo and the page reads exactly as rendered. */
+
+/* Hero title: hidden only until SplitText has run, so the words do not flash before they animate in.
+   Failsafe: if the motion chunk never arrives, the title shows by itself after 3s. */
+@media screen and (prefers-reduced-motion: no-preference) {
+    .js .hero-title:not(.is-split) {
+        visibility: hidden;
+        animation: hero-title-failsafe 0s 3s forwards;
+    }
+}
+
+@keyframes hero-title-failsafe {
+    to {
+        visibility: visible;
+    }
+}
+
+/* 3D stage: invisible until its first frame, then it crossfades over the photo (which becomes its LED wall). */
+.hero-stage {
+    opacity: 0;
+    transition: opacity 1.4s ease-out;
+}
+
+[data-hero-photo] {
+    transition: opacity 1.4s ease-out;
+}
+
+[data-hero].is-3d .hero-stage {
+    opacity: 1;
+}
+
+[data-hero].is-3d [data-hero-photo] {
+    opacity: 0;
+}
+
+/* Wide screens: the console sits right of the text, so the side shade only needs to cover the text column.
+   Black is fine here: the hero is always a dark stage in both themes (same exception as the photo). */
+@media (min-width: 1024px) {
+    [data-hero].is-3d .hero-overlay-side {
+        background-image: linear-gradient(to right, rgb(0 0 0 / 0.88), rgb(0 0 0 / 0.5) 42%, transparent 72%);
+    }
+}
+
+/* Masked heading reveal: a little room so descenders (g, y) are not clipped by the mask. */
+.split-word-mask {
+    padding-bottom: 0.14em;
+    margin-bottom: -0.14em;
+}
+
+/* Marquee band: outlined second row. */
+.marquee-outline {
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgb(var(--color-text) / 0.4);
+}
+
+/* Tilt cards: a soft stage light follows the pointer (position from --mx / --my). */
+.fx-spot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(var(--color-primary) / 0.16), transparent 45%);
+    opacity: 0;
+    transition: opacity 300ms ease-out;
+}
+
+.fx-spot:hover::after {
+    opacity: 1;
 }

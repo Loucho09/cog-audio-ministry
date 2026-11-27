@@ -19,7 +19,8 @@
 @endphp
 
 @if (count($stats) > 0)
-    <section id="impact" data-reveal aria-labelledby="impact-title" class="relative isolate overflow-hidden bg-background py-14 sm:py-16">
+    <section id="impact" data-reveal aria-labelledby="impact-title" class="relative isolate overflow-hidden bg-background py-20 sm:py-24 lg:py-32">
+
         {{-- Thin primary-to-accent light bar on the top edge, and a subtle backdrop. Decorative. --}}
         <span aria-hidden="true" class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary to-accent"></span>
         <x-site.section-backdrop variant="vignette" />
@@ -33,10 +34,10 @@
                     align="split"
                 />
 
-                <dl class="mx-auto mt-10 grid max-w-3xl gap-4 text-center sm:gap-6 lg:mt-0 lg:max-w-none lg:gap-6 {{ $gridCols }}">
+                <dl class="mx-auto mt-12 grid max-w-3xl gap-4 text-center sm:mt-16 sm:gap-6 lg:mt-0 lg:max-w-none lg:gap-6 {{ $gridCols }}">
                 @foreach ($stats as $stat)
                     {{-- Stat card: white in light mode, with a thin stage-colour bar on top. --}}
-                    <div class="relative flex flex-col-reverse items-center gap-1 overflow-hidden rounded-3xl border border-text/15 bg-surface px-3 py-6 shadow-sm sm:px-6 sm:py-7 dark:bg-surface/60 {{ $lgCard }}">
+                    <div data-tilt class="relative flex flex-col-reverse items-center gap-1 overflow-hidden rounded-3xl border border-text/15 bg-surface px-3 py-6 shadow-sm sm:px-6 sm:py-7 dark:bg-surface/60 {{ $lgCard }}">
                         <span aria-hidden="true" class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-accent"></span>
                         <dt class="text-xs font-semibold uppercase tracking-wider text-text/80 sm:text-sm">{{ $stat['label'] }}</dt>
                         <dd

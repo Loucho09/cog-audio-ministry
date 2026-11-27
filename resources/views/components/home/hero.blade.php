@@ -1,4 +1,4 @@
-<section aria-labelledby="hero-title" class="relative isolate flex min-h-[100svh] items-center overflow-hidden bg-black sm:min-h-[44rem] lg:min-h-[clamp(44rem,85svh,52rem)]">
+<section data-hero data-home-fx aria-labelledby="hero-title" class="relative isolate flex min-h-[100svh] items-center overflow-hidden bg-black sm:min-h-[44rem] lg:min-h-[max(44rem,100svh)]">
     {{-- Cover photo as a full-bleed background. Decorative (the h1 carries the name), so alt is empty.
          Above the fold, so no lazy loading.
          The frame caps the photo at 110rem (1760px at the default 16px root, 1980px at the 18px root from 1920px),
@@ -6,7 +6,7 @@
          TODO: a larger original from the owner would allow a wider cap). The side fade starts once the frame is
          narrower than the screen (above 1980px). It is centred, so on very wide screens the photo's wordmark stays
          beside the text column instead of drifting to the far edge; its sides fade into the black section. --}}
-    <div aria-hidden="true" class="absolute inset-y-0 left-1/2 -z-10 w-full max-w-[min(110rem,2000px)] -translate-x-1/2 min-[1981px]:[mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
+    <div data-hero-photo aria-hidden="true" class="absolute inset-y-0 left-1/2 -z-10 w-full max-w-[min(110rem,2000px)] -translate-x-1/2 min-[1981px]:[mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
     <picture>
         <source
             type="image/webp"
@@ -28,10 +28,16 @@
     </picture>
     </div>
 
+    {{-- Live 3D stage (Three.js mixing console), drawn by resources/js/home. Hidden until its first frame, then it
+         crossfades over the photo (which it reuses as the LED wall). No WebGL, reduced motion, or no JS: photo only. --}}
+    <div data-hero-stage data-wall-image="{{ asset('images/cover-1200.webp') }}" aria-hidden="true" class="hero-stage absolute inset-0 -z-10">
+        <canvas class="block h-full w-full"></canvas>
+    </div>
+
     {{-- Readability overlay. Darker on the left where the text sits; the photo's wordmark stays visible on the right.
          The photo is always dark, so hero text uses white directly instead of theme tokens. --}}
-    <div aria-hidden="true" class="absolute inset-0 -z-10 bg-gradient-to-r from-black/90 via-black/70 to-black/50 lg:via-black/60"></div>
-    <div aria-hidden="true" class="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
+    <div data-hero-overlay aria-hidden="true" class="hero-overlay-side absolute inset-0 -z-10 bg-gradient-to-r from-black/90 via-black/70 to-black/50 lg:via-black/60"></div>
+    <div data-hero-overlay aria-hidden="true" class="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
 
     {{-- Stage-light glows in the brand colours. --}}
     <x-site.glow tone="primary" class="-left-40 top-10 h-[28rem] w-[28rem] opacity-70 sm:-left-24" />
@@ -44,7 +50,7 @@
     <span aria-hidden="true" class="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-primary via-primary to-accent dark:hidden"></span>
 
     <div class="relative mx-auto w-full max-w-7xl px-5 pb-24 pt-28 sm:px-6 sm:pt-32 lg:px-8">
-        <div class="motion-safe:animate-fade-up flex flex-col items-center text-center lg:items-start lg:text-left">
+        <div data-hero-content class="motion-safe:animate-fade-up flex flex-col items-center text-center lg:items-start lg:text-left">
 
             {{-- Small pill above the title: EQ bars and the location line. --}}
             <p class="inline-flex max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] sm:gap-3 sm:px-4 sm:tracking-[0.2em] text-white backdrop-blur-sm">
@@ -53,7 +59,7 @@
             </p>
 
             {{-- "Audio" is set in the script font to echo the logo. The name is escaped first, so the replace is safe. --}}
-            <h1 id="hero-title" class="mt-6 max-w-full break-words text-5xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl 2xl:text-8xl">{!!str_replace('Audio', '<span class="inline-block bg-gradient-to-r from-white to-accent bg-clip-text pb-1 font-script text-[1.9em] font-normal leading-none tracking-normal text-transparent forced-colors:bg-none forced-colors:text-[CanvasText]">Audio</span>', e(config('ministry.name'))) !!}</h1>
+            <h1 id="hero-title" data-hero-title class="hero-title mt-6 max-w-full break-words text-5xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl 2xl:text-8xl">{{ config('ministry.name') }}</h1>
 
             <p class="mt-5 text-lg font-semibold text-white sm:text-xl 2xl:text-2xl">{{ config('ministry.tagline') }}</p>
 
@@ -74,8 +80,9 @@
             </p>
 
             <div class="mt-9 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
-                <x-site.button :href="route('join.create')" size="lg" class="w-full sm:w-auto">Join Us</x-site.button>
-                <x-site.button :href="route('home').'#services'" variant="outline-light" size="lg" class="w-full sm:w-auto">See Service Times</x-site.button>
+                {{-- data-magnet: the wrapper leans toward the pointer (fine pointers only; see resources/js/home/effects.js). --}}
+                <span data-magnet class="inline-flex w-full sm:w-auto"><x-site.button :href="route('join.create')" size="lg" class="w-full sm:w-auto">Join Us</x-site.button></span>
+                <span data-magnet class="inline-flex w-full sm:w-auto"><x-site.button :href="route('home').'#services'" variant="outline-light" size="lg" class="w-full sm:w-auto">See Service Times</x-site.button></span>
             </div>
         </div>
     </div>
@@ -83,6 +90,7 @@
     {{-- Scroll cue: a real link to the next section. It sits on the dark photo, so white (the dark-mode fade ends near-black too). The bounce is motion-safe only. --}}
     <a
         href="#about"
+        data-hero-cue
         aria-label="Scroll to About"
         class="absolute inset-x-0 bottom-4 mx-auto flex h-11 w-11 items-center justify-center rounded-full text-white/85 transition-colors duration-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black motion-safe:animate-nudge"
     >

@@ -19,7 +19,7 @@ it('marks the homepage sections for scroll reveal', function () {
 it('never reveal-animates the hero (above the fold)', function () {
     $html = $this->get('/')->assertOk()->getContent();
 
-    preg_match('/<section aria-labelledby="hero-title"[^>]*>/', $html, $matches);
+    preg_match('/<section[^>]*aria-labelledby="hero-title"[^>]*>/', $html, $matches);
 
     expect($matches)->toHaveCount(1)
         ->and($matches[0])->not->toContain('data-reveal');

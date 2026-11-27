@@ -22,15 +22,29 @@
 
         <title>{{ $pageTitle }}</title>
         <meta name="description" content="{{ $metaDescription }}">
+        <link rel="canonical" href="{{ url()->current() }}">
+
+        <!-- Favicons (resized from the logo) -->
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
 
         <!-- Open Graph -->
         <meta property="og:title" content="{{ $pageTitle }}">
         <meta property="og:description" content="{{ $metaDescription }}">
         <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:image" content="{{ asset('images/cover-1200.webp') }}">
+        <meta property="og:site_name" content="{{ $siteName }}">
 
-        <!-- Fonts -->
+        <!-- Twitter / X -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $pageTitle }}">
+        <meta name="twitter:description" content="{{ $metaDescription }}">
+        <meta name="twitter:image" content="{{ asset('images/cover-1200.webp') }}">
+
+        <!-- Fonts: Schibsted Grotesk (headings, body) and JetBrains Mono (labels, readouts) -->
         <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-        <link href="https://fonts.bunny.net/css?family=montserrat:400,500,600,700,800|mrs-saint-delafield:400&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=schibsted-grotesk:400,500,600,700,800|jetbrains-mono:400,500&display=swap" rel="stylesheet" />
 
         <!-- Scripts / Styles -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

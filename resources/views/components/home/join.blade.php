@@ -11,19 +11,20 @@
     <span aria-hidden="true" class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent"></span>
     <x-site.glow tone="accent" class="-bottom-40 -right-24 hidden h-[28rem] w-[28rem] opacity-50 dark:block" />
 
-    <div class="relative mx-auto flex max-w-3xl flex-col items-center px-5 text-center sm:px-6 lg:px-8">
-        {{-- White bars on the blue band (light mode); the usual blue-to-red bars in dark mode. --}}
-        <x-site.eq-bars class="mb-6 [&>span]:from-white [&>span]:to-white/70 dark:[&>span]:from-primary dark:[&>span]:to-accent" />
+    <div class="relative mx-auto flex max-w-7xl flex-col items-center px-5 text-center sm:px-6 lg:px-8">
+        <div class="flex w-full max-w-3xl flex-col items-center">
+            {{-- White bars on the blue band (light mode); the usual blue-to-red bars in dark mode. --}}
+            <x-site.eq-bars class="mb-6 [&>span]:from-white [&>span]:to-white/70 dark:[&>span]:from-primary dark:[&>span]:to-accent" />
 
-        {{-- TODO: owner to confirm this copy. --}}
-        <x-site.section-header
-            id="join-title"
-            tone="stage"
-            title="Join Us"
-            lead="Do you love serving through sound, stage, or livestream? You do not need to be an expert. We will gladly teach and walk with you. Halina at sumama sa amin!"
-        />
+            {{-- TODO: owner to confirm this copy. --}}
+            <x-site.section-header
+                id="join-title"
+                tone="stage"
+                title="Join Us"
+                lead="Do you love serving through sound, stage, or livestream? You do not need to be an expert. We will gladly teach and walk with you. Halina at sumama sa amin!"
+            />
 
-        <div class="mt-10">
+            <div class="mt-12 sm:mt-16">
             {{-- Light mode: white button on the blue band. Dark mode: the normal blue button. --}}
             <x-site.button
                 size="lg"
@@ -32,6 +33,7 @@
             >
                 Apply to join
             </x-site.button>
+        </div>
         </div>
     </div>
 </section>

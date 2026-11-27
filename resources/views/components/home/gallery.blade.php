@@ -169,6 +169,7 @@
                         x-on:keydown.tab="trapTab($event)"
                         role="dialog"
                         aria-modal="true"
+                        data-lenis-prevent
                         x-bind:aria-labelledby="(images[current]?.title || images[current]?.alt) ? 'gallery-caption' : null"
                         x-bind:aria-label="(images[current]?.title || images[current]?.alt) ? null : 'Photo viewer'"
                         class="fixed inset-0 z-[60] flex overflow-y-auto bg-text/95 p-4 dark:bg-background/95"

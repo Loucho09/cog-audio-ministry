@@ -7,7 +7,7 @@
 
     // Icon paths are static SVG markup defined here, never user input.
     $iconClasses = 'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 text-primary-dark ring-1 ring-inset ring-primary/20 transition duration-300 motion-safe:group-hover:scale-105';
-    $cardClasses = 'group flex min-h-11 items-center gap-4 rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark sm:p-6 dark:hover:shadow-black/60';
+    $cardClasses = 'group flex h-full min-h-11 items-center gap-4 rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark sm:p-6 dark:hover:shadow-black/60';
 @endphp
 
 <section id="contact" data-reveal aria-labelledby="contact-title" class="relative isolate overflow-hidden bg-surface py-20 sm:py-24 lg:py-32">
@@ -81,7 +81,7 @@
                 @endif
 
                 @if ($address)
-                    <li class="flex min-h-11 items-center gap-4 rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm sm:p-6">
+                    <li class="flex h-full min-h-11 items-center gap-4 rounded-3xl border border-text/15 bg-surface p-5 dark:bg-background shadow-sm sm:p-6">
                         <span aria-hidden="true" class="{{ $iconClasses }}">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />

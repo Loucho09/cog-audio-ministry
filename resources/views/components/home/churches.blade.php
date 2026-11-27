@@ -26,12 +26,12 @@
         <div class="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
             <div>
                 <p class="inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent-text dark:text-white/90"><span aria-hidden="true" class="h-0.5 w-8 rounded-full bg-accent"></span>Our Churches</p>
-                <h2 id="churches-title" class="mt-3 text-3xl font-extrabold tracking-tight text-text sm:text-4xl">One sound, all our churches</h2>
+                <h2 id="churches-title" class="mt-4 text-3xl font-extrabold leading-tight tracking-tight text-text [text-wrap:balance] sm:text-4xl lg:text-5xl">One sound, all our churches</h2>
                 <p class="mt-4 max-w-xl text-base leading-relaxed text-text/80 sm:text-lg">The same heart for worship, shared across every church we serve.</p>
 
-                <ul class="mt-8 grid grid-cols-2 gap-3 [&>li:last-child:nth-child(odd)]:col-span-2">
+                <ul class="mt-12 grid sm:mt-16 grid-cols-2 gap-3 [&>li:last-child:nth-child(odd)]:col-span-2">
                     @foreach ($churches as $church)
-                        <li class="flex flex-col rounded-2xl border border-text/15 bg-surface px-3 pb-0.5 pt-3 shadow-sm sm:px-4 dark:border-white/15 dark:bg-black/55 dark:shadow-none dark:backdrop-blur-sm">
+                        <li class="flex h-full flex-col rounded-3xl border border-text/15 bg-surface px-3 pb-0.5 pt-3 shadow-sm sm:px-4 dark:border-white/15 dark:bg-black/55 dark:shadow-none dark:backdrop-blur-sm">
                             <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                                 <span class="min-w-0 break-words font-semibold text-text">{{ $church->name }}</span>
                                 @if ($church->is_main)
@@ -57,9 +57,9 @@
                 </ul>
             </div>
 
-            <div class="rounded-3xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8 dark:border-white/15 dark:bg-black/60 dark:shadow-none dark:backdrop-blur-sm">
+            <div data-tilt class="relative rounded-3xl border border-text/15 bg-surface p-6 shadow-sm sm:p-8 dark:border-white/15 dark:bg-black/60 dark:shadow-none dark:backdrop-blur-sm">
                 <h3 class="text-center text-lg font-bold text-text">Behind the sound</h3>
-                <p class="mt-3 text-base leading-relaxed text-text/80">
+                <p data-scroll-words class="mt-3 text-base leading-relaxed text-text/80">
                     Before every service, the Audio team does a sound check, balances the mix, and makes sure the microphones and speakers are ready. During worship, we keep watch so every sermon and every song is heard clearly, by everyone in the room.
                 </p>
                 <p class="mt-3 text-center">

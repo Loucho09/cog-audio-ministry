@@ -9,7 +9,7 @@
     $todayName = now()->format('l');
 @endphp
 
-<section id="services" data-reveal aria-labelledby="services-title" class="relative isolate overflow-hidden bg-surface py-16 sm:py-20 lg:py-24">
+<section id="services" data-reveal aria-labelledby="services-title" class="relative isolate overflow-hidden bg-surface py-20 sm:py-24 lg:py-32">
     <x-site.section-backdrop variant="cone" fade-from="background" />
     <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <x-site.section-header
@@ -19,10 +19,10 @@
         />
 
         @if ($soon->isEmpty() && $weekly->isEmpty())
-            <p class="mt-10 text-center text-base text-text/80 sm:mt-12">Service times will be posted soon.</p>
+            <p class="mt-12 text-center text-base text-text/80 sm:mt-16">Service times will be posted soon.</p>
         @else
             {{-- From md (tablet) up: featured service left, upcoming list right. --}}
-            <div class="mt-10 sm:mt-12 md:grid md:grid-cols-12 md:items-stretch md:gap-6 lg:gap-8">
+            <div class="mt-12 sm:mt-16 md:grid md:grid-cols-12 md:items-stretch md:gap-6 lg:gap-8">
                 @if ($spotlight)
                     <div class="mx-auto max-w-3xl {{ $upcoming->isNotEmpty() ? 'md:col-span-7' : 'md:col-span-12' }} md:mx-0 md:flex md:max-w-none md:flex-col md:[&>*]:flex-1">
                         @include('components.home.partials.service-spotlight', ['day' => $spotlight, 'badge' => $spotlight['badge']])
