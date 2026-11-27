@@ -98,13 +98,13 @@
                     @if ($sundaySlots->isNotEmpty())
                         <div class="mt-8">
                             <p class="t-label text-text/70">Sunday @if ($todayName === 'Sunday')<span class="sr-only"> (today)</span>@endif</p>
-                            <ul class="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-console border border-text/10 bg-text/10 sm:grid-cols-3" data-fx="strips">
+                            <ul class="mt-4 flex flex-wrap gap-4" data-fx="strips">
                                 @foreach ($sundaySlots as $slot)
                                     <li
                                         data-day="0"
                                         data-time="{{ $slot['time24'] }}"
                                         data-name="{{ $slot['name'] }}"
-                                        class="flex flex-col gap-1 bg-surface p-4 data-[state]:bg-primary/5 lg:p-5"
+                                        class="flex min-w-[9rem] flex-1 basis-40 flex-col gap-1 rounded-console border border-text/10 bg-surface p-4 data-[state]:border-primary/40 data-[state]:bg-primary/5 lg:p-5"
                                     >
                                         <p class="font-mono text-xl font-medium tabular-nums tracking-tight sm:text-2xl">{{ $slot['time'] }}</p>
                                         <p class="text-sm font-medium">{{ $slot['name'] }}</p>
