@@ -15,3 +15,10 @@ Decision:
 - Cover is now a full-bleed background behind the hero (`object-cover`), not a banner below the hero text. Previous banner layout superseded.
 - Even black/65 overlay; text centered in white. Owner chose "text centered, full overlay" over "text left, logo visible".
 - Cover is decorative: `alt=""`, because the h1 already carries the name.
+
+### Update 2026-11-28 (logo WebP, owner decision)
+- Header and footer round badge logo stays the same in both themes.
+- Served as WebP at 40, 80 and 120px (1x, 2x, 3x) via `srcset`: `public/images/logo-40.webp`, `logo-80.webp`, `logo-120.webp`.
+- `public/images/logo.png` kept as fallback, and as the Open Graph and favicon source.
+- Wordmark `public/images/logo-full.png` also has `logo-full.webp` (512px, about 34KB vs 191KB PNG).
+- Owner may send a dark-background logo file later. Not yet received.

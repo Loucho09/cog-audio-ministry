@@ -1,7 +1,7 @@
 @props(['transparent' => false])
 
 @php
-    $hasLogo = file_exists(public_path('images/logo.png'));
+    $hasLogo = file_exists(public_path('images/logo-40.webp'));
 
     // Join carries the blue signal LED. Labels are mono; hover uses the fader underline, not colour.
     $links = collect([
@@ -57,7 +57,8 @@
         >
             @if ($hasLogo)
                 <img
-                    src="{{ asset('images/logo.png') }}"
+                    src="{{ asset('images/logo-40.webp') }}"
+                    srcset="{{ asset('images/logo-40.webp') }} 1x, {{ asset('images/logo-80.webp') }} 2x, {{ asset('images/logo-120.webp') }} 3x"
                     alt=""
                     width="40"
                     height="40"

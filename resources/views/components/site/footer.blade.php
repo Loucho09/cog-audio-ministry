@@ -1,5 +1,5 @@
 @php
-    $hasLogo = file_exists(public_path('images/logo.png'));
+    $hasLogo = file_exists(public_path('images/logo-40.webp'));
 
     // Same list as the navbar (footer repeats it so the two can differ later if needed).
     $explore = collect([
@@ -24,7 +24,8 @@
             <div class="flex items-center gap-4">
                 @if ($hasLogo)
                     <img
-                        src="{{ asset('images/logo.png') }}"
+                        src="{{ asset('images/logo-80.webp') }}"
+                        srcset="{{ asset('images/logo-80.webp') }} 1x, {{ asset('images/logo-120.webp') }} 2x"
                         alt=""
                         width="48"
                         height="48"
