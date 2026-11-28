@@ -58,11 +58,34 @@ export function initJoinButton(wrap) {
         meterTimer = 0;
     };
 
-    // Sonar: two rings, 350ms apart, once every 4 seconds -----------------------------------------------------
+    // Sonar: two rings, 350ms apart, once every 4 seconds. The rings grow evenly (no vertical stretch), so they stay a
+    // halo around the button and never read as a separate line under it.
     const sonar = gsap.timeline({ repeat: -1, repeatDelay: 4 - 1.75, paused: true });
     rings.forEach((ring, i) =>
-        sonar.fromTo(ring, { scaleX: 1, scaleY: 1, opacity: 0.7 }, { scaleX: 1.14, scaleY: 1.7, opacity: 0, duration: 1.4, ease: 'power2.out' }, i * 0.35),
+        sonar.fromTo(ring, { scale: 1, opacity: 0.6 }, { scale: 1.12, opacity: 0, duration: 1.4, ease: 'power2.out' }, i * 0.35),
     );
+
+    // Running border light: the SVG rect is sized to the button and kept in sync (ResizeObserver), so the light runs
+    // on the button's own rounded edge at any width.
+    const border = button.querySelector('.join-border rect');
+    // The stroke (1.5px, app.css) is centred on the rect's edge, so the rect is inset by half of it: the light then
+    // runs on the button's own edge, not half a pixel outside it. offsetWidth/offsetHeight ignore the press scale,
+    // and the svg scales with the button, so the rect stays exact through the press animation.
+    const BORDER_INSET = 0.75;
+    const BORDER_RADIUS = 6; // rounded-console
+    const syncBorder = () => {
+        if (!border) return;
+        const w = button.offsetWidth;
+        const h = button.offsetHeight;
+        border.setAttribute('x', BORDER_INSET);
+        border.setAttribute('y', BORDER_INSET);
+        border.setAttribute('width', Math.max(0, w - BORDER_INSET * 2));
+        border.setAttribute('height', Math.max(0, h - BORDER_INSET * 2));
+        border.setAttribute('rx', Math.max(0, BORDER_RADIUS - BORDER_INSET));
+    };
+    syncBorder();
+    const sizing = border && 'ResizeObserver' in window ? new ResizeObserver(syncBorder) : null;
+    sizing?.observe(button);
 
     // Pause everything while the button is off-screen.
     const observer = new IntersectionObserver(([entry]) => {
@@ -157,6 +180,7 @@ export function initJoinButton(wrap) {
         clearTimeout(navigateTimer);
         sonar.kill();
         observer.disconnect();
+        sizing?.disconnect();
         undo.splice(0).forEach((remove) => remove());
     };
 }

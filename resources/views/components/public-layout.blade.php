@@ -24,6 +24,9 @@
         <meta name="description" content="{{ $metaDescription }}">
         <link rel="canonical" href="{{ url()->current() }}">
 
+        {{-- Per-page head tags pushed by components (e.g. the hero's wordmark preload). --}}
+        @stack('head')
+
         <!-- Favicons (resized from the logo) -->
         <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">

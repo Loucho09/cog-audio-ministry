@@ -5,10 +5,11 @@
  * - a 12" touchscreen above each bank, leaning back into a low rear hood, with its encoder row in front;
  * - a centre master section with soft keys and a small rotary cluster;
  * - dark anodised chassis with brushed-metal side cheeks and a matte armrest.
- * No maker's name, logo or wordmark is drawn (trademark). Desktop shows two banks; phones show one.
+ * No maker's name, logo or wordmark is drawn (trademark). Two banks and two screens at every quality; the
+ * quality ('desktop' | 'medium' | 'light', see console-scene.js) only changes the screen redraw rate here.
  *
  * Built from primitives (instanced where repeated) so it stays light. The touchscreens are canvas textures
- * redrawn about 20 times a second (12 on phones): the PASTOR channel (waveform) and a mixer overview, driven by a fake signal.
+ * redrawn 20 times a second on desktop, 15 on tablets, 12 on phones: the PASTOR channel (waveform) and a mixer overview, driven by a fake signal.
  *
  * Units: 1 = 10 cm. Top of the work surface is y = 0; the operator sits at +z.
  */
@@ -63,15 +64,20 @@ const css = (color, alpha = 1) => {
     return `rgba(${Math.round(c.r * 255)},${Math.round(c.g * 255)},${Math.round(c.b * 255)},${alpha})`;
 };
 
-export function buildSurface({ tokens, mobile, random }) {
-    const banks = mobile ? 1 : 2;
+export function buildSurface({ tokens, quality = 'desktop', random }) {
+    // Both banks, both screens and the master section at every quality (the poster shows them all). The quality
+    // only changes the screen redraw rate here; pixel ratio, bloom and post live in console-scene.js.
+    const banks = 2;
     const strips = banks * BANK;
-    const centre = mobile ? 0 : CENTER;
+    const centre = CENTER;
     const totalW = banks * BANK_W + centre;
     const width = totalW + 0.5; // with cheeks
 
-    // Bank centres: desktop has one bank either side of the master section; phones show a single centred bank.
-    const bankCenter = (b) => (mobile ? 0 : (b === 0 ? -1 : 1) * (centre / 2 + BANK_W / 2));
+    // Layout left to right, like a dLive S5000: fader bank 1, fader bank 2, then the master section on the right.
+    // The surface is centred on x = 0. Phones show a single bank, centred (no master section).
+    const left = -totalW / 2;
+    const bankCenter = (b) => left + BANK_W / 2 + b * BANK_W;
+    const masterX = left + banks * BANK_W + centre / 2;
     const stripX = (s) => bankCenter(Math.floor(s / BANK)) - BANK_W / 2 + PITCH / 2 + (s % BANK) * PITCH;
 
     const group = new Group();
@@ -110,7 +116,10 @@ export function buildSurface({ tokens, mobile, random }) {
         envMapIntensity: 0.15,
     });
     const plastic = new MeshPhysicalMaterial({ color: black.clone().multiplyScalar(2), metalness: 0, roughness: 0.8 });
-    const rubber = new MeshPhysicalMaterial({ color: tokens.text.clone().multiplyScalar(0.28), metalness: 0, roughness: 0.92 });
+    // Fader caps: matte dark rubber (not emissive). Only LEDs, scribble strips and screens emit light.
+    const rubber = new MeshPhysicalMaterial({ color: tokens.surface.clone().multiplyScalar(7), metalness: 0, roughness: 0.92 });
+    // Thin centre line on each cap: a matte light line, not a glowing one.
+    const capLineMat = new MeshPhysicalMaterial({ color: tokens.text.clone().multiplyScalar(0.7), metalness: 0, roughness: 0.6 });
     const slotMat = new MeshPhysicalMaterial({ color: black, metalness: 0, roughness: 1 });
     const armMat = new MeshPhysicalMaterial({ color: black.clone().multiplyScalar(1.6), metalness: 0, roughness: 0.9, sheen: 0.4, sheenRoughness: 0.8 });
     const glow = () => new MeshBasicMaterial({ color: new Color(0xffffff).multiplyScalar(2.5), toneMapped: false });
@@ -150,8 +159,9 @@ export function buildSurface({ tokens, mobile, random }) {
     group.add(hood);
 
     // Bank separators (thin brushed bars between the banks and the master section).
-    if (!mobile) {
-        [-centre / 2, centre / 2].forEach((x) => {
+    {
+        // Between the two banks, and between bank 2 and the master section.
+        [left + BANK_W, left + 2 * BANK_W].forEach((x) => {
             const bar = new Mesh(new BoxGeometry(0.05, 0.02, 2.9), cheekMat);
             bar.position.set(x, 0.016, 0.72);
             group.add(bar);
@@ -161,11 +171,8 @@ export function buildSurface({ tokens, mobile, random }) {
     // Fader strips -----------------------------------------------------------------------------------------
     const slots = new InstancedMesh(new BoxGeometry(0.026, 0.012, TRAVEL + 0.2), slotMat, strips);
     const caps = new InstancedMesh(new RoundedBoxGeometry(0.2, 0.15, 0.12, 2, 0.03), rubber, strips);
-    const capLines = new InstancedMesh(new BoxGeometry(0.2, 0.004, 0.012), glow(), strips);
-    for (let s = 0; s < strips; s++) {
-        place(slots, s, stripX(s), 0.012, FADER_NEAR - TRAVEL / 2);
-        capLines.setColorAt(s, unit.setRGB(1.1, 1.1, 1.1));
-    }
+    const capLines = new InstancedMesh(new BoxGeometry(0.2, 0.004, 0.012), capLineMat, strips);
+    for (let s = 0; s < strips; s++) place(slots, s, stripX(s), 0.012, FADER_NEAR - TRAVEL / 2);
 
     // Mix / PAFL / Mute keys (RGB lit, always faintly glowing like the real thing).
     const keyRows = [
@@ -224,7 +231,7 @@ export function buildSurface({ tokens, mobile, random }) {
     const encoderSpots = [];
     for (let s = 0; s < strips; s++) encoderSpots.push({ x: stripX(s), z: -0.22, strip: s });
     const clusterX = [-0.3, 0, 0.3];
-    if (!mobile) clusterX.forEach((x) => encoderSpots.push({ x, z: -0.2, strip: -1 }));
+    clusterX.forEach((x) => encoderSpots.push({ x: masterX + x, z: -0.2, strip: -1 }));
     const knobBodies = new InstancedMesh(new CylinderGeometry(0.068, 0.074, 0.09, 32), plastic, encoderSpots.length);
     const knobCaps = new InstancedMesh(new CylinderGeometry(0.048, 0.048, 0.094, 32), brushed, encoderSpots.length);
     const knobPointers = new InstancedMesh(new BoxGeometry(0.01, 0.006, 0.04), glow(), encoderSpots.length);
@@ -243,10 +250,10 @@ export function buildSurface({ tokens, mobile, random }) {
 
     // Master section: a grid of soft keys (lit at random, colour per function).
     let softkeys = null;
-    if (!mobile) {
+    {
         softkeys = new InstancedMesh(new RoundedBoxGeometry(0.24, 0.04, 0.14, 2, 0.015), glow(), 8);
         let k = 0;
-        for (let r = 0; r < 2; r++) for (let c = 0; c < 4; c++) place(softkeys, k++, -0.45 + c * 0.3, 0.024, 0.45 + r * 0.22);
+        for (let r = 0; r < 2; r++) for (let c = 0; c < 4; c++) place(softkeys, k++, masterX - 0.45 + c * 0.3, 0.024, 0.45 + r * 0.22);
         softkeys.userData.lit = Array.from({ length: 8 }, () => random() < 0.4);
         softkeys.userData.color = Array.from({ length: 8 }, (_, i) => (i % 3 === 0 ? tokens.primary : i % 3 === 1 ? tokens.text : tokens.primary.clone().lerp(tokens.text, 0.5)));
     }
@@ -441,12 +448,14 @@ export function buildSurface({ tokens, mobile, random }) {
     }
 
     // Screen 2: the input bank as a mixer overview (the channels coming alive one by one in "The mix").
+    // Each screen shows its own bay: screen 1 the first 12 channels (PASTOR highlighted), screen 2 the next 12.
     function drawOverview(screen) {
         const { ctx } = screen;
+        const first = screen.bank * BANK;
         header(ctx, 'Scene 04  Worship', ['Mixer', 'Scenes', 'FX', 'Setup'], 0);
         const colW = 976 / BANK;
         for (let i = 0; i < BANK; i++) {
-            const voice = voices[i];
+            const voice = voices[first + i];
             const x = 24 + i * colW;
             ctx.fillStyle = ui.panel;
             ctx.fillRect(x + 3, 72, colW - 6, 548);
@@ -476,12 +485,17 @@ export function buildSurface({ tokens, mobile, random }) {
             ctx.font = `700 12px ${MONO}`;
             ctx.textAlign = 'center';
             ctx.fillText('MUTE', x + colW / 2, 602);
+            if (first + i === 0) {
+                ctx.strokeStyle = ui.primary;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x + 3, 72, colW - 6, 548);
+            }
         }
     }
 
     // Per-frame update -------------------------------------------------------------------------------------
-    let screenClock = 0;
-    const screenInterval = mobile ? 1 / 12 : 1 / 20;
+    let screenClock = Infinity; // the first update draws both screens at once (no blank first frame)
+    const screenInterval = quality === 'light' ? 1 / 12 : quality === 'medium' ? 1 / 15 : 1 / 20;
 
     function update(time, dt, state) {
         const beat = (time * BPM) / 60;
@@ -495,7 +509,9 @@ export function buildSurface({ tokens, mobile, random }) {
             const local = s % BANK;
             const bank = Math.floor(s / BANK);
             // LEDs light in sequence: each strip comes up a moment after the one before it.
-            const pw = MathUtils.clamp(state.power * 1.6 - (bank * 0.2 + local * 0.035), 0, 1);
+            // LEDs are even across both bays (one power level). PASTOR, the selected channel, runs a touch brighter.
+            const pw = MathUtils.clamp(state.power, 0, 1);
+            const lift = s === 0 ? 1.15 : 1;
             const sweep = Math.sin(MathUtils.clamp((state.boot * 1.6 - (bank * 0.2 + local * 0.04)) / 0.55, 0, 1) * Math.PI);
             // How "live" this channel is: PASTOR follows its own fader move; the others join one by one in the mix.
             const alive = s === 0
@@ -532,20 +548,20 @@ export function buildSurface({ tokens, mobile, random }) {
             }
 
             const dim = 0.1 * pw;
-            keys.setColorAt(s * 3, unit.copy(keyRows[0].color).multiplyScalar(v.mix || alive > 0.5 ? 2.2 * pw : dim));
-            keys.setColorAt(s * 3 + 1, unit.copy(keyRows[1].color).multiplyScalar(v.pafl && blink ? 2 * pw : dim));
-            keys.setColorAt(s * 3 + 2, unit.copy(keyRows[2].color).multiplyScalar(v.muted ? 2.4 * pw : dim));
+            keys.setColorAt(s * 3, unit.copy(keyRows[0].color).multiplyScalar(v.mix || alive > 0.5 ? 2.2 * pw * lift : dim));
+            keys.setColorAt(s * 3 + 1, unit.copy(keyRows[1].color).multiplyScalar(v.pafl && blink ? 2 * pw * lift : dim));
+            keys.setColorAt(s * 3 + 2, unit.copy(keyRows[2].color).multiplyScalar(v.muted ? 2.4 * pw * lift : dim));
 
             const lit = Math.round(MathUtils.clamp(v.level, 0, 1) * METER);
             const peak = Math.min(METER - 1, Math.round(MathUtils.clamp(v.peak, 0, 1) * METER) - 1);
             for (let m = 0; m < METER; m++) {
-                meters.setColorAt(s * METER + m, unit.copy(meterBase[m]).multiplyScalar(m < lit || m === peak ? 2.4 * pw : 0.05 + 0.03 * pw));
+                meters.setColorAt(s * METER + m, unit.copy(meterBase[m]).multiplyScalar(m < lit || m === peak ? 2.4 * pw * lift : 0.05 + 0.03 * pw));
             }
         }
 
         encoderSpots.forEach((spot, e) => {
             const voice = spot.strip >= 0 ? voices[spot.strip] : null;
-            const pw = MathUtils.clamp(state.power * 1.6 - ((spot.strip >= 0 ? Math.floor(spot.strip / BANK) * 0.2 : 0.1) + 0.2), 0, 1);
+            const pw = MathUtils.clamp(state.power, 0, 1);
             const value = MathUtils.clamp(spot.value + (voice ? voice.alive * 0.2 : 0) + Math.sin(time * 0.2 + spot.phase) * 0.02, 0, 1);
             const angle = MathUtils.degToRad(-135 + 270 * value);
             place(knobPointers, e, spot.x + Math.sin(angle) * 0.03, 0.095, spot.z - Math.cos(angle) * 0.03, -angle);
@@ -570,7 +586,6 @@ export function buildSurface({ tokens, mobile, random }) {
         keys.instanceColor.needsUpdate = true;
         meters.instanceColor.needsUpdate = true;
         rings.instanceColor.needsUpdate = true;
-        capLines.instanceColor.needsUpdate = true;
 
         screenClock += dt;
         if (screenClock >= screenInterval) {
@@ -581,8 +596,8 @@ export function buildSurface({ tokens, mobile, random }) {
             });
         }
         // Above 1.0 so the brightest screen text blooms slightly (bloom threshold is 1.0 in console-scene.js).
-        // The screens boot in order: PASTOR first, then the overview.
-        screens.forEach((screen, i) => (screen.glass.material.emissiveIntensity = 1.5 * MathUtils.clamp(state.power * 1.4 - i * 0.25, 0, 1)));
+        // The screens boot in order: PASTOR first, then the overview. Floor of 0.45: a screen is never blank.
+        screens.forEach((screen, i) => (screen.glass.material.emissiveIntensity = 1.5 * MathUtils.clamp(state.power * 1.4 - i * 0.25, 0.45, 1)));
     }
 
     const meterBase = [];

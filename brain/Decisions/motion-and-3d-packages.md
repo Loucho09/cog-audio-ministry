@@ -8,7 +8,7 @@ Part of [[homepage-redesign]]. See also [[homepage-console-brand]].
 Add these npm packages, used by the homepage only:
 - `gsap` with ScrollTrigger, SplitText and DrawSVG. Free plugins only, no paid bonus plugins.
 - `lenis` for smooth scroll on desktop.
-- `three` for the procedural hero console. Loaded only on capable desktops (see [[homepage-redesign]]).
+- `three` for the procedural hero console. Loaded only on capable desktops (see [[homepage-redesign]]). (Superseded 2026-11-28: also tablets and capable phones, see [[3d-on-tablets-and-phones]].)
 
 Icons: about 10 Tabler icons copied inline as SVG (MIT). No icon package added.
 
@@ -18,7 +18,7 @@ Icons: about 10 Tabler icons copied inline as SVG (MIT). No icon package added.
 - Lenis and GSAP run on desktop only. Phones use native scroll.
 
 ## Rules
-- The three.js chunk is loaded only after first paint and only on capable desktops. Reduced motion never loads it.
+- The three.js chunk is loaded only after first paint and only on capable desktops. Reduced motion never loads it. (Superseded 2026-11-28: also tablets and capable phones after the capability check, see [[3d-on-tablets-and-phones]].)
 - A GLB model is optional. GLTFLoader is used with Meshopt. Draco and KTX2 are not wired (no decoders are shipped).
 - No new Composer packages.
 

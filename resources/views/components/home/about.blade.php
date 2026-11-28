@@ -42,6 +42,18 @@
         </div>
     </div>
 
+    {{-- Psalm quote on phones only (tablets and desktop show it in the hero). Same text and config as the hero verse. --}}
+    @if (filled(config('ministry.verse.text')))
+        <figure class="mt-12 border-t border-text/10 pt-8 md:hidden">
+            <blockquote>
+                <p class="text-xl leading-relaxed text-text/80">&ldquo;{{ config('ministry.verse.text') }}&rdquo;</p>
+            </blockquote>
+            @if (filled(config('ministry.verse.reference')))
+                <figcaption class="t-label mt-4 text-text/60">{{ config('ministry.verse.reference') }}</figcaption>
+            @endif
+        </figure>
+    @endif
+
     {{-- Readouts as a meter bridge: a dB tick scale runs above each live count, across the full width. --}}
     @if (count($stats) > 0)
         <dl class="mt-16 grid gap-8 border-t border-text/10 pt-8 {{ match (count($stats)) { 3 => 'sm:grid-cols-3', 2 => 'sm:grid-cols-2', default => '' } }} lg:mt-24 lg:gap-8">

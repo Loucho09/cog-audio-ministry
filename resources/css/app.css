@@ -22,6 +22,7 @@
     /* Hero only (scoped exception, brain/Decisions/hero-join-brand-exception.md). The hero is dark in both themes,
        so these are not overridden in .dark. */
     --color-hero-red: 159 18 57; /* #9F1239 streaks and the desk's red light */
+    --color-hero-red-deep: 127 29 29; /* #7F1D1D tablet and phone streak (below lg only) */
     --color-hero-cta: 3 105 161; /* #0369A1 Join us fill (white text passes AA) */
     --color-hero-cta-hover: 2 122 184; /* #027AB8 Join us hover, lighter and still AA with white text */
     --color-signal-glow: 125 211 252; /* #7DD3FC Join us running border light and meter bars */
@@ -461,7 +462,7 @@
 
 /* Hero title: hidden only until SplitText has run, so the words do not flash before they animate in.
    Failsafe: if the motion chunk never arrives, the title shows by itself after 3s. */
-@media screen and (prefers-reduced-motion: no-preference) {
+@media screen and (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
     .js .hero-title:not(.is-split) {
         visibility: hidden;
         animation: hero-title-failsafe 0s 3s forwards;
@@ -494,6 +495,20 @@
 
 [data-hero].is-3d [data-hero-poster] {
     opacity: 0;
+}
+
+/* Tablets and phones: the poster-to-desk crossfade is 0.4s (desktop keeps 1.4s). */
+@media (max-width: 1023.98px) {
+    .hero-stage canvas,
+    [data-hero-poster] {
+        transition-duration: 0.4s;
+    }
+
+    /* The live desk draws the poster's 1600x1000 frame and is cropped exactly like the poster (object-position 50% 60%). */
+    .hero-stage canvas {
+        object-fit: cover;
+        object-position: 50% 60%;
+    }
 }
 
 /* Marquee outline row: hollow letters on the dark console band (home/marquee). */
@@ -539,6 +554,31 @@
     opacity: 0.14;
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Below lg (tablet and phone), the hero's red streaks are 40% as strong, deeper (#7F1D1D) and moved off the wordmark,
+   to the right and behind the desk. Desktop streaks are unchanged. */
+@media (max-width: 1023.98px) {
+    .hero-streak-red {
+        top: 54%;
+        left: 22vw;
+        height: 14vh;
+        opacity: 0.4;
+        background: linear-gradient(90deg, transparent 18%, rgb(var(--color-hero-red-deep) / 0.5) 52%, rgb(var(--color-hero-red-deep) / 0.2) 78%, transparent);
+    }
+
+    .hero-streak-red-thin {
+        top: 66%;
+        left: 40vw;
+        opacity: 0.4;
+        background: linear-gradient(90deg, transparent 22%, rgb(var(--color-hero-red-deep) / 0.38) 55%, transparent 85%);
+    }
+
+    /* The desk's top edge fades into the background (the poster is black, so the fade only softens its top rows). */
+    .hero-stage [data-hero-poster] {
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgb(0 0 0) 12%);
+        mask-image: linear-gradient(to bottom, transparent 0, rgb(0 0 0) 12%);
+    }
 }
 
 /* Join us (hero only): the one attention-seeking control. Motion in resources/js/home/join-button.js. */

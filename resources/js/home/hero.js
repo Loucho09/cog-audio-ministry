@@ -3,9 +3,10 @@
  * Spec: brain/Features/hero-console-story.md.
  *
  * - Title: desktop only, SplitText lines rise out of a mask (effects.js splitHeading). Phones fade the block up.
- * - 3D: a dynamic import after load, idle and the first interaction (or 2.5s). Gated by canRun3D(): capable
- *   desktops get the full desk; capable phones a lighter one (one bank, no depth of field or SMAA, lower DPR,
- *   30fps). Everything else keeps the pre-rendered poster and never downloads three.js.
+ * - 3D: a dynamic import after load, idle and the first interaction (or 2.5s). Gated by canRun3D() (tier: desktop,
+ *   medium for tablets, light for phones) and an FPS check over the first second of drawing (startDesk). Tablets
+ *   and phones get the stage box only (no scroll pin yet). A failed check or a missing WebGL2 keeps the poster.
+ *   Tiers and settings: brain/Decisions/3d-on-tablets-and-phones.md and console-scene.js.
  * - Idle (always, subtle): the desk comes up to a low standby, meters play a fake signal, faders drift, the camera
  *   drifts slowly; on fine pointers the desk tilts up to 3.5 degrees toward the cursor.
  * - Story (desktop only): the hero pins for five screens. 0 Silence (headline) -> 1 Power on -> 2 The fader
@@ -25,34 +26,53 @@ import { initJoinButton } from './join-button';
 
 const SOFTWARE_RENDERER = /swiftshader|llvmpipe|software|basic render/i;
 const STANDBY = 0.4; // desk power before chapter 1: dim LEDs and screens, meters still moving
+const MIN_FPS = 45; // the live desk must reach this over its first second of rendering, or the poster stays
+const MIN_MEMORY_GB = 4; // navigator.deviceMemory, where the browser reports it (Safari and Firefox do not)
+const TABLET_QUERY = '(min-width: 768px)';
+// Every breakpoint the desk's tier depends on. Crossing one tears the desk down and re-checks the device.
+const BREAKPOINTS = ['(min-width: 768px)', '(min-width: 1024px)', '(pointer: fine)'];
 
-/** True unless the browser reports a software WebGL2 renderer. Hidden renderer names count as hardware. */
-function gpuIsHardware() {
+/** Dev-only override: ?force3d=1 on a page rendered with APP_ENV=local (hero.blade.php sets data-dev-3d). */
+function forced(host) {
+    return host.hasAttribute('data-dev-3d') && new URLSearchParams(window.location.search).get('force3d') === '1';
+}
+
+/**
+ * 'none' (no WebGL2 context), 'software' (a software renderer such as SwiftShader) or 'hardware'.
+ * Hidden renderer names count as hardware.
+ */
+function probeGpu() {
     try {
         const gl = document.createElement('canvas').getContext('webgl2');
-        if (!gl) return false;
+        if (!gl) return 'none';
         const info = gl.getExtension('WEBGL_debug_renderer_info');
         const name = String(info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : '');
         gl.getExtension('WEBGL_lose_context')?.loseContext();
-        return !SOFTWARE_RENDERER.test(name);
+        return SOFTWARE_RENDERER.test(name) ? 'software' : 'hardware';
     } catch {
-        return false;
+        return 'none';
     }
 }
 
 /**
- * Live 3D: motion allowed, not saving data, a real GPU. Desktops need 5+ cores; phones and tablets (the lighter
- * desk) need 6+ cores and, where the browser reports it, 4 GB of memory. Returns false, 'desktop' or 'mobile'.
+ * The live desk a device gets, or false: the poster stays and three.js is never requested. These checks run
+ * before the chunk loads. The FPS gate runs once the desk is drawing (see startDesk).
+ * - 'desktop': 1024px and up with a fine pointer. The full desk, as before (needs 5+ cores).
+ * - 'medium': tablets (768px and up, or a coarse pointer from 1024px). The full desk at medium quality.
+ * - 'light': phones below 768px. The same desk, lighter (pixel ratio 1.25, almost no bloom, no master section).
+ * Shared: no reduced motion, no save-data, WebGL2 on a hardware renderer, deviceMemory >= 4 where reported.
  */
-function canRun3D() {
+function canRun3D(host) {
     const matches = (query) => window.matchMedia(query).matches;
     if (matches('(prefers-reduced-motion: reduce)')) return false;
     if (navigator.connection?.saveData) return false;
-    if (navigator.deviceMemory !== undefined && navigator.deviceMemory < 4) return false;
-    const cores = navigator.hardwareConcurrency || 0;
-    const tier = desktopMotion() ? 'desktop' : 'mobile';
-    if (cores < (tier === 'desktop' ? 5 : 6)) return false;
-    return gpuIsHardware() ? tier : false;
+    const override = forced(host);
+    if (navigator.deviceMemory !== undefined && navigator.deviceMemory < MIN_MEMORY_GB && !override) return false;
+    const tier = desktopMotion() ? 'desktop' : matches(TABLET_QUERY) ? 'medium' : 'light';
+    if (tier === 'desktop' && (navigator.hardwareConcurrency || 0) < 5 && !override) return false;
+    const gpu = probeGpu();
+    if (gpu === 'none') return false;
+    return gpu === 'hardware' || override ? tier : false;
 }
 
 /**
@@ -199,61 +219,98 @@ async function initStory(hero, story, ctx) {
     ScrollTrigger.refresh();
 }
 
+const CHECK_TIMEOUT_MS = 8000; // the desk must pass the FPS check within this much visible time, or the poster stays
+const CHECK_GRACE_MS = 250; // after frame 3, shader compile hitches are not counted
+
 /**
- * Starts the live desk. Returns a teardown that stops the loop and observers, removes the listeners and disposes the
- * stage. Safe to call before the stage exists (e.g. during the idle wait): the start checks `stopped` after each await.
+ * Starts one live desk on the current canvas at the given tier. Returns a handle:
+ * - handle.teardown(status) stops the loop, observers and listeners, disposes the scene (GPU objects first, then the
+ *   WebGL context), swaps in a fresh canvas (a released context cannot be reused), hides the loader, removes is-3d
+ *   and resets the desk3d data attributes. `status` is what the stage reports afterwards ('poster' by default).
+ * - handle.dead is true once the desk has ended (teardown, failed check, timeout, context loss, error).
+ * - handle.tier is the tier it was started with.
+ *
+ * FPS gate (every tier), measured on rendered frames only:
+ * - Frames 1 and 2 are ignored (shader upload and first-frame warm-up).
+ * - From frame 3, a 250ms grace period is skipped (shader compile hitches are not counted).
+ * - Then a 1000 ms window: each rendered frame is counted; fps = counted frames / elapsed seconds.
+ * - Below MIN_FPS the desk is torn down and the poster stays.
+ * - Paused frames (hero off-screen, tab hidden) are not counted, and the check restarts when the desk is back on screen.
+ * - Hard timeout: 8s of visible time without a pass tears the desk down to the poster and hides the loader.
+ * - The canvas stays hidden while the check runs; the crossfade starts when the check passes.
+ * - The phone tier is capped at 30fps only after the check passes (the check itself runs uncapped).
+ * Dev override (?force3d=1 on APP_ENV=local): measured and logged but never fails.
  */
-function initStage(hero, story) {
-    const host = hero.querySelector('[data-hero-stage]');
-    const canvas = host?.querySelector('canvas');
-    const loader = hero.querySelector('[data-hero-loader]');
-    const tier = canvas ? canRun3D() : false;
-    if (!tier) return () => {};
-    const mobile = tier === 'mobile';
+function startDesk(hero, host, loader, story, tier) {
+    const canvas = host.querySelector('canvas');
+    const override = forced(host);
+    const handle = { dead: false, tier, teardown: () => {} };
 
     let stopped = false;
-    let lost = false;
     let scene = null;
     let tick = null;
     let introTl = null;
-    const observers = [];
+    let timeout = 0;
+    let visible = true;
+    let intersection = null;
+    let resize = null;
     const listeners = [];
     const listen = (target, type, handler, options) => {
         target.addEventListener(type, handler, options);
         listeners.push(() => target.removeEventListener(type, handler, options));
     };
+    const check = { status: 'measuring', seen: 0, count: 0, since: 0, grace: 0, fps: 0 };
+    const resetCheck = () => {
+        check.seen = 0;
+        check.count = 0;
+        check.since = 0;
+        check.grace = 0;
+    };
 
-    // Stops drawing and releases observers and listeners. The poster stays. Used on context loss and at teardown.
+    // Stops drawing and releases observers, listeners and timers. Used at teardown.
     const stopRendering = () => {
         if (tick) gsap.ticker.remove(tick);
         tick = null;
-        observers.splice(0).forEach((observer) => observer.disconnect());
+        clearTimeout(timeout);
+        intersection?.disconnect();
+        resize?.disconnect();
+        intersection = null;
+        resize = null;
         listeners.splice(0).forEach((remove) => remove());
     };
 
-    const onContextLost = (event) => {
-        // preventDefault asks the browser to allow a restore; we keep the poster either way (no rebuild).
-        event.preventDefault();
-        lost = true;
-        stopRendering();
-        hero.classList.remove('is-3d');
-        if (loader) loader.hidden = true;
-    };
-
-    const teardown = () => {
-        if (stopped) return;
+    const teardown = (status = 'poster') => {
+        if (handle.dead) return;
+        handle.dead = true;
         stopped = true;
         introTl?.kill();
         stopRendering();
-        scene?.dispose();
+        scene?.dispose(); // GPU objects, then the WebGL context (console-scene.js)
         scene = null;
+        // A released context cannot be reused: the next desk on this stage gets a fresh canvas element.
+        const old = host.querySelector('canvas');
+        old?.replaceWith(old.cloneNode(false));
         hero.classList.remove('is-3d');
+        if (loader) loader.hidden = true;
+        delete hero.dataset.desk3dFps;
+        delete hero.dataset.desk3dTier;
+        hero.dataset.desk3dStatus = status;
     };
+    handle.teardown = teardown;
+
+    // Gives up on a check that never passes (slow import, a GPU that never gets to the threshold, a stuck frame loop).
+    // Time while the hero is off-screen does not count: the check is paused then, so the timer waits too.
+    const onTimeout = () => {
+        if (handle.dead || check.status === 'passed') return;
+        if (!visible || document.hidden) {
+            timeout = setTimeout(onTimeout, 1000);
+            return;
+        }
+        teardown('poster');
+    };
+    timeout = setTimeout(onTimeout, CHECK_TIMEOUT_MS);
 
     const start = async () => {
-        await afterIdleAndInteraction();
-        if (stopped) return;
-
         const readout = loader?.querySelector('[data-hero-percent]');
         const bar = loader?.querySelector('[data-hero-meter]');
         const load = { value: 0 };
@@ -263,37 +320,42 @@ function initStage(hero, story) {
             if (bar) gsap.set(bar, { scaleX: load.value });
         };
 
+        hero.dataset.desk3dTier = tier;
+        hero.dataset.desk3dStatus = 'loading';
         if (loader) loader.hidden = false;
         showLoad(0.1);
 
         try {
+            // three.js and the scene are requested only here: after first paint, idle, and the checks above.
             const { createConsoleScene } = await import('./console-scene');
             if (stopped) return;
             showLoad(0.2);
-            scene = createConsoleScene(canvas, {
-                mobile,
-                glbUrl: host.dataset.glb || null,
-                onProgress: (value) => showLoad(value),
-            });
+            scene = createConsoleScene(canvas, { quality: tier, glbUrl: host.dataset.glb || null, onProgress: showLoad });
             // A failed GLB keeps the procedural desk, so the error is swallowed here on purpose.
             await scene.ready.catch(() => {});
         } catch {
-            // No WebGL or the chunk failed: the poster stays and the loader is removed.
-            loader?.remove();
+            // No WebGL, or the chunk failed to load: the poster stays.
+            teardown('error');
             return;
         }
         if (stopped || !scene) return;
         const live = scene;
         showLoad(0.95);
 
-        listen(canvas, 'webglcontextlost', onContextLost);
+        // Context loss: the poster comes back and nothing is rebuilt (the desk is re-checked on the next breakpoint).
+        listen(canvas, 'webglcontextlost', (event) => {
+            event.preventDefault();
+            teardown('lost');
+        });
 
-        let visible = true;
-        const intersection = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting));
+        intersection = new IntersectionObserver(([entry]) => {
+            visible = entry.isIntersecting;
+            // The loader goes with the desk: hidden while the hero is off-screen, back while it is still loading.
+            if (loader && check.status !== 'passed') loader.hidden = !visible;
+        });
         intersection.observe(hero);
-        const resize = new ResizeObserver(() => live.resize());
+        resize = new ResizeObserver(() => live.resize());
         resize.observe(canvas);
-        observers.push(intersection, resize);
 
         if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
             listen(
@@ -307,12 +369,58 @@ function initStage(hero, story) {
             );
         }
 
-        // Load-in brings the desk to standby; the story (scroll) takes it from there.
+        // Load-in: the desk comes up to standby after the crossfade; the story (scroll) takes it from there.
         const intro = { power: 0 };
         let lastFrame = 0;
+        const reveal = () => {
+            clearTimeout(timeout);
+            hero.classList.add('is-3d');
+            showLoad(1);
+            const tl = (introTl = gsap.timeline());
+            if (loader) tl.to(loader, { autoAlpha: 0, duration: 0.6, ease: 'power2.out', onComplete: () => (loader.hidden = true) }, 0.2);
+            tl.to(live.state, { intro: 1, duration: 2.6, ease: 'power3.out' }, 0).to(intro, { power: STANDBY, duration: 2.2, ease: 'power2.inOut' }, 0.3);
+        };
+
+        const measure = (now) => {
+            check.seen += 1;
+            if (check.seen < 3) return; // frames 1 and 2: warm-up, ignored
+            if (check.seen === 3) {
+                check.grace = now + CHECK_GRACE_MS;
+                return;
+            }
+            if (now < check.grace) return;
+            if (check.since === 0) {
+                check.since = now; // the 1s window starts at the first frame after the grace period
+                return;
+            }
+            check.count += 1;
+            const elapsed = now - check.since;
+            if (elapsed < 1000) return;
+            check.fps = (check.count * 1000) / elapsed;
+            hero.dataset.desk3dFps = check.fps.toFixed(1);
+            if (check.fps >= MIN_FPS || override) {
+                check.status = 'passed';
+                hero.dataset.desk3dStatus = 'live';
+                reveal();
+            } else {
+                check.status = 'failed';
+            }
+        };
+
         tick = (time) => {
-            if (!visible || document.hidden) return;
-            if (mobile && time - lastFrame < 1 / 30) return; // phones: 30fps is plenty for an idle desk
+            if (!visible || document.hidden) {
+                // Paused: a check in progress restarts when the desk is back on screen.
+                if (check.status === 'measuring') resetCheck();
+                return;
+            }
+            if (check.status === 'measuring') {
+                measure(performance.now());
+                if (check.status === 'failed') {
+                    queueMicrotask(() => teardown('failed')); // not from inside the ticker's own loop
+                    return;
+                }
+            }
+            if (tier === 'light' && check.status === 'passed' && time - lastFrame < 1 / 30) return;
             lastFrame = time;
             live.state.power = Math.max(intro.power, story.power);
             live.state.boot = story.boot;
@@ -322,20 +430,65 @@ function initStage(hero, story) {
             live.render(time);
         };
         gsap.ticker.add(tick);
-
-        // First frame is drawn: crossfade from the poster to the live desk, then come up to standby.
-        requestAnimationFrame(() => {
-            if (stopped || lost) return;
-            hero.classList.add('is-3d');
-            showLoad(1);
-            const tl = (introTl = gsap.timeline());
-            if (loader) tl.to(loader, { autoAlpha: 0, duration: 0.6, ease: 'power2.out', onComplete: () => (loader.hidden = true) }, 0.2);
-            tl.to(live.state, { intro: 1, duration: 2.6, ease: 'power3.out' }, 0).to(intro, { power: STANDBY, duration: 2.2, ease: 'power2.inOut' }, 0.3);
-        });
     };
 
-    start();
-    return teardown;
+    start().catch((error) => {
+        console.error(error);
+        teardown('error');
+    });
+    return handle;
+}
+
+/**
+ * Owns the 3D desk for this hero. Waits for load, idle and the first interaction (afterIdleAndInteraction), then
+ * starts a desk for the current device (canRun3D). Breakpoint changes (768px, 1024px, pointer) are coalesced into one
+ * check per animation frame. A desk that is already running at the same tier is kept; a different tier (or no tier)
+ * tears it down first. Returns the stop function (pagehide).
+ */
+function initStage(hero, story) {
+    const host = hero.querySelector('[data-hero-stage]');
+    const loader = hero.querySelector('[data-hero-loader]');
+    if (!host?.querySelector('canvas')) return () => {};
+
+    let current = null;
+    let armed = false;
+    let stopped = false;
+    let frame = 0;
+    const mediaQueries = BREAKPOINTS.map((query) => window.matchMedia(query));
+    const alive = () => Boolean(current && !current.dead);
+
+    const reconcile = () => {
+        frame = 0;
+        if (stopped || !armed) return;
+        const tier = canRun3D(host);
+        if (alive() && current.tier === tier) return; // same tier: keep the desk running
+        current?.teardown('poster');
+        current = null;
+        if (!tier) {
+            hero.dataset.desk3dStatus = 'poster';
+            return;
+        }
+        current = startDesk(hero, host, loader, story, tier);
+    };
+    const onBreakpoint = () => {
+        if (frame || stopped) return;
+        frame = requestAnimationFrame(reconcile);
+    };
+
+    hero.dataset.desk3dStatus = 'waiting';
+    mediaQueries.forEach((mq) => mq.addEventListener('change', onBreakpoint));
+    afterIdleAndInteraction().then(() => {
+        armed = true;
+        reconcile();
+    });
+
+    return () => {
+        stopped = true;
+        cancelAnimationFrame(frame);
+        mediaQueries.forEach((mq) => mq.removeEventListener('change', onBreakpoint));
+        current?.teardown('poster');
+        current = null;
+    };
 }
 
 /**

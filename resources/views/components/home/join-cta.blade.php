@@ -4,13 +4,14 @@
      the running border light and the tooltip fade-in are CSS. Reduced motion keeps only the static meter bars. --}}
 @props(['href'])
 
-<div data-join-cta class="join-cta relative inline-flex w-full sm:w-auto">
-    <p data-join-tip class="join-tip absolute bottom-full left-0 mb-3 inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/15 bg-console/80 px-3 py-1.5 font-mono text-[11px] tracking-[0.04em] text-white/85">
+<div data-join-cta class="join-cta relative inline-flex w-full md:w-auto">
+    <p data-join-tip class="join-tip absolute bottom-full left-0 mb-3 inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/15 bg-console/80 px-3 py-1.5 font-mono text-[11px] max-lg:tracking-[0.12em] lg:tracking-[0.04em] text-white/85">
         <span aria-hidden="true" class="relative flex h-2 w-2 shrink-0">
             <span class="join-tip-pulse absolute inset-0 rounded-full bg-signal"></span>
             <span class="relative h-2 w-2 rounded-full bg-signal"></span>
         </span>
-        Volunteers needed — sound, stream, stage
+        <span class="lg:hidden">Volunteers needed</span>
+        <span class="hidden lg:inline">Volunteers needed — sound, stream, stage</span>
     </p>
 
     {{-- Sonar rings and click burst: decorative, animated from JS. --}}
@@ -26,7 +27,7 @@
     <a
         href="{{ $href }}"
         data-join-button
-        class="join-btn relative inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-console px-6 font-mono text-sm font-medium uppercase tracking-[0.12em] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-console sm:w-auto"
+        class="join-btn relative inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-console px-6 font-mono text-sm font-medium uppercase tracking-[0.12em] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-console md:w-auto"
     >
         <span aria-hidden="true" data-join-meter class="join-meter">
             @for ($i = 0; $i < 5; $i++)

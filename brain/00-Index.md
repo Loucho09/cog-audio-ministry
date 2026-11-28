@@ -63,6 +63,7 @@ Claude Code reads this note first, then only the notes relevant to the task.
 - [[reminder-delivery-at-most-once]]: duty reminders are claimed then sent; released if enqueue fails, skipped if stale (2026-11-26)
 - [[duty-availability-decision]]: AM/PM availability blocks with 15:00 cutoff; open-offer swaps and self-approval rule (2026-11-26)
 - [[admins-manage-not-serve]]: admins only manage; cannot be assigned, claim swaps, or mark availability (2026-11-26)
+- [[3d-on-tablets-and-phones]]: live 3D desk on tablets (768px+) and capable phones, behind a capability check; supersedes desktop-only 3D (2026-11-28)
 
 ## Features
 - [[homepage-redesign]]: "console at night, but clean" homepage: 3D dLive-style hero, CH 01 to CH 07 sections, GSAP/Lenis motion (Phase 1 rework, done 2026-11-27, owner browser check pending)

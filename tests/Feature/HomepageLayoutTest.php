@@ -151,16 +151,30 @@ it('shows the text logo placeholder when no logo file exists', function () {
     $this->get('/')
         ->assertOk()
         ->assertSee('>COG</span>', false)
-        ->assertDontSee('images/logo.png', false);
-})->skip(fn () => file_exists(public_path('images/logo.png')), 'public/images/logo.png exists, so the placeholder is not rendered.');
+        ->assertDontSee('images/logo-40.webp', false);
+})->skip(fn () => file_exists(public_path('images/logo-40.webp')), 'public/images/logo-40.webp exists, so the placeholder is not rendered.');
 
 it('shows the logo image with empty alt when the logo file exists', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('src="'.asset('images/logo.png').'"', false)
+        ->assertSee('src="'.asset('images/logo-40.webp').'"', false)
+        ->assertSee(asset('images/logo-80.webp').' 2x', false)
+        ->assertSee(asset('images/logo-120.webp').' 3x', false)
         ->assertSee('alt=""', false)
         ->assertDontSee('>COG</span>', false);
-})->skip(fn () => ! file_exists(public_path('images/logo.png')), 'public/images/logo.png does not exist yet.');
+})->skip(fn () => ! file_exists(public_path('images/logo-40.webp')), 'public/images/logo-40.webp does not exist yet.');
+
+it('uses the WebP wordmark in the hero and preloads it only below lg', function () {
+    $response = $this->get('/')->assertOk();
+
+    $response->assertSee('src="'.asset('images/logo-full.webp').'"', false);
+    $response->assertDontSee('images/logo-full.png', false);
+
+    if (file_exists(public_path('images/logo-full.webp'))) {
+        $response->assertSee('rel="preload" as="image" href="'.asset('images/logo-full.webp').'"', false)
+            ->assertSee('media="(max-width: 1023px)"', false);
+    }
+});
 
 it('no longer has the retired join form URL config key', function () {
     expect(config('ministry'))->not->toHaveKey('join_form_url');

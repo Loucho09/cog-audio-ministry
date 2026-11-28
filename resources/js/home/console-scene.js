@@ -4,7 +4,8 @@
  * - PBR materials (brushed metal, matte plastic, rubber caps, clearcoat glass) lit by RoomEnvironment,
  *   ACES tone mapping and sRGB output. A soft contact shadow sits under the desk (no hard shadow maps).
  * - Post: bloom only catches values above the threshold, which the LEDs and bright screens exceed.
- *   Light depth of field (BokehPass) and SMAA run on desktop only.
+ *   Quality (hero.js picks it): 'desktop' full (depth of field, bloom 0.38, SMAA); 'medium' tablets (no depth of
+ *   field, no SMAA, bloom 0.22, pixel ratio 1.5); 'light' phones (bloom 0.1, pixel ratio 1.25, same desk).
  * - The screens and meters "play" a simulated mix. hero.js drives the state: load-in, standby power, and the
  *   scroll story (shot, boot, the PASTOR fader, the mix). Red and blue area lights rake the chassis.
  * - Optional GLB: when glbUrl is given, a Meshopt-compressed model replaces the procedural desk. Draco and
@@ -46,7 +47,18 @@ import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { buildSurface } from './dlive-surface';
 
 const VERTICAL_FOV = 35;
-const DESK_WIDTH = { desktop: 8.2, mobile: 5.6 };
+const DESK_WIDTH = { desktop: 8.2, medium: 8.2, light: 8.2 };
+const PIXEL_RATIO = { desktop: 1.5, medium: 1.5, light: 1.25 };
+const BLOOM = { desktop: 0.38, medium: 0.22, light: 0.1 };
+// Framing: how much room the desk leaves around it (higher = smaller desk). Desktop unchanged; tablets and phones tuned.
+const FRAME = { desktop: 1.55, medium: 1.31, light: 1.85 };
+// Tuned against the phone/tablet poster (hero-console-800.webp): bright-pixel box and mean luminance, see the report.
+// Vertical view offset (fraction of the height, desktop 0.05 as before) and exposure per quality.
+const VIEW_Y = { desktop: 0.05, medium: 0.035, light: 0.04 };
+const EXPOSURE = { desktop: 1.0, medium: 1.12, light: 1.0 };
+// Below lg the drawing buffer is the poster's frame (hero-console-1600: 1.6:1) and CSS object-fit covers it (app.css),
+// so the crop, the desk size and the angle match the poster the crossfade starts from.
+const POSTER_ASPECT = 1600 / 1000;
 const MAX_TILT = MathUtils.degToRad(3.5);
 
 /** Reads "R G B" tokens from the dark theme scope, so no colour is hardcoded here. */
@@ -95,10 +107,10 @@ const smooth = (x) => {
  * 3-4 The mix (glide along the input bay, then toward the centre), 5 The room (pulled back, full desk).
  * `fit` scales with the horizontal field of view, so the desk frames the same on any canvas shape.
  */
-function buildShots(aspect, deskWidth, anchors) {
+function buildShots(aspect, deskWidth, anchors, frame) {
     const vertical = MathUtils.degToRad(VERTICAL_FOV / 2);
     const horizontal = 2 * Math.atan(Math.tan(vertical) * aspect);
-    const fit = (deskWidth / 2 / Math.tan(horizontal / 2)) * 1.55;
+    const fit = (deskWidth / 2 / Math.tan(horizontal / 2)) * frame;
     const { pastor, bank } = anchors;
     return [
         { pos: [fit * 0.5, fit * 0.42, fit * 0.76], look: [0, -0.2, 0] },
@@ -110,16 +122,17 @@ function buildShots(aspect, deskWidth, anchors) {
     ];
 }
 
-export function createConsoleScene(canvas, { mobile = false, glbUrl = null, onProgress = () => {} } = {}) {
+export function createConsoleScene(canvas, { quality = 'desktop', glbUrl = null, onProgress = () => {} } = {}) {
+    const desktop = quality === 'desktop';
     const tokens = readTokens();
     const random = seeded(1977);
 
     // Renderer -----------------------------------------------------------------------------------------
     const renderer = new WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
-    // DPR cap: 1.5 on desktop, 1.25 on phones (the canvas is large; more pixels cost more than they show).
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.5));
+    // DPR cap: 1.5 on desktop and tablets, 1.25 on phones (the canvas is large; more pixels cost more than they show).
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, PIXEL_RATIO[quality] ?? 1.25));
     renderer.toneMapping = ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
+    renderer.toneMappingExposure = EXPOSURE[quality] ?? 1.0;
     renderer.outputColorSpace = SRGBColorSpace;
 
     const scene = new Scene();
@@ -128,7 +141,8 @@ export function createConsoleScene(canvas, { mobile = false, glbUrl = null, onPr
     scene.background = new Color(0, 0, 0);
 
     const pmrem = new PMREMGenerator(renderer);
-    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    const environmentTarget = pmrem.fromScene(new RoomEnvironment(), 0.04); // a render target: disposed in dispose()
+    scene.environment = environmentTarget.texture;
     scene.environmentIntensity = 0.18;
     pmrem.dispose();
 
@@ -141,8 +155,8 @@ export function createConsoleScene(canvas, { mobile = false, glbUrl = null, onPr
     rig.add(deck);
     scene.add(rig);
 
-    const surface = buildSurface({ tokens, mobile, random });
-    const deskWidth = mobile ? DESK_WIDTH.mobile : DESK_WIDTH.desktop;
+    const surface = buildSurface({ tokens, quality, random });
+    const deskWidth = DESK_WIDTH[quality] ?? DESK_WIDTH.light;
     const scale = deskWidth / surface.width;
     deck.scale.setScalar(scale);
     deck.add(surface.group);
@@ -174,13 +188,14 @@ export function createConsoleScene(canvas, { mobile = false, glbUrl = null, onPr
     const target = new WebGLRenderTarget(1, 1, { type: HalfFloatType });
     const composer = new EffectComposer(renderer, target);
     composer.addPass(new RenderPass(scene, camera));
-    const bokeh = mobile ? null : new BokehPass(scene, camera, { focus: 10, aperture: 0.00005, maxblur: 0.003 });
+    const bokeh = desktop ? new BokehPass(scene, camera, { focus: 10, aperture: 0.00005, maxblur: 0.003 }) : null;
     if (bokeh) composer.addPass(bokeh);
     // Threshold: only LED and screen highlights above 1.0 (in HDR) bloom; the rest of the desk stays crisp.
-    const bloom = new UnrealBloomPass(new Vector2(1, 1), mobile ? 0.25 : 0.38, 0.4, 1.0);
+    const bloom = new UnrealBloomPass(new Vector2(1, 1), BLOOM[quality] ?? BLOOM.light, 0.4, 1.0);
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
-    if (!mobile) composer.addPass(new SMAAPass());
+    const smaa = desktop ? new SMAAPass() : null;
+    if (smaa) composer.addPass(smaa);
 
     // State (driven from outside by GSAP) ----------------------------------------------------------------------
     const state = {
@@ -190,7 +205,7 @@ export function createConsoleScene(canvas, { mobile = false, glbUrl = null, onPr
         shot: 0, // 0..5 camera position along the story (see buildShots)
         pastor: 0, // 0..1 the PASTOR fader move (chapter 2)
         mix: 0, // 0..1 the other channels joining (chapter 3)
-        shift: mobile ? 0 : 0.17, // share of the canvas width the desk sits right of centre (text is on the left)
+        shift: desktop ? 0.17 : 0, // share of the canvas width the desk sits right of centre (text is on the left)
         pointerX: 0,
         pointerY: 0,
     };
@@ -205,15 +220,19 @@ export function createConsoleScene(canvas, { mobile = false, glbUrl = null, onPr
     let height = 1;
 
     function resize() {
-        width = canvas.clientWidth || 1;
-        height = canvas.clientHeight || 1;
+        const boxW = canvas.clientWidth || 1;
+        const boxH = canvas.clientHeight || 1;
+        // Below lg the buffer is the poster's 1.6:1 frame, at least the box in both directions (no upscaling blur;
+        // the DPR cap still applies). CSS object-fit covers it, so the crop and the framing stay the poster's.
+        height = desktop ? boxH : Math.max(boxH, Math.round(boxW / POSTER_ASPECT));
+        width = desktop ? boxW : Math.round(height * POSTER_ASPECT);
         renderer.setSize(width, height, false);
         composer.setSize(width, height);
         bloom.resolution.set(width / 2, height / 2);
         camera.aspect = width / height;
         // The view offset is re-applied every frame (it follows state.shift); this keeps the projection current.
         camera.updateProjectionMatrix();
-        shots = buildShots(width / height, deskWidth, anchors);
+        shots = buildShots(width / height, deskWidth, anchors, FRAME[quality] ?? FRAME.light);
     }
 
     function updateCamera(time) {
@@ -234,7 +253,7 @@ export function createConsoleScene(canvas, { mobile = false, glbUrl = null, onPr
         camera.lookAt(look);
 
         // Desk sits right of centre (and a little low), leaving the left of the hero for the copy.
-        camera.setViewOffset(width, height, -width * state.shift, -height * 0.05 * (state.shift > 0 ? 1 : 0), width, height);
+        camera.setViewOffset(width, height, -width * state.shift, -height * (VIEW_Y[quality] ?? VIEW_Y.light), width, height);
 
         // Pointer parallax: the desk tilts at most 3.5 degrees toward the cursor, with inertia.
         rig.rotation.y += (state.pointerX * MAX_TILT - rig.rotation.y) * 0.04;
@@ -297,14 +316,25 @@ export function createConsoleScene(canvas, { mobile = false, glbUrl = null, onPr
         ready,
         resize,
         render,
+        /**
+         * Releases everything this scene allocated on the GPU: meshes, materials and their textures (canvas screens,
+         * LCDs, the contact shadow), the post passes and their render targets, the environment target, then the WebGL
+         * context itself. The GPU objects go first, because deleting them needs a live context.
+         */
         dispose() {
             surface.dispose();
-            composer.dispose();
-            renderer.dispose();
+            [bokeh, bloom, smaa].forEach((pass) => pass?.dispose());
+            composer.dispose(); // releases its two render targets
+            environmentTarget.dispose();
             scene.traverse((obj) => {
                 obj.geometry?.dispose();
-                if (obj.material) [].concat(obj.material).forEach((m) => m.dispose());
+                [].concat(obj.material ?? []).forEach((material) => {
+                    for (const value of Object.values(material)) if (value?.isTexture) value.dispose();
+                    material.dispose();
+                });
             });
+            renderer.forceContextLoss(); // release the context now, not whenever the garbage collector gets to it
+            renderer.dispose();
         },
     };
 }

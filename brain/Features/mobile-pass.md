@@ -40,7 +40,26 @@ Test widths: 375, 390, 414, 430 portrait, then 768.
 - Body 16px min, line-height 1.6; headings clamp(). Tap targets ≥ 44×44. No horizontal scroll.
 - Entrances: simple fade-up, 0.5s.
 
+## Tablet portrait (768–1023px, `md` breakpoint)
+Owner decision 2026-11-28.
+- Below 1024px the hero uses the stacked mobile layout.
+- At md and up, three tablet extras:
+  - (a) The Psalm quote stays visible in the hero (it is hidden only below md).
+  - (b) Hero buttons sit side by side (auto width, min-height 48px), not stacked full width.
+  - (c) Member login shows in the header next to the menu button (part of slice 4, navigation; see [[mobile-pass-tasks]]).
+- Landscape tablets (>=1024px) get the desktop layout unchanged.
+
 ## Checks
 - Lighthouse mobile: Performance ≥ 75, Accessibility ≥ 95.
 - Real devices (owner): one iPhone (Safari), one Android (Chrome).
 - Screenshots at 390px: hero, each chapter, menu open, every section.
+- Performance rule (owner, 2026-11-28): the site must never feel slow. Every slice checks:
+  - No horizontal scroll.
+  - No layout shift from the hero (CLS < 0.1).
+  - Poster image loads first and is sized (width/height or aspect box).
+  - ~~3D/three.js never downloads or runs below 1024px or on weak devices.~~ Superseded 2026-11-28: 3D only loads after the capability check passes (see [[3d-on-tablets-and-phones]]); the poster is always first and sized.
+  - No new JS on the main thread for mobile-only layout (CSS first).
+  - If a slice makes anything slower, fix it before commit.
+
+## Notes
+- Wordmark on mobile is the official logo image `public/images/logo-full.png` (it already contains the script "Audio"). No script web font. Decided 2026-11-27, restated 2026-11-28.
